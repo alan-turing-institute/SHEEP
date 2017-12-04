@@ -1,4 +1,13 @@
 
+## About HElib  (from the HElib README).
+
+HElib impolements the BGV scheme, Smart-Vercauteren packing techniques, and
+the Gentry-Halevi-Smart optimizations.  Also includes bootstrapping.
+It is written in C++, and the product of compilation is a library fhe.a
+that can be included in other programs.
+Also in the package are some example Test executables.
+
+
 ## installing HElib
 
 git clone git@github.com:shaih/HElib.git
