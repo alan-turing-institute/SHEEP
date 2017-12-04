@@ -57,3 +57,9 @@ to give an executable called Test_<something_x
 Similarly, you can write your own code in <myprog>.cpp then do
 make <myprog>_x
 to build the <myprog>_x executable which uses the fhe.a library.
+
+
+"Tutorial" (found by googling):
+http://tommd.github.io/posts/HELib-Intro.html
+This mentions that NTL, on which HElib is built, is not thread-safe, so the
+potential parallelism from the packing is not fully realised.
