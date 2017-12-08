@@ -59,7 +59,18 @@ make <myprog>_x
 to build the <myprog>_x executable which uses the fhe.a library.
 
 
-"Tutorial" (found by googling):
+### "Tutorial" (found by googling):
 http://tommd.github.io/posts/HELib-Intro.html
 This mentions that NTL, on which HElib is built, is not thread-safe, so the
 potential parallelism from the packing is not fully realised.
+
+### "Example_x" (adapted from tutorial above)
+Example.cpp program in this directory (copy to HElib/src and do `make Example_x` ) to explore how nslots (the number of elements in the plaintext/ciphertext
+vectors (i.e. the "packing")) varies with different parameters, and how
+different numbers of additions and multiplications can give rise to "noise".
+
+One of the parameters is "p" - the modulo for the decrypted text.  This is 2
+in the original tutorial, meaning that the output is binary, and addition is
+XOR, multiplication is AND etc.
+It can be changed to give integer results, but ***p needs to be a prime***,
+otherwise an assertion fails when calculating "m".
