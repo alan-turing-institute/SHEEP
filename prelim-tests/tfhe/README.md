@@ -14,6 +14,8 @@ From the website
 > instructions. The default parameter set achieves a 110-bit
 > cryptographic security, based on ideal lattice assumptions.
 
+As of v1.0, it is boostrapped on each gate evaluation.
+
 ### Installation
 
 ```
@@ -41,7 +43,7 @@ compilers.
 ### Running the example
 
 The [tutorial example](https://tfhe.github.io/tfhe/coding.html) is
-reproduced in tutorial.  From within that directory: 
+reproduced in `tutorial`.  From within that directory: 
 
 ```
 # directory containing the TFHE header files, under a subdirectory tfhe
