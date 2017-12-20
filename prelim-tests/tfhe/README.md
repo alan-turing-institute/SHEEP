@@ -62,3 +62,70 @@ Hi there! Today, I will ask the cloud what is the minimum between 2017 and 42
 And the result is: 42
 I hope you remember what was the question!
 ```
+
+### The parameters
+
+`TFheGateBootstrappingParameterSet *new_default_gate_bootstrapping_parameters(int32_t minimum_lambda);`
+gives a default parameter set with estimated 128 bits of security (it
+simply triggers an error if more security is asked for than can be
+provided).
+
+The parameters are represented by the following structs:
+
+```
+typedef int32_t Torus32;
+
+struct LweParams {
+	const int32_t n;
+	const double alpha_min;//le plus petit bruit tq sur
+	                       // (the minimal noise)
+	const double alpha_max;//le plus gd bruit qui permet le déchiffrement
+	                       // (the largest noise that allows decryption)
+};
+
+struct TLweParams {
+    const int32_t N; ///< a power of 2: degree of the polynomials
+    const int32_t k; ///< number of polynomials in the mask
+    const double alpha_min; ///< minimal noise s.t. the sample is secure
+    const double alpha_max; ///< maximal noise s.t. we can decrypt
+    const LweParams extracted_lweparams; ///< lwe params if one extracts
+};
+
+struct TGswParams {
+    const int32_t l; ///< decomp length
+    const int32_t Bgbit;///< log_2(Bg)
+    const int32_t Bg;///< decomposition base (must be a power of 2)
+    const int32_t halfBg; ///< Bg/2
+    const uint32_t maskMod; ///< Bg-1
+    const TLweParams *tlwe_params; ///< Params of each row
+    const int32_t kpl; ///< number of rows = (k+1)*l
+    Torus32 *h; ///< powers of Bgbit
+    uint32_t offset; ///< offset = Bg/2 * (2^(32-Bgbit) + 2^(32-2*Bgbit) + ... + 2^(32-l*Bgbit))
+};
+
+struct TFheGateBootstrappingParameterSet {
+    const int32_t ks_t;
+    const int32_t ks_basebit;
+    const LweParams *const in_out_params;
+    const TGswParams *const tgsw_params;
+};
+```
+
+Of these, we must set 
+
+| Name         | Member of     | Meaning                   | Default value                          |
+| ---------    | ---------     | ---------                 | -------                                |
+| `N`          | TLwe          | degree of the polynomials | 1024                                   |
+| `k`          | TLwe          | number of polynomials     | 1                                      |
+| `n`          | Lwe           | ?                         | 500                                    |
+| `l`          | TGsw          | decomp length?            | 2                                      |
+| `Bgbit`      | TGsw          | log2(decomp base)         | 10                                     |
+| `ks_t`       | Bootstrapping | length of ?               | 8                                      |
+| `ks_basebit` | Bootstrapping | ?                         | 2                                      |
+| `alpha_min`  | Lwe           | std deviation             | `\frac{\sqrt{2}}{\pi} 2^{-15}`         |
+| `alpha_max`  | Lwe           | max std deviation         | `\frac{\sqrt{2}}{4\pi} 2^{-4}`         |
+| `bk_stdev`   | Tlwe          | std deviation             | `\frac{\sqrt{2}}{\pi} 9\times 10^{-9}` |
+
+
+> What are `n`, `alpha` and `q` for the lwe-estimator?
+
