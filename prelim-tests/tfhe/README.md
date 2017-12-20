@@ -131,3 +131,6 @@ Of these, we must set
 
 > What are `n`, `alpha` and `q` for the lwe-estimator?
 
+An example of reading the full set of parameters from the command line
+and using them for a simple THFE calculation is
+`examples/mult_depth.cpp`.
