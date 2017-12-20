@@ -74,3 +74,15 @@ in the original tutorial, meaning that the output is binary, and addition is
 XOR, multiplication is AND etc.
 It can be changed to give integer results, but ***p needs to be a prime***,
 otherwise an assertion fails when calculating "m".
+
+### Further examples and explanation
+https://pwnhome.wordpress.com/2013/05/03/guide-to-helib-1/
+https://pwnhome.wordpress.com/2013/05/29/guide-to-helib-2/
+https://pwnhome.wordpress.com/2013/06/19/guide-to-helib-3/
+
+
+
+### Observations
+
+* ciphertext size (as obtained from sizeof() on a single element of a CTxt) is
+always 122 bytes. 
