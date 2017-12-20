@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """  
-plot number of slots in HElib as a function of different parameter choices
+plot things in HElib as a function of different parameter choices
 """
 
 
@@ -93,6 +93,23 @@ def convert_to_2d_arrays(x_vals,y_vals,z_vals):
     return x,y,z
 
 
+def plot_map(data,x_var,y_var,z_var,log_axes = []):
+    x_vals = data[x_var]
+    y_vals = data[y_var]
+    z_vals = data[z_var]
+    x,y,z = convert_to_2d_arrays(x_vals,y_vals,z_vals)
+    fig = plt.figure()
+    ax=fig.add_subplot(1,1,1)
+    pp = plt.pcolor(x,y,z,cmap="rainbow")
+    if "x" in log_axes:
+        ax.set_xscale("log")
+    if "y" in log_axes:
+        ax.set_yscale("log")        
+    plt.title(z_var)
+    plt.xlabel(x_var)
+    plt.ylabel(y_var)
+    plt.colorbar()
+
 def plot_nslots_map(data,x_var,y_var):
     x_vals = data[x_var]
     y_vals = data[y_var]
@@ -136,9 +153,13 @@ if __name__ == "__main__":
     print("Loading in file %s" % args.input_filename)
     data = read_into_arrays(args.input_filename)
     if args.plot == "noise":
-        plot_num_correct(data,["p"],[65539])
+        plot_num_correct(data,["p"],[257])
     elif args.plot == "nslots":
         plot_nslots_map(data,"p","security")
+    elif args.plot == "ctsize":
+        plot_map(data,"L","security","ctsize")
+    elif args.plot == "noisemap":
+        plot_map(data,"L","security","correct_mult")                
     plt.show()
 
         
