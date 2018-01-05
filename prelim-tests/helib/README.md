@@ -82,19 +82,24 @@ https://pwnhome.wordpress.com/2013/06/19/guide-to-helib-3/
 
 ### Parameters
 
-A nice intro to Helib and its parameters can be found [here](http://people.csail.mit.edu/shaih/pubs/he-library.pdf)
+A nice intro to Helib and its parameters can be found [here](http://people.csail.mit.edu/shaih/pubs/he-library.pdf).
 
 | Name         | Meaning       | Default value             |
 | ---------    | ---------     | ---------                 |
 | `m`          | Parameter for chosing mth cyclotomic polynomial $\Phi(X)$             | ?                         |
 | `\Phi(m)`    | mth cyclotomic polynomial, i.e. irreducible polynomial with integer coefficients that divides $x^n-1$ but not $x^k-1$, for all $k < n$     | ?                         |
 | Plaintext space   | usually $A_2 = A/2A$ (binary polynomials modulo $\Phi(m)$)               | ?                         |
-| `q`          | Modulus to cancel out noise in decryption. This value evolves as homomorphic operations are applied, and hence we have $q_l$ for each level l              | ?                         |
+| `q`          | Modulus to cancel out noise in decryption. This value evolves as homomorphic operations are applied, and hence we have $q_i$ for each level i             | ?                         |
 | Ciphertext space   | $A_q = A/2A$ (binary polynomials modulo $\Phi(m)$)               | ?                         |
 | `p`          |  Parameter defining plaintext space as $A_p$ (as opposed to $A_2$ above)            | ?                |
-| `r`          |  Parameter defining plaintext space as $A_{p^r}$ (as opposed to $A_p$ above)             | ?                |
+| `r`          |  Parameter defining plaintext space as $A_{p^r}$ (as opposed to $A_p$ above)             | 1, and in this case all slots are isomorphic to $F_{p^d}$, with d defined in the next entry of this table                |
 | `l`          |  Number of slots. This corresponds to the number of irreducible factors of $\Phi(m) mod 2$, which all have degree $d=\phi(m)/l$.              | ?                         |
+| `L`          |  The maximum number of homomorphic levels. The L moduli q_1, ..., q_l above are defined as as a product of i carefully chosen primes          | ?                |
 
+#### DoubleCRT
+
+A polinomial in the ciphertext space A_q is represented in Helib using the double CRT representation.
+See section 2.1 in the document linked above [here](http://people.csail.mit.edu/shaih/pubs/he-library.pdf).
 
 
 ### Observations
