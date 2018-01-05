@@ -80,6 +80,21 @@ https://pwnhome.wordpress.com/2013/05/03/guide-to-helib-1/
 https://pwnhome.wordpress.com/2013/05/29/guide-to-helib-2/
 https://pwnhome.wordpress.com/2013/06/19/guide-to-helib-3/
 
+### Parameters
+
+A nice intro to Helib and its parameters can be found [here](http://people.csail.mit.edu/shaih/pubs/he-library.pdf)
+
+| Name         | Meaning       | Default value             |
+| ---------    | ---------     | ---------                 |
+| `m`          | Parameter for chosing mth cyclotomic polynomial $\Phi(X)$             | ?                         |
+| `\Phi(m)`    | mth cyclotomic polynomial, i.e. irreducible polynomial with integer coefficients that divides $x^n-1$ but not $x^k-1$, for all $k < n$     | ?                         |
+| Plaintext space   | usually $A_2 = A/2A$ (binary polynomials modulo $\Phi(m)$)               | ?                         |
+| `q`          | Modulus to cancel out noise in decryption. This value evolves as homomorphic operations are applied, and hence we have $q_l$ for each level l              | ?                         |
+| Ciphertext space   | $A_q = A/2A$ (binary polynomials modulo $\Phi(m)$)               | ?                         |
+| `p`          |  Parameter defining plaintext space as $A_p$ (as opposed to $A_2$ above)            | ?                |
+| `r`          |  Parameter defining plaintext space as $A_{p^r}$ (as opposed to $A_p$ above)             | ?                |
+| `l`          |  Number of slots. This corresponds to the number of irreducible factors of $\Phi(m) mod 2$, which all have degree $d=\phi(m)/l$.              | ?                         |
+
 
 
 ### Observations
