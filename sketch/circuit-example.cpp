@@ -9,5 +9,6 @@ int main(void)
 	// w2 is the output of th
 	const Wire& w2 = c.add_assignment("w2", Gate::And, a, b);
 
+	c.print();
 	//c.get_outputs();
 }
