@@ -11,20 +11,41 @@
 // 	Wire_container(const Wire& w_) : w(w_) {};
 // };
 
+typedef std::function<bool(bool,bool)> GateFn;
+
 class ContextClear : public Context {
 public:
+	typedef Plaintext bool;
+	typedef Ciphertext bool;
+	
 	
 	bool And(bool a, bool b) {
 		return a & b;
 	}
 
-	std::function<bool(bool,bool)> get_op(Gate g) {
+	bool Or(bool a, bool b) {
+		return a | b;
+	}
+
+	bool Xor(bool a, bool b) {
+		return a != b;
+	}
+	
+	GateFn get_op(Gate g) {
+		using namespace std::placeholders;
 		switch(g) {
 		case(Gate::And):
-			std::function<bool(bool,bool)> op;
-			op = [this](bool a, bool b) mutable { return And(a,b); };
-			return op;
+			return GateFn(std::bind(&ContextClear::And, this, _1, _2));
 			break;
+
+		case(Gate::Or):
+			return GateFn(std::bind(&ContextClear::Or, this, _1, _2));
+			break;
+
+		case(Gate::Xor):
+			return GateFn(std::bind(&ContextClear::Xor, this, _1, _2));
+			break;
+
 		}
 		throw std::runtime_error("Unknown op");
 	}

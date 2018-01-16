@@ -15,8 +15,7 @@ public:
 };
 
 
-enum class Gate {And};
-
+enum class Gate {And, Or, Xor};
 
 // class ConstWire : public Wire {
 // };
@@ -33,7 +32,7 @@ public:
 	const Wire& get_input1() const { return input1; }
 	const Wire& get_input2() const { return input2; }
 	const Wire& get_output() const { return output; }
-	Gate get_op() const { return op; }		
+	Gate get_op() const { return op; }
 };
 
 struct Output {

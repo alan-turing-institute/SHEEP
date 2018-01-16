@@ -11,6 +11,8 @@ typedef std::function<double(const std::list<bool>&, std::list<bool>&)> CircuitE
 class Context {
 public:
 	virtual bool And(bool,bool) =0;
+	virtual bool Or(bool,bool) =0;
+	virtual bool Xor(bool,bool) =0;
 
 	virtual double eval(const Circuit& circ,
 			    const std::list<bool>& inputs,
