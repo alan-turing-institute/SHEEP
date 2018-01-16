@@ -11,7 +11,7 @@ class Wire {
 	// this class represents 'wires' (1-bit) or 'buses'
 public:
 	Wire(std::string name_) : name(name_) { }
-  const std::string get_name() const { return name; }
+	const std::string get_name() const { return name; }
 };
 
 
@@ -30,10 +30,10 @@ public:
 	Assignment(const Wire& output_, Gate op_, const Wire& input1_, const Wire& input2_)
 		: output(output_), op(op_), input1(input1_), input2(input2_)
 	{ }
-  const Wire& get_input1() const { return input1; }
-  const Wire& get_input2() const { return input2; }
-  const Wire& get_output() const { return output; }
-  
+	const Wire& get_input1() const { return input1; }
+	const Wire& get_input2() const { return input2; }
+	const Wire& get_output() const { return output; }
+	Gate get_op() const { return op; }		
 };
 
 class Circuit {
@@ -58,6 +58,15 @@ public:
 		
 		return output;
 	}
+
+	const std::list<Assignment>& get_assignments() const {
+		return assignments;
+	}
+
+	const std::list<Wire>& get_inputs() const {
+		return inputs;
+	}
+	
   void print() {
     for (auto assignment : assignments) {
       std::cout<<"Assignment:  "<<std::endl <<"   "<<assignment.get_input1().get_name()<<" "<<assignment.get_input2().get_name()<<"  --> "<<assignment.get_output().get_name() <<std::endl;
