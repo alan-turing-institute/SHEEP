@@ -52,21 +52,18 @@ public:
 		return inputs.back();
 	}
 
-	// const Wire& add_and_gate(const Wire& a, const Wire& b) {
-	// 	std::vector<const Wire&> add_assignment(Gate::And, std::vector<const Wire&>(a, b));
-	// }
 	const Wire& add_assignment(std::string name, Gate op, const Wire& a, const Wire& b) {
 		wires.emplace_back(name);
 		const Wire& output = wires.back();
 		assignments.emplace_back(output, op, a, b);
-		
+
 		return output;
 	}
 
 	void set_output(const Wire& w) {
 		outputs.emplace_back(w);
 	}
-	
+
 	const std::list<Assignment>& get_assignments() const {
 		return assignments;
 	}
@@ -78,12 +75,16 @@ public:
 	const std::list<Output>& get_outputs() const {
 		return outputs;
 	}
-	
-  void print() {
-    for (auto assignment : assignments) {
-      std::cout<<"Assignment:  "<<std::endl <<"   "<<assignment.get_input1().get_name()<<" "<<assignment.get_input2().get_name()<<"  --> "<<assignment.get_output().get_name() <<std::endl;
-    }
-  }
+
+	void print() {
+		for (auto assignment : assignments) {
+			std::cout << "Assignment:  " << std::endl
+				  << "   " << assignment.get_input1().get_name()
+				  << " " << assignment.get_input2().get_name()
+				  << "  --> " << assignment.get_output().get_name()
+				  << std::endl;
+		}
+	}
 };
 
 #endif // define CIRCUIT_HPP
