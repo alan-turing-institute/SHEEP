@@ -19,15 +19,15 @@ public:
 	typedef Ciphertext bool;
 	
 	
-	bool And(bool a, bool b) {
+	Ciphertext Add(Ciphertext a, Ciphertext b) {
 		return a & b;
 	}
 
-	bool Or(bool a, bool b) {
+	Ciphertext Or(Ciphertext a, Ciphertext b) {
 		return a | b;
 	}
 
-	bool Xor(bool a, bool b) {
+	Ciphertext Xor(Ciphertext a, Ciphertext b) {
 		return a != b;
 	}
 	
@@ -54,10 +54,10 @@ public:
 	// method, which can perform any library-specific
 	// optimization.
 	double eval(const Circuit& circ,
-		    const std::list<bool>& input_vals,
-		    std::list<bool>& output_vals) {
+		    const std::list<Ciphertext>& input_vals,
+		    std::list<Ciphertext>& output_vals) {
 
-		std::unordered_map<std::string, bool> eval_map;
+		std::unordered_map<std::string, Ciphertext> eval_map;
 
 		// add Circuit::inputs and inputs into the map
 		auto input_vals_it = input_vals.begin();
@@ -77,10 +77,10 @@ public:
 		for (const Assignment assn : circ.get_assignments()) {
 
 			// throws out_of_range if not present in the map
-			bool input1 = eval_map.at(assn.get_input1().get_name());
-			bool input2 = eval_map.at(assn.get_input2().get_name());
+			Ciphertext input1 = eval_map.at(assn.get_input1().get_name());
+			Ciphertext input2 = eval_map.at(assn.get_input2().get_name());
 			auto op = get_op(assn.get_op());
-			bool output = op(input1, input2);
+			Ciphertext output = op(input1, input2);
 			eval_map.insert({assn.get_output().get_name(), output});
 		}
 
