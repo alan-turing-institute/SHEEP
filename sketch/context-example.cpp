@@ -2,21 +2,27 @@
 
 int main(void)
 {
-	Circuit c; // construct empty circuit
-	const Wire& a = c.add_input("a");
-	const Wire& b = c.add_input("b");
+	Circuit C; // construct empty circuit
+	const Wire& a = C.add_input("a");
+	const Wire& b = C.add_input("b");
+	const Wire& c = C.add_input("c");
+	const Wire& d = C.add_input("d");
 	
-	// w2 is the output of th
-	const Wire& w2 = c.add_assignment("w2", Gate::And, a, b);
+	const Wire& w2 = C.add_assignment("w2", Gate::And, a, b);
+	const Wire& w3 = C.add_assignment("w3", Gate::Xor, w2, c);
 
-	c.set_output(w2);
-	
+	C.set_output(w3);
+	C.set_output(d);
+
 	ContextClear ctx;
 	
-	std::list<bool> outputs;
-
-	double time = ctx.eval(c, {true, false}, outputs);
-
-	for (auto output : outputs) std::cout << output << std::endl;
+	CircuitEvaluator run_circuit;
+	run_circuit = ctx.compile(C);
 	
+	std::list<bool> outputs;
+	double time = run_circuit({true, false, true, false}, outputs);
+	// equivalent to:
+	// double time = ctx.eval(c, {true, false}, outputs);
+	
+	for (auto output : outputs) std::cout << output << std::endl;
 }
