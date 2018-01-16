@@ -36,21 +36,22 @@ public:
 		    const std::list<bool>& input_vals,
 		    std::list<bool>& output_vals) {
 
-		// build map of Wire& -> bool
 		std::unordered_map<std::string, bool> eval_map;
 
 		// add Circuit::inputs and inputs into the map
 		auto input_vals_it = input_vals.begin();
 		auto input_wires_it = circ.get_inputs().begin();
-		for (; input_vals_it != input_vals.end() || input_wires_it != circ.get_inputs().end();
+		const auto input_wires_end = circ.get_inputs().end();
+		for (; input_vals_it != input_vals.end() || input_wires_it != input_wires_end;
 		     ++input_vals_it, ++input_wires_it)
 		{
 			eval_map.insert({input_wires_it->get_name(), *input_vals_it});
 		}
 
 		// error check: both iterators should be at the end
-		// ...
-		
+		if (input_vals_it != input_vals.end() || input_wires_it != input_wires_end)
+			throw std::runtime_error("Number of inputs doesn't match");
+				
 		// for each assignment, look up the Wire in the map
 		for (const Assignment assn : circ.get_assignments()) {
 
@@ -72,12 +73,5 @@ public:
 		return t;
 	}
 };
-
-
-
-// context.eval(circ, inputs, time);
-
-// evaluator = context.compile(circ);
-// evaluator(inputs, time);
 
 #endif // CONTEXT_CLEAR_HPP
