@@ -6,6 +6,11 @@
 #include "circuit.hpp"
 #include "context.hpp"
 
+// struct Wire_container {
+// 	const Wire& w;
+// 	Wire_container(const Wire& w_) : w(w_) {};
+// };
+
 class ContextClear : public Context {
 public:
 	
@@ -27,7 +32,9 @@ public:
 	// each Context concrete class provides its own compile
 	// method, which can perform any library-specific
 	// optimization.
-	bool eval(const Circuit& circ, const std::list<bool>& input_vals, double& t) {
+	double eval(const Circuit& circ,
+		    const std::list<bool>& input_vals,
+		    std::list<bool>& output_vals) {
 
 		// build map of Wire& -> bool
 		std::unordered_map<std::string, bool> eval_map;
@@ -52,9 +59,17 @@ public:
 			bool input2 = eval_map.at(assn.get_input2().get_name());
 			auto op = get_op(assn.get_op());
 			bool output = op(input1, input2);
+			eval_map.insert({assn.get_output().get_name(), output});
 		}
-		t = 0.0;
-		return true;
+
+		auto output_wires_it = circ.get_outputs().begin();
+		auto output_wires_end = circ.get_outputs().end();
+		for (; output_wires_it != output_wires_end; ++output_wires_it) {
+			output_vals.push_back(eval_map.at(output_wires_it->wire.get_name()));
+		}
+				
+		double t = 0.0;
+		return t;
 	}
 };
 

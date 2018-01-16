@@ -36,11 +36,16 @@ public:
 	Gate get_op() const { return op; }		
 };
 
+struct Output {
+	const Wire& wire;
+	Output(const Wire& w) : wire(w) {}
+};
+
 class Circuit {
 	// probably don't need to write an eval method here
 	std::list<Wire> inputs;
 	std::list<Wire> wires;
-	std::list<Wire> outputs;
+	std::list<Output> outputs;
 	std::list<Assignment> assignments;
 public:
 	const Wire& add_input(std::string name) {
@@ -59,12 +64,20 @@ public:
 		return output;
 	}
 
+	void set_output(const Wire& w) {
+		outputs.emplace_back(w);
+	}
+	
 	const std::list<Assignment>& get_assignments() const {
 		return assignments;
 	}
 
 	const std::list<Wire>& get_inputs() const {
 		return inputs;
+	}
+
+	const std::list<Output>& get_outputs() const {
+		return outputs;
 	}
 	
   void print() {
