@@ -2,8 +2,7 @@
 
 #include "context-clear.hpp"
 
-int main(void)
-{
+int main(void) {
 	Circuit C; // construct empty circuit
 	const Wire& a = C.add_input("a");
 	const Wire& b = C.add_input("b");
@@ -18,25 +17,22 @@ int main(void)
 
 	ContextClear ctx;
 	
-	CircuitEvaluator run_circuit;
+	ContextClear::CircuitEvaluator run_circuit;
 	run_circuit = ctx.compile(C);
 	
-	std::list<ContextClear::Ciphertext> secret_outputs;
-	std::list<ContextClear::Ciphertext> ciphertexts = ctx.encrypt({true, false, true, false});
+	std::list<ContextClear::Plaintext> plaintext_inputs = {true, false, true, false};
+	std::list<ContextClear::Ciphertext> ciphertext_inputs;
 
-	double time = run_circuit(ciphertexts, secret_outputs); // outputs :: list<Ciphertext>
-
-	std::list<ContextClear::Plaintext> public_outputs = ctx.decrypt(secret_outputs);
-
-
-// equivalent to:
-	//double time = ctx.eval(C, {true, false}, outputs);
-	//C.assert({}, 0)
-	//for (auto output : outputs) std::cout << output << std::endl;
-
-	//TestClear.test(C, {a: 1. b: 1}, {0,1})
-	//	assert(output[0] == true);
+	for (ContextClear::Plaintext pt : plaintext_inputs)
+		ciphertext_inputs.push_back(ctx.encrypt(pt));
 	
-}
+	std::list<ContextClear::Ciphertext> ciphertext_outputs;
+	double time = run_circuit(ciphertext_inputs, ciphertext_outputs);
 
-// Slots per ciphertext
+	std::list<ContextClear::Plaintext> plaintext_outputs;
+	for (ContextClear::Ciphertext ct : ciphertext_outputs) {
+		ContextClear::Plaintext pt = ctx.decrypt(ct);
+		plaintext_outputs.push_back(pt);
+		std::cout << pt << std::endl;
+	}
+}

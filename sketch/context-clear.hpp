@@ -11,15 +11,17 @@
 // 	Wire_container(const Wire& w_) : w(w_) {};
 // };
 
-typedef std::function<bool(bool,bool)> GateFn;
-
-class ContextClear : public Context {
+class ContextClear : public Context<bool, bool> {
 public:
-	typedef Plaintext bool;
-	typedef Ciphertext bool;
+	Ciphertext encrypt(Plaintext p) {
+		return p; // both Plaintext and Ciphertext are typedef'd to bool
+	}
+
+	Plaintext decrypt(Ciphertext c) {
+		return c;
+	}
 	
-	
-	Ciphertext Add(Ciphertext a, Ciphertext b) {
+	Ciphertext And(Ciphertext a, Ciphertext b) {
 		return a & b;
 	}
 
