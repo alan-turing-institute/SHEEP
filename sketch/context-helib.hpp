@@ -19,7 +19,15 @@ public:
   ContextHElib(long num_levels, long security);
 
   // destructor
-  ~ContextHElib() {};
+  ~ContextHElib() {
+    /// delete everything we new-ed in the constructor
+    if (m_ea != NULL) delete m_ea;
+
+    if (m_secretKey != NULL) delete m_secretKey;
+
+    if (m_helib_context != NULL) delete m_helib_context;
+    
+  };
   
   Ciphertext encrypt(Plaintext p);
 

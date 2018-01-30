@@ -85,7 +85,15 @@ ContextHElib::And(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
 
 ContextHElib::Ciphertext
 ContextHElib::Or(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
-  return a;   //// DUMMY!!!!!
+  /// Do XOR( XOR(a,b), AND(a,b) )
+  ContextHElib::Ciphertext a_copy = a;
+
+  a += b;  /// XOR(a,b)
+  a_copy *= b;  /// AND(a,b)
+
+  a += a_copy;  /// XOR (XOR(a,b), AND(a,b))
+  
+  return a;   
 }
 
 ContextHElib::Ciphertext
