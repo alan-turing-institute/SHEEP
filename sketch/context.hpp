@@ -2,6 +2,8 @@
 #define CONTEXT_HPP
 
 #include <functional>
+#include <unordered_map>
+#include <chrono>
 
 #include "circuit.hpp"
 
@@ -22,7 +24,28 @@ public:
 	virtual Ciphertext And(Ciphertext,Ciphertext) =0;
 	virtual Ciphertext Or(Ciphertext,Ciphertext) =0;
 	virtual Ciphertext Xor(Ciphertext,Ciphertext) =0;
-	
+
+
+	virtual GateFn get_op(Gate g) {
+		using namespace std::placeholders;
+		switch(g) {
+		case(Gate::And):
+			return GateFn(std::bind(&Context::And, this, _1, _2));
+			break;
+
+		case(Gate::Or):
+			return GateFn(std::bind(&Context::Or, this, _1, _2));
+			break;
+
+		case(Gate::Xor):
+			return GateFn(std::bind(&Context::Xor, this, _1, _2));
+			break;
+
+		}
+		throw std::runtime_error("Unknown op");
+	}
+
+>>>>>>> master
 	virtual microsecond eval(const Circuit& circ,
 				 const std::list<Ciphertext>& input_vals,
 				 std::list<Ciphertext>& output_vals) {
