@@ -18,3 +18,10 @@ helib-example: helib-example.cpp context-helib.o context.hpp circuit.hpp
 
 context-helib.o: context-helib.cpp context-helib.hpp
 	g++ -std=c++14 -Wall -Wextra -I$(HELIB_HOME) -c context-helib.cpp
+
+
+TFHE_INCLUDE=${HOME}/projects/sheep/code/tfhe-include/
+TFHE_LIB=${HOME}/projects/sheep/code/tfhe/build/libtfhe/
+
+tfhe-example: tfhe-example.cpp context.hpp circuit.hpp
+	g++ -std=c++14 -Wall -Wextra -isystem $(TFHE_INCLUDE) -L$(TFHE_LIB) $< -o $@ -ltfhe-fftw 
