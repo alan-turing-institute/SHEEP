@@ -10,22 +10,22 @@ int main(void) {
     //// instantiate the Circuit Repository
   CircuitRepo cr;
   
-  // Circuit C = cr.get_test_circuit_1();
+  //Circuit C = cr.get_test_circuit_1();
 
-  const Circuit* C = cr.get_circuit_by_name("TestCircuit1");
+  //  Circuit C = cr.get_circuit_by_name("TestCircuit1");
 
-  C->print();
+  // C.print();
 
 
-  //Circuit C2 = cr.create_circuit(Gate::And, 3);
-  //C2.print();
+  Circuit C2 = cr.create_circuit(Gate::And, 3);
+  C2.print();
   
   
   
   ContextClear ctx;
   
   ContextClear::CircuitEvaluator run_circuit;
-  run_circuit = ctx.compile(*C);
+  run_circuit = ctx.compile(C2);
 	
   std::list<ContextClear::Plaintext> plaintext_inputs = {true, false, true, false};
   std::list<ContextClear::Ciphertext> ciphertext_inputs;

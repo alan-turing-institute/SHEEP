@@ -45,7 +45,6 @@ public:
 		throw std::runtime_error("Unknown op");
 	}
 
->>>>>>> master
 	virtual microsecond eval(const Circuit& circ,
 				 const std::list<Ciphertext>& input_vals,
 				 std::list<Ciphertext>& output_vals) {
@@ -56,15 +55,11 @@ public:
 		auto input_wires_it = circ.get_inputs().begin();
 		const auto input_wires_end = circ.get_inputs().end();
 
-		std::cout<<"Sizes of inputs "<<input_vals.size()<<" "<<circ.get_inputs().size()<<std::endl;
-		
 		for (; input_vals_it != input_vals.end() || input_wires_it != input_wires_end;
 		     ++input_vals_it, ++input_wires_it)
 		{
-		  std::cout<<" inserting "<<input_wires_it->get_name()<<std::endl;
 		  eval_map.insert({input_wires_it->get_name(), *input_vals_it});
 		}
-		std::cout<<" checking "<<std::endl;		
 		// error check: both iterators should be at the end
 		if (input_vals_it != input_vals.end() || input_wires_it != input_wires_end)
 			throw std::runtime_error("Number of inputs doesn't match");
@@ -81,7 +76,6 @@ public:
 		
 		for (const Assignment assn : circ.get_assignments()) {
 			// throws out_of_range if not present in the map
-		  std::cout<<" looking up "<<assn.get_input1().get_name()<<" "<<assn.get_input2().get_name()<<std::endl;
 		  Ciphertext input1 = eval_map.at(assn.get_input1().get_name());
 		  Ciphertext input2 = eval_map.at(assn.get_input2().get_name());
 			auto op = get_op(assn.get_op());
@@ -97,12 +91,9 @@ public:
 		// push them onto output_vals.
 		auto output_wires_it = circ.get_outputs().begin();
 		auto output_wires_end = circ.get_outputs().end();
-		std::cout<<" about to look at outputs"<<std::endl;
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
-		  std::cout<<" name of output wire "<<output_wires_it->wire.get_name()<<std::endl;		  
 		  output_vals.push_back(eval_map.at(output_wires_it->wire.get_name()));
 		}
-		std::cout<<"done"<<std::endl;
 		return duration;
 	}
 
@@ -114,24 +105,7 @@ public:
 		return CircuitEvaluator(run);
 	}
 
-        GateFn get_op(Gate g) {
-	  using namespace std::placeholders;
-	  switch(g) {
-	  case(Gate::And):
-	    return GateFn(std::bind(&Context::And, this, _1, _2));
-	    break;
-	    
-	  case(Gate::Or):
-	    return GateFn(std::bind(&Context::Or, this, _1, _2));
-	    break;
-	    
-	  case(Gate::Xor):
-	    return GateFn(std::bind(&Context::Xor, this, _1, _2));
-	    break;
-	    
-	  }
-	  throw std::runtime_error("Unknown op");
-	}
+ 
 };
 
 #endif // CONTEXT_HPP

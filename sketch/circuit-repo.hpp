@@ -37,20 +37,6 @@ public:
   }
 
 
-  Circuit get_test_circuit_1() {
-    Circuit C;
-    Wire a = C.add_input("a");
-    Wire b = C.add_input("b");
-    Wire c = C.add_input("c");
-    Wire d = C.add_input("d");
-    Wire w2 = C.add_assignment("w2", Gate::And, a, b);
-    Wire w3 = C.add_assignment("w3", Gate::Xor, w2, c);
-
-    C.set_output(w3);
-    C.set_output(d);
-
-    return C;
-  }
   
   Circuit create_circuit( Gate gate, int depth) {
 
@@ -85,7 +71,7 @@ public:
     return C;
   }
   
-  const Circuit& get_circuit_by_name(std::string name) {
+  const Circuit get_circuit_by_name(std::string name) {
     
     auto iter = m_circuitStore.find(name);
     if (iter != m_circuitStore.end()) return iter->second;
