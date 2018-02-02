@@ -1,7 +1,7 @@
 circuit-example: circuit-example.cpp circuit.hpp
 	g++ -std=c++14 -Wall -Wextra -Wconversion $< -o $@
 
-context-example: context-example.cpp context-clear.hpp context.hpp circuit.hpp
+clear-context-example: clear-context-example.cpp context-clear.hpp context.hpp circuit.hpp circuit-repo.hpp
 	g++ -std=c++14 -Wall -Wextra -Wconversion $< -o $@
 
 
@@ -12,7 +12,7 @@ GMP=-lgmp
 NTL=-lntl
 LDLIBS = -L/usr/local/lib $(NTL) $(GMP) -lm
 
-helib-example: helib-example.cpp context-helib.o context.hpp circuit.hpp
+helib-context-example: helib-context-example.cpp context-helib.o context.hpp circuit.hpp circuit-repo.hpp
 
 	g++ -std=c++14 -Wall -Wextra context-helib.o -I$(HELIB_HOME) $(LDLIBS) $< $(HELIB_HOME)/fhe.a -o $@
 
