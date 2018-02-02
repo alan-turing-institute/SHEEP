@@ -9,14 +9,15 @@ int main(void) {
   
     //// instantiate the Circuit Repository
   CircuitRepo cr;
+
+
+  /// can either retrieve pre-build test circuits by name:
   
-  //Circuit C = cr.get_test_circuit_1();
+  Circuit C = cr.get_circuit_by_name("TestCircuit1");
+  C.print();
 
-  //  Circuit C = cr.get_circuit_by_name("TestCircuit1");
-
-  // C.print();
-
-
+  //// or build a circuit with a specified depth of a specified gate
+  
   Circuit C2 = cr.create_circuit(Gate::And, 3);
   C2.print();
   
