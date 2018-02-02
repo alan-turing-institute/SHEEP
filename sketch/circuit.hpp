@@ -14,30 +14,29 @@ public:
 	const std::string get_name() const { return name; }
 };
 
-
 enum class Gate {And, Or, Xor};
 
 // class ConstWire : public Wire {
 // };
 
 class Assignment {
-	const Wire& output;
+	Wire output;
 	Gate op;
 	// std::list<const Wire&> inputs;
-	const Wire& input1, input2;
+	Wire input1, input2;
 public:
-	Assignment(const Wire& output_, Gate op_, const Wire& input1_, const Wire& input2_)
+	Assignment(Wire output_, Gate op_, Wire input1_, Wire input2_)
 		: output(output_), op(op_), input1(input1_), input2(input2_)
 	{ }
-	const Wire& get_input1() const { return input1; }
-	const Wire& get_input2() const { return input2; }
-	const Wire& get_output() const { return output; }
+	Wire get_input1() const { return input1; }
+	Wire get_input2() const { return input2; }
+	Wire get_output() const { return output; }
 	Gate get_op() const { return op; }
 };
 
 struct Output {
-	const Wire& wire;
-	Output(const Wire& w) : wire(w) {}
+	Wire wire;
+	Output(Wire w) : wire(w) {}
 };
 
 class Circuit {
@@ -47,20 +46,20 @@ class Circuit {
 	std::list<Output> outputs;
 	std::list<Assignment> assignments;
 public:
-	const Wire& add_input(std::string name) {
+	Wire add_input(std::string name) {
 		inputs.emplace_back(name);
 		return inputs.back();
 	}
 
-	const Wire& add_assignment(std::string name, Gate op, const Wire& a, const Wire& b) {
+	Wire add_assignment(std::string name, Gate op, Wire a, Wire b) {
 		wires.emplace_back(name);
-		const Wire& output = wires.back();
+		Wire output = wires.back();
 		assignments.emplace_back(output, op, a, b);
 
 		return output;
 	}
 
-	void set_output(const Wire& w) {
+	void set_output(Wire w) {
 		outputs.emplace_back(w);
 	}
 
