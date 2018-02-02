@@ -1,9 +1,6 @@
 #ifndef CONTEXT_CLEAR_HPP
 #define CONTEXT_CLEAR_HPP
 
-#include <unordered_map>
-#include <chrono>
-
 #include "circuit.hpp"
 #include "context.hpp"
 

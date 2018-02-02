@@ -2,6 +2,8 @@
 #define CONTEXT_HPP
 
 #include <functional>
+#include <unordered_map>
+#include <chrono>
 
 #include "circuit.hpp"
 
