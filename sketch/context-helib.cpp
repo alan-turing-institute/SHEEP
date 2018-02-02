@@ -102,24 +102,6 @@ ContextHElib::Xor(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
   a += b;
   return a;   //// as long as p=2
 }
-	
-ContextHElib::GateFn
-ContextHElib::get_op(Gate g) {
-  using namespace std::placeholders;
-		switch(g) {
-		case(Gate::And):
-			return GateFn(std::bind(&ContextHElib::And, this, _1, _2));
-			break;
 
-		case(Gate::Or):
-			return GateFn(std::bind(&ContextHElib::Or, this, _1, _2));
-			break;
 
-		case(Gate::Xor):
-			return GateFn(std::bind(&ContextHElib::Xor, this, _1, _2));
-			break;
-
-		}
-		throw std::runtime_error("Unknown op");
-}
 

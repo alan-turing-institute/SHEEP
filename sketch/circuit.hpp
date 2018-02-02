@@ -46,6 +46,7 @@ class Circuit {
 	std::list<Output> outputs;
 	std::list<Assignment> assignments;
 public:
+
 	Wire add_input(std::string name) {
 		inputs.emplace_back(name);
 		return inputs.back();
@@ -55,8 +56,7 @@ public:
 		wires.emplace_back(name);
 		Wire output = wires.back();
 		assignments.emplace_back(output, op, a, b);
-
-		return output;
+	        return output;
 	}
 
 	void set_output(Wire w) {
@@ -71,11 +71,15 @@ public:
 		return inputs;
 	}
 
+  	const std::list<Wire>& get_wires() const {
+		return wires;
+	}
+
 	const std::list<Output>& get_outputs() const {
 		return outputs;
 	}
 
-	void print() {
+	void print() const {
 		for (auto assignment : assignments) {
 			std::cout << "Assignment:  " << std::endl
 				  << "   " << assignment.get_input1().get_name()

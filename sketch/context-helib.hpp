@@ -39,9 +39,6 @@ public:
 
   Ciphertext Xor(Ciphertext a, Ciphertext b);
 	
-  GateFn get_op(Gate g);
-
-
 
   
 private:
