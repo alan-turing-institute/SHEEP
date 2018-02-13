@@ -5,7 +5,6 @@
 #include <list>
 #include <iostream>
 
-
 class Wire {
 	std::string name;
 	// this class represents 'wires' (1-bit) or 'buses'
@@ -15,9 +14,6 @@ public:
 };
 
 enum class Gate {And, Or, Xor};
-
-// class ConstWire : public Wire {
-// };
 
 class Assignment {
 	Wire output;
@@ -40,7 +36,6 @@ struct Output {
 };
 
 class Circuit {
-	// probably don't need to write an eval method here
 	std::list<Wire> inputs;
 	std::list<Wire> wires;
 	std::list<Output> outputs;
@@ -78,16 +73,8 @@ public:
 	const std::list<Output>& get_outputs() const {
 		return outputs;
 	}
-
-	void print() const {
-		for (auto assignment : assignments) {
-			std::cout << "Assignment:  " << std::endl
-				  << "   " << assignment.get_input1().get_name()
-				  << " " << assignment.get_input2().get_name()
-				  << "  --> " << assignment.get_output().get_name()
-				  << std::endl;
-		}
-	}
 };
+
+std::ostream& operator<<(std::ostream& osteam, const Circuit& c);
 
 #endif // define CIRCUIT_HPP

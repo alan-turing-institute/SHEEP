@@ -76,8 +76,8 @@ public:
 		
 		for (const Assignment assn : circ.get_assignments()) {
 			// throws out_of_range if not present in the map
-		  Ciphertext input1 = eval_map.at(assn.get_input1().get_name());
-		  Ciphertext input2 = eval_map.at(assn.get_input2().get_name());
+			Ciphertext input1 = eval_map.at(assn.get_input1().get_name());
+			Ciphertext input2 = eval_map.at(assn.get_input2().get_name());
 			auto op = get_op(assn.get_op());
 			Ciphertext output = op(input1, input2);
 			eval_map.insert({assn.get_output().get_name(), output});
