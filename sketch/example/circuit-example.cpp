@@ -11,6 +11,6 @@ int main(void)
 
 	c.set_output(w2);
 	
-	c.print();
+	std::cout << c;
 	//c.get_outputs();
 }

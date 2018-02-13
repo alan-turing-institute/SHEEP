@@ -14,12 +14,12 @@ int main(void) {
   /// can either retrieve pre-build test circuits by name:
   
   Circuit C = cr.get_circuit_by_name("TestCircuit1");
-  C.print();
+  std::cout << C;
 
   //// or build a circuit with a specified depth of a specified gate
   
   Circuit C2 = cr.create_circuit(Gate::And, 3);
-  C2.print();
+  std::cout << C2;
   
   
   

@@ -14,7 +14,7 @@ int main(void) {
 
   Circuit c2 = cr.create_circuit(Gate::And, 3);
 
-  c2.print();
+  std::cout << c2;
 
   
   ContextHElib ctx(20,80);
