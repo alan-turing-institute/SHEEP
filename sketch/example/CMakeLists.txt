@@ -21,7 +21,7 @@ if (HELIB_FOUND)
     add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
 
     target_link_libraries(helib-context-example
-                            ${HELIB_LIBRARIES})
+                            ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 endif(HELIB_FOUND)
 
 if (TFHE_FOUND)
