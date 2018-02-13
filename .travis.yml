@@ -11,7 +11,7 @@ install:
     - git submodule update
     - mkdir build
     - cd build
-    - cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=debug 
+    - cmake ../src -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=debug 
     - make
     - make test
 
