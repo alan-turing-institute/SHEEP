@@ -1,0 +1,7 @@
+language: cpp
+script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make all
+    - make test
