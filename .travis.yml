@@ -1,5 +1,6 @@
 language: cpp
 script:
+    - cd sketch
     - mkdir -p build
     - cd build
     - cmake ..
