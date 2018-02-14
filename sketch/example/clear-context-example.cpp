@@ -18,17 +18,16 @@ int main(void) {
 
   //// or build a circuit with a specified depth of a specified gate
   
-  Circuit C2 = cr.create_circuit(Gate::And, 3);
-  std::cout << C2;
-  
+  // Circuit C2 = cr.create_circuit(Gate::Add, 3);
+  // std::cout << C2;
   
   
   ContextClear ctx;
   
   ContextClear::CircuitEvaluator run_circuit;
-  run_circuit = ctx.compile(C2);
+  run_circuit = ctx.compile(C);
 	
-  std::list<ContextClear::Plaintext> plaintext_inputs = {true, false, true, false};
+  std::list<ContextClear::Plaintext> plaintext_inputs = {6, 9, 25,67};
   std::list<ContextClear::Ciphertext> ciphertext_inputs;
   
   for (ContextClear::Plaintext pt: plaintext_inputs)
@@ -42,7 +41,7 @@ int main(void) {
   for (ContextClear::Ciphertext ct: ciphertext_outputs) {
     ContextClear::Plaintext pt = ctx.decrypt(ct);
     plaintext_outputs.push_back(pt);
-    std::cout << pt << std::endl;
+    std::cout << "output: "<<std::to_string(pt) << std::endl;
   }
   std::cout << "time was " << time.count() << " microseconds\n";
   

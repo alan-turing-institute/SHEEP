@@ -18,22 +18,38 @@ public:
 
   CircuitRepo() {
     build_test_circuit_1();
+    build_test_circuit_2();    
   }
  
   
   void build_test_circuit_1() {
-    Circuit C;// = new Circuit();
+    Circuit C;
     Wire a = C.add_input("a");
     Wire b = C.add_input("b");
     Wire c = C.add_input("c");
     Wire d = C.add_input("d");
-    Wire w2 = C.add_assignment("w2", Gate::And, a, b);
-    Wire w3 = C.add_assignment("w3", Gate::Xor, w2, c);
+    Wire w2 = C.add_assignment("w2", Gate::Add, a, b);
+    Wire w3 = C.add_assignment("w3", Gate::Multiply, w2, c);
 
     C.set_output(w3);
     C.set_output(d);
 
     m_circuitStore.insert({"TestCircuit1", C});
+  }
+
+    void build_test_circuit_2() {
+    Circuit C;
+    Wire a = C.add_input("a");
+    Wire b = C.add_input("b");
+    Wire c = C.add_input("c");
+    Wire d = C.add_input("d");
+    Wire w2 = C.add_assignment("w2", Gate::Multiply, a, b);
+    Wire w3 = C.add_assignment("w3", Gate::Multiply, w2, c);
+    Wire w4 = C.add_assignment("w4", Gate::Subtract, w3, d);    
+
+    C.set_output(w4);
+
+    m_circuitStore.insert({"TestCircuit2", C});
   }
 
 

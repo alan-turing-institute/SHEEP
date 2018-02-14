@@ -13,7 +13,7 @@ public:
 	const std::string get_name() const { return name; }
 };
 
-enum class Gate {And, Or, Xor};
+enum class Gate {Add, Multiply, Subtract};
 
 class Assignment {
 	Wire output;

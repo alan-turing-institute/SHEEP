@@ -21,24 +21,24 @@ public:
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext decrypt(Ciphertext) =0;
 	
-	virtual Ciphertext And(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Or(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Xor(Ciphertext,Ciphertext) =0;
+	virtual Ciphertext Add(Ciphertext,Ciphertext) =0;
+	virtual Ciphertext Multiply(Ciphertext,Ciphertext) =0;
+	virtual Ciphertext Subtract(Ciphertext,Ciphertext) =0;
 
 
 	virtual GateFn get_op(Gate g) {
 		using namespace std::placeholders;
 		switch(g) {
-		case(Gate::And):
-			return GateFn(std::bind(&Context::And, this, _1, _2));
+		case(Gate::Add):
+			return GateFn(std::bind(&Context::Add, this, _1, _2));
 			break;
 
-		case(Gate::Or):
-			return GateFn(std::bind(&Context::Or, this, _1, _2));
+		case(Gate::Multiply):
+			return GateFn(std::bind(&Context::Multiply, this, _1, _2));
 			break;
 
-		case(Gate::Xor):
-			return GateFn(std::bind(&Context::Xor, this, _1, _2));
+		case(Gate::Subtract):
+			return GateFn(std::bind(&Context::Subtract, this, _1, _2));
 			break;
 
 		}
