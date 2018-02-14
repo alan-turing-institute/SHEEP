@@ -4,6 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <chrono>
+#include <algorithm>
 
 #include "circuit.hpp"
 
