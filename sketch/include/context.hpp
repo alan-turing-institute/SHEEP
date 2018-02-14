@@ -15,7 +15,6 @@ public:
 	typedef PlaintextT Plaintext;
 	typedef CiphertextT Ciphertext;
 
-	typedef std::function<Ciphertext(Ciphertext,Ciphertext)> GateFn;
 	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
 	
         virtual Ciphertext encrypt(Plaintext) =0;
@@ -25,20 +24,19 @@ public:
 	virtual Ciphertext Or(Ciphertext,Ciphertext) =0;
 	virtual Ciphertext Xor(Ciphertext,Ciphertext) =0;
 
-
-	virtual GateFn get_op(Gate g) {
+	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
 		switch(g) {
 		case(Gate::And):
-			return GateFn(std::bind(&Context::And, this, _1, _2));
+			return And(inputs.at(0), inputs.at(1));
 			break;
 
 		case(Gate::Or):
-			return GateFn(std::bind(&Context::Or, this, _1, _2));
+			return Or(inputs.at(0), inputs.at(1));
 			break;
 
 		case(Gate::Xor):
-			return GateFn(std::bind(&Context::Xor, this, _1, _2));
+			return Xor(inputs.at(0), inputs.at(1));
 			break;
 
 		}
@@ -75,11 +73,15 @@ public:
 		auto start_time = high_res_clock::now();
 		
 		for (const Assignment assn : circ.get_assignments()) {
-			// throws out_of_range if not present in the map
-			Ciphertext input1 = eval_map.at(assn.get_input1().get_name());
-			Ciphertext input2 = eval_map.at(assn.get_input2().get_name());
-			auto op = get_op(assn.get_op());
-			Ciphertext output = op(input1, input2);
+			std::vector<Ciphertext> inputs;
+			std::transform(assn.get_inputs().begin(),
+				       assn.get_inputs().end(),
+				       std::back_inserter(inputs),
+				       [&eval_map](Wire w) {
+					       // throws out_of_range if not present in the map
+					       return eval_map.at(w.get_name());
+				       });
+			Ciphertext output = dispatch(assn.get_op(), inputs);
 			eval_map.insert({assn.get_output().get_name(), output});
 		}
 		
@@ -92,7 +94,7 @@ public:
 		auto output_wires_it = circ.get_outputs().begin();
 		auto output_wires_end = circ.get_outputs().end();
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
-		  output_vals.push_back(eval_map.at(output_wires_it->wire.get_name()));
+		  output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
 		return duration;
 	}
@@ -104,8 +106,6 @@ public:
 		auto run = std::bind(&Context::eval, this, circ, _1, _2);
 		return CircuitEvaluator(run);
 	}
-
- 
 };
 
 #endif // CONTEXT_HPP

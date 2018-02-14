@@ -2,12 +2,12 @@
 #define CIRCUIT_HPP
 
 #include <string>
+#include <vector>
 #include <list>
 #include <iostream>
 
 class Wire {
 	std::string name;
-	// this class represents 'wires' (1-bit) or 'buses'
 public:
 	Wire(std::string name_) : name(name_) { }
 	const std::string get_name() const { return name; }
@@ -16,30 +16,37 @@ public:
 enum class Gate {And, Or, Xor};
 
 class Assignment {
+public:
+	typedef std::vector<Wire> WireList;
+private:
 	Wire output;
 	Gate op;
-	// std::list<const Wire&> inputs;
-	Wire input1, input2;
+	WireList inputs;
 public:
-	Assignment(Wire output_, Gate op_, Wire input1_, Wire input2_)
-		: output(output_), op(op_), input1(input1_), input2(input2_)
+	template <typename... Ts>
+	Assignment(Wire output_, Gate op_, Ts... inputs_)
+		: output(output_), op(op_), inputs{inputs_...}
 	{ }
-	Wire get_input1() const { return input1; }
-	Wire get_input2() const { return input2; }
+	size_t input_count() const { return inputs.size();  }
+	const WireList& get_inputs() const { return inputs; }
 	Wire get_output() const { return output; }
 	Gate get_op() const { return op; }
 };
 
-struct Output {
-	Wire wire;
-	Output(Wire w) : wire(w) {}
-};
+// struct Output {
+// 	Wire wire;
+// 	Output(Wire w) : wire(w) {}
+// };
 
 class Circuit {
-	std::list<Wire> inputs;
-	std::list<Wire> wires;
-	std::list<Output> outputs;
-	std::list<Assignment> assignments;
+public:
+	typedef std::list<Wire> WireList;
+	typedef std::list<Assignment> AssignmentList;
+private:
+	WireList inputs;
+	WireList wires;
+	WireList outputs;
+	AssignmentList assignments;
 public:
 
 	Wire add_input(std::string name) {
@@ -47,10 +54,11 @@ public:
 		return inputs.back();
 	}
 
-	Wire add_assignment(std::string name, Gate op, Wire a, Wire b) {
+	template <typename... Wires>
+	Wire add_assignment(std::string name, Gate op, Wires... ws) {
 		wires.emplace_back(name);
 		Wire output = wires.back();
-		assignments.emplace_back(output, op, a, b);
+		assignments.emplace_back(output, op, ws...);
 	        return output;
 	}
 
@@ -58,19 +66,19 @@ public:
 		outputs.emplace_back(w);
 	}
 
-	const std::list<Assignment>& get_assignments() const {
+	const AssignmentList& get_assignments() const {
 		return assignments;
 	}
 
-	const std::list<Wire>& get_inputs() const {
+	const WireList& get_inputs() const {
 		return inputs;
 	}
 
-  	const std::list<Wire>& get_wires() const {
+	const WireList& get_wires() const {
 		return wires;
 	}
 
-	const std::list<Output>& get_outputs() const {
+	const WireList& get_outputs() const {
 		return outputs;
 	}
 };
