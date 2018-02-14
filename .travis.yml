@@ -27,6 +27,7 @@ before_install:
     - ./configure NTL_GMP_LIP=on
     - make
     - sudo make install
+    - cd 
     - git clone https://github.com/shaih/HElib.git	
     - cd HElib/src
     - make
