@@ -21,7 +21,7 @@ before_install:
     - make
     - sudo make install
     - cd
-    - wget --no-check-certificate https://www.shoup.net/ntl/ntl-10.5.0.tar.gz
+    - wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
     - tar -xvzf ntl-10.5.0.tar.gz
     - cd ntl-10.5.0/src
     - ./configure NTL_GMP_LIB=on
