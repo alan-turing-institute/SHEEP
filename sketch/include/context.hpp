@@ -20,11 +20,15 @@ public:
 	
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext decrypt(Ciphertext) =0;
+
+	struct GateNotImplemented : public std::runtime_error {
+		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
+	};
 	
-	virtual Ciphertext And(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Or(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Xor(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Not(Ciphertext) =0;
+	virtual Ciphertext And(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Or(Ciphertext,Ciphertext)  { throw GateNotImplemented(); };
+	virtual Ciphertext Xor(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Not(Ciphertext)            { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
