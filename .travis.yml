@@ -13,12 +13,31 @@ before_install:
     - make
     - make test
     - sudo make install
+    - cd
+    - wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+    - tar -xvf gmp-6.1.2.tar.xz
+    - cd gmp-6.1.2
+    - ./configure
+    - make
+    - sudo make install
+    - cd
+    - wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
+    - tar -xvzf ntl-10.5.0.tar.gz
+    - cd ntl-10.5.0/src
+    - ./configure NTL_GMP_LIP=on
+    - make
+    - sudo make install
+    - cd 
+    - git clone https://github.com/shaih/HElib.git	
+    - cd HElib/src
+    - make
+    - make check
 
 script:
     - cd $TRAVIS_BUILD_DIR
     - cd sketch
     - mkdir -p build
     - cd build
-    - cmake ..
+    - CMAKE_LIBRARY_PATH=${HOME}/HElib/src CMAKE_INCLUDE_PATH=${HOME}/HElib/src cmake ..
     - make all
     - make test
