@@ -80,6 +80,12 @@ public:
 		bootsXOR(result, a, b, cloud_key_cptr());
 		return result;
 	}
+
+	Ciphertext Not(Ciphertext a) {
+		Ciphertext result(parameters);
+		bootsNOT(result, a, cloud_key_cptr());
+		return result;
+	}
 };
 
 }

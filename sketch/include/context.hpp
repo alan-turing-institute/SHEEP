@@ -23,6 +23,7 @@ public:
 	virtual Ciphertext And(Ciphertext,Ciphertext) =0;
 	virtual Ciphertext Or(Ciphertext,Ciphertext) =0;
 	virtual Ciphertext Xor(Ciphertext,Ciphertext) =0;
+	virtual Ciphertext Not(Ciphertext) =0;
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
@@ -39,6 +40,9 @@ public:
 			return Xor(inputs.at(0), inputs.at(1));
 			break;
 
+		case(Gate::Not):
+			return Not(inputs.at(0));
+			break;
 		}
 		throw std::runtime_error("Unknown op");
 	}
