@@ -24,7 +24,7 @@ before_install:
     - wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
     - tar -xvzf ntl-10.5.0.tar.gz
     - cd ntl-10.5.0/src
-    - ./configure NTL_GMP_LIB=on
+    - ./configure NTL_GMP_LIP=on
     - make
     - sudo make install
     - git clone https://github.com/shaih/HElib.git	
