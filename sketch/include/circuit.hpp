@@ -33,11 +33,6 @@ public:
 	Gate get_op() const { return op; }
 };
 
-// struct Output {
-// 	Wire wire;
-// 	Output(Wire w) : wire(w) {}
-// };
-
 class Circuit {
 public:
 	typedef std::list<Wire> WireList;
