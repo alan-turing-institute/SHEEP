@@ -77,7 +77,7 @@ public:
     }
     ///  loop over the rest of the inputs, combining an input with an output from the previous operation..    
     for (unsigned long i=2; i < input_wires.size(); ++i) {
-      Wire gate_output = C.add_assignment("output_"+ std::to_string(i-1), gate, input_wires[i], output_wires[i-2]);      
+      Wire gate_output = C.add_assignment("output_"+ std::to_string(i-1), gate, output_wires[i-2], input_wires[i]);      
       output_wires.push_back(gate_output);
 
     }

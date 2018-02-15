@@ -24,3 +24,4 @@ endif (HElib_FOUND)
 
 
 add_subdirectory(example bin)
+add_subdirectory(tests testbin)
