@@ -11,7 +11,7 @@
 #include "EncryptedArray.h"
 
 
-class ContextHElib : public Context< bool , Ctxt> {
+class ContextHElib : public Context< uint8_t , Ctxt> {
   ////class ContextHElib : public Context<std::vector<long> , Ctxt> {  
 
 public:
@@ -33,11 +33,11 @@ public:
 
   Plaintext decrypt(Ciphertext c);
 	
-  Ciphertext And(Ciphertext a, Ciphertext b);
+  Ciphertext Add(Ciphertext a, Ciphertext b);
 
-  Ciphertext Or(Ciphertext a, Ciphertext b);
+  Ciphertext Multiply(Ciphertext a, Ciphertext b);
 
-  Ciphertext Xor(Ciphertext a, Ciphertext b);
+  Ciphertext Subtract(Ciphertext a, Ciphertext b);
 	
 
   

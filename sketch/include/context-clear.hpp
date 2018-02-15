@@ -4,31 +4,31 @@
 #include "circuit.hpp"
 #include "context.hpp"
 
-// struct Wire_container {
-// 	const Wire& w;
-// 	Wire_container(const Wire& w_) : w(w_) {};
-// };
 
-class ContextClear : public Context<bool, bool> {
+class ContextClear : public Context<uint8_t, uint8_t> {
 public:
 	Ciphertext encrypt(Plaintext p) {
-		return p; // both Plaintext and Ciphertext are typedef'd to bool
+	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
+	  return p; // plaintext and ciphertext are the same for this context
 	}
 
 	Plaintext decrypt(Ciphertext c) {
-		return c;
+		return c; // plaintext and ciphertext are the same for this context
 	}
 	
-	Ciphertext And(Ciphertext a, Ciphertext b) {
-		return a & b;
+	Ciphertext Add(Ciphertext a, Ciphertext b) {
+	  std::cout<<"Using clear context's ADD"<<std::endl;
+	  return (a + b);
 	}
 
-	Ciphertext Or(Ciphertext a, Ciphertext b) {
-		return a | b;
+	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+	  std::cout<<"Using clear context's MULTIPLY"<<std::endl;
+	  return (a * b);
 	}
 
-	Ciphertext Xor(Ciphertext a, Ciphertext b) {
-		return a != b;
+	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
+	  return (a - b);
 	}
 
 	Ciphertext Not(Ciphertext a) {

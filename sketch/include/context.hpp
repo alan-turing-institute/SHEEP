@@ -25,28 +25,34 @@ public:
 		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
 	};
 	
-	virtual Ciphertext And(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
-	virtual Ciphertext Or(Ciphertext,Ciphertext)  { throw GateNotImplemented(); };
-	virtual Ciphertext Xor(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
-	virtual Ciphertext Not(Ciphertext)            { throw GateNotImplemented(); };
+	virtual Ciphertext Multiply(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Maximum(Ciphertext,Ciphertext)  { throw GateNotImplemented(); };
+	virtual Ciphertext Add(Ciphertext,Ciphertext)      { throw GateNotImplemented(); };
+	virtual Ciphertext Subtract(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
 		switch(g) {
-		case(Gate::And):
-			return And(inputs.at(0), inputs.at(1));
+
+		case(Gate::Multiply):
+			return Multiply(inputs.at(0), inputs.at(1));
 			break;
 
-		case(Gate::Or):
-			return Or(inputs.at(0), inputs.at(1));
+		case(Gate::Maximum):
+			return Maximum(inputs.at(0), inputs.at(1));
 			break;
 
-		case(Gate::Xor):
-			return Xor(inputs.at(0), inputs.at(1));
+		case(Gate::Add):
+			return Add(inputs.at(0), inputs.at(1));
 			break;
 
-		case(Gate::Not):
-			return Not(inputs.at(0));
+		case(Gate::Subtract):
+			return Subtract(inputs.at(0), inputs.at(1));
+			break;
+
+		case(Gate::Negate):
+			return Negate(inputs.at(0));
 			break;
 		}
 		throw std::runtime_error("Unknown op");
@@ -93,21 +99,19 @@ public:
 			Ciphertext output = dispatch(assn.get_op(), inputs);
 			eval_map.insert({assn.get_output().get_name(), output});
 		}
-		
+
 		auto end_time = high_res_clock::now();
 		microsecond duration = microsecond(end_time - start_time);
 
-		
 		// Look up the required outputs in the eval_map and
 		// push them onto output_vals.
 		auto output_wires_it = circ.get_outputs().begin();
 		auto output_wires_end = circ.get_outputs().end();
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
-		  output_vals.push_back(eval_map.at(output_wires_it->get_name()));
+			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
 		return duration;
 	}
-
 	
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
