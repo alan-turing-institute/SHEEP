@@ -58,9 +58,10 @@ public:
 		throw std::runtime_error("Unknown op");
 	}
 
-	virtual microsecond eval(const Circuit& circ,
-				 const std::list<Ciphertext>& input_vals,
-				 std::list<Ciphertext>& output_vals) {
+	template <typename InputContainer, typename OutputContainer>
+	microsecond eval(const Circuit& circ,
+			 const InputContainer& input_vals,
+			 OutputContainer& output_vals) {
 		std::unordered_map<std::string, Ciphertext> eval_map;
 		
 		// add Circuit::inputs and inputs into the map
@@ -116,7 +117,7 @@ public:
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
 		using std::placeholders::_2;
-		auto run = std::bind(&Context::eval, this, circ, _1, _2);
+		auto run = std::bind(&Context::eval<std::list<Ciphertext>, std::list<Ciphertext> >, this, circ, _1, _2);
 		return CircuitEvaluator(run);
 	}
 };
