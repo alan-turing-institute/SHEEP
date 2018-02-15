@@ -10,16 +10,10 @@ int main(void) {
     //// instantiate the Circuit Repository
   CircuitRepo cr;
 
-
-  /// can either retrieve pre-build test circuits by name:
+  //// build a circuit with a specified depth of a specified gate
   
-  Circuit C = cr.get_circuit_by_name("TestCircuit1");
+  Circuit C = cr.create_circuit(Gate::Multiply, 3);
   std::cout << C;
-
-  //// or build a circuit with a specified depth of a specified gate
-  
-  // Circuit C2 = cr.create_circuit(Gate::Add, 3);
-  // std::cout << C2;
   
   
   ContextClear ctx;
@@ -27,12 +21,16 @@ int main(void) {
   ContextClear::CircuitEvaluator run_circuit;
   run_circuit = ctx.compile(C);
 	
-  std::list<ContextClear::Plaintext> plaintext_inputs = {6, 9, 25,67};
+  std::list<ContextClear::Plaintext> plaintext_inputs = {4, 5, 6, 7};
   std::list<ContextClear::Ciphertext> ciphertext_inputs;
+
+  uint8_t product = 1;
+
   
-  for (ContextClear::Plaintext pt: plaintext_inputs)
+  for (ContextClear::Plaintext pt: plaintext_inputs) {
     ciphertext_inputs.push_back(ctx.encrypt(pt));
-  
+    product = (product * pt) % 256;
+  }
   std::list<ContextClear::Ciphertext> ciphertext_outputs;
   using microsecond = std::chrono::duration<double, std::micro>;
   microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
@@ -44,5 +42,8 @@ int main(void) {
     std::cout << "output: "<<std::to_string(pt) << std::endl;
   }
   std::cout << "time was " << time.count() << " microseconds\n";
+
+  if ( plaintext_outputs.front() == product) return 0;
+  return -1;
   
 }

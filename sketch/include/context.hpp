@@ -4,6 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <chrono>
+#include <algorithm>
 
 #include "circuit.hpp"
 
@@ -15,32 +16,44 @@ public:
 	typedef PlaintextT Plaintext;
 	typedef CiphertextT Ciphertext;
 
-	typedef std::function<Ciphertext(Ciphertext,Ciphertext)> GateFn;
 	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
 	
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext decrypt(Ciphertext) =0;
+
+	struct GateNotImplemented : public std::runtime_error {
+		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
+	};
 	
-	virtual Ciphertext And(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Or(Ciphertext,Ciphertext) =0;
-	virtual Ciphertext Xor(Ciphertext,Ciphertext) =0;
+	virtual Ciphertext Multiply(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Maximum(Ciphertext,Ciphertext)  { throw GateNotImplemented(); };
+	virtual Ciphertext Add(Ciphertext,Ciphertext)      { throw GateNotImplemented(); };
+	virtual Ciphertext Subtract(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
 
-
-	virtual GateFn get_op(Gate g) {
+	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
 		switch(g) {
-		case(Gate::And):
-			return GateFn(std::bind(&Context::And, this, _1, _2));
+
+		case(Gate::Multiply):
+			return Multiply(inputs.at(0), inputs.at(1));
 			break;
 
-		case(Gate::Or):
-			return GateFn(std::bind(&Context::Or, this, _1, _2));
+		case(Gate::Maximum):
+			return Maximum(inputs.at(0), inputs.at(1));
 			break;
 
-		case(Gate::Xor):
-			return GateFn(std::bind(&Context::Xor, this, _1, _2));
+		case(Gate::Add):
+			return Add(inputs.at(0), inputs.at(1));
 			break;
 
+		case(Gate::Subtract):
+			return Subtract(inputs.at(0), inputs.at(1));
+			break;
+
+		case(Gate::Negate):
+			return Negate(inputs.at(0));
+			break;
 		}
 		throw std::runtime_error("Unknown op");
 	}
@@ -75,28 +88,30 @@ public:
 		auto start_time = high_res_clock::now();
 		
 		for (const Assignment assn : circ.get_assignments()) {
-			// throws out_of_range if not present in the map
-			Ciphertext input1 = eval_map.at(assn.get_input1().get_name());
-			Ciphertext input2 = eval_map.at(assn.get_input2().get_name());
-			auto op = get_op(assn.get_op());
-			Ciphertext output = op(input1, input2);
+			std::vector<Ciphertext> inputs;
+			std::transform(assn.get_inputs().begin(),
+				       assn.get_inputs().end(),
+				       std::back_inserter(inputs),
+				       [&eval_map](Wire w) {
+					       // throws out_of_range if not present in the map
+					       return eval_map.at(w.get_name());
+				       });
+			Ciphertext output = dispatch(assn.get_op(), inputs);
 			eval_map.insert({assn.get_output().get_name(), output});
 		}
-		
+
 		auto end_time = high_res_clock::now();
 		microsecond duration = microsecond(end_time - start_time);
 
-		
 		// Look up the required outputs in the eval_map and
 		// push them onto output_vals.
 		auto output_wires_it = circ.get_outputs().begin();
 		auto output_wires_end = circ.get_outputs().end();
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
-		  output_vals.push_back(eval_map.at(output_wires_it->wire.get_name()));
+			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
 		return duration;
 	}
-
 	
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
@@ -104,8 +119,6 @@ public:
 		auto run = std::bind(&Context::eval, this, circ, _1, _2);
 		return CircuitEvaluator(run);
 	}
-
- 
 };
 
 #endif // CONTEXT_HPP

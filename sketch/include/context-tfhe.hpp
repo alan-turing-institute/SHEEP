@@ -63,21 +63,27 @@ public:
 		return pt;
 	}
 
-	Ciphertext And(Ciphertext a, Ciphertext b) {
+	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 		Ciphertext result(parameters);
 		bootsAND(result, a, b, cloud_key_cptr());
 		return result;
 	}
 	
-	Ciphertext Or(Ciphertext a, Ciphertext b) {
+	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
 		Ciphertext result(parameters);
 		bootsOR(result, a, b, cloud_key_cptr());
 		return result;
 	}
 	
-	Ciphertext Xor(Ciphertext a, Ciphertext b) {
+	Ciphertext Add(Ciphertext a, Ciphertext b) {
 		Ciphertext result(parameters);
 		bootsXOR(result, a, b, cloud_key_cptr());
+		return result;
+	}
+
+	Ciphertext Negate(Ciphertext a) {
+		Ciphertext result(parameters);
+		bootsNOT(result, a, cloud_key_cptr());
 		return result;
 	}
 };

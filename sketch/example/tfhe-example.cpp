@@ -9,8 +9,8 @@ int main(void) {
 	const Wire& c = C.add_input("c");
 	const Wire& d = C.add_input("d");
 	
-	const Wire& w2 = C.add_assignment("w2", Gate::And, a, b);
-	const Wire& w3 = C.add_assignment("w3", Gate::Xor, w2, c);
+	const Wire& w2 = C.add_assignment("w2", Gate::Multiply, a, b);
+	const Wire& w3 = C.add_assignment("w3", Gate::Add, w2, c);
 
 	C.set_output(w3);
 	C.set_output(d);
