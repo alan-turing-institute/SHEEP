@@ -28,7 +28,7 @@ public:
 	virtual Ciphertext Multiply(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
 	virtual Ciphertext Maximum(Ciphertext,Ciphertext)  { throw GateNotImplemented(); };
 	virtual Ciphertext Add(Ciphertext,Ciphertext)      { throw GateNotImplemented(); };
-  virtual Ciphertext Subtract(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
+	virtual Ciphertext Subtract(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
 	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
@@ -47,9 +47,9 @@ public:
 			return Add(inputs.at(0), inputs.at(1));
 			break;
 
-    case(Gate::Subtract):
-      return Subtract(inputs.at(0), inputs.at(1));
-      break;
+		case(Gate::Subtract):
+			return Subtract(inputs.at(0), inputs.at(1));
+			break;
 
 		case(Gate::Negate):
 			return Negate(inputs.at(0));
@@ -98,22 +98,20 @@ public:
 				       });
 			Ciphertext output = dispatch(assn.get_op(), inputs);
 			eval_map.insert({assn.get_output().get_name(), output});
-		
-		
+		}
+
 		auto end_time = high_res_clock::now();
 		microsecond duration = microsecond(end_time - start_time);
 
-		
 		// Look up the required outputs in the eval_map and
 		// push them onto output_vals.
 		auto output_wires_it = circ.get_outputs().begin();
 		auto output_wires_end = circ.get_outputs().end();
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
-		  output_vals.push_back(eval_map.at(output_wires_it->get_name()));
+			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
 		return duration;
 	}
-
 	
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
