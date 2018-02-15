@@ -1,10 +1,12 @@
 #ifndef CONTEXT_TFHE_HPP
 #define CONTEXT_TFHE_HPP
 
-#include "context.hpp"
+#include <memory>
 
 #include <tfhe/tfhe.h>
 #include <tfhe/tfhe_io.h>
+
+#include "context.hpp"
 
 namespace Sheep {
 namespace TFHE {
