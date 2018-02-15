@@ -30,6 +30,10 @@ public:
 	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
 	  return (a - b);
 	}
+
+	Ciphertext Not(Ciphertext a) {
+		return !a;
+	}
 };
 
 #endif // CONTEXT_CLEAR_HPP
