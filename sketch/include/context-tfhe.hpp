@@ -81,6 +81,10 @@ public:
 		return result;
 	}
 
+	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+		return Add(a,b); // correct in F_2
+	}
+
 	Ciphertext Negate(Ciphertext a) {
 		Ciphertext result(parameters);
 		bootsNOT(result, a, cloud_key_cptr());
