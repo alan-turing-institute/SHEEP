@@ -122,4 +122,53 @@ public:
 	}
 };
 
+template <typename ContextT,
+	  typename PlaintextCIterator,
+	  typename CiphertextIterator>
+void encrypt(ContextT& context,
+	     PlaintextCIterator plaintext_begin,
+	     PlaintextCIterator plaintext_end,
+	     CiphertextIterator ciphertext_begin)
+{
+	std::transform(plaintext_begin, plaintext_end, ciphertext_begin,
+		       [&context](typename ContextT::Plaintext pt){
+			       return context.encrypt(pt);
+		       });
+}
+
+template <typename ContextT,
+	  typename CiphertextCIterator,
+	  typename PlaintextIterator>
+void decrypt(ContextT& context,
+	     CiphertextCIterator ciphertext_begin,
+	     CiphertextCIterator ciphertext_end,
+	     PlaintextIterator plaintext_begin)
+{
+	std::transform(ciphertext_begin, ciphertext_end, plaintext_begin,
+		       [&context](typename ContextT::Ciphertext ct){
+			       return context.decrypt(ct);
+		       });
+}
+
+template <typename ContextT,
+	  typename PlaintextContainer>
+PlaintextContainer eval_with_encrypted(ContextT context,
+				       Circuit circ,
+				       PlaintextContainer plaintexts_in)
+{
+	typedef std::list<typename ContextT::Ciphertext> CiphertextContainer;
+	CiphertextContainer ciphertexts_in, ciphertexts_out;
+	encrypt(context, plaintexts_in.begin(), plaintexts_in.end(),
+		std::back_inserter(ciphertexts_in));
+
+	context.eval(circ, ciphertexts_in, ciphertexts_out);
+
+	PlaintextContainer plaintexts_out;
+	decrypt(context, ciphertexts_out.begin(), ciphertexts_out.end(),
+		std::back_inserter(plaintexts_out));
+
+	return plaintexts_out;
+}
+
+
 #endif // CONTEXT_HPP
