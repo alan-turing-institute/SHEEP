@@ -1,3 +1,4 @@
+#include <cassert>
 #include <algorithm>
 #include "context-tfhe.hpp"
 #include "simple-circuits.hpp"
