@@ -1,10 +1,12 @@
 #ifndef CONTEXT_TFHE_HPP
 #define CONTEXT_TFHE_HPP
 
-#include "context.hpp"
+#include <memory>
 
 #include <tfhe/tfhe.h>
 #include <tfhe/tfhe_io.h>
+
+#include "context.hpp"
 
 namespace Sheep {
 namespace TFHE {
@@ -79,6 +81,10 @@ public:
 		Ciphertext result(parameters);
 		bootsXOR(result, a, b, cloud_key_cptr());
 		return result;
+	}
+
+	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+		return Add(a,b); // correct in F_2
 	}
 
 	Ciphertext Negate(Ciphertext a) {
