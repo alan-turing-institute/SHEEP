@@ -10,13 +10,20 @@
 #include "FHE.h"
 #include "EncryptedArray.h"
 
+namespace Sheep {
+namespace HElib {
 
-class ContextHElib : public Context< uint8_t , Ctxt> {
-  ////class ContextHElib : public Context<std::vector<long> , Ctxt> {  
+template <typename PlaintextT>
+class ContextHElib : public Context< PlaintextT , Ctxt> {
 
 public:
-  /// constructor
-  ContextHElib(long num_levels, long security);
+
+  typedef PlaintextT Plaintext;
+  typedef Ctxt Ciphertext;
+
+  /// constructors
+
+  ContextHElib(long num_levels, long security, long p=65537, long r=1, long c=3, long w=64, long d=0);
 
   // destructor
   ~ContextHElib() {
@@ -69,4 +76,12 @@ private:
   
 };
 
+
+  typedef ContextHElib<bool> ContextHElib_bool;
+  typedef ContextHElib<uint8_t> ContextHElib_uint8_t;  
+  
+  
+}  // leavin HElib namespace
+}  // leaving Sheep namespace
+  
 #endif // CONTEXT_HELIB_HPP

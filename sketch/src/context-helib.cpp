@@ -13,15 +13,18 @@
 
 /// Constructor
 
-ContextHElib::ContextHElib(long num_levels, long security) {
-  m_L = num_levels;
-  m_security = security;
-  m_r = 1;   // plaintext space 
-  m_p = 65537;   // modulus of plaintext
-  m_c = 3;   // num columns in key-switching matrix
-  m_w = 64;  // Hamming weight of secret key
-  m_d = 0;   // unknown
+using namespace Sheep::HElib;
 
+template< typename PlaintextT>
+ContextHElib<PlaintextT>::ContextHElib(long num_levels, long security, long p, long r, long c, long w, long d) :
+  m_L(num_levels),
+  m_security(security),
+  m_p(p),   // modulus of plaintext
+  m_r(r),   // plaintext space 
+  m_c(c),   // num columns in key-switching matrix
+  m_w(w),  // Hamming weight of secret key
+  m_d(d)   // unknown
+{
   /// start to build
 
   long m = FindM(m_security, m_L, m_c, m_p, m_d, 0, 0);
@@ -51,9 +54,9 @@ ContextHElib::ContextHElib(long num_levels, long security) {
   
 }
 
-
-ContextHElib::Ciphertext
-ContextHElib::encrypt(ContextHElib::Plaintext pt) {
+template< typename PlaintextT>
+typename ContextHElib<PlaintextT>::Ciphertext
+ContextHElib<PlaintextT>::encrypt( PlaintextT pt) {
   //// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
   std::vector<long> ptvec;
   ptvec.push_back(pt);
@@ -61,40 +64,43 @@ ContextHElib::encrypt(ContextHElib::Plaintext pt) {
   ////// fill up nslots with zeros//// 
   for (int i = ptvec.size(); i < m_nslots; i++) ptvec.push_back(0);
   
-  ContextHElib::Ciphertext ct(*m_publicKey);
+  ContextHElib<PlaintextT>::Ciphertext ct(*m_publicKey);
   m_ea->encrypt(ct, *m_publicKey, ptvec);
   return ct; 
 }
 
 
-
-
-ContextHElib::Plaintext
-ContextHElib::decrypt(ContextHElib::Ciphertext ct) {
+template< typename PlaintextT>
+PlaintextT
+ContextHElib<PlaintextT>::decrypt(ContextHElib::Ciphertext ct) {
   std::vector<long> pt;
   m_ea->decrypt(ct, *m_secretKey, pt);
   return pt[0];
 }
 
-ContextHElib::Ciphertext
-ContextHElib::Add(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
+template< typename PlaintextT>
+typename ContextHElib<PlaintextT>::Ciphertext
+ContextHElib<PlaintextT>::Add(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
   std::cout<<"using HElib's ADD "<<std::endl;
   a += b;
   return a;   
 }
 
-ContextHElib::Ciphertext
-ContextHElib::Subtract(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
+template< typename PlaintextT>
+typename ContextHElib<PlaintextT>::Ciphertext
+ContextHElib<PlaintextT>::Subtract(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
   a -= b;  
   return a;   
 }
 
-ContextHElib::Ciphertext
-ContextHElib::Multiply(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
+template< typename PlaintextT>
+typename ContextHElib<PlaintextT>::Ciphertext
+ContextHElib<PlaintextT>::Multiply(ContextHElib::Ciphertext a, ContextHElib::Ciphertext b) {
   std::cout<<"using HElib's MULTIPLY "<<std::endl;
   a *= b;
   return a;   
 }
 
-
-
+void DummyFunction() {
+  ContextHElib<uint8_t> tempObj(20,80);
+}
