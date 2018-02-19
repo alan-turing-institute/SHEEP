@@ -16,6 +16,9 @@ add_executable(test-clear-subtract
 
 add_test(NAME test-clear-subtract COMMAND $<TARGET_FILE:test-clear-subtract>)
 
+add_executable(test-bit-get-set test-bit-get-set.cpp)
+add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
+
 if (TFHE_FOUND)
 
     foreach(op IN ITEMS and or xor not)
