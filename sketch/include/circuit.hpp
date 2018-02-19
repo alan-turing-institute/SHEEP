@@ -44,6 +44,7 @@ private:
 	WireList outputs;
 	AssignmentList assignments;
 public:
+
 	Wire add_input(std::string name) {
 		inputs.emplace_back(name);
 		return inputs.back();
