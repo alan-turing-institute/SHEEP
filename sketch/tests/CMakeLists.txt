@@ -16,6 +16,9 @@ add_executable(test-clear-subtract
 
 add_test(NAME test-clear-subtract COMMAND $<TARGET_FILE:test-clear-subtract>)
 
+add_executable(test-clear-ripple-carry-add test-clear-ripple-carry-add.cpp)
+add_test(NAME test-clear-ripple-carry-add COMMAND $<TARGET_FILE:test-clear-ripple-carry-add>)
+
 add_executable(test-bit-get-set test-bit-get-set.cpp)
 add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
