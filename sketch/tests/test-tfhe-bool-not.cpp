@@ -6,14 +6,14 @@
 
 int main(void) {
 	using namespace Sheep::TFHE;
-	typedef std::vector<ContextTFHE::Plaintext> PtVec;
+	typedef std::vector<ContextTFHE<bool>::Plaintext> PtVec;
 
 	Circuit circ;
 	Wire in = circ.add_input("in");
 	Wire out = circ.add_assignment("out", Gate::Negate, in);
 	circ.set_output(out);
 
-	ContextTFHE ctx;
+	ContextTFHE<bool> ctx;
 
 	assert(eval_encrypted_check_equal(ctx, circ, PtVec{true}, PtVec{false}));
 	assert(eval_encrypted_check_equal(ctx, circ, PtVec{false}, PtVec{true}));

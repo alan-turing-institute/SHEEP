@@ -6,12 +6,12 @@
 
 int main(void) {
 	using namespace Sheep::TFHE;
-	typedef std::vector<ContextTFHE::Plaintext> PtVec;
+	typedef std::vector<ContextTFHE<bool>::Plaintext> PtVec;
 
 	// Maximum corresponds to 'Or' in binary circuit
 	Circuit circ = single_binary_gate_circuit(Gate::Maximum);
 
-	ContextTFHE ctx;
+	ContextTFHE<bool> ctx;
 	
 	assert(eval_encrypted_check_equal(ctx, circ, PtVec{true, true}, PtVec{true}));
 	assert(eval_encrypted_check_equal(ctx, circ, PtVec{false, true}, PtVec{true}));

@@ -17,24 +17,24 @@ int main(void) {
 
 	using namespace Sheep::TFHE;
 	
-	ContextTFHE ctx;
+	ContextTFHE<bool> ctx;
 	
-	ContextTFHE::CircuitEvaluator run_circuit;
+	ContextTFHE<bool>::CircuitEvaluator run_circuit;
 	run_circuit = ctx.compile(C);
 	
-	std::list<ContextTFHE::Plaintext> plaintext_inputs = {false, true, true, true};
-	std::list<ContextTFHE::Ciphertext> ciphertext_inputs;
+	std::list<ContextTFHE<bool>::Plaintext> plaintext_inputs = {false, true, true, true};
+	std::list<ContextTFHE<bool>::Ciphertext> ciphertext_inputs;
 
-	for (ContextTFHE::Plaintext pt: plaintext_inputs)
+	for (ContextTFHE<bool>::Plaintext pt: plaintext_inputs)
 	  ciphertext_inputs.push_back(ctx.encrypt(pt));
 	
-	std::list<ContextTFHE::Ciphertext> ciphertext_outputs;
+	std::list<ContextTFHE<bool>::Ciphertext> ciphertext_outputs;
 	using microsecond = std::chrono::duration<double, std::micro>;
 	microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
 
-	std::list<ContextTFHE::Plaintext> plaintext_outputs;
-	for (ContextTFHE::Ciphertext ct: ciphertext_outputs) {
-	  ContextTFHE::Plaintext pt = ctx.decrypt(ct);
+	std::list<ContextTFHE<bool>::Plaintext> plaintext_outputs;
+	for (ContextTFHE<bool>::Ciphertext ct: ciphertext_outputs) {
+	  ContextTFHE<bool>::Plaintext pt = ctx.decrypt(ct);
 	  plaintext_outputs.push_back(pt);
 	  std::cout << pt << std::endl;
 	}

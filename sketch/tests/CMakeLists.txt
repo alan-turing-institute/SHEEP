@@ -23,9 +23,12 @@ add_executable(test-bit-get-set test-bit-get-set.cpp)
 add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
 if (TFHE_FOUND)
+    add_executable(test-tfhe-bool-encrypt-decrypt
+                     test-tfhe-bool-encrypt-decrypt.cpp)
+    target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
+    add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
 
     foreach(op IN ITEMS and or xor not)
-
         add_executable(test-tfhe-bool-${op}
                          test-tfhe-bool-${op}.cpp
                          ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -34,6 +37,22 @@ if (TFHE_FOUND)
         target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
 
         add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
-
     endforeach(op)
+
+    add_executable(test-tfhe-uint8_t-encrypt-decrypt
+                     test-tfhe-uint8_t-encrypt-decrypt.cpp)
+    target_link_libraries(test-tfhe-uint8_t-encrypt-decrypt ${TFHE_LIBRARIES})
+    add_test(NAME test-tfhe-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-uint8_t-encrypt-decrypt>)
+
+    foreach(op IN ITEMS add)
+        add_executable(test-tfhe-uint8_t-${op}
+                         test-tfhe-uint8_t-${op}.cpp
+                         ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+                         ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+        target_link_libraries(test-tfhe-uint8_t-${op} ${TFHE_LIBRARIES})
+
+        add_test(NAME test-tfhe-uint8_t-${op} COMMAND $<TARGET_FILE:test-tfhe-uint8_t-${op}>)
+    endforeach(op)
+
 endif (TFHE_FOUND)
