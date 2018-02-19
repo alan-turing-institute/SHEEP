@@ -5,7 +5,6 @@
 #include <vector>
 #include <list>
 #include <iostream>
-#include <map>
 
 class Wire {
 	std::string name;
@@ -79,8 +78,6 @@ public:
 	}
 };
 
-std::ostream& operator<<(std::ostream& ostream, const Circuit& c);
-
-std::istream& operator >>(std::istream& istream, Circuit& c);
+std::ostream& operator<<(std::ostream& osteam, const Circuit& c);
 
 #endif // define CIRCUIT_HPP
