@@ -1,3 +1,7 @@
+add_executable(circuit-parser
+                 circuit-parser.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
 add_executable(circuit-example
                  circuit-example.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
