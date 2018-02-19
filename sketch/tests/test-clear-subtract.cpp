@@ -21,7 +21,7 @@ int main(void) {
   ContextClear::CircuitEvaluator run_circuit;
   run_circuit = ctx.compile(C);
 	
-  std::list<ContextClear::Plaintext> plaintext_inputs = {144, 35, 6, 7};
+  std::list<ContextClear::Plaintext> plaintext_inputs = {127, 35, 6, 7};
   std::list<ContextClear::Ciphertext> ciphertext_inputs;
 
 
@@ -42,7 +42,7 @@ int main(void) {
   }
   std::cout << "time was " << time.count() << " microseconds\n";
 
-  if ( plaintext_outputs.front() == 96 ) return 0;
+  if ( plaintext_outputs.front() == 79 ) return 0;
   return -1;
   
 }
