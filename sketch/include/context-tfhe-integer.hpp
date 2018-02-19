@@ -1,5 +1,5 @@
-#ifndef CONTEXT_TFHE_UINT8_T_HPP
-#define CONTEXT_TFHE_UINT8_T_HPP
+#ifndef CONTEXT_TFHE_INTEGER_HPP
+#define CONTEXT_TFHE_INTEGER_HPP
 
 #include <cstdint>
 #include <memory>
@@ -14,9 +14,9 @@
 namespace Sheep {
 namespace TFHE {
 
-template <>
-class ContextTFHE<uint8_t>
-	: public Context<uint8_t, CiphertextArrayTFHE<BITWIDTH(uint8_t)> >
+template <typename T>
+class ContextTFHE
+	: public Context<T, CiphertextArrayTFHE<BITWIDTH(T)> >
 {
 	const int minimum_lambda;
 	// shared pointers, since these are handles that are referred to elsewhere
@@ -26,6 +26,10 @@ class ContextTFHE<uint8_t>
 	const TFheGateBootstrappingCloudKeySet *cloud_key_cptr() { return &secret_key.get()->cloud; }
 
 public:
+	typedef Context<T, CiphertextArrayTFHE<BITWIDTH(T)> > Context_;
+	typedef typename Context_::Plaintext Plaintext;
+	typedef typename Context_::Ciphertext Ciphertext;
+
 	ContextTFHE()
 		:
 		// fixed security level that works with
@@ -121,4 +125,4 @@ public:
 }
 }
 
-#endif // CONTEXT_TFHE_UINT8_T_HPP
+#endif // CONTEXT_TFHE_INTEGER_HPP
