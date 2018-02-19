@@ -40,21 +40,13 @@ public:
 	typedef std::list<Wire> WireList;
 	typedef std::list<Assignment> AssignmentList;
 
-
-
 private:
 	WireList inputs;
 	WireList wires;
 	WireList outputs;
 	AssignmentList assignments;
-
-
-  
+	
 public:
-  
-  
-  
-  
 	Wire add_input(std::string name) {
 		inputs.emplace_back(name);
 		return inputs.back();
