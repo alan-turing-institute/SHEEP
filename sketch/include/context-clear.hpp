@@ -63,6 +63,10 @@ public:
 	Ciphertext Not(Ciphertext a) {
 		return !a;
 	}
+
+	Ciphertext Compare(Ciphertext a, Ciphertext b) {
+		return (a > b);
+	}
 };
 
 #endif // CONTEXT_CLEAR_HPP
