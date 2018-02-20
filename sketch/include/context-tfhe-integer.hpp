@@ -156,6 +156,22 @@ public:
 		}
 		return result;
 	}
+
+	Ciphertext Compare(Ciphertext a, Ciphertext b) {
+		Ciphertext difference(parameters);
+		Ciphertext result(parameters);
+		// Set all result bits to zero, other than the lsb
+		// (so loop counter starts at 1)
+		for (size_t i = 1; i < BITWIDTH(Plaintext); i++)
+			bootsCONSTANT(result[i], 0, cloud_key_cptr());
+
+		difference = Subtract(b, a);
+
+		// 'a' was larger if the sign bit was set
+		constexpr size_t signbit = BITWIDTH(Plaintext) - 1;
+		bootsCOPY(result[0], difference[signbit], cloud_key_cptr());
+		return result;
+	}
 };
 
 }
