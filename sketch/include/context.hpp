@@ -152,9 +152,9 @@ void decrypt(ContextT& context,
 
 template <typename ContextT,
 	  typename PlaintextContainer>
-PlaintextContainer eval_with_encrypted(ContextT context,
-				       Circuit circ,
-				       PlaintextContainer plaintexts_in)
+PlaintextContainer eval_with_plaintexts(ContextT context,
+					Circuit circ,
+					PlaintextContainer plaintexts_in)
 {
 	typedef std::list<typename ContextT::Ciphertext> CiphertextContainer;
 	CiphertextContainer ciphertexts_in, ciphertexts_out;
