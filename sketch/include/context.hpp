@@ -30,7 +30,8 @@ public:
 	virtual Ciphertext Add(Ciphertext,Ciphertext)      { throw GateNotImplemented(); };
 	virtual Ciphertext Subtract(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
 	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
-	virtual Ciphertext Compare(Ciphertext)             { throw GateNotImplemented(); };
+	// if a > b, returns a Ciphertext representation of 1, and a Ciphertext 0 otherwise.
+	virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;

@@ -19,6 +19,12 @@ add_test(NAME test-clear-subtract COMMAND $<TARGET_FILE:test-clear-subtract>)
 add_executable(test-clear-ripple-carry-add test-clear-ripple-carry-add.cpp)
 add_test(NAME test-clear-ripple-carry-add COMMAND $<TARGET_FILE:test-clear-ripple-carry-add>)
 
+add_executable(test-clear-compare
+  test-clear-compare.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+add_test(NAME test-clear-compare COMMAND $<TARGET_FILE:test-clear-compare>)
+
 add_executable(test-bit-get-set test-bit-get-set.cpp)
 add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
