@@ -86,6 +86,13 @@ public:
 		return std::make_pair(sum, carry);
 	}
 
+	std::pair<CiphertextBit,CiphertextBit> HalfSubtractor(LweSample *a, LweSample *b) {
+		CiphertextTFHE diff(parameters), borrow(parameters);
+		bootsXOR(diff, a, b, cloud_key_cptr());
+		bootsANDNY(borrow, a, b, cloud_key_cptr());		
+		return std::make_pair(diff, borrow);
+	}
+
 	std::pair<CiphertextBit,CiphertextBit> FullAdder(LweSample *a, LweSample *b, LweSample *carry_in) {
 		CiphertextBit sum(parameters), carry_out(parameters),
 			s1(parameters), c1(parameters), c2(parameters);
@@ -94,6 +101,16 @@ public:
 		std::tie(sum, c2) = HalfAdder(s1, carry_in);
 		bootsOR(carry_out, c1, c2, cloud_key_cptr());
 		return std::make_pair(sum, carry_out);
+	}
+
+	std::pair<CiphertextBit,CiphertextBit> FullSubtractor(LweSample *x, LweSample *y, LweSample *borrow_in) {
+		CiphertextBit diff(parameters), borrow_out(parameters),
+			d1(parameters), b1(parameters), b2(parameters);
+
+		std::tie(d1, b1) = HalfSubtractor(x, y);
+		std::tie(diff, b2) = HalfSubtractor(d1, borrow_in);
+		bootsOR(borrow_out, b1, b2, cloud_key_cptr());
+		return std::make_pair(diff, borrow_out);
 	}
 
 	// Add implented as a ripple-carry adder
@@ -111,15 +128,34 @@ public:
 		return result;
 	}
 
-	// Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	// 	return Add(a,b); // correct in F_2
-	// }
+	// Two's complement negation: negate each bit and add 1.
+	Ciphertext Negate(Ciphertext a) {
+		Ciphertext result(parameters), tmp(parameters), const1(parameters);
+		for (size_t i = 0; i < BITWIDTH(Plaintext); ++i) {
+			bootsNOT(result[i], a[i], cloud_key_cptr());
+			bootsCONSTANT(const1[i], 0, cloud_key_cptr());
+		}
+		bootsCONSTANT(const1[0], 1, cloud_key_cptr());
+		return Add(result, const1);
+	}
 
-	// Ciphertext Negate(Ciphertext a) {
-	// 	Ciphertext result(parameters);
-	// 	bootsNOT(result, a, cloud_key_cptr());
-	// 	return result;
-	// }
+	Ciphertext SubtractNaive(Ciphertext a, Ciphertext b) {
+		return Add(a,Negate(b));
+	}
+
+	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+		Ciphertext result(parameters);
+		CiphertextBit diff(parameters), borrow(parameters);
+		std::tie(diff, borrow) = HalfSubtractor(a[0], b[0]);
+		bootsCOPY(result[0], diff, cloud_key_cptr());
+		// Note that the loop starts at ONE, since we computed
+		// the zeroth bit above
+		for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
+			std::tie(diff, borrow) = FullSubtractor(a[i], b[i], borrow);
+			bootsCOPY(result[i], diff, cloud_key_cptr());
+		}
+		return result;
+	}
 };
 
 }

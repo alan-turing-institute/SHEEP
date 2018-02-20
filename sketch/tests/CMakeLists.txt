@@ -39,13 +39,13 @@ if (TFHE_FOUND)
         add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
     endforeach(op)
 
-    foreach(type IN ITEMS uint8_t int8_t)
+    foreach(type IN ITEMS int8_t)
         add_executable(test-tfhe-${type}-encrypt-decrypt
                          test-tfhe-${type}-encrypt-decrypt.cpp)
         target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
         add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
 
-        foreach(op IN ITEMS add)
+        foreach(op IN ITEMS add subtract negate)
             add_executable(test-tfhe-${type}-${op}
                              test-tfhe-${type}-${op}.cpp
                              ${CMAKE_SOURCE_DIR}/src/circuit.cpp
