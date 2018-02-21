@@ -30,6 +30,8 @@ public:
 	virtual Ciphertext Add(Ciphertext,Ciphertext)      { throw GateNotImplemented(); };
 	virtual Ciphertext Subtract(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
 	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
+	// if a > b, returns a Ciphertext representation of 1, and a Ciphertext 0 otherwise.
+	virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
@@ -53,6 +55,10 @@ public:
 
 		case(Gate::Negate):
 			return Negate(inputs.at(0));
+			break;
+
+		case(Gate::Compare):
+			return Compare(inputs.at(0), inputs.at(1));
 			break;
 		}
 		throw std::runtime_error("Unknown op");
