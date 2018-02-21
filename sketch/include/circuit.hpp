@@ -14,7 +14,7 @@ public:
 	const std::string get_name() const { return name; }
 };
 
-enum class Gate {Multiply, Maximum, Add, Subtract, Negate};
+enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare};
 
 class Assignment {
 public:
