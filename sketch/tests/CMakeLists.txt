@@ -1,3 +1,9 @@
+add_executable(test-write-read-circuit
+                 test-write-read-circuit.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
+
+
 add_executable(test-clear-add
                  test-clear-add.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -64,3 +70,20 @@ if (TFHE_FOUND)
     endforeach(type)
 
 endif (TFHE_FOUND)
+
+if (HELIB_FOUND)
+    add_executable(test-helib-uint8_t-encrypt-decrypt
+                     test-helib-uint8_t-encrypt-decrypt.cpp
+		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    target_link_libraries(test-helib-uint8_t-encrypt-decrypt ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+    add_test(NAME test-helib-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-helib-uint8_t-encrypt-decrypt>)
+
+    foreach(op IN ITEMS add multiply subtract)
+    	add_executable(test-helib-uint8_t-${op}
+		test-helib-uint8_t-${op}.cpp	
+		${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+	target_link_libraries(test-helib-uint8_t-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+	add_test(NAME test-helib-uint8_t-${op} COMMAND $<TARGET_FILE:test-helib-uint8_t-${op}>)	
+    endforeach(op)
+
+endif (HELIB_FOUND)
