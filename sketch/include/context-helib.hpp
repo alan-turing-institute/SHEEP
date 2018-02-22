@@ -105,7 +105,16 @@ public:
     a -= b;  
     return a;   
   };
+
+  Ciphertext Negate(Ciphertext a) {
+    //    const Vec<long> minus_one = {-1};
+    a.multByConstant(to_ZZX(-1L));  
+    return a;   
+  };
 	
+  long get_num_slots() {
+    return m_nslots;
+  }
 
   
 private:
