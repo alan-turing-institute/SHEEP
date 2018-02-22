@@ -72,10 +72,5 @@ if (HELIB_FOUND)
 	target_link_libraries(test-helib-uint8_t-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 	add_test(NAME test-helib-uint8_t-${op} COMMAND $<TARGET_FILE:test-helib-uint8_t-${op}>)	
     endforeach(op)
-    add_executable(test-helib-int8_t-negate
-	test-helib-int8_t-negate.cpp	
-	${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    target_link_libraries(test-helib-int8_t-negate ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    add_test(NAME test-helib-int8_t-negate COMMAND $<TARGET_FILE:test-helib-int8_t-negate>)
     
 endif (HELIB_FOUND)
