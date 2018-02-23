@@ -16,6 +16,12 @@ add_executable(clear-context-example
 add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
 
 
+add_executable(custom-example
+                 custom-example.cpp
+                 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+add_test(NAME custom-example COMMAND $<TARGET_FILE:custom-example>)
+
 if (HELIB_FOUND)
     add_executable(helib-context-example
                      helib-context-example.cpp
