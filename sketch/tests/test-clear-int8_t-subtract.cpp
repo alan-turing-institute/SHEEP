@@ -4,6 +4,8 @@
 
 #include "circuit-repo.hpp"
 
+using namespace Sheep::Clear;
+
 int main(void) {
 
   
@@ -16,27 +18,27 @@ int main(void) {
   std::cout << C;
   
   
-  ContextClear ctx;
+  ContextClear<int8_t> ctx;
   
-  ContextClear::CircuitEvaluator run_circuit;
+  ContextClear<int8_t>::CircuitEvaluator run_circuit;
   run_circuit = ctx.compile(C);
 	
-  std::list<ContextClear::Plaintext> plaintext_inputs = {127, 35, 6, 7};
-  std::list<ContextClear::Ciphertext> ciphertext_inputs;
+  std::list<ContextClear<int8_t>::Plaintext> plaintext_inputs = {127, 35, 6, 7};
+  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_inputs;
 
 
 
   
-  for (ContextClear::Plaintext pt: plaintext_inputs) {
+  for (ContextClear<int8_t>::Plaintext pt: plaintext_inputs) {
     ciphertext_inputs.push_back(ctx.encrypt(pt));
   }
-  std::list<ContextClear::Ciphertext> ciphertext_outputs;
+  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_outputs;
   using microsecond = std::chrono::duration<double, std::micro>;
   microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
   
-  std::list<ContextClear::Plaintext> plaintext_outputs;
-  for (ContextClear::Ciphertext ct: ciphertext_outputs) {
-    ContextClear::Plaintext pt = ctx.decrypt(ct);
+  std::list<ContextClear<int8_t>::Plaintext> plaintext_outputs;
+  for (ContextClear<int8_t>::Ciphertext ct: ciphertext_outputs) {
+    ContextClear<int8_t>::Plaintext pt = ctx.decrypt(ct);
     plaintext_outputs.push_back(pt);
     std::cout << "output: "<<std::to_string(pt) << std::endl;
   }

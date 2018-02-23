@@ -7,7 +7,8 @@ static std::map<std::string, Gate> gate_name_map = {
   {"MULTIPLY", Gate::Multiply },
   {"SUBTRACT", Gate::Subtract },
   {"MAXIMUM", Gate::Maximum },
-  {"NEGATE", Gate::Negate } 
+  {"NEGATE", Gate::Negate },
+  {"COMPARE", Gate::Compare }
 };
 
 

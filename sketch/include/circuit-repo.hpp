@@ -18,7 +18,8 @@ public:
 
   CircuitRepo() {
     build_test_circuit_1();
-    build_test_circuit_2();    
+    build_test_circuit_2();
+    build_test_circuit_3();        
   }
  
   
@@ -50,6 +51,24 @@ public:
     C.set_output(w4);
 
     m_circuitStore.insert({"TestCircuit2", C});
+  }
+
+  void build_test_circuit_3() {
+    Circuit C;
+    Wire a = C.add_input("a");
+    Wire b = C.add_input("b");
+    Wire c = C.add_input("c");
+    Wire d = C.add_input("d");
+    Wire e = C.add_input("e");    
+    Wire w2 = C.add_assignment("w2", Gate::Add, a, b);
+    Wire w3 = C.add_assignment("w3", Gate::Multiply, w2, c);
+    Wire w4 = C.add_assignment("w4", Gate::Subtract, w3, d);
+    Wire w5 = C.add_assignment("w5", Gate::Negate, e);
+    Wire w6 = C.add_assignment("w6", Gate::Maximum, w4, w5);            
+
+    C.set_output(w6);
+
+    m_circuitStore.insert({"TestCircuit3", C});
   }
 
 
