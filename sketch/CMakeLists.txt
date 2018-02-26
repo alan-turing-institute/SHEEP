@@ -22,6 +22,10 @@ if (HElib_FOUND)
    find_library(GMP_LIBRARIES NAMES gmp)
 endif (HElib_FOUND)
 
+find_package(TBB REQUIRED)
+link_libraries(tbb)
+include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
 
 add_subdirectory(example bin)
 add_subdirectory(tests testbin)
+
