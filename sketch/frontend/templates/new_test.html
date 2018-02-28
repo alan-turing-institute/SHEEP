@@ -35,66 +35,17 @@
             </div>
         </div>
 	<div>
-	  <table>
-	  <tr>
-	  <td> Upload a circuit file: </td>
-	  <td>
-	<form action = "http://127.0.0.1:5000/uploadcircuit" method = "POST" 
-            enctype = "multipart/form-data">
-        <input type = "file" name = "file" />
-        <input type = "submit"/>
-	</form>
-	</td>
-	  </tr>	  
-	  <tr>
-	    <td> Select a context: </td>
-	    <td>
-	  <select name="context" method="GET" action="/">
-	    <option value="{{contexts[0]}}" selected>{{contexts[0]}}</option>
-	    {% for context in contexts[1:] %}
-	    <option value="{{context}}">{{context}}</option>
-	    {% endfor %}
-	  </select>
-	    </td>
-	  </tr>
-	  <tr>
-	    <td> Select input type: </td>
-	    <td>
-	    <select name="bitwidth" method="GET" action="/">
-	    <option value="{{types[0]}}" selected>{{types[0]}}</option>
-	    {% for type in types[1:] %}
-	    <option value="{{type}}">{{type}}</option>
-	    {% endfor %}
-	  </select>
-	    </td>
-	  </tr>
-	  <tr>
-	    <td> Upload a parameters file: </td>
-	    <td>
-	      <form action = "http://127.0.0.1:5000/uploadparams" method = "POST" 
-		    enctype = "multipart/form-data">
-		<input type = "file" name = "file" />
-		<input type = "submit"/>
-	      </form>
-	    </td>
-	  </tr>	  
-	  <tr>
-	    <td> Upload an inputs file: </td>
-	    <td>
-	      <form action = "http://127.0.0.1:5000/uploadinputs" method = "POST" 
-		    enctype = "multipart/form-data">
-		<input type = "file" name = "file" />
-		<input type = "submit"/>
-	      </form>
-	    </td>
-	  </tr>	  
-	  
-	  </table>
-	</div>
-	<p class="lead"></p>
-        <p><a class="btn btn-lg btn-success" href="execute_test" role="button">GO!</a>
-        </p>
-	
+	  <form method="POST" action="" enctype="multipart/form-data">
+	    <table>
+	      {% for field in form %}
+	      <tr>
+		<td>{{ field.label }}</td><td>{{ field }}</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+	    <p><input type=submit value="Go!"></form></p>
+
+
  
     </div>
 </body>
