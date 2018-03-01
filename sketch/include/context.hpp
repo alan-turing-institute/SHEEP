@@ -19,7 +19,7 @@ template <typename PlaintextT>
 class BaseContext {
 public:
   virtual std::list<PlaintextT>
-  eval_with_plaintexts(Circuit, std::list<PlaintextT>, std::chrono::duration<double, std::micro> ) = 0 ; 
+  eval_with_plaintexts(Circuit, std::list<PlaintextT>, std::chrono::duration<double, std::micro>&) = 0 ; 
 };
 
 // Base class - abstract interface to each library
@@ -143,7 +143,7 @@ public:
 
         virtual std::list<Plaintext> eval_with_plaintexts(Circuit C,
 							  std::list<Plaintext> plaintext_inputs,
-							  std::chrono::duration<double, std::micro> duration) {
+							  std::chrono::duration<double, std::micro>& duration) {
 	  /// encrypt the inputs
 	  std::list<Ciphertext> ciphertext_inputs;
 	  for (auto pt_iter = plaintext_inputs.begin(); pt_iter != plaintext_inputs.end(); ++pt_iter) 

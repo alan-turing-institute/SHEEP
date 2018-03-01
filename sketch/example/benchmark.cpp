@@ -78,6 +78,7 @@ void print_outputs(std::list<PlaintextT> test_results, std::list<PlaintextT> con
     test_iter++;
     ctrl_iter++;
   }
+  std::cout<<endl<<"==== END RESULTS ==="<<std::endl;
   
 }
 
@@ -92,6 +93,7 @@ bool benchmark_run(std::unique_ptr<BaseContext<PlaintextT> > test_ctx,
 	std::list<PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
 	
 	std::list<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, inputs, duration);
+	std::cout<<"duration here in benchmark_run is "<<duration.count()<<std::endl;
 	DurationT dummy;
 	std::list<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, inputs, dummy);	
 
