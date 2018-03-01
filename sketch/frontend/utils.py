@@ -93,6 +93,19 @@ def construct_run_cmd(data,config):
     return run_cmd
 
 
+def cleanup_time_string(t):
+    """
+    convert from microseconds to seconds, and only output 3 s.f.
+    """
+    time_in_seconds = float(t)/1e6
+
+    if time_in_seconds < 1:
+        time_in_seconds = round(time_in_seconds,3)
+    else:
+        time_in_seconds = int(time_in_seconds)
+    timestring = str(time_in_seconds)
+    return timestring
+
 
 def parse_test_output(outputstring):
     """
@@ -107,6 +120,7 @@ def parse_test_output(outputstring):
         if in_results_section:
             if "Processing time" in line:
                 processing_time = re.search("[\d\.]+",line).group()
+                processing_time = cleanup_time_string(processing_time)
             elif "test context" in line:
                 output_vals = re.findall("[\d]+",line)
                 outputs.append(output_vals)

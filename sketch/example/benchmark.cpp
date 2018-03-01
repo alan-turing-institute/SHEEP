@@ -4,7 +4,7 @@
 
 #include "context-clear.hpp"
 #include "context-helib.hpp"
-///#include "context-tfhe.hpp"
+#include "context-tfhe.hpp"
 
 
 using namespace Sheep;
@@ -19,6 +19,9 @@ make_context(std::string context_type, std::string context_params="") {
 	  auto ctx =  std::make_unique<HElib::ContextHElib<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
+	  return ctx;
+	} else if (context_type == "TFHE") {
+	  auto ctx =  std::make_unique<TFHE::ContextTFHE<PlaintextT> >();
 	  return ctx;
 	} else {
 	  return std::make_unique<Clear::ContextClear<PlaintextT> >();
@@ -114,7 +117,7 @@ main(int argc, const char** argv) {
   if (argc < 5) {
 
     std::cout<<"Usage: <path_to>/custom_example circuit_file context_name input_type inputs_file [params_file]"<<std::endl;
-    return -1;
+    return 0;
   }
 
   /// read the circuit

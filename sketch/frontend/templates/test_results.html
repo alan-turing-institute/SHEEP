@@ -18,7 +18,7 @@
         <div class="header">
             <nav>
                 <ul class="nav nav-pills pull-right">
-                    <li role="presentation" class="active"><a href="#">Home</a>
+                    <li role="presentation" class="active"><a href="/">Home</a>
                     </li>
                 </ul>
             </nav>
@@ -27,7 +27,12 @@
  
         <div class="jumbotron">
             <p class="lead"></p>
-	    <h2>Processing time: {{ proc_time }} microseconds </h2>
+	    <h2>Processing time: </h2>
+	    <table>
+	      <tr>
+		<td>{{ proc_time }} seconds  </td>
+		</tr>
+	    </table>
 	    <p class="lead"></p>
 	    <h2>Output values: </h2>
 	    <table>
