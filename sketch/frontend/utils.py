@@ -8,7 +8,7 @@ import uuid
 import subprocess
 
 
-def check_inputs(input_vals, input_type):
+def check_inputs(input_dict, input_type):
     """ 
     check that the supplied inputs are within the ranges for the specified input type.
     Assume we have bools, or signed-or-unsigned 8,16,32,64 bit integers
@@ -27,7 +27,7 @@ def check_inputs(input_vals, input_type):
             min_allowed = -1* pow(2,int(bitwidth)-1)
             max_allowed = pow(2,int(bitwidth)-1) -1    
 
-    for val in input_vals.values():
+    for val in input_dict.values():
         if int(val) < min_allowed or int(val) > max_allowed:
             return False
     return True  # all inputs were ok
@@ -111,24 +111,38 @@ def parse_test_output(outputstring):
     """
     Extract values from the stdout output of the "benchmark" executable.
     """
-    processing_time = ""
+    processing_times = []
     test_outputs = []
     clear_outputs = []
     outputs = []
     in_results_section = False
+    in_processing_times = False
+    in_outputs = False
+### parse the file, assuming we have processing times then outputs.
     for line in outputstring.decode("utf-8").splitlines():
         if in_results_section:
-            if "Processing time" in line:
-                processing_time = re.search("[\d\.]+",line).group()
-                processing_time = cleanup_time_string(processing_time)
-            elif "test context" in line:
+            if in_processing_times:
+                num_search = re.search("[\d][\d\.e\+]+",line)
+                if num_search:
+                    processing_time = num_search.group()
+                    processing_time = cleanup_time_string(processing_time)
+                    processing_times.append(processing_time)  ## assume we keep the same order - setup, enc, eval, dec
+                if "Output values" in line:
+                    in_processing_times = False
+                    in_outputs = True
+            elif in_outputs:
                 output_vals = re.findall("[\d]+",line)
-                outputs.append(output_vals)
-            pass
-        elif "RESULTS" in line:
+                if len(output_vals) > 0:
+                    outputs.append(output_vals)
+                if "END RESULTS" in line:
+                    in_results_section = False
+            elif "Processing times" in line:
+                in_outputs = False
+                in_processing_times = True                
+        elif "=== RESULTS" in line:
             in_results_section = True
             pass
-    return processing_time, outputs
+    return processing_times, outputs
         
 def run_test(data,config):
     """

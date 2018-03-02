@@ -27,11 +27,24 @@
  
         <div class="jumbotron">
             <p class="lead"></p>
-	    <h2>Processing time: </h2>
+	    <h2>Processing times: </h2>
 	    <table>
 	      <tr>
-		<td>{{ proc_time }} seconds  </td>
-		</tr>
+		<td> Setup (key generation etc.): </td>
+		<td>{{ proc_time[0] }} seconds  </td>
+	      </tr>
+	      <tr>
+		<td> Encrypting plaintext inputs: </td>
+		<td>{{ proc_time[1] }} seconds  </td>
+	      </tr>
+	      <tr>
+		<td> Evaluating circuit: </td>
+		<td>{{ proc_time[2] }} seconds  </td>
+	      </tr>
+	      <tr>
+		<td> Decrypting outputs: </td>
+		<td>{{ proc_time[3] }} seconds  </td>
+	      </tr>	      
 	    </table>
 	    <p class="lead"></p>
 	    <h2>Output values: </h2>

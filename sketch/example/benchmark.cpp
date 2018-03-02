@@ -64,15 +64,21 @@ std::list<T> read_inputs_file(std::string filename) {
 }
 
 template <typename PlaintextT>
-void print_outputs(std::list<PlaintextT> test_results, std::list<PlaintextT> control_results, DurationT duration) {
+void print_outputs(std::list<PlaintextT> test_results, std::list<PlaintextT> control_results, std::vector<DurationT>& durations) {
   std::cout<<std::endl<<"==============="<<std::endl;
   std::cout<<"=== RESULTS ==="<<std::endl<<std::endl;
-  std::cout<<"Processing time: "<<std::to_string(duration.count())<<" microseconds."<<std::endl;
+  std::cout<<"== Processing times: =="<<std::endl;
+  std::cout<<"setup: "<<durations[0].count()<<std::endl;
+  std::cout<<"encryption: "<<durations[1].count()<<std::endl;
+  std::cout<<"circuit_evaluation: "<<durations[2].count()<<std::endl;  
+  std::cout<<"decryption: "<<durations[3].count()<<std::endl;    
+  std::cout<<std::endl;
+  
   if (test_results.size() != control_results.size()) {
     std::cout<<"Outputs have different size - something went wrong!"<<std::endl;
     return;
   }
-  std::cout<<"Output values (test vs clear)"<<std::endl;
+  std::cout<<"== Output values (test vs clear) =="<<std::endl;
   auto test_iter = test_results.begin();
   auto ctrl_iter = control_results.begin();
   while (test_iter != test_results.end()) {
@@ -86,22 +92,32 @@ void print_outputs(std::list<PlaintextT> test_results, std::list<PlaintextT> con
 }
 
 template <typename PlaintextT>
-bool benchmark_run(std::unique_ptr<BaseContext<PlaintextT> > test_ctx,
-		   std::unique_ptr<BaseContext<PlaintextT> > clear_ctx,
+bool benchmark_run(std::string context_name, std::string parameter_file,
 		   Circuit C,
-		   std::string input_filename,
-		   DurationT& duration)
+		   std::string input_filename)
 {
-	// read in inputs from input_filename
-	std::list<PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
+
+        std::vector<DurationT> durations;
+	typedef std::chrono::duration<double, std::micro> microsecond;
+	typedef std::chrono::high_resolution_clock high_res_clock;
+	auto setup_start_time = high_res_clock::now();
 	
-	std::list<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, inputs, duration);
-	std::cout<<"duration here in benchmark_run is "<<duration.count()<<std::endl;
-	DurationT dummy;
+	std::unique_ptr<BaseContext<PlaintextT> > test_ctx = make_context<PlaintextT>(context_name, parameter_file);
+
+	auto setup_end_time = high_res_clock::now();	
+	durations.push_back(microsecond(setup_end_time - setup_start_time));	
+
+	std::unique_ptr<BaseContext<PlaintextT> > clear_ctx = make_context<PlaintextT>("Clear");
+	
+	// read in inputs from input_filename
+	std::list<PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);	
+	std::list<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, inputs, durations);
+
+	std::vector<DurationT> dummy;
 	std::list<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, inputs, dummy);	
 
 
-	print_outputs(result_bench, result_clear, duration);
+	print_outputs(result_bench, result_clear, durations);
 	
 	return true;
 }
@@ -136,37 +152,32 @@ main(int argc, const char** argv) {
     parameter_file = argv[5];
 
   
-  DurationT duration;
+
   /// run the benchmark
   bool isOK = false;
   if (input_type == "bool") {
-    isOK = benchmark_run<bool>(make_context<bool>(context_name, parameter_file),
-			       make_context<bool>("Clear"),
-			       C, inputs_file, duration);
+    isOK = benchmark_run<bool>(context_name, parameter_file, C, inputs_file);
   } else if (input_type == "uint8_t") {
-    isOK = benchmark_run<uint8_t>(make_context<uint8_t>(context_name, parameter_file),
-				  make_context<uint8_t>("Clear"),
-				  C, inputs_file, duration);    
+    isOK = benchmark_run<uint8_t>(context_name, parameter_file,C, inputs_file);    
   } else if (input_type == "int8_t") {
-    isOK = benchmark_run<int8_t>(make_context<int8_t>(context_name, parameter_file),
-				 make_context<int8_t>("Clear"),
-				 C, inputs_file, duration);    
-  } else if (input_type == "uint16_t") {
+    isOK = benchmark_run<int8_t>(context_name, parameter_file, C, inputs_file);    
+  } /* else if (input_type == "uint16_t") {
     isOK = benchmark_run<uint16_t>(make_context<uint16_t>(context_name, parameter_file),
 				   make_context<uint16_t>("Clear"),
-				   C, inputs_file, duration);    
+				   C, inputs_file, durations);    
   } else if (input_type == "int16_t") {
     isOK = benchmark_run<int16_t>(make_context<int16_t>(context_name, parameter_file),
 				  make_context<int16_t>("Clear"),
-				  C, inputs_file, duration);    
+				  C, inputs_file, durations);    
   } else if (input_type == "uint32_t") {
     isOK = benchmark_run<uint32_t>(make_context<uint32_t>(context_name, parameter_file),
 				   make_context<uint32_t>("Clear"),
-				   C, inputs_file, duration);    
+				   C, inputs_file, durations);    
   }  else if (input_type == "int32_t") {
     isOK = benchmark_run<int32_t>(make_context<int32_t>(context_name, parameter_file),
 				  make_context<int32_t>("Clear"),
-				  C, inputs_file, duration);    
+				  C, inputs_file, durations);    
   }  
+    */
   return isOK;
 }

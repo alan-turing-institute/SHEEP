@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <map>
 #include <list>
+#include <vector>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -19,7 +20,7 @@ template <typename PlaintextT>
 class BaseContext {
 public:
   virtual std::list<PlaintextT>
-  eval_with_plaintexts(Circuit, std::list<PlaintextT>, std::chrono::duration<double, std::micro>&) = 0 ; 
+  eval_with_plaintexts(Circuit, std::list<PlaintextT>, std::vector<std::chrono::duration<double, std::micro> >&) = 0 ; 
 };
 
 // Base class - abstract interface to each library
@@ -131,6 +132,7 @@ public:
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
 			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
+		std::cout<<"duration here in context::eval is "<<duration.count()<<std::endl;
 		return duration;
 	}
 	
@@ -143,20 +145,31 @@ public:
 
         virtual std::list<Plaintext> eval_with_plaintexts(Circuit C,
 							  std::list<Plaintext> plaintext_inputs,
-							  std::chrono::duration<double, std::micro>& duration) {
+							  std::vector<std::chrono::duration<double, std::micro> >& durations) {
+
+	  typedef std::chrono::duration<double, std::micro> microsecond;
+	  typedef std::chrono::high_resolution_clock high_res_clock;
+	  auto enc_start_time = high_res_clock::now();
+	  
 	  /// encrypt the inputs
 	  std::list<Ciphertext> ciphertext_inputs;
 	  for (auto pt_iter = plaintext_inputs.begin(); pt_iter != plaintext_inputs.end(); ++pt_iter) 
 	    ciphertext_inputs.push_back(encrypt(*pt_iter));
-
+	  auto enc_end_time = high_res_clock::now();
+	  durations.push_back(microsecond(enc_end_time - enc_start_time));
+	  
 	  //// evaluate the circuit	  
 	  std::list<Ciphertext> ciphertext_outputs;
-	  duration = eval(C, ciphertext_inputs, ciphertext_outputs); 
+	  microsecond eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs);
+	  durations.push_back(eval_duration);
 
 	  //// decrypt the outputs again
+	  auto dec_start_time = high_res_clock::now();
 	  std::list<Plaintext> plaintext_outputs;
 	  for (auto ct_iter = ciphertext_outputs.begin(); ct_iter != ciphertext_outputs.end(); ++ct_iter) 
 	    plaintext_outputs.push_back(decrypt(*ct_iter));
+	  auto dec_end_time = high_res_clock::now();
+	  durations.push_back(microsecond(dec_end_time - dec_start_time));	  
 	  return plaintext_outputs;
 	}
   
