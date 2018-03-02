@@ -1,0 +1,19 @@
+"""
+test that we can extract the labels of input wires from a circuit file.
+"""
+
+from utils import parse_circuit_file
+from pytest import raises
+
+def test_parse_inputs():
+    """ 
+    test the parse_test_output function in utils.py
+    """
+    
+    ### open the file in bytes mode to mimic what subprocess gets from stdout
+    circuit_filename = "tests/testfiles/simple_add.sheep"
+    inputs = parse_circuit_file(circuit_filename)
+    assert(len(inputs) == 2)
+    assert(inputs[0] == "a")
+    assert(inputs[1] == "b")
+
