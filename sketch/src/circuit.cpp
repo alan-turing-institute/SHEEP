@@ -2,14 +2,7 @@
 #include <map>
 #include <sstream>  
 
-static std::map<std::string, Gate> gate_name_map = {
-  {"ADD", Gate::Add },
-  {"MULTIPLY", Gate::Multiply },
-  {"SUBTRACT", Gate::Subtract },
-  {"MAXIMUM", Gate::Maximum },
-  {"NEGATE", Gate::Negate },
-  {"COMPARE", Gate::Compare }
-};
+
 
 
 std::ostream& operator<<(std::ostream& stream, const Circuit& c) {

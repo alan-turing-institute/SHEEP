@@ -7,6 +7,18 @@
 #include <iostream>
 #include <map>
 
+enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare};
+
+static std::map<std::string, Gate> gate_name_map = {
+  {"ADD", Gate::Add },
+  {"MULTIPLY", Gate::Multiply },
+  {"SUBTRACT", Gate::Subtract },
+  {"MAXIMUM", Gate::Maximum },
+  {"NEGATE", Gate::Negate },
+  {"COMPARE", Gate::Compare }
+};
+
+
 class Wire {
 	std::string name;
 public:
@@ -14,7 +26,7 @@ public:
 	const std::string get_name() const { return name; }
 };
 
-enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare};
+
 
 class Assignment {
 public:

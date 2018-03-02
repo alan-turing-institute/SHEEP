@@ -5,8 +5,13 @@ add_executable(circuit-parser
 add_executable(circuit-example
                  circuit-example.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
 add_test(NAME circuit-example COMMAND $<TARGET_FILE:circuit-example>)
+
+add_executable(simple-circuit-maker
+                 simple-circuit-maker.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+
 
 
 add_executable(clear-context-example
