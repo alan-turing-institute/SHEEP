@@ -8,6 +8,20 @@ import uuid
 import subprocess
 
 
+def get_bitwidth(input_type):
+    """
+    given a string input type e.g. bool, uint32_t, return the number of bits,
+    (i.e. 2 or 32 for the examples above)
+    """
+    bitwidth_match = re.search("[\d]+",input_type)
+    if bitwidth_match:
+        bitwidth = int(bitwidth_match.group())
+    else:
+        bitwidth = 2
+    return bitwidth
+
+
+
 def check_inputs(input_dict, input_type):
     """ 
     check that the supplied inputs are within the ranges for the specified input type.
@@ -106,6 +120,17 @@ def cleanup_time_string(t):
     timestring = str(time_in_seconds)
     return timestring
 
+def check_outputs(output_list):
+    """
+    take a list of outputs - each should be [test_result,clear_result]
+    and check that in each case, the test and clear results are equal.
+    """
+
+    for output in output_list:
+        if output[0] != output[1]:
+            return False
+    return True
+
 
 def parse_test_output(outputstring):
     """
@@ -125,7 +150,7 @@ def parse_test_output(outputstring):
                 num_search = re.search("[\d][\d\.e\+]+",line)
                 if num_search:
                     processing_time = num_search.group()
-                    processing_time = cleanup_time_string(processing_time)
+                    processing_time = cleanup_time_string(processing_time) ## and convert to seconds
                     processing_times.append(processing_time)  ## assume we keep the same order - setup, enc, eval, dec
                 if "Output values" in line:
                     in_processing_times = False
@@ -143,7 +168,7 @@ def parse_test_output(outputstring):
             in_results_section = True
             pass
     return processing_times, outputs
-        
+
 def run_test(data,config):
     """
     Run the executable in a subprocess, and capture the stdout output.

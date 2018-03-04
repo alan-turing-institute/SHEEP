@@ -10,10 +10,14 @@ class CircuitForm(Form):
     circuit_file = FileField(validators=[validators.InputRequired()],label="Circuit file")
     HE_library = SelectField(choices=[("Clear","Clear"),("HElib","HElib"),("TFHE","TFHE")],label="HE library")
     parameter_file = FileField(validators=[validators.InputRequired()],label="Parameter file")
-    input_type = SelectField(choices=[("bool","bool"),("uint8_t","uint8_t"),("int8_t","int8_t")],label="Input type")
-##    inputs_file = FileField(validators=[validators.InputRequired()],label="")    
-    
-
+    input_type = SelectField(choices=[("bool","bool"),
+                                      ("uint8_t","uint8_t"),
+                                      ("int8_t","int8_t"),
+                                      ("uint16_t","uint16_t"),
+                                      ("int16_t","int16_t"),
+                                      ("uint32_t","uint32_t"),
+                                      ("int32_t","int32_t")]
+                             ,label="Input type")
 
 def build_inputs_form(inputs):
     """ 
