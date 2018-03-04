@@ -13,7 +13,7 @@ engine = create_engine("sqlite:///sheep.db")
 
 class BenchmarkMeasurement(Base):
     __tablename__ = "benchmarks"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, nullable=False)
     context_name = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
     gate_name = Column(String(250), nullable=False)
