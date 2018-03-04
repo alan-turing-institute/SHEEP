@@ -4,6 +4,7 @@
 #include "circuit.hpp"
 #include "context.hpp"
 #include "bits.hpp"
+#include <type_traits>
 
 namespace Sheep {
 namespace Clear {
@@ -16,6 +17,13 @@ public:
 
         typedef PlaintextT Plaintext;
         typedef PlaintextT Ciphertext;
+
+        ContextClear() {
+	  if (std::is_same<Plaintext, bool>::value)
+	    m_bitwidth = 2;
+	  else
+	    m_bitwidth = BITWIDTH(Plaintext);
+	}
   
 	Ciphertext encrypt(Plaintext p) {
 	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
@@ -56,18 +64,17 @@ public:
 	}
 
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  std::cout<<"Using clear context's ADD"<<std::endl;
-	  return (a + b);
+	  return (a + b) % m_bitwidth;
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 	  std::cout<<"Using clear context's MULTIPLY"<<std::endl;
-	  return (a * b);
+	  return (a * b) % m_bitwidth;
 	}
 
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
-	  return (a - b);
+	  return (a - b) % m_bitwidth ;
 	}
 
 	Ciphertext Not(Ciphertext a) {
@@ -75,12 +82,15 @@ public:
 	}
 
   	Ciphertext Negate(Ciphertext a) {
-		return -1 * a;
+	        return (-1 * a) % m_bitwidth;
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
 	}
+private:
+        int m_bitwidth;
+  
 };
 
 }  // Leaving Clear namespace
