@@ -39,7 +39,7 @@ public:
     //// (better to specialize class?)
     
     if (std::is_same<Plaintext, bool>::value)
-      m_bitwidth = 2;
+      m_bitwidth = 1;
     else
       m_bitwidth = BITWIDTH(bool);
   
@@ -155,7 +155,7 @@ public:
   Plaintext decrypt(Ciphertext ct) {
     std::vector<long> pt;
     m_ea->decrypt(ct, *m_secretKey, pt);
-    return pt[0] % m_bitwidth;
+    return pt[0] % pow(2,m_bitwidth);
   };
 	
   Ciphertext Add(Ciphertext a, Ciphertext b) {

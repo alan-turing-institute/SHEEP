@@ -20,7 +20,7 @@ public:
 
         ContextClear() {
 	  if (std::is_same<Plaintext, bool>::value)
-	    m_bitwidth = 2;
+	    m_bitwidth = 1;
 	  else
 	    m_bitwidth = BITWIDTH(Plaintext);
 	}
@@ -64,17 +64,17 @@ public:
 	}
 
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  return (a + b) % m_bitwidth;
+	  return (a + b) % pow(2,m_bitwidth);
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 	  std::cout<<"Using clear context's MULTIPLY"<<std::endl;
-	  return (a * b) % m_bitwidth;
+	  return (a * b) % pow(2,m_bitwidth);
 	}
 
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
-	  return (a - b) % m_bitwidth ;
+	  return (a - b) % pow(2,m_bitwidth) ;
 	}
 
 	Ciphertext Not(Ciphertext a) {
@@ -82,7 +82,7 @@ public:
 	}
 
   	Ciphertext Negate(Ciphertext a) {
-	        return (-1 * a) % m_bitwidth;
+	        return (-1 * a) % pow(2,m_bitwidth);
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
