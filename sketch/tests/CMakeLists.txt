@@ -3,6 +3,10 @@ add_executable(test-write-read-circuit
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
 
+add_executable(test-circuit-copy
+  test-circuit-copy.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
 
 foreach(op IN ITEMS add multiply subtract compare ripple-carry-add select)
 	  foreach(type IN ITEMS int8_t)
