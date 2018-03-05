@@ -79,8 +79,8 @@ public:
 	}
 
 	Ciphertext Negate(Ciphertext a) {
-		return -a;
-	}
+		return -1 * a;
+  }
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
