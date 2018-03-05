@@ -15,7 +15,7 @@ table_regex = re.compile("(FROM|from) ([\w]+)")
 column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 
 
-DB_LOCATION = "/Users/nbarlow/SHEEP/sketch/sheep.db"
+DB_LOCATION = "/Users/nbarlow/SHEEP/sketch/frontend/sheep.db"
 
 
 Base = declarative_base()
@@ -23,7 +23,7 @@ engine = create_engine("sqlite:///sheep.db")
 
 class BenchmarkMeasurement(Base):
     __tablename__ = "benchmarks"
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
     context_name = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
     gate_name = Column(String(250), nullable=False)
@@ -37,11 +37,14 @@ class BenchmarkMeasurement(Base):
     
 class CustomMeasurement(Base):
     __tablename__ = "circuit_tests"
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
     circuit_path = Column(String(250), nullable=False)
     context_name = Column(String(250), nullable=False)
-    input_bitwidth = Column(Integer, nullable=False)
-
+    input_type = Column(String(250), nullable=False)
+    setup_time = Column(Float, nullable=False)
+    encryption_time = Column(Float, nullable=False)
+    evaluation_time = Column(Float, nullable=False)
+    decryption_time = Column(Float, nullable=False)
 
     
 Base.metadata.create_all(engine)
@@ -87,3 +90,19 @@ def execute_query_sqlalchemy(query):
     """
     session.query(BenchmarkMeasurement).all()
     
+def upload_test_result(timing_data,app_data):
+    """
+    Save data from a user-specified circuit test.
+    """
+    print("Uploading result to DB")
+    cm = CustomMeasurement(
+        circuit_path = app_data["uploaded_filenames"]["circuit_file"],
+        context_name = app_data["HE_library"],
+        input_type = app_data["input_type"],
+        setup_time = timing_data[0],
+        encryption_time = timing_data[1],
+        evaluation_time = timing_data[2],
+        decryption_time = timing_data[3])
+    session.add(cm)
+    session.commit()
+        
