@@ -163,7 +163,7 @@ main(int argc, const char** argv) {
     isOK = benchmark_run<uint8_t>(context_name, parameter_file,C, inputs_file);    
   } else if (input_type == "int8_t") {
     isOK = benchmark_run<int8_t>(context_name, parameter_file, C, inputs_file);
-  } else if (input_type == "uint16_t") {
+  }  else if (input_type == "uint16_t") {
     isOK = benchmark_run<uint16_t>(context_name, parameter_file, C, inputs_file);
   } else if (input_type == "int16_t") {
     isOK = benchmark_run<int16_t>(context_name, parameter_file, C, inputs_file);
@@ -172,6 +172,6 @@ main(int argc, const char** argv) {
   } else if (input_type == "int32_t") {
     isOK = benchmark_run<int32_t>(context_name, parameter_file, C, inputs_file);
   }
-
+    
   return isOK;
 }

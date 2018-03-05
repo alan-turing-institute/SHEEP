@@ -64,17 +64,20 @@ public:
 	}
 
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  return (a + b) % pow(2,m_bitwidth);
+	  int modulus = pow(2,m_bitwidth);
+	  return (a + b) % modulus;
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+	  int modulus = pow(2,m_bitwidth);
 	  std::cout<<"Using clear context's MULTIPLY"<<std::endl;
-	  return (a * b) % pow(2,m_bitwidth);
+	  return (a * b) % modulus ;
 	}
 
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
-	  return (a - b) % pow(2,m_bitwidth) ;
+	  int modulus = pow(2,m_bitwidth);
+	  return (a - b) % modulus ;
 	}
 
 	Ciphertext Not(Ciphertext a) {
@@ -82,7 +85,8 @@ public:
 	}
 
   	Ciphertext Negate(Ciphertext a) {
-	        return (-1 * a) % pow(2,m_bitwidth);
+	  int modulus = pow(2,m_bitwidth);	  
+	  return (-1 * a) % modulus;
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
