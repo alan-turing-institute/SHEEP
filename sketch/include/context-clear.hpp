@@ -77,6 +77,10 @@ public:
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
 	}
+
+	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+		return (s % 2)?a:b;
+	}
 };
 
 }  // Leaving Clear namespace

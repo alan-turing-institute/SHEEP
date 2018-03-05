@@ -32,7 +32,7 @@ public:
 	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
 	// if a > b, returns a Ciphertext representation of 1, and a Ciphertext 0 otherwise.
 	virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
-	// Select(s,a,b) := s?a:b
+	// Select(s,a,b) := lsb(s)?a:b
 	virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {

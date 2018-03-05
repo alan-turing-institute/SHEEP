@@ -172,6 +172,15 @@ public:
 		bootsCOPY(result[0], difference[signbit], cloud_key_cptr());
 		return result;
 	}
+
+	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+		//bootsMUX(LweSample* result, const LweSample* a, const LweSample* b, const LweSample* c, const TFheGateBootstrappingCloudKeySet* bk);
+		Ciphertext result(parameters);
+		for (size_t i = 0; i < BITWIDTH(Plaintext); i++)
+			bootsMUX(result[i], s, a[i], b[i], cloud_key_cptr());
+
+		return result;
+	}
 };
 
 }

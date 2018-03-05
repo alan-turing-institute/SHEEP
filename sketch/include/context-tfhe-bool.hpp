@@ -79,6 +79,13 @@ public:
 		bootsNOT(result, a, cloud_key_cptr());
 		return result;
 	}
+
+	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+		//bootsMUX(LweSample* result, const LweSample* a, const LweSample* b, const LweSample* c, const TFheGateBootstrappingCloudKeySet* bk);
+		Ciphertext result(parameters);
+		bootsMUX(result, s, a, b, cloud_key_cptr());
+		return result;
+	}
 };
 
 }
