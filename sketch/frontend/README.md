@@ -10,6 +10,7 @@ user-specified circuit file.
 pip install flask
 pip install wtforms
 pip install pytest
+pip install python-nvd3
 ```
 
 To run the app, from this directory, just do:

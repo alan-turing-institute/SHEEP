@@ -8,9 +8,10 @@ from werkzeug.utils import secure_filename
 import subprocess
 
 
-from forms import CircuitForm, ResultsForm, build_inputs_form
+from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form
 import utils
 import database
+import plotting
 
 EXECUTABLE_DIR = "/Users/nbarlow/SHEEP/sketch/build/bin"
 UPLOAD_FOLDER = "/Users/nbarlow/SHEEP/sketch/frontend/uploads"
@@ -68,19 +69,30 @@ def enter_input_vals():
     return render_template("enter_input_vals.html",form=iform)
 
 
-@app.route("/view_results",methods=["POST","GET"])
+@app.route("/view_results_table",methods=["POST","GET"])
 def results_table():
     """
-    results table.  Could get too complicated for a simple 2D table, may need some selectable
-    options e.g. how many cores in parallel?
+    allow the user to put in an SQL query, and show the resulting table
     """
     rform = ResultsForm(request.form)
     if request.method == "POST":
         query = rform.data['sql_query']
-        print("Got query ",query)
         columns, rdata = database.execute_query_sqlite3(query)
         return render_template("results_table.html",columns=columns,results=rdata)
     return render_template("results_query.html",form=rform)
+
+
+@app.route("/view_results_plots",methods=["POST","GET"])
+def results_plots():
+    """
+    plots, using nvd3 (i.e. D3.js with a Python wrapper)
+    """
+    pform = PlotsForm(request.form)
+    if request.method == "POST":
+        inputs = pform.data
+        plotting.generate_plots(inputs)
+        return render_template("results_plots.html")
+    return render_template("result_plots_query.html",form=pform)
 
 
 @app.route("/execute_test",methods=["POST","GET"])

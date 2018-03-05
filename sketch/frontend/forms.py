@@ -1,7 +1,12 @@
 """
 WTForms forms for user to enter configuration of an HE test - choose circuit file, context etc.
 """
-from wtforms import Form, FloatField, FormField, IntegerField, FileField, SelectField, validators, FieldList, StringField
+from wtforms import Form, FloatField, FormField, IntegerField, FileField, \
+    SelectField, validators, FieldList, StringField,SelectMultipleField, widgets
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
 class CircuitForm(Form):
     """
@@ -26,6 +31,26 @@ class ResultsForm(Form):
     """
     sql_query = StringField(label="SQL query")
     
+
+class PlotsForm(Form):
+    """
+    Let the user configure what to plot.
+    """
+    x_axis_var = SelectField(choices=[
+        ("context_name","HE library"),
+        ("input_bitwidth","Input bitwidth"),
+        ("depth","Depth"),
+        ("gate","Gate"),        
+    ],label="x-axis var")
+    category_field = SelectField(choices=[
+        ("depth","Depth"),
+        ("context_name","HE library"),
+        ("input_bitwidth","Input bitwidth"),
+        ("gate","Gate"),        
+    ],label="category var")
+    context_selections = MultiCheckboxField('Select contexts', choices=[("HElib","HElib"),("TFHE","TFHE")])
+    gate_selections = MultiCheckboxField('Select gate', choices=[("ADD","ADD"),("SUBTRACT","SUBTRACT"),("MULTIPLY","MULTIPLY")])    
+    input_type_selections = MultiCheckboxField('Select input_type', choices=[(1,"bool"),(8,"uint8_t"),(16,"uint16_t")])
 
     
 def build_inputs_form(inputs):
