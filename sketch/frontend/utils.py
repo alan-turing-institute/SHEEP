@@ -17,7 +17,7 @@ def get_bitwidth(input_type):
     if bitwidth_match:
         bitwidth = int(bitwidth_match.group())
     else:
-        bitwidth = 2
+        bitwidth = 1
     return bitwidth
 
 
