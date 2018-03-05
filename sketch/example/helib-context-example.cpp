@@ -20,6 +20,14 @@ int main(void) {
 
   
   ContextHElib_uint8_t ctx(20,80);
+
+  std::cout<<"about to read params"<<std::endl;
+  
+  ctx.read_params_from_file("params.txt");
+  
+  ctx.set_parameter("p",long(257));
+  
+  ctx.print_parameters();
   
   ContextHElib_uint8_t::CircuitEvaluator run_circuit;
   run_circuit = ctx.compile(c2);

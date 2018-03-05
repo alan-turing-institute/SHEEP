@@ -5,12 +5,27 @@
 #include <unordered_map>
 #include <chrono>
 #include <algorithm>
+#include <map>
+#include <list>
+#include <vector>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
 
 #include "circuit.hpp"
 
+/// Base base class
+template <typename PlaintextT>
+class BaseContext {
+public:
+  virtual std::list<PlaintextT>
+  eval_with_plaintexts(Circuit, std::list<PlaintextT>, std::vector<std::chrono::duration<double, std::micro> >&) = 0 ; 
+};
+
 // Base class - abstract interface to each library
 template <typename PlaintextT, typename CiphertextT>
-class Context {
+class Context : public BaseContext<PlaintextT> {
 	typedef std::chrono::duration<double, std::micro> microsecond;
 public:
 	typedef PlaintextT Plaintext;
@@ -117,6 +132,7 @@ public:
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
 			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
+		std::cout<<"duration here in context::eval is "<<duration.count()<<std::endl;
 		return duration;
 	}
 	
@@ -126,6 +142,92 @@ public:
 		auto run = std::bind(&Context::eval<std::list<Ciphertext>, std::list<Ciphertext> >, this, circ, _1, _2);
 		return CircuitEvaluator(run);
 	}
+
+        virtual std::list<Plaintext> eval_with_plaintexts(Circuit C,
+							  std::list<Plaintext> plaintext_inputs,
+							  std::vector<std::chrono::duration<double, std::micro> >& durations) {
+
+	  typedef std::chrono::duration<double, std::micro> microsecond;
+	  typedef std::chrono::high_resolution_clock high_res_clock;
+	  auto enc_start_time = high_res_clock::now();
+	  
+	  /// encrypt the inputs
+	  std::list<Ciphertext> ciphertext_inputs;
+	  for (auto pt_iter = plaintext_inputs.begin(); pt_iter != plaintext_inputs.end(); ++pt_iter) 
+	    ciphertext_inputs.push_back(encrypt(*pt_iter));
+	  auto enc_end_time = high_res_clock::now();
+	  durations.push_back(microsecond(enc_end_time - enc_start_time));
+	  
+	  //// evaluate the circuit	  
+	  std::list<Ciphertext> ciphertext_outputs;
+	  microsecond eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs);
+	  durations.push_back(eval_duration);
+
+	  //// decrypt the outputs again
+	  auto dec_start_time = high_res_clock::now();
+	  std::list<Plaintext> plaintext_outputs;
+	  for (auto ct_iter = ciphertext_outputs.begin(); ct_iter != ciphertext_outputs.end(); ++ct_iter) 
+	    plaintext_outputs.push_back(decrypt(*ct_iter));
+	  auto dec_end_time = high_res_clock::now();
+	  durations.push_back(microsecond(dec_end_time - dec_start_time));	  
+	  return plaintext_outputs;
+	}
+  
+  
+        virtual void read_params_from_file(std::string filename) {
+	  std::ifstream inputstream(filename);
+	  
+	  if (inputstream.bad()) {
+	    std::cout<<"Empty or non-existent input file"<<std::endl;
+	  }
+	  
+	  /// loop over all lines in the input file 
+	  std::string line;
+	  while (std::getline(inputstream, line) ) {
+	    /// remove comments (lines starting with #) and empty lines
+	    int found= line.find_first_not_of(" \t");
+	    if( found != std::string::npos) {   
+	      if ( line[found] == '#') 
+		continue;
+	      
+	      /// split up by whitespace
+	      std::string buffer;
+	      std::vector<std::string> tokens;
+	      std::stringstream ss(line);
+	      while (ss >> buffer) tokens.push_back(buffer);
+	      
+	      if (tokens.size() == 2) {   /// assume we have param_name param_value
+		set_parameter(tokens[0],stol(tokens[1])); 		
+	      }	      
+	    }    
+	  } // end of loop over lines
+	}
+  
+  
+  
+        virtual void set_parameter(std::string param_name, long param_value) {
+	  auto map_iter = m_param_name_map.find(param_name);
+	  if ( map_iter == m_param_name_map.end() ) {
+	    std::cout<<"Parameter "<<param_name<<" not found."<<std::endl;
+	    return;
+	  } else {
+	    std::cout<<"Setting parameter "<<map_iter->first<<" to "<<param_value<<std::endl;
+	    map_iter->second = param_value;
+	    return;
+	  }
+	}
+
+        virtual void print_parameters() {
+	  for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
+	    std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
+	  }
+	}
+
+  
+protected:
+
+        std::map<std::string, long& > m_param_name_map;
+
 };
 
 template <typename ContextT,
