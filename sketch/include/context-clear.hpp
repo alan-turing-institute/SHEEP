@@ -70,8 +70,16 @@ public:
 	  return (a - b);
 	}
 
+	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+		return (a>=b)?a:b;
+	}
+
 	Ciphertext Not(Ciphertext a) {
 		return !a;
+	}
+
+	Ciphertext Negate(Ciphertext a) {
+		return -a;
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
