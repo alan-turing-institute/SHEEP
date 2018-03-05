@@ -25,19 +25,27 @@ private:
 	WireList inputs;
 public:
 	template <typename... Ts>
-	Assignment(Wire output_, Gate op_, Ts... inputs_)
-		: output(output_), op(op_), inputs{inputs_...}
-	{ }
+	Assignment(Wire output_, Gate op_, Ts... inputs_);
+
 	size_t input_count() const { return inputs.size();  }
 	const WireList& get_inputs() const { return inputs; }
 	Wire get_output() const { return output; }
 	Gate get_op() const { return op; }
 };
 
+template <typename... Ts>
+Assignment::Assignment(Wire output_, Gate op_, Ts... inputs_)
+	: output(output_), op(op_), inputs{inputs_...}
+{ }
+
+template <>
+Assignment::Assignment(Wire, Gate, Assignment::WireList);
+
+
 class Circuit {
 public:
-	typedef std::list<Wire> WireList;
-	typedef std::list<Assignment> AssignmentList;
+	typedef Assignment::WireList WireList;
+	typedef std::vector<Assignment> AssignmentList;
 private:
 	WireList inputs;
 	WireList wires;

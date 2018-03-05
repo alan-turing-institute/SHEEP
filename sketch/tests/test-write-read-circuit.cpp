@@ -19,8 +19,8 @@ bool check_circuits_equal(const Circuit& c1, const Circuit& c2) {
 
   /// check individual inputs and outputs
   
-  std::list<Wire> c1_inputs = c1.get_inputs();
-  std::list<Wire> c2_inputs = c2.get_inputs();  
+  Circuit::WireList c1_inputs = c1.get_inputs();
+  Circuit::WireList c2_inputs = c2.get_inputs();
   auto c1_it = c1_inputs.begin();
   auto c2_it = c2_inputs.begin();  
   while( c1_it != c1_inputs.end() && c2_it != c2_inputs.end() ) {
@@ -29,8 +29,8 @@ bool check_circuits_equal(const Circuit& c1, const Circuit& c2) {
     c2_it++;
   }
 
-  std::list<Wire> c1_outputs = c1.get_outputs();
-  std::list<Wire> c2_outputs = c2.get_outputs();  
+  Circuit::WireList c1_outputs = c1.get_outputs();
+  Circuit::WireList c2_outputs = c2.get_outputs();
   auto c1out_it = c1_outputs.begin();
   auto c2out_it = c2_outputs.begin();
   while( c1out_it != c1_outputs.end() && c2out_it != c2_outputs.end() ) {

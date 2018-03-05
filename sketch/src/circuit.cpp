@@ -12,6 +12,10 @@ static std::map<std::string, Gate> gate_name_map = {
   {"SELECT", Gate::Select }
 };
 
+template <>
+Assignment::Assignment(Wire output_, Gate op_, WireList inputs_)
+	: output(output_), op(op_), inputs(inputs_)
+{ }
 
 std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
 
