@@ -20,12 +20,16 @@ def insert_measurement(context,
                        depth,
                        nslots,
                        execution_time,
-                       is_correct):
+                       is_correct,
+                       num_threads=1,
+                       parameters="Default"):
     m = BenchmarkMeasurement(context_name=context,
                              input_bitwidth=bitwidth,
                              gate_name=gate,
                              depth=depth,
                              num_slots=nslots,
+                             num_threads=num_threads,
+                             parameters=parameters,
                              execution_time=execution_time,
                              is_correct=is_correct)
     session.add(m)
@@ -45,7 +49,7 @@ def run_single_benchmark(input_circuit,
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
 ### write job's stdout to a file for debugging
-    debug_output_name = input_circuit.split(".")[0]+"_"+\
+    debug_output_name = context+"_"+input_circuit.split(".")[0]+"_"+\
                         input_vals_file.split(".")[0]
     outfile = open(os.path.join(DEBUG_FILE_DIR,debug_output_name),"w")
     outfile.write(job_output.decode("utf-8"))

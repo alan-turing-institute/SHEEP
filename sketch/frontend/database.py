@@ -19,8 +19,12 @@ class BenchmarkMeasurement(Base):
     gate_name = Column(String(250), nullable=False)
     depth = Column(Integer, nullable=False)
     num_slots = Column(Integer, nullable=False)
+    num_threads = Column(Integer, nullable=False)
+    parameters = Column(String(250), nullable=False)
     execution_time = Column(Float, nullable=False)
     is_correct = Column(Boolean, nullable=False)
+    
+    
 
 Base.metadata.create_all(engine)
 
