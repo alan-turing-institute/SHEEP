@@ -22,7 +22,7 @@ public:
 // produced by repeated calls to name(prefix), where prefix is a
 // std::string.
 template <typename NameGenT>
-Circuit copy(Circuit C, NameGenT& name)
+Circuit copy(const Circuit& C, NameGenT& name)
 {
 	Circuit C_copy;
 	
@@ -57,5 +57,7 @@ Circuit copy(Circuit C, NameGenT& name)
 	return C_copy;
 }
 
+Circuit seq(const Circuit&, const Circuit&);
+Circuit par(const Circuit&, const Circuit&);
 
 #endif //CIRCUIT_UTIL_HPP

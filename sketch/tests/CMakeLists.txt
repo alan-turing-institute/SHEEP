@@ -8,12 +8,26 @@ add_executable(test-circuit-copy
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
 
+add_executable(test-circuit-par
+  test-circuit-par.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-par COMMAND test-circuit-par)
+
+add_executable(test-circuit-seq
+  test-circuit-seq.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
+
+
 foreach(op IN ITEMS add multiply subtract compare ripple-carry-add select)
 	  foreach(type IN ITEMS int8_t)
 	  	       add_executable(test-clear-${type}-${op}	
                        test-clear-${type}-${op}.cpp
-		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp  
-		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)			  
+		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
 	  endforeach(type)
 endforeach(op)
@@ -32,6 +46,7 @@ if (TFHE_FOUND)
         add_executable(test-tfhe-bool-${op}
                          test-tfhe-bool-${op}.cpp
                          ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+			 ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
                          ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
         target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
@@ -49,6 +64,7 @@ if (TFHE_FOUND)
             add_executable(test-tfhe-${type}-${op}
                              test-tfhe-${type}-${op}.cpp
                              ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+			     ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
                              ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
             target_link_libraries(test-tfhe-${type}-${op} ${TFHE_LIBRARIES})
