@@ -25,7 +25,9 @@ public:
 	struct GateNotImplemented : public std::runtime_error {
 		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
 	};
-	
+
+	virtual Ciphertext Alias(Ciphertext a)             { return a; };
+	virtual Ciphertext Identity(Ciphertext)            { throw GateNotImplemented(); };
 	virtual Ciphertext Multiply(Ciphertext,Ciphertext) { throw GateNotImplemented(); };
 	virtual Ciphertext Maximum(Ciphertext,Ciphertext)  { throw GateNotImplemented(); };
 	virtual Ciphertext Add(Ciphertext,Ciphertext)      { throw GateNotImplemented(); };
@@ -39,6 +41,13 @@ public:
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
 		switch(g) {
+		case(Gate::Alias):
+			return Alias(inputs.at(0));
+			break;
+
+		case(Gate::Identity):
+			return Identity(inputs.at(0));
+			break;
 
 		case(Gate::Multiply):
 			return Multiply(inputs.at(0), inputs.at(1));

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <map>
 
-enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
+enum class Gate {Alias, Identity, Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
 
 class Wire {
 	std::string name;
