@@ -37,3 +37,13 @@ if (TFHE_FOUND)
     target_link_libraries(tfhe-example
                             ${TFHE_LIBRARIES})
 endif(TFHE_FOUND)
+
+add_executable(bitonic-sorting-circuit
+  bitonic-sorting-circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+target_link_libraries(bitonic-sorting-circuit ${TFHE_LIBRARIES})
+
+add_test(NAME bitonic-sorting-circuit COMMAND bitonic-sorting-circuit)
