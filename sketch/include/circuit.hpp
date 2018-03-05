@@ -3,9 +3,11 @@
 
 #include <string>
 #include <vector>
-#include <list>
+#include <unordered_map>
 #include <iostream>
 #include <map>
+
+enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
 
 class Wire {
 	std::string name;
@@ -14,7 +16,9 @@ public:
 	const std::string get_name() const { return name; }
 };
 
-enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
+bool operator==(const Wire&, const Wire&);
+bool operator!=(const Wire&, const Wire&);
+
 
 class Assignment {
 public:
@@ -40,6 +44,9 @@ Assignment::Assignment(Wire output_, Gate op_, Ts... inputs_)
 
 template <>
 Assignment::Assignment(Wire, Gate, Assignment::WireList);
+
+bool operator==(const Assignment&, const Assignment&);
+bool operator!=(const Assignment&, const Assignment&);
 
 
 class Circuit {
@@ -88,7 +95,9 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Circuit& c);
+std::istream& operator>>(std::istream& istream, Circuit& c);
 
-std::istream& operator >>(std::istream& istream, Circuit& c);
+bool operator==(const Circuit&, const Circuit&);
+bool operator!=(const Circuit&, const Circuit&);
 
 #endif // define CIRCUIT_HPP
