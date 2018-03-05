@@ -3,19 +3,22 @@
 
 #include <string>
 #include <vector>
-#include <list>
+#include <unordered_map>
 #include <iostream>
 #include <map>
 
-enum class Gate {Multiply, Maximum, Add, Subtract, Negate, Compare};
+enum class Gate {Alias, Identity, Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
 
 static std::map<std::string, Gate> gate_name_map = {
+  {"ALIAS", Gate::Alias },
+  {"ID", Gate::Identity },
   {"ADD", Gate::Add },
   {"MULTIPLY", Gate::Multiply },
   {"SUBTRACT", Gate::Subtract },
   {"MAXIMUM", Gate::Maximum },
   {"NEGATE", Gate::Negate },
-  {"COMPARE", Gate::Compare }
+  {"COMPARE", Gate::Compare },
+  {"SELECT", Gate::Select }
 };
 
 
@@ -26,6 +29,8 @@ public:
 	const std::string get_name() const { return name; }
 };
 
+bool operator==(const Wire&, const Wire&);
+bool operator!=(const Wire&, const Wire&);
 
 
 class Assignment {
@@ -37,19 +42,30 @@ private:
 	WireList inputs;
 public:
 	template <typename... Ts>
-	Assignment(Wire output_, Gate op_, Ts... inputs_)
-		: output(output_), op(op_), inputs{inputs_...}
-	{ }
+	Assignment(Wire output_, Gate op_, Ts... inputs_);
+
 	size_t input_count() const { return inputs.size();  }
 	const WireList& get_inputs() const { return inputs; }
 	Wire get_output() const { return output; }
 	Gate get_op() const { return op; }
 };
 
+template <typename... Ts>
+Assignment::Assignment(Wire output_, Gate op_, Ts... inputs_)
+	: output(output_), op(op_), inputs{inputs_...}
+{ }
+
+template <>
+Assignment::Assignment(Wire, Gate, Assignment::WireList);
+
+bool operator==(const Assignment&, const Assignment&);
+bool operator!=(const Assignment&, const Assignment&);
+
+
 class Circuit {
 public:
-	typedef std::list<Wire> WireList;
-	typedef std::list<Assignment> AssignmentList;
+	typedef Assignment::WireList WireList;
+	typedef std::vector<Assignment> AssignmentList;
 private:
 	WireList inputs;
 	WireList wires;
@@ -92,7 +108,9 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Circuit& c);
+std::istream& operator>>(std::istream& istream, Circuit& c);
 
-std::istream& operator >>(std::istream& istream, Circuit& c);
+bool operator==(const Circuit&, const Circuit&);
+bool operator!=(const Circuit&, const Circuit&);
 
 #endif // define CIRCUIT_HPP

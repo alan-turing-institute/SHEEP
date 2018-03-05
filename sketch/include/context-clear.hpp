@@ -80,21 +80,30 @@ public:
 	  return (a - b) % modulus ;
 	}
 
+	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+		return (a>=b)?a:b;
+	}
+
 	Ciphertext Not(Ciphertext a) {
 		return !a;
 	}
 
-  	Ciphertext Negate(Ciphertext a) {
-	  int modulus = pow(2,m_bitwidth);	  
-	  return (-1 * a) % modulus;
+	Ciphertext Negate(Ciphertext a) {
+		return -1 * a;
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
 	}
+
+	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+		return (s % 2)?a:b;
+	}
+  
 private:
         int m_bitwidth;
   
+
 };
 
 }  // Leaving Clear namespace

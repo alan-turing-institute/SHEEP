@@ -1,9 +1,40 @@
+#include "all_equal.hpp"
 #include "circuit.hpp"
 #include <map>
-#include <sstream>  
+#include <sstream>
 
+// Wires are equal iff their names are the same
+bool operator==(const Wire& a, const Wire& b)
+{
+	return a.get_name() == b.get_name();
+}
 
+bool operator!=(const Wire& a, const Wire& b)
+{
+	return !(a == b);
+}
 
+template <>
+Assignment::Assignment(Wire output_, Gate op_, WireList inputs_)
+	: output(output_), op(op_), inputs(inputs_)
+{ }
+
+bool operator==(const Assignment& a, const Assignment& b)
+{
+	// Assignments must perform the same operation:
+	if (a.get_op() != b.get_op()) return false;
+
+	// Output wire must match
+	if (a.get_output() != b.get_output()) return false;
+
+	// Finally, each input wire must match
+	return all_equal(a.get_inputs(), b.get_inputs());
+}
+
+bool operator!=(const Assignment& a, const Assignment& b)
+{
+	return !(a == b);
+}
 
 std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
 
@@ -106,4 +137,18 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
   } /// end of loop over input lines
   
   return stream;
+}
+
+bool operator==(const Circuit& c1, const Circuit& c2)
+{
+	/// check individual inputs, outputs and assignments
+	bool inputs_match = all_equal(c1.get_inputs(), c2.get_inputs());
+	bool outputs_match = all_equal(c1.get_outputs(), c2.get_outputs());
+	bool assignments_match = all_equal(c1.get_assignments(), c2.get_assignments());
+	return inputs_match && outputs_match && assignments_match;
+}
+
+bool operator!=(const Circuit& c1, const Circuit& c2)
+{
+	return !(c1 == c2);
 }
