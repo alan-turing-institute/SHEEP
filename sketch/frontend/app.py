@@ -60,7 +60,6 @@ def enter_input_vals():
     """
     iform = build_inputs_form(app.data["inputs"])(request.form)
     if request.method == "POST" and iform.validate():
-        print("Reading input values")
         input_vals = iform.data
         if utils.check_inputs(input_vals, app.data["input_type"]):
             app.data["uploaded_filenames"]["inputs_file"] = utils.write_inputs_file(input_vals,
