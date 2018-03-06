@@ -8,13 +8,39 @@
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
  
     <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
- 
+
+  <script>
+        function loading(){
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("content").style.display = "none";
+        }
+  </script>
+  <style>
+    div#loading {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;    
+    width: 40%;
+    display: none;
+    background: url(/static/sheep_waiting.gif) no-repeat;
+    cursor: wait;
+    }
+  </style>
+    
  
 </head>
  
 <body>
+  <div id="loading">
+    <img src="/static/sheep_waiting.gif" alt="waiting">
+    <p>
+      <h3> Calculating .... </h3>
+      </p>
+  </div>
+  
  
-    <div class="container">
+    <div id="content" class="container">
         <div class="header">
             <nav>
                 <ul class="nav nav-pills pull-right">
