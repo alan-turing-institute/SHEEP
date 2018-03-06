@@ -5,6 +5,7 @@ generate D3.js plots, using the nvd3 python wrapper, building lists of data usin
 
 from nvd3 import multiBarChart
 import database
+import uuid
 
 def create_plot(xdata_list, ydata_dict):
     """
@@ -21,10 +22,14 @@ def create_plot(xdata_list, ydata_dict):
 
     extra_serie = {"tooltip": {"y_start": "", "y_end": " cal"}}
     chart.buildhtml()
-    print("Writing results to templates/results_plots.html")
-    output_file = open("templates/results_plots.html","w")
+    unique_id = str(uuid.uuid4())
+    filename = "results_plots_"+unique_id+".html"
+    print("Writing results to templates/"+filename)
+
+    output_file = open("templates/"+filename,"w")
     output_file.write(chart.htmlcontent)
     output_file.close()
+    return filename
 
 
 def build_query(input_dict):
@@ -89,7 +94,7 @@ def generate_plots(input_dict):
     for xval in xdata:
         for k in ydata.keys():
             ydata[k].append(data_dict[xval][k])
-    create_plot(xdata, ydata)
+    return create_plot(xdata, ydata)
         
     
         

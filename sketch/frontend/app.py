@@ -90,8 +90,8 @@ def results_plots():
     pform = PlotsForm(request.form)
     if request.method == "POST":
         inputs = pform.data
-        plotting.generate_plots(inputs)
-        return render_template("results_plots.html")
+        filename = plotting.generate_plots(inputs)
+        return render_template(filename)
     return render_template("result_plots_query.html",form=pform)
 
 
