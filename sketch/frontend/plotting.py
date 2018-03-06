@@ -21,27 +21,65 @@ def create_plot(xdata_list, ydata_dict):
 
     extra_serie = {"tooltip": {"y_start": "", "y_end": " cal"}}
     chart.buildhtml()
+    print("Writing results to templates/results_plots.html")
     output_file = open("templates/results_plots.html","w")
     output_file.write(chart.htmlcontent)
     output_file.close()
 
 
+def build_query(input_dict):
+    """
+    convert dict on inputs from the web form PlotsForm into an sql query 
+    """
+    query = "SELECT "
+    query += input_dict["x_axis_var"]+","+input_dict["category_field"]
+    query += ",execution_time "
+    query += " FROM benchmarks"
+    if len(input_dict["context_selections"]) > 0 or \
+       len(input_dict["gate_selections"]) > 0 or \
+       len(input_dict["input_type_selections"]) > 0:
+        query+= " WHERE "
+        if len(input_dict["context_selections"]) > 0:
+            query += "("
+            for context in input_dict["context_selections"]:
+                query += "context_name='"+context+"' OR "
+## now remove the trailing OR and replace with a close-brace.
+            query = query[:-4]+")"
+        if len(input_dict["gate_selections"]) > 0:
+            query += " AND ("
+            for gate in input_dict["gate_selections"]:
+                query += "gate_name='"+gate+"' OR "
+## now remove the trailing OR and replace with a close-brace.
+            query = query[:-4]+")"
+        if len(input_dict["input_type_selections"]) > 0:
+            query += " AND ("
+            for itype in input_dict["input_type_selections"]:
+                query += "input_bitwidth="+itype+" OR "
+## now remove the trailing OR and replace with a close-brace.
+            query = query[:-4]+")" 
+    return query
+                
 def generate_plots(input_dict):
+    """
+    convert input_dict into an sql query,
+    then convert the query output into a 
+    list (x-axis vals) and a dict (y-axis category labels and val-lists)
+    for input to create_plot
+    """
     print("INPUT DICT FOR GENERATE PLOTS")
     print(input_dict)
-    query = "SELECT context_name,input_bitwidth,depth,execution_time FROM benchmarks WHERE input_bitwidth=8"
+    query = build_query(input_dict)
     columns, rdata = database.execute_query_sqlite3(query)
     xdata = []
     ydata = {}
-
     data_dict = {}
+    ### in each row, row[0] is the x-axis var, row[1] is the category var, and row[2] is execution time
     for row in rdata:
-        
-        if not row[2] in data_dict.keys():
-            data_dict[row[2]] = {}
+        if not row[0] in data_dict.keys():
+            data_dict[row[0]] = {}
             pass
-        if not row[0] in data_dict[row[2]].keys():
-            data_dict[row[2]][row[0]] = row[3]
+        if not row[1] in data_dict[row[0]].keys():
+            data_dict[row[0]][row[1]] = row[2]
             pass
         pass
 ### now have full set of data - need to separate out y-axis vals into lists
@@ -51,7 +89,7 @@ def generate_plots(input_dict):
     for xval in xdata:
         for k in ydata.keys():
             ydata[k].append(data_dict[xval][k])
-    return xdata, ydata
+    create_plot(xdata, ydata)
         
     
         
