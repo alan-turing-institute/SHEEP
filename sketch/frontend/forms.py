@@ -40,13 +40,13 @@ class PlotsForm(Form):
         ("context_name","HE library"),
         ("input_bitwidth","Input bitwidth"),
         ("depth","Depth"),
-        ("gate","Gate"),        
+        ("gate_name","Gate"),        
     ],label="x-axis var")
     category_field = SelectField(choices=[
         ("depth","Depth"),
         ("context_name","HE library"),
         ("input_bitwidth","Input bitwidth"),
-        ("gate","Gate"),        
+        ("gate_name","Gate"),        
     ],label="category var")
     context_selections = MultiCheckboxField('Select contexts', choices=[("HElib","HElib"),("TFHE","TFHE")])
     gate_selections = MultiCheckboxField('Select gate', choices=[("ADD","ADD"),("SUBTRACT","SUBTRACT"),("MULTIPLY","MULTIPLY")])    
