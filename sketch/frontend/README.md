@@ -17,5 +17,5 @@ To run the app, from this directory, just do:
 ```
 python app.py
 ```
-
+then point your browser to `localhost:5000`.
 
