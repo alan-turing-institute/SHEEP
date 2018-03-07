@@ -23,7 +23,7 @@ public:
 
   /// constructors
 
-  ContextHElib(long num_levels, long security, long p=65537, long r=1, long c=3, long w=64, long d=0):
+  ContextHElib(long num_levels=20, long security=80, long p=65537, long r=1, long c=3, long w=64, long d=0):
     m_L(num_levels),
     m_security(security),
     m_p(p),   // modulus of plaintext
@@ -55,7 +55,14 @@ public:
     m_ea = new EncryptedArray(*m_helib_context, G);
     
     m_nslots = m_ea->size();
-    
+
+    m_param_name_map.insert({"security", m_security});
+    m_param_name_map.insert({"L", m_L});
+    m_param_name_map.insert({"p", m_p});    
+    m_param_name_map.insert({"r", m_r});
+    m_param_name_map.insert({"c", m_c});
+    m_param_name_map.insert({"w", m_w});
+    m_param_name_map.insert({"d", m_d});            
   
 };
 
@@ -69,6 +76,57 @@ public:
     if (m_helib_context != NULL) delete m_helib_context;
     
   };
+
+  void read_params_from_file(std::string filename) {
+    std::ifstream inputstream(filename);
+
+    if (inputstream.bad()) {
+      std::cout<<"Empty or non-existent input file"<<std::endl;
+    }
+    
+    /// loop over all lines in the input file 
+    std::string line;
+    while (std::getline(inputstream, line) ) {
+      /// remove comments (lines starting with #) and empty lines
+      int found= line.find_first_not_of(" \t");
+      if( found != std::string::npos) {   
+	if ( line[found] == '#') 
+	  continue;
+	
+	/// split up by whitespace
+	std::string buffer;
+	std::vector<std::string> tokens;
+	std::stringstream ss(line);
+	while (ss >> buffer) tokens.push_back(buffer);
+	
+	if (tokens.size() == 2) {   /// assume we have param_name param_value
+	  set_parameter(tokens[0],stol(tokens[1])); 
+	  
+	}
+	
+      }    
+    } // end of loop over lines
+  }
+
+  
+
+  void set_parameter(std::string param_name, long param_value) {
+    auto map_iter = m_param_name_map.find(param_name);
+    if ( map_iter == m_param_name_map.end() ) {
+      std::cout<<"Parameter "<<param_name<<" not found."<<std::endl;
+      return;
+    } else {
+      std::cout<<"Setting parameter "<<map_iter->first<<" to "<<param_value<<std::endl;
+      map_iter->second = param_value;
+      return;
+    }
+  }
+
+  void print_parameters() {
+    for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
+      std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
+    }
+  }
   
   Ciphertext encrypt(Plaintext pt) {
   //// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
@@ -135,6 +193,8 @@ private:
 
   long m_nslots;  // number of SIMD operations that can be done at a time
 
+  std::map<std::string, long& > m_param_name_map;
+  
   EncryptedArray* m_ea; 
 
   FHESecKey* m_secretKey;

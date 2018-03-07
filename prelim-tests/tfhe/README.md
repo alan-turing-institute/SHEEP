@@ -25,15 +25,11 @@ git submodule init
 git submodule update
 mkdir build
 cd build
-cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=debug 
+cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim \
+-DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off \
+-DENABLE_NAYUKI_AVX=off
 make
 make test
-```
-
-Can use additional flags to cmake if there is trouble building:
-
-```
--DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
 ```
 
 ots note: I used the macports 'fftw-3' package (version 3.3.5), with

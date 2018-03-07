@@ -5,8 +5,18 @@
 #include "context.hpp"
 #include "bits.hpp"
 
-class ContextClear : public Context<int8_t, int8_t> {
+namespace Sheep {
+namespace Clear {
+
+
+template<typename PlaintextT>
+class ContextClear : public Context<PlaintextT, PlaintextT> {   //plaintext and ciphertext are the same type
+
 public:
+
+        typedef PlaintextT Plaintext;
+        typedef PlaintextT Ciphertext;
+  
 	Ciphertext encrypt(Plaintext p) {
 	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
 	  return p; // plaintext and ciphertext are the same for this context
@@ -60,13 +70,28 @@ public:
 	  return (a - b);
 	}
 
+	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+		return (a>=b)?a:b;
+	}
+
 	Ciphertext Not(Ciphertext a) {
 		return !a;
 	}
 
+	Ciphertext Negate(Ciphertext a) {
+		return -1 * a;
+  }
+
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
 	}
+
+	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+		return (s % 2)?a:b;
+	}
 };
 
+}  // Leaving Clear namespace
+}  // Leaving Sheep namespace
+  
 #endif // CONTEXT_CLEAR_HPP
