@@ -9,13 +9,20 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 
 import sqlite3
-import re
 
+import os
+
+#### the following regexes are only necessary for when we allow the user to
+#### enter their own SQL query - shouldn't be there long-term!
+import re
 table_regex = re.compile("(FROM|from) ([\w]+)")
 column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 
+### this hard-coded location of an sqlite file is only necessary if we explicitly
+### use sqlite3, which is in turn only necessary until we translate SQL queries into
+### sqlalchemy commands
 
-DB_LOCATION = "/Users/nbarlow/SHEEP/sketch/frontend/sheep.db"
+DB_LOCATION = os.environ["HOME"]+"/SHEEP/sketch/frontend/sheep.db"
 
 
 Base = declarative_base()

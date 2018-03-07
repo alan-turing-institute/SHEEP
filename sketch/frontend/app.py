@@ -12,9 +12,13 @@ from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form
 import utils
 import database
 import plotting
+import os
 
-EXECUTABLE_DIR = "/Users/nbarlow/SHEEP/sketch/build/bin"
-UPLOAD_FOLDER = "/Users/nbarlow/SHEEP/sketch/frontend/uploads"
+### NOTE that the below hard-coded locations assume that the user has the SHEEP repo checked out directly from
+### their home dir. TODO - better way of configuring the app.
+
+EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/sketch/build/bin"
+UPLOAD_FOLDER = os.environ["HOME"]+"/SHEEP/sketch/frontend/uploads"
 
 
 app = Flask(__name__)
