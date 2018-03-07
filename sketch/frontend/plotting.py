@@ -4,8 +4,9 @@ generate D3.js plots, using the nvd3 python wrapper, building lists of data usin
 
 
 from nvd3 import multiBarChart
-import database
+from database import BenchmarkMeasurement, session
 import uuid
+from sqlalchemy import and_, or_
 
 def create_plot(xdata_list, ydata_dict):
     """
@@ -32,71 +33,57 @@ def create_plot(xdata_list, ydata_dict):
     return filename
 
 
-def build_query(input_dict):
+
+def build_filter(input_dict):
     """
-    convert dict on inputs from the web form PlotsForm into an sql query 
+    convert dict of inputs from web form PlotsForm into SQLAlchemy filter.
     """
-    query = "SELECT "
-    query += input_dict["x_axis_var"]+","+input_dict["category_field"]
-    query += ",execution_time "
-    query += " FROM benchmarks"
-    if len(input_dict["context_selections"]) > 0 or \
-       len(input_dict["gate_selections"]) > 0 or \
-       len(input_dict["input_type_selections"]) > 0:
-        query+= " WHERE "
-        if len(input_dict["context_selections"]) > 0:
-            query += "("
-            for context in input_dict["context_selections"]:
-                query += "context_name='"+context+"' OR "
-## now remove the trailing OR and replace with a close-brace.
-            query = query[:-4]+")"
-        if len(input_dict["gate_selections"]) > 0:
-            query += " AND ("
-            for gate in input_dict["gate_selections"]:
-                query += "gate_name='"+gate+"' OR "
-## now remove the trailing OR and replace with a close-brace.
-            query = query[:-4]+")"
-        if len(input_dict["input_type_selections"]) > 0:
-            query += " AND ("
-            for itype in input_dict["input_type_selections"]:
-                query += "input_bitwidth="+itype+" OR "
-## now remove the trailing OR and replace with a close-brace.
-            query = query[:-4]+")" 
-    return query
-                
+    field_to_attribute_dict = {
+        "context_selections" : BenchmarkMeasurement.context_name,
+        "gate_selections" : BenchmarkMeasurement.gate_name,
+        "input_type_selections" : BenchmarkMeasurement.input_bitwidth
+    }
+    and_expr = and_()
+    for field, values in input_dict.items():
+        if not field in field_to_attribute_dict.keys():
+            continue
+        or_expr = or_()
+        for val in values:
+            or_expr += field_to_attribute_dict[field] == val
+        and_expr &= or_expr
+    return and_expr
+
+    
+
+
 def generate_plots(input_dict):
     """
-    convert input_dict into an sql query,
+    convert input_dict into sqlalchemy query,
     then convert the query output into a 
     list (x-axis vals) and a dict (y-axis category labels and val-lists)
     for input to create_plot
     """
-    print("INPUT DICT FOR GENERATE PLOTS")
-    print(input_dict)
-    query = build_query(input_dict)
-    columns, rdata = database.execute_query_sqlite3(query)
-    xdata = []
-    ydata = {}
-    data_dict = {}
-    ### in each row, row[0] is the x-axis var, row[1] is the category var, and row[2] is execution time
-    for row in rdata:
-        if not row[0] in data_dict.keys():
-            data_dict[row[0]] = {}
-            pass
-        if not row[1] in data_dict[row[0]].keys():
-            data_dict[row[0]][row[1]] = row[2]
-            pass
-        pass
-### now have full set of data - need to separate out y-axis vals into lists
-    xdata = list(data_dict.keys())
-    for k in data_dict[xdata[0]].keys():
-        ydata[k] = []
-    for xval in xdata:
-        for k in ydata.keys():
-            ydata[k].append(data_dict[xval][k])
-    return create_plot(xdata, ydata)
-        
+    filt = build_filter(input_dict)
+    filtered_rows = session.query(BenchmarkMeasurement).filter(filt).all()
+
+    ### need to organise data so there is a list of unique x-axis vals in xdata,
+    ### and a dictionary of { 'category_label' : [y-vals] } 
+
+    ### NOTE the current simple logic below only works if the number of y-vals per selected
+    ### category is equal to the number of x-bins..  This would not be the case if e.g. plotting
+    ### more than one gate at the same time, with x-axis depth, and category_var HE_lib.
     
-        
-        
+    xdata = []    
+    ydata = {}
+    
+    for row in filtered_rows:
+        xval = row.__getattribute__(input_dict["x_axis_var"])
+        if not xval in xdata:
+            xdata.append(xval)
+        category = row.__getattribute__(input_dict["category_field"])
+        if not category in ydata.keys():
+            ydata[category] = []
+        execution_time = row.__getattribute__("execution_time")
+        ydata[category].append(execution_time)
+    return create_plot(xdata, ydata)
 
