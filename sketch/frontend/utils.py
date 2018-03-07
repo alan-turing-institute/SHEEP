@@ -156,7 +156,7 @@ def parse_test_output(outputstring):
                     in_processing_times = False
                     in_outputs = True
             elif in_outputs:
-                output_vals = re.findall("[\d]+",line)
+                output_vals = re.findall("[\-\d]+",line)
                 if len(output_vals) > 0:
                     outputs.append(output_vals)
                 if "END RESULTS" in line:
