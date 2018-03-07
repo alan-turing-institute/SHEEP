@@ -4,6 +4,7 @@
 #include "circuit.hpp"
 #include "context.hpp"
 #include "bits.hpp"
+#include <type_traits>
 
 namespace Sheep {
 namespace Clear {
@@ -16,6 +17,13 @@ public:
 
         typedef PlaintextT Plaintext;
         typedef PlaintextT Ciphertext;
+
+        ContextClear() {
+	  if (std::is_same<Plaintext, bool>::value)
+	    m_bitwidth = 1;
+	  else
+	    m_bitwidth = BITWIDTH(Plaintext);
+	}
   
 	Ciphertext encrypt(Plaintext p) {
 	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
@@ -56,18 +64,20 @@ public:
 	}
 
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  std::cout<<"Using clear context's ADD"<<std::endl;
-	  return (a + b);
+	  int modulus = pow(2,m_bitwidth);
+	  return (a + b) % modulus;
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+	  int modulus = pow(2,m_bitwidth);
 	  std::cout<<"Using clear context's MULTIPLY"<<std::endl;
-	  return (a * b);
+	  return (a * b) % modulus ;
 	}
 
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
-	  return (a - b);
+	  int modulus = pow(2,m_bitwidth);
+	  return (a - b) % modulus ;
 	}
 
 	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
@@ -80,7 +90,7 @@ public:
 
 	Ciphertext Negate(Ciphertext a) {
 		return -1 * a;
-  }
+	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
@@ -89,6 +99,11 @@ public:
 	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
 		return (s % 2)?a:b;
 	}
+  
+private:
+        int m_bitwidth;
+  
+
 };
 
 }  // Leaving Clear namespace
