@@ -159,11 +159,6 @@ public:
     long pt_transformed = pt[0];
     if ((pt[0]) > m_p / 2)    //// convention - treat this as a negative number
       pt_transformed = pt[0] - m_p;
-    
-    int modulus = pow(2,m_bitwidth);
-    std::cout<<"modulus is "<<modulus<<" bitwidth "<<m_bitwidth<<std::endl;
-    Plaintext output = Plaintext(pt[0]);
-    std::cout<<" output plaintext is "<<std::to_string(output)<<std::endl;
     return pt_transformed  % int(pow(2,m_bitwidth));
   };
 	
@@ -185,7 +180,10 @@ public:
   };
 
   Ciphertext Negate(Ciphertext a) {
-    a.multByConstant(to_ZZX(-1L));  
+    if (m_bitwidth == 1)  /// special case for binary
+      a.addConstant(to_ZZX(1L));
+    else
+      a.multByConstant(to_ZZX(-1L));  
     return a;   
   };
 

@@ -16,7 +16,7 @@ int main(void) {
 
 	std::cout<<circ;
 	
-	ContextHElib<int8_t> ctx(20,80);
+	ContextHElib<int8_t> ctx;
 
 	ContextHElib<int8_t>::CircuitEvaluator run_circuit;
 	run_circuit = ctx.compile(circ);
@@ -40,10 +40,6 @@ int main(void) {
 	  plaintext_outputs.push_back(pt);
 	  std::cout << std::to_string(pt) << std::endl;
 	}	
+	assert(plaintext_outputs.front() == -54);
 
-	//	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0}, PtVec{0}));
-	//	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1}, PtVec{-1}));
-	//	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-127}, PtVec{127}));
-	// Correct for int (eight-bit two's complement):
-	//	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-128}, PtVec{-128}));
 }
