@@ -156,11 +156,15 @@ public:
     std::vector<long> pt;
     m_ea->decrypt(ct, *m_secretKey, pt);
     std::cout<<" answer before modulus is "<<std::to_string(pt[0])<<std::endl;
+    long pt_transformed = pt[0];
+    if ((pt[0]) > m_p / 2)    //// convention - treat this as a negative number
+      pt_transformed = pt[0] - m_p;
+    
     int modulus = pow(2,m_bitwidth);
     std::cout<<"modulus is "<<modulus<<" bitwidth "<<m_bitwidth<<std::endl;
     Plaintext output = Plaintext(pt[0]);
     std::cout<<" output plaintext is "<<std::to_string(output)<<std::endl;
-    return pt[0]  % int(pow(2,m_bitwidth));
+    return pt_transformed  % int(pow(2,m_bitwidth));
   };
 	
   Ciphertext Add(Ciphertext a, Ciphertext b) {
@@ -181,11 +185,30 @@ public:
   };
 
   Ciphertext Negate(Ciphertext a) {
-    //    const Vec<long> minus_one = {-1};
     a.multByConstant(to_ZZX(-1L));  
     return a;   
   };
-	
+
+  Ciphertext MultByConstant(Ciphertext a, long b) {
+    a.multByConstant(to_ZZX(b));
+    return a;
+  }
+
+  Ciphertext AddConstant(Ciphertext a, long b) {
+    a.addConstant(to_ZZX(b));
+    return a;
+  }
+
+  Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+    /// s is 0 or 1
+    /// output is s*a + (1-s)*b
+    Ciphertext sa = Multiply(s,a);
+    Ciphertext one_minus_s = MultByConstant( AddConstant(s,-1L), -1L);
+    Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
+    return Add(sa, one_minus_s_times_b);
+  }
+  
+  
   long get_num_slots() {
     return m_nslots;
   }
