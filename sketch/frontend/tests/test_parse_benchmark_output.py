@@ -15,6 +15,10 @@ def test_parse_output():
     output_string = output_file.read()
     processing_times, outputs = parse_test_output(output_string)
     assert(len(processing_times) == 4)
-    assert(len(outputs) == 1)
+    assert(len(outputs) == 2)
     assert(len(outputs[0]) == 2)
-
+    assert(len(outputs[1]) == 2)    
+    assert(outputs[0][0] == '75')
+    assert(outputs[0][1] == '75')
+    assert(outputs[1][0] == '-215')
+    assert(outputs[1][1] == '-215')        
