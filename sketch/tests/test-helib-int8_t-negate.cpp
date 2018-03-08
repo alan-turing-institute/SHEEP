@@ -20,8 +20,10 @@ int main(void) {
 
 	ContextHElib<int8_t>::CircuitEvaluator run_circuit;
 	run_circuit = ctx.compile(circ);
-	
-	std::list<ContextHElib<int8_t>::Plaintext> plaintext_inputs = {-54};
+
+	int8_t input = 54;
+	std::cout<<"Input "<<std::to_string(input)<<std::endl;
+	std::list<ContextHElib<int8_t>::Plaintext> plaintext_inputs = {input};
 	std::list<ContextHElib<int8_t>::Ciphertext> ciphertext_inputs;
 	
 	for (ContextHElib<int8_t>::Plaintext pt: plaintext_inputs)
