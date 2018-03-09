@@ -82,13 +82,9 @@ if (HELIB_FOUND)
     target_link_libraries(test-helib-uint8_t-encrypt-decrypt ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
     add_test(NAME test-helib-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-helib-uint8_t-encrypt-decrypt>)
 
-    add_executable(test-helib-bool-negate
-                     test-helib-bool-negate.cpp
-		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    target_link_libraries(test-helib-bool-negate ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    add_test(NAME test-helib-bool-negate COMMAND $<TARGET_FILE:test-helib-bool-negate>)
 
-    foreach (op IN ITEMS negate addConst multByConst select)
+
+    foreach (op IN ITEMS addConst multByConst select)
         add_executable(test-helib-int8_t-${op}	
     	                 test-helib-int8_t-${op}
 			 	     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -98,7 +94,7 @@ if (HELIB_FOUND)
 
 
     foreach(type IN ITEMS bool int8_t uint8_t)
-        foreach(op IN ITEMS add multiply subtract)	
+        foreach(op IN ITEMS add multiply subtract negate)	
     		add_executable(test-helib-${type}-${op}
 			test-helib-${type}-${op}.cpp	
 			${CMAKE_SOURCE_DIR}/src/circuit.cpp)
