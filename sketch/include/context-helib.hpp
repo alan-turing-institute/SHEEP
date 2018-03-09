@@ -225,8 +225,7 @@ public:
 		  m_bitwidth,
 		  &m_unpackSlotEncoding);
     return sum;
-    //    a += b;
-    // return a;   
+
   };
 
   
@@ -241,8 +240,6 @@ public:
 		   &m_unpackSlotEncoding);
     return product;
     
-    //    a *= b;
-    // return a;   
   };
 
   /*
