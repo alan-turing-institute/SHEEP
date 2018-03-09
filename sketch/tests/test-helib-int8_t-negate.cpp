@@ -36,7 +36,6 @@ int main(void) {
 	std::list<ContextHElib<int8_t>::Plaintext> plaintext_outputs;
 	for (ContextHElib<int8_t>::Ciphertext ct: ciphertext_outputs) {
 	  ContextHElib<int8_t>::Plaintext pt = ctx.decrypt(ct);
-	  std::cout<<" is ct correct? "<<ct.isCorrect()<<std::endl;
 	  plaintext_outputs.push_back(pt);
 	  std::cout << std::to_string(pt) << std::endl;
 	}	

@@ -5,6 +5,9 @@
 #include <chrono>
 #include <type_traits>
 #include "bits.hpp"
+#include <NTL/BasicThreadPool.h>
+NTL_CLIENT
+
 
 #include "circuit.hpp"
 #include "context.hpp"
@@ -12,20 +15,26 @@
 #include "FHE.h"
 #include "EncryptedArray.h"
 
+#include "intraSlot.h"
+#include "binaryArith.h"
+#include "binaryCompare.h"
+
+
 namespace Sheep {
 namespace HElib {
 
 template <typename PlaintextT>
-class ContextHElib : public Context< PlaintextT , Ctxt> {
+class ContextHElib : public Context< PlaintextT , NTL::Vec<Ctxt> > {
 
 public:
 
   typedef PlaintextT Plaintext;
-  typedef Ctxt Ciphertext;
+  ///  typedef Ctxt Ciphertext;
+  typedef NTL::Vec<Ctxt> Ciphertext;  
 
   /// constructors
 
-  ContextHElib(long num_levels=20, long security=80, long p=65537, long r=1, long c=3, long w=64, long d=0):
+  ContextHElib(long num_levels=20, long security=80, long p=2, long r=1, long c=3, long w=64, long d=0):
     m_L(num_levels),
     m_security(security),
     m_p(p),   // modulus of plaintext
@@ -51,6 +60,12 @@ public:
     m_helib_context = new FHEcontext(m, m_p, m_r);
     /// modify context, add primes to modulus chain
     buildModChain(*m_helib_context, m_L, m_c);
+
+
+    // unpack slot encoding
+    buildUnpackSlotEncoding(m_unpackSlotEncoding, *(m_helib_context->ea));
+
+    
     /// create secret key structure
     m_secretKey = new FHESecKey(*m_helib_context);
     
@@ -62,11 +77,15 @@ public:
     m_secretKey->GenSecKey(m_w);
     
     addSome1DMatrices(*m_secretKey);
+    addFrbMatrices(*m_secretKey);
+
     
     m_ea = new EncryptedArray(*m_helib_context, G);
     
     m_nslots = m_ea->size();
 
+    ////  populate the map that will allow us to set parameters via an input file (or string)
+    
     m_param_name_map.insert({"security", m_security});
     m_param_name_map.insert({"L", m_L});
     m_param_name_map.insert({"p", m_p});    
@@ -140,6 +159,15 @@ public:
   }
   
   Ciphertext encrypt(Plaintext pt) {
+    Ctxt mu(*m_publicKey);  /// use this to fill up the vector when resizing
+    Ciphertext  ct;   /// now an NTL::Vec<Ctxt>
+    resize(ct,m_bitwidth, mu);
+    for (int i=0; i < m_bitwidth; i++) {
+      m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
+    }
+    return ct;
+    
+    /*
   //// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
   std::vector<long> ptvec;
   ptvec.push_back(pt);
@@ -149,31 +177,75 @@ public:
   
   Ciphertext ct(*m_publicKey);
   m_ea->encrypt(ct, *m_publicKey, ptvec);
-  return ct; 
+  return ct;
+    */ 
   };
 
   Plaintext decrypt(Ciphertext ct) {
     std::vector<long> pt;
-    m_ea->decrypt(ct, *m_secretKey, pt);
-    std::cout<<" answer before modulus is "<<std::to_string(pt[0])<<std::endl;
+
+    decryptBinaryNums(pt, CtPtrs_VecCt(ct), *m_secretKey, *m_ea);
+
+    
+    ///    m_ea->decrypt(ct[0], *m_secretKey, pt);
+
     long pt_transformed = pt[0];
-    if ((pt[0]) > m_p / 2)    //// convention - treat this as a negative number
-      pt_transformed = pt[0] - m_p;
+    //  if ((pt[0]) > m_p / 2)    //// convention - treat this as a negative number
+    //  pt_transformed = pt[0] - m_p;
     return pt_transformed  % int(pow(2,m_bitwidth));
   };
-	
+
+
+  Ciphertext Compare(Ciphertext a, Ciphertext b) {
+    std::cout<<" using HElib's COMPARE "<<std::endl;
+    Ctxt mu(*m_publicKey);
+    Ctxt ni(*m_publicKey);    
+    Ciphertext cmax, cmin;
+    CtPtrs_VecCt wMin(cmin), wMax(cmax);  /// wrappers around output vectors
+    compareTwoNumbers(wMax, wMin, mu, ni,
+		      CtPtrs_VecCt(a), CtPtrs_VecCt(b),
+		      &m_unpackSlotEncoding);
+    /// mu is now a Ctxt which is the encryption of 1 if a>b and 0 otherwise.
+    /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
+    Ciphertext output;
+    output.append(mu);
+
+    return output;
+    
+  }
+  
+  
+  
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     std::cout<<"using HElib's ADD "<<std::endl;
-    a += b;
-    return a;   
+
+    Ciphertext sum;
+    CtPtrs_VecCt wsum(sum);
+    addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
+		  m_bitwidth,
+		  &m_unpackSlotEncoding);
+    return sum;
+    //    a += b;
+    // return a;   
   };
 
+  
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
     std::cout<<"using HElib's MULTIPLY "<<std::endl;
-    a *= b;
-    return a;   
+
+   Ciphertext product;
+   CtPtrs_VecCt wprod(product);
+    multTwoNumbers(wprod,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
+		   false,
+		   m_bitwidth,
+		   &m_unpackSlotEncoding);
+    return product;
+    
+    //    a *= b;
+    // return a;   
   };
 
+  /*
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
     a -= b;  
     return a;   
@@ -205,7 +277,7 @@ public:
     Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
     return Add(sa, one_minus_s_times_b);
   }
-  
+  */
   
   long get_num_slots() {
     return m_nslots;
@@ -241,6 +313,10 @@ private:
   FHEcontext* m_helib_context;
 
   int m_bitwidth;
+
+  std::vector<zzX> m_unpackSlotEncoding;
+
+  
 };
 
 
