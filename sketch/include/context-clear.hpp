@@ -89,7 +89,8 @@ public:
 	}
 
 	Ciphertext Negate(Ciphertext a) {
-		return -1 * a;
+	  if (m_bitwidth == 1) return Not(a); 
+	  return -1 * a;
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
