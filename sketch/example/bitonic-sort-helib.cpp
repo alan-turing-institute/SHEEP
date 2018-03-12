@@ -12,7 +12,7 @@ int main(void)
 	typedef std::vector<ContextHElib<int8_t>::Plaintext> PtVec;
 
 	std::cout << "Constructing context...\n";
-	ContextHElib<int8_t> ctx;
+	ContextHElib<int8_t> ctx(2,true);   // paramset, bootstrappable
 
 	std::cout << "The bitonic sorting network is:\n";
 	Circuit bitonic = bitonic_sort(4, false);
@@ -21,7 +21,7 @@ int main(void)
 	outputfile << bitonic;
 	outputfile.close();
 	
-	PtVec inputs {7, 3, 10, 0};
+	PtVec inputs {7, 3, 22, 2 };
 
 	std::cout << "Inputs are: ";
 	for (auto x : inputs) std::cout << std::to_string(x) << " ";

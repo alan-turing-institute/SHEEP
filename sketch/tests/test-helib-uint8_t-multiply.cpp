@@ -16,7 +16,7 @@ int main(void) {
 	Circuit circ = cr.create_circuit(Gate::Multiply, 1);
 	std::cout << circ;
 
-	ContextHElib<uint8_t> ctx(20,80);
+	ContextHElib<uint8_t> ctx;
 
 	ContextHElib<uint8_t>::CircuitEvaluator run_circuit;
 	run_circuit = ctx.compile(circ);
