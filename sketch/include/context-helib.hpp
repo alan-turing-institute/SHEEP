@@ -236,6 +236,15 @@ public:
 
   Ciphertext Compare(Ciphertext a, Ciphertext b) {
     std::cout<<" using HElib's COMPARE "<<std::endl;
+
+    if (m_bootstrap) {
+      std::cout<<"bootstrapping"<<std::endl;
+      for (int i=0; i< m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+	b[i].modDownToLevel(5);
+      }
+    }
+    
     Ctxt mu(*m_publicKey);
     Ctxt ni(*m_publicKey);    
     Ciphertext cmax, cmin;
