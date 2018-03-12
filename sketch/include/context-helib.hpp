@@ -185,14 +185,16 @@ public:
     std::vector<long> pt;
 
     decryptBinaryNums(pt, CtPtrs_VecCt(ct), *m_secretKey, *m_ea);
-
+    long pt_transformed = pt[0];
+    return pt_transformed  % int(pow(2,m_bitwidth));
     
     ///    m_ea->decrypt(ct[0], *m_secretKey, pt);
 
-    long pt_transformed = pt[0];
+
     //  if ((pt[0]) > m_p / 2)    //// convention - treat this as a negative number
     //  pt_transformed = pt[0] - m_p;
-    return pt_transformed  % int(pow(2,m_bitwidth));
+
+
   };
 
 
@@ -209,7 +211,7 @@ public:
     /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
     Ciphertext output;
     output.append(mu);
-
+    std::cout<<" at end of HElib's COMPARE "<<std::endl;
     return output;
     
   }
@@ -265,16 +267,33 @@ public:
     a.addConstant(to_ZZX(b));
     return a;
   }
-
-  Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-    /// s is 0 or 1
-    /// output is s*a + (1-s)*b
-    Ciphertext sa = Multiply(s,a);
-    Ciphertext one_minus_s = MultByConstant( AddConstant(s,-1L), -1L);
-    Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
-    return Add(sa, one_minus_s_times_b);
-  }
   */
+  
+  Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+    std::cout<<" in HElib SELECT"<<std::endl;
+    /// s is 0 or 1
+    /// for each bit of a,b,output, do output = s*a + (1-s)*b
+    Ciphertext output;
+
+    for (int i=0; i < m_bitwidth; ++i) {
+      Ctxt sbit = s[0];
+      Ctxt abit = a[i];
+      Ctxt bbit = b[i];
+      abit *= sbit;
+      sbit.addConstant(to_ZZX(-1L));
+      sbit.multByConstant(to_ZZX(-1L));
+      sbit *= bbit;
+      abit += sbit;
+      output.append(abit);
+    }
+    std::cout<<" end of  HElib SELECT"<<std::endl;
+    return output;
+    //    Ciphertext sa = Multiply(s,a);
+    // Ciphertext one_minus_s = MultByConstant( AddConstant(s,-1L), -1L);
+    // Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
+    //return Add(sa, one_minus_s_times_b);
+  }
+  
   
   long get_num_slots() {
     return m_nslots;

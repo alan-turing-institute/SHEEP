@@ -83,7 +83,7 @@ if (HELIB_FOUND)
     add_test(NAME test-helib-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-helib-uint8_t-encrypt-decrypt>)
 
 
-    foreach (op IN ITEMS addConst multByConst select)
+    foreach (op IN ITEMS addConst multByConst)
         add_executable(test-helib-int8_t-${op}	
     	                 test-helib-int8_t-${op}
 			 	     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -93,7 +93,7 @@ if (HELIB_FOUND)
 
 
     foreach(type IN ITEMS bool int8_t uint8_t)
-        foreach(op IN ITEMS add multiply subtract negate compare)	
+        foreach(op IN ITEMS add multiply subtract compare select)	
     		add_executable(test-helib-${type}-${op}
 			test-helib-${type}-${op}.cpp	
 			${CMAKE_SOURCE_DIR}/src/circuit.cpp)

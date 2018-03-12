@@ -63,13 +63,17 @@ def enter_input_vals():
     user for the input values.
     """
     iform = build_inputs_form(app.data["inputs"])(request.form)
+    circuit_text = open(app.data["uploaded_filenames"]["circuit_file"]).readlines()
     if request.method == "POST" and iform.validate():
         input_vals = iform.data
         if utils.check_inputs(input_vals, app.data["input_type"]):
-            app.data["uploaded_filenames"]["inputs_file"] = utils.write_inputs_file(input_vals,
-                                                                                    app.config["UPLOAD_FOLDER"])            
+            app.data["uploaded_filenames"]["inputs_file"] = \
+                        utils.write_inputs_file(input_vals,
+                                                app.config["UPLOAD_FOLDER"])
             return redirect(url_for("execute_test"))
-    return render_template("enter_input_vals.html",form=iform)
+    return render_template("enter_input_vals.html",
+                           form=iform,
+                           circuit=circuit_text)
 
 
 @app.route("/view_results_table",methods=["POST","GET"])

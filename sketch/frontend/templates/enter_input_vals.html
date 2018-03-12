@@ -12,7 +12,7 @@
   <script>
         function loading(){
         document.getElementById("loading").style.display = "block";
-        document.getElementById("content").style.display = "none";
+        document.getElementById("circuit").style.display = "none";
         }
   </script>
   <style>
@@ -32,13 +32,6 @@
 </head>
  
 <body>
-  <div id="loading">
-    <img src="/static/sheep_waiting.gif" alt="waiting">
-    <p>
-      <h3> Calculating .... </h3>
-      </p>
-  </div>
-  
  
     <div id="content" class="container">
         <div class="header">
@@ -70,7 +63,21 @@
 	      {% endfor %}
 	    </table>
 	    <p><input type=submit value="Go!" onclick="loading();"></form></p>
-          </div>
+</div>
+<div id="circuit">
+  <p> <h3>  Circuit:</h3></p>
+<p> {% for line in  circuit %} </p>
+<br> {{ line }} <br>
+{% endfor %}
+  </div>
+
+
+ <div id="loading">
+    <img src="/static/sheep_waiting.gif" alt="waiting">
+    <p>
+      <h3> Calculating .... </h3>
+      </p>
+  </div>
  
 </body>
  
