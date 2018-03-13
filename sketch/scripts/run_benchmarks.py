@@ -23,6 +23,10 @@ def insert_measurement(context,
                        is_correct,
                        num_threads=1,
                        parameters="Default"):
+    """
+    insert a single benchmark run into the database.
+    """
+    
     m = BenchmarkMeasurement(context_name=context,
                              input_bitwidth=bitwidth,
                              gate_name=gate,
@@ -40,6 +44,11 @@ def run_single_benchmark(input_circuit,
                          input_vals_file,
                          context,
                          input_type):
+    """
+    Call the executable "benchmark" with command-line args for a specific run,
+    and parse the stdout output to get the processing time, and whether the 
+    test outputs equal the ClearContext outputs.
+    """
     run_cmd=[]
     run_cmd.append(os.path.join(EXECUTABLE_DIR,"benchmark"))
     run_cmd.append(os.path.join(INPUT_FILE_DIR,input_circuit))
@@ -60,7 +69,13 @@ def run_single_benchmark(input_circuit,
     eval_time = processing_times[2]
     return eval_time, is_correct
 
+
+
 def run_many_benchmarks(gates,types,contexts,max_depth=9):
+    """
+    call this function with lists of the Gates, input-types, and contexts to be benchmarked.
+    this in turn calls run_single_benchmark for each combination.
+    """
     for gate in gates:
         for input_type in types:
             bitwidth = get_bitwidth(input_type)
@@ -70,13 +85,13 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
                 for context in contexts:
                     print("Doing benchmark for %s %s %i %s" %
                           (context,gate,depth,input_type))
+### run the test
                     eval_time, is_correct = run_single_benchmark(
                         circuit_file,
                         inputs_file,
                         context,
                         input_type)
-                
-
+### insert the measurement into the database                    
                     insert_measurement(
                         context,
                         bitwidth,
