@@ -5,11 +5,11 @@ import subprocess
 import os
 import re
 
-EXECUTABLE_DIR = "/Users/nbarlow/SHEEP/sketch/build/bin"
+EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/sketch/build/bin"
 
-INPUT_FILE_DIR = "/Users/nbarlow/SHEEP/sketch/benchmark_inputs"
+INPUT_FILE_DIR = os.environ["HOME"]+"/SHEEP/sketch/benchmark_inputs"
 
-DEBUG_FILE_DIR = "/Users/nbarlow/SHEEP/sketch/debug"
+DEBUG_FILE_DIR = os.environ["HOME"]+"/SHEEP/sketch/debug"
 
 from frontend.database import BenchmarkMeasurement,session
 from frontend.utils import parse_test_output, check_outputs, get_bitwidth
