@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include "simple-circuits.hpp"
-//#include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "all_equal.hpp"
 
@@ -12,7 +11,7 @@ int main(void)
 	typedef std::vector<ContextHElib<int8_t>::Plaintext> PtVec;
 
 	std::cout << "Constructing context...\n";
-	ContextHElib<int8_t> ctx(2,true);   // paramset, bootstrappable
+	ContextHElib<int8_t> ctx(1,true);   // paramset, bootstrappable
 
 	std::cout << "The bitonic sorting network is:\n";
 	Circuit bitonic = bitonic_sort(4, false);
