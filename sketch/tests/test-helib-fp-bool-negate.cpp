@@ -23,17 +23,17 @@ int main(void) {
 
 	bool input = true;
 	std::cout<<"Input "<<std::to_string(input)<<std::endl;
-	std::list<ContextHElib_Fp<bool>::Plaintext> plaintext_inputs = {input};
-	std::list<ContextHElib_Fp<bool>::Ciphertext> ciphertext_inputs;
+	std::vector<ContextHElib_Fp<bool>::Plaintext> plaintext_inputs = {input};
+	std::vector<ContextHElib_Fp<bool>::Ciphertext> ciphertext_inputs;
 	
 	for (ContextHElib_Fp<bool>::Plaintext pt: plaintext_inputs)
 	  ciphertext_inputs.push_back(ctx.encrypt(pt));
 	
-	std::list<ContextHElib_Fp<bool>::Ciphertext> ciphertext_outputs;
+	std::vector<ContextHElib_Fp<bool>::Ciphertext> ciphertext_outputs;
 	using microsecond = std::chrono::duration<double, std::micro>;
 	microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
 	
-	std::list<ContextHElib_Fp<bool>::Plaintext> plaintext_outputs;
+	std::vector<ContextHElib_Fp<bool>::Plaintext> plaintext_outputs;
 	for (ContextHElib_Fp<bool>::Ciphertext ct: ciphertext_outputs) {
 	  ContextHElib_Fp<bool>::Plaintext pt = ctx.decrypt(ct);
 	  plaintext_outputs.push_back(pt);

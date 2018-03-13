@@ -25,8 +25,8 @@ int main(void) {
 	ContextHElib_Fp<uint8_t> ctx;
 
 	/// test choosing first
-	std::list<uint8_t> inputs = {1, 3, 15};
-	std::list<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::vector<uint8_t> inputs = {1, 3, 15};
+	std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front() == 3);
 	std::cout<<" select (1, 3, 15) = "<<std::to_string(result.front())<<std::endl;	
 	/// test choosing second

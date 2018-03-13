@@ -25,8 +25,8 @@ int main(void) {
 	ContextHElib_Fp<bool> ctx;
 
 	/// test choosing first
-	std::list<bool> inputs = {1, 0, 1};
-	std::list<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::vector<bool> inputs = {1, 0, 1};
+	std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front() == 0);
 	std::cout<<" select (1, 0, 1) = "<<std::to_string(result.front())<<std::endl;	
 	/// test choosing second

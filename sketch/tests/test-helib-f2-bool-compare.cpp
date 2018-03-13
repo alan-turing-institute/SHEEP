@@ -24,8 +24,8 @@ int main(void) {
 	ContextHElib_F2<bool> ctx;
 
 	/// test first bigger
-	std::list<bool> inputs = {1, 0};
-	std::list<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::vector<bool> inputs = {1, 0};
+	std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	std::cout<<" compare (1,0 ) = "<<std::to_string(result.front())<<std::endl;	
 	assert(result.front() == 1);
 

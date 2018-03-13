@@ -21,8 +21,8 @@ int main(void) {
 	ContextHElib_Fp<bool> ctx;
 
 	/// test two 1s
-	std::list<bool> inputs = {1, 1};
-	std::list<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::vector<bool> inputs = {1, 1};
+	std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front() == 0);
 	std::cout<<"  1 - 1 = "<<std::to_string(result.front())<<std::endl;	
 	/// test one of each

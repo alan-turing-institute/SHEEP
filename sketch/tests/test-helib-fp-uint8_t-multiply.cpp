@@ -7,6 +7,8 @@
 #include "circuit-repo.hpp"
 #include "circuit-test-util.hpp"
 
+typedef std::chrono::duration<double, std::micro> DurationT;
+
 int main(void) {
 	using namespace Sheep::HElib;
 
@@ -15,29 +17,22 @@ int main(void) {
 
 	Circuit circ = cr.create_circuit(Gate::Multiply, 1);
 	std::cout << circ;
-
+	std::vector<DurationT> durations;
 	ContextHElib_Fp<uint8_t> ctx;
 
 	ContextHElib_Fp<uint8_t>::CircuitEvaluator run_circuit;
 	run_circuit = ctx.compile(circ);
-	
-	std::list<ContextHElib_Fp<uint8_t>::Plaintext> plaintext_inputs = {10,12};
-	std::list<ContextHElib_Fp<uint8_t>::Ciphertext> ciphertext_inputs;
 
-	for (ContextHElib_Fp<uint8_t>::Plaintext pt: plaintext_inputs)
-	  ciphertext_inputs.push_back(ctx.encrypt(pt));
+/// test small postitive numbers
+        std::vector<uint8_t> inputs = {5, 22};
+        std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+        std::cout<<" 5*22 = "<<std::to_string(result.front())<<std::endl;      
+        assert(result.front() == 110);
 
-	std::list<ContextHElib_Fp<uint8_t>::Ciphertext> ciphertext_outputs;	
-
-	using microsecond = std::chrono::duration<double, std::micro>;
-	microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
-
-	std::list<ContextHElib_Fp<uint8_t>::Plaintext> plaintext_outputs;
-	for (ContextHElib_Fp<uint8_t>::Ciphertext ct: ciphertext_outputs) {
-	  ContextHElib_Fp<uint8_t>::Plaintext pt = ctx.decrypt(ct);
-	  plaintext_outputs.push_back(pt);
-	}
-
-	assert(plaintext_outputs.front() == 120);
+        /// test result going out of range positive
+        inputs = {100, 127};
+        result = ctx.eval_with_plaintexts(circ, inputs, durations);
+        std::cout<<" 100 + 127 = "<<std::to_string(result.front())<<std::endl;
+        assert(result.front() == 156);
 
 }

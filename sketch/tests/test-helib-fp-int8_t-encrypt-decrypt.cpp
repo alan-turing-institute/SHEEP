@@ -18,6 +18,6 @@ void test_single(ContextHElib_Fp<int8_t>& context) {
 }
 
 int main(void) {
-  ContextHElib_F2<int8_t> context;
+  ContextHElib_Fp<int8_t> context;
   test_single(context);
 }

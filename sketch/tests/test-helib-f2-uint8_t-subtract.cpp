@@ -21,8 +21,8 @@ int main(void) {
 	ContextHElib_F2<uint8_t> ctx;
 
 	/// test small postitive numbers
-	std::list<uint8_t> inputs = {22, 15};
-	std::list<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::vector<uint8_t> inputs = {22, 15};
+	std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front() == 7);
 	std::cout<<" 22 - 15 = "<<std::to_string(result.front())<<std::endl;	
 	/// test small 'negative' numbers (should give 2^BITWIDTH - x)

@@ -21,8 +21,8 @@ int main(void) {
 	ContextHElib_Fp<int8_t> ctx;
 
 	/// test small postitive numbers
-	std::list<int8_t> inputs = {3, 15};
-	std::list<int8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::vector<int8_t> inputs = {3, 15};
+	std::vector<int8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front() == 45);
 	std::cout<<" 3* 15 = "<<std::to_string(result.front())<<std::endl;	
 	/// test small negative numbers

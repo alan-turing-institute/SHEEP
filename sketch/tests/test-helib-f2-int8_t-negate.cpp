@@ -23,17 +23,17 @@ int main(void) {
 
 	int8_t input = 54;
 	std::cout<<"Input "<<std::to_string(input)<<std::endl;
-	std::list<ContextHElib_F2<int8_t>::Plaintext> plaintext_inputs = {input};
-	std::list<ContextHElib_F2<int8_t>::Ciphertext> ciphertext_inputs;
+	std::vector<ContextHElib_F2<int8_t>::Plaintext> plaintext_inputs = {input};
+	std::vector<ContextHElib_F2<int8_t>::Ciphertext> ciphertext_inputs;
 	
 	for (ContextHElib_F2<int8_t>::Plaintext pt: plaintext_inputs)
 	  ciphertext_inputs.push_back(ctx.encrypt(pt));
 	
-	std::list<ContextHElib_F2<int8_t>::Ciphertext> ciphertext_outputs;
+	std::vector<ContextHElib_F2<int8_t>::Ciphertext> ciphertext_outputs;
 	using microsecond = std::chrono::duration<double, std::micro>;
 	microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
 	
-	std::list<ContextHElib_F2<int8_t>::Plaintext> plaintext_outputs;
+	std::vector<ContextHElib_F2<int8_t>::Plaintext> plaintext_outputs;
 	for (ContextHElib_F2<int8_t>::Ciphertext ct: ciphertext_outputs) {
 	  ContextHElib_F2<int8_t>::Plaintext pt = ctx.decrypt(ct);
 	  plaintext_outputs.push_back(pt);
