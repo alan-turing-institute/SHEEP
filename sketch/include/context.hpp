@@ -6,8 +6,10 @@
 #include <chrono>
 #include <algorithm>
 
+#ifdef HAVE_TBB
 #include "tbb/concurrent_unordered_map.h"
 #include "tbb/flow_graph.h"
+#endif // HAVE_TBB
 
 #include "circuit.hpp"
 
@@ -127,6 +129,7 @@ public:
 	microsecond parallel_eval(const Circuit& circ,
 				  const InputContainer& input_vals,
 				  OutputContainer& output_vals) {
+#ifdef HAVE_TBB
 		using namespace tbb::flow;
 		tbb::concurrent_unordered_map<std::string, Ciphertext> eval_map;
 		tbb::concurrent_unordered_map<std::string, continue_node<continue_msg> > node_map;
@@ -205,9 +208,11 @@ public:
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
 			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
-		return duration;	
+		return duration;
+#else
+		throw std::runtime_error("SHEEP was not compiled with TBB, so parallel evaluation is not available.");
+#endif // HAVE_TBB
 	}
-
 	
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
