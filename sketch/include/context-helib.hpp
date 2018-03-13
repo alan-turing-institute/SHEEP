@@ -29,14 +29,16 @@ class ContextHElib : public Context< PlaintextT , NTL::Vec<Ctxt> > {
 public:
 
   typedef PlaintextT Plaintext;
-  ///  typedef Ctxt Ciphertext;
   typedef NTL::Vec<Ctxt> Ciphertext;  
 
   /// constructors
 
   ContextHElib(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
-	       bool bootstrap=true):
-    m_bootstrap(bootstrap)
+	       bool bootstrap=true, // bootstrap or not?
+	       long haming_weight=128):   // Haming weight of secret key
+    m_param_set(param_set),
+    m_bootstrap(bootstrap),
+    m_w(haming_weight)
   {
 
     /// BITWIDTH(bool) is 8, so need to deal with this by hand...
@@ -58,7 +60,7 @@ public:
       {  2, 27000, 32767, 15, 31,  7, 151, 11628, 28087,25824, 30,  6, -10, 28, 4}
     };
 
-    long* vals = mValues[param_set];
+    long* vals = mValues[m_param_set];
     m_p = vals[0];
     
     long m = vals[2];
@@ -107,7 +109,7 @@ public:
     m_publicKey = m_secretKey;  //// points to the same place
   
     /// generate a secret key
-    m_secretKey->GenSecKey(128);   /// Haming weight of 128
+    m_secretKey->GenSecKey(m_w);   /// Haming weight of 128
      
     addSome1DMatrices(*m_secretKey);
     addFrbMatrices(*m_secretKey);
@@ -121,26 +123,17 @@ public:
 
     ////  populate the map that will allow us to set parameters via an input file (or string)
     
-    m_param_name_map.insert({"security", m_security});
-    m_param_name_map.insert({"L", m_L});
-    m_param_name_map.insert({"p", m_p});    
-    m_param_name_map.insert({"r", m_r});
-    m_param_name_map.insert({"c", m_c});
-    m_param_name_map.insert({"w", m_w});
-    m_param_name_map.insert({"d", m_d});            
+    m_param_name_map.insert({"param_set", m_param_set});
+    m_param_name_map.insert({"Haming_weight", m_w});    
   
 };
 
   // destructor
   virtual ~ContextHElib() {
     /// delete everything we new-ed in the constructor
-    std::cout<<" in ContextHElib destructor - deleting ea"<<std::endl;
     if (m_ea != NULL) delete m_ea;
-    std::cout<<" in ContextHElib destructor - deleting secretKey"<<std::endl;
     if (m_secretKey != NULL) delete m_secretKey;
-    std::cout<<" in ContextHElib destructor - deleting context"<<std::endl;
     if (m_helib_context != NULL) delete m_helib_context;
-    std::cout<<" at end of ContextHElib destructor - deleted everything "<<std::endl;    
   };
 
   void read_params_from_file(std::string filename) {
@@ -202,19 +195,7 @@ public:
       m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
     }
     return ct;
-    
-    /*
-  //// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
-  std::vector<long> ptvec;
-  ptvec.push_back(pt);
   
-  ////// fill up nslots with zeros//// 
-  for (int i = ptvec.size(); i < m_nslots; i++) ptvec.push_back(0);
-  
-  Ciphertext ct(*m_publicKey);
-  m_ea->encrypt(ct, *m_publicKey, ptvec);
-  return ct;
-    */ 
   };
 
   Plaintext decrypt(Ciphertext ct) {
@@ -224,21 +205,12 @@ public:
     long pt_transformed = pt[0];
     return pt_transformed  % int(pow(2,m_bitwidth));
     
-    ///    m_ea->decrypt(ct[0], *m_secretKey, pt);
-
-
-    //  if ((pt[0]) > m_p / 2)    //// convention - treat this as a negative number
-    //  pt_transformed = pt[0] - m_p;
-
-
   };
 
 
   Ciphertext Compare(Ciphertext a, Ciphertext b) {
-    std::cout<<" using HElib's COMPARE "<<std::endl;
 
     if (m_bootstrap) {
-      std::cout<<"bootstrapping"<<std::endl;
       for (int i=0; i< m_bitwidth; ++i) {
 	a[i].modDownToLevel(5);
 	b[i].modDownToLevel(5);
@@ -256,7 +228,6 @@ public:
     /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
     Ciphertext output;
     output.append(mu);
-    std::cout<<" at end of HElib's COMPARE "<<std::endl;
     return output;
     
   }
@@ -264,7 +235,6 @@ public:
   
   
   Ciphertext Add(Ciphertext a, Ciphertext b) {
-    std::cout<<"using HElib's ADD "<<std::endl;
 
     Ciphertext sum;
     CtPtrs_VecCt wsum(sum);
@@ -277,7 +247,6 @@ public:
 
   
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-    std::cout<<"using HElib's MULTIPLY "<<std::endl;
 
    Ciphertext product;
    CtPtrs_VecCt wprod(product);
@@ -289,33 +258,8 @@ public:
     
   };
 
-  /*
-  Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-    a -= b;  
-    return a;   
-  };
-
-  Ciphertext Negate(Ciphertext a) {
-    if (m_bitwidth == 1)  /// special case for binary
-      a.addConstant(to_ZZX(1L));
-    else
-      a.multByConstant(to_ZZX(-1L));  
-    return a;   
-  };
-
-  Ciphertext MultByConstant(Ciphertext a, long b) {
-    a.multByConstant(to_ZZX(b));
-    return a;
-  }
-
-  Ciphertext AddConstant(Ciphertext a, long b) {
-    a.addConstant(to_ZZX(b));
-    return a;
-  }
-  */
   
   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-    std::cout<<" in HElib SELECT"<<std::endl;
     /// s is 0 or 1
     /// for each bit of a,b,output, do output = s*a + (1-s)*b
     Ciphertext output;
@@ -331,12 +275,7 @@ public:
       abit += sbit;
       output.append(abit);
     }
-    std::cout<<" end of  HElib SELECT"<<std::endl;
     return output;
-    //    Ciphertext sa = Multiply(s,a);
-    // Ciphertext one_minus_s = MultByConstant( AddConstant(s,-1L), -1L);
-    // Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
-    //return Add(sa, one_minus_s_times_b);
   }
   
   
@@ -347,17 +286,13 @@ public:
   
 private:
 
+  long m_param_set;  // which set of parameters to use (0 to 4).
+  
   long m_p;     //  modulus of plaintext
 
   long m_B;     // number of bits per level
   
-  long m_d;     // this is likely to be zero
-
   long m_L;     // maximum number of homomorphic levels
-
-  long m_r;     // defines plaintext space as A_{p^r} 
-
-  long m_security;  // chosen security level for the encryption
 
   long m_w;     // Hamming weight of secret key
 
@@ -383,10 +318,6 @@ private:
   
 };
 
-
-  typedef ContextHElib<bool> ContextHElib_bool;
-  typedef ContextHElib<uint8_t> ContextHElib_uint8_t;  
-  
   
 }  // leavin HElib namespace
 }  // leaving Sheep namespace
