@@ -76,40 +76,51 @@ if (TFHE_FOUND)
 endif (TFHE_FOUND)
 
 if (HELIB_FOUND)
-    foreach(f IN ITEMS f2 fp)
-    add_executable(test-helib-${f}-uint8_t-encrypt-decrypt
-                     test-helib-${f}-uint8_t-encrypt-decrypt.cpp
-		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    target_link_libraries(test-helib-${f}-uint8_t-encrypt-decrypt ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    add_test(NAME test-helib-${f}-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-helib-${f}-uint8_t-encrypt-decrypt>)
-
-
-    foreach (op IN ITEMS addConst multByConst)
-        add_executable(test-helib-${f}-int8_t-${op}	
-    	                 test-helib-${f}-int8_t-${op}
-			 	     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    	target_link_libraries(test-helib-${f}-int8_t-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    	add_test(NAME test-helib-${f}-int8_t-${op} COMMAND $<TARGET_FILE:test-helib-${f}-int8_t-${op}>)
-    endforeach(op)      
-
 
     foreach(type IN ITEMS bool int8_t uint8_t)
-        foreach(op IN ITEMS add multiply subtract compare select)	
+        foreach(f IN ITEMS fp)
+    	foreach (op IN ITEMS subtract addConst multByConst)
+        	add_executable(test-helib-${f}-${type}-${op}	
+    	                  	test-helib-${f}-${type}-${op}
+			 	${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+    		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+    	endforeach(op)      
+    	endforeach(f)
+	foreach(f IN ITEMS f2)
+        foreach(op IN ITEMS compare)	
     		add_executable(test-helib-${f}-${type}-${op}
 			test-helib-${f}-${type}-${op}.cpp	
 			${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
         endforeach(op)
+    	endforeach(f)
+    	foreach(f IN ITEMS f2 fp)
+        foreach(op IN ITEMS add multiply select encrypt-decrypt)	
+    		add_executable(test-helib-${f}-${type}-${op}
+			test-helib-${f}-${type}-${op}.cpp	
+			${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
+        endforeach(op)
+    	endforeach(f)
     endforeach(type)
-    endforeach(f)
-    
+
 endif (HELIB_FOUND)
 
 add_executable(test-parallel-eval test-parallel-eval.cpp
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp
   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+if (HELIB_FOUND AND TFHE_FOUND)
+   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+elseif (HELIB_FOUND)
+   target_link_libraries(test-parallel-eval ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+elseif (TFHE_FOUND)
+   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} )
+else(HELIB_FOUND_AND_TFHE_FOUND)
+   target_link_libraries(test-parallel-eval)
+endif(HELIB_FOUND AND TFHE_FOUND)  
 
-target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES})
 add_test(NAME test-parallel-eval COMMAND test-parallel-eval)
