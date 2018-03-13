@@ -7,7 +7,7 @@ template <typename ContextT, typename PTcontainer>
 bool eval_encrypted_check_equal(ContextT ctx, Circuit circ,
 				PTcontainer in, PTcontainer out_expected)
 {
-	PTcontainer out(eval_with_plaintexts(ctx, circ, in));
+	PTcontainer out(ctx.eval_with_plaintexts(circ, in));
 	return all_equal(out, out_expected);
 }
 

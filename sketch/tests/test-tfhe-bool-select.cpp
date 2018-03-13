@@ -17,6 +17,6 @@ int main(void) {
 
 	ContextTFHE<bool> ctx;
 	
-	assert(all_equal(eval_with_plaintexts(ctx, circ, PtVec{0, 0, 1}), PtVec{1}));
-	assert(all_equal(eval_with_plaintexts(ctx, circ, PtVec{1, 0, 1}), PtVec{0}));
+	assert(all_equal(ctx.eval_with_plaintexts(circ, PtVec{0, 0, 1}), PtVec{1}));
+	assert(all_equal(ctx.eval_with_plaintexts(circ, PtVec{1, 0, 1}), PtVec{0}));
 }

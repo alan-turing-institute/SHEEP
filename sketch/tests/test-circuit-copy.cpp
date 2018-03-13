@@ -34,8 +34,7 @@ int main(void)
 	typedef std::vector<ContextClear<int32_t>::Plaintext> PtVec;
 	ContextClear<int32_t> ctx;
 	PtVec inputs{1,2,3,4,5};
-	PtVec result_C(eval_with_plaintexts(ctx, C, inputs));
-	assert(all_equal(result_C, eval_with_plaintexts(ctx, C_copy, inputs)));
-	assert(!all_equal(result_C, eval_with_plaintexts(ctx, C_copy,
-							 PtVec{1,1,1,1,1})));
+	PtVec result_C(ctx.eval_with_plaintexts(C, inputs));
+	assert(all_equal(result_C, ctx.eval_with_plaintexts(C_copy, inputs)));
+	assert(!all_equal(result_C, ctx.eval_with_plaintexts(C_copy, {1,1,1,1,1})));
 }

@@ -23,7 +23,7 @@ int main(void)
 	for (auto x : inputs) std::cout << std::to_string(x) << " ";
 	std::cout << std::endl;
 
-	PtVec sorted = eval_with_plaintexts(ctx, bitonic, inputs);
+	PtVec sorted = ctx.eval_with_plaintexts(bitonic, inputs);
 
 	std::cout << "Sorted result is: ";
 	for (auto x : sorted) std::cout << std::to_string(x) << " ";

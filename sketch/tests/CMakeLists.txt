@@ -91,3 +91,11 @@ if (HELIB_FOUND)
     endforeach(op)
     
 endif (HELIB_FOUND)
+
+add_executable(test-parallel-eval test-parallel-eval.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+
+target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES})
+add_test(NAME test-parallel-eval COMMAND test-parallel-eval)
