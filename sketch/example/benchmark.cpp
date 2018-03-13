@@ -15,8 +15,13 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
-	if (context_type == "HElib") {
+	if (context_type == "HElib_F2") {
 	  auto ctx =  std::make_unique<HElib::ContextHElib_F2<PlaintextT> >();
+	  if (context_params.length() > 0)
+	    ctx->read_params_from_file(context_params);
+	  return ctx;
+	} else if (context_type == "HElib_Fp") {
+	  auto ctx =  std::make_unique<HElib::ContextHElib_Fp<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
