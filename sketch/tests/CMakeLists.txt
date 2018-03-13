@@ -1,18 +1,33 @@
-
-
-
 add_executable(test-write-read-circuit
                  test-write-read-circuit.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
 
+add_executable(test-circuit-copy
+  test-circuit-copy.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
 
-foreach(op IN ITEMS add multiply subtract compare ripple-carry-add)
+add_executable(test-circuit-par
+  test-circuit-par.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-par COMMAND test-circuit-par)
+
+add_executable(test-circuit-seq
+  test-circuit-seq.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
+
+
+foreach(op IN ITEMS add multiply subtract compare ripple-carry-add select)
 	  foreach(type IN ITEMS int8_t)
 	  	       add_executable(test-clear-${type}-${op}	
                        test-clear-${type}-${op}.cpp
-		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp  
-		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)			  
+		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
 	  endforeach(type)
 endforeach(op)
@@ -27,10 +42,11 @@ if (TFHE_FOUND)
     target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
     add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
 
-    foreach(op IN ITEMS and or xor not)
+    foreach(op IN ITEMS and or xor not select)
         add_executable(test-tfhe-bool-${op}
                          test-tfhe-bool-${op}.cpp
                          ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+			 ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
                          ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
         target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
@@ -44,10 +60,11 @@ if (TFHE_FOUND)
         target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
         add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
 
-        foreach(op IN ITEMS add subtract negate compare)
+        foreach(op IN ITEMS add subtract negate compare select)
             add_executable(test-tfhe-${type}-${op}
                              test-tfhe-${type}-${op}.cpp
                              ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+			     ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
                              ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
             target_link_libraries(test-tfhe-${type}-${op} ${TFHE_LIBRARIES})

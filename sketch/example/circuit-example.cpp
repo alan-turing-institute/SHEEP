@@ -7,7 +7,7 @@ int main(void)
 	const Wire& b = c.add_input("b");
 	
 	// w2 is the output of th
-	const Wire& w2 = c.add_assignment("w2", Gate::Add, a, b);
+	const Wire& w2 = c.add_assignment("w2", Gate::Add, Circuit::WireList{a, b});
 
 	c.set_output(w2);
 	
