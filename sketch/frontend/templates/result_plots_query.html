@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<script type="text/javascript">// <![CDATA[
-        function loading(){
-            $("#loading").show();
-            $("#content").hide();       
-        }
-// ]]></script>
-
-  
+ 
 <head>
     <title>SHEEP</title>
  
@@ -33,17 +25,8 @@
             <h3 class="text-muted">Homomorphic Encryption Evaluation</h3>
         </div>
  
-        <div class="jumbotron">
-            <h1>SHEEP</h1>
-            <p class="lead"></p>
-            <p><a class="btn btn-lg btn-success" href="view_results_table" role="button">View table of results</a>
-            </p>
-	    <p class="lead"></p>
-            <p><a class="btn btn-lg btn-success" href="view_results_plots" role="button">Make plots of results</a>
-            </p>
-	    <p class="lead"></p>
-            <p><a class="btn btn-lg btn-success" href="new_test" role="button">Upload circuit and run test</a>
-            </p>
+        <div>
+            <h2>Select results to view</h2>
         </div>
  
         <div class="row marketing">
@@ -51,8 +34,18 @@
 
             </div>
         </div>
+	<div>
+	  <form method="POST" action="" enctype="multipart/form-data">
+	    <table>
+	      {% for field in form %}
+	      <tr>
+		<td>{{ field.label }}</td><td>{{ field }}</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+	    <p><input type=submit value="Go!"></form></p>
+          </div>
  
-    </div>
 </body>
  
 </html>

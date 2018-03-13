@@ -3,6 +3,8 @@
 
 #include <unordered_map>
 #include <chrono>
+#include <type_traits>
+#include "bits.hpp"
 
 #include "circuit.hpp"
 #include "context.hpp"
@@ -32,6 +34,15 @@ public:
     m_w(w),  // Hamming weight of secret key
     m_d(d)   // unknown
   {
+
+    /// BITWIDTH(bool) is 8, so need to deal with this by hand...
+    //// (better to specialize class?)
+    
+    if (std::is_same<Plaintext, bool>::value)
+      m_bitwidth = 1;
+    else
+      m_bitwidth = BITWIDTH(Plaintext);
+  
     /// start to build
     
     long m = FindM(m_security, m_L, m_c, m_p, m_d, 0, 0);
@@ -144,7 +155,12 @@ public:
   Plaintext decrypt(Ciphertext ct) {
     std::vector<long> pt;
     m_ea->decrypt(ct, *m_secretKey, pt);
-    return pt[0];
+    std::cout<<" answer before modulus is "<<std::to_string(pt[0])<<std::endl;
+    int modulus = pow(2,m_bitwidth);
+    std::cout<<"modulus is "<<modulus<<" bitwidth "<<m_bitwidth<<std::endl;
+    Plaintext output = Plaintext(pt[0]);
+    std::cout<<" output plaintext is "<<std::to_string(output)<<std::endl;
+    return pt[0]  % int(pow(2,m_bitwidth));
   };
 	
   Ciphertext Add(Ciphertext a, Ciphertext b) {
@@ -193,7 +209,8 @@ private:
   const FHEPubKey* m_publicKey;
 
   FHEcontext* m_helib_context;
-  
+
+  int m_bitwidth;
 };
 
 

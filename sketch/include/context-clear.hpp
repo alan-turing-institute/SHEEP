@@ -4,6 +4,8 @@
 #include "circuit.hpp"
 #include "context.hpp"
 #include "bits.hpp"
+#include <type_traits>
+#include <cmath>
 
 namespace Sheep {
 namespace Clear {
@@ -11,9 +13,7 @@ namespace Clear {
 
 template<typename PlaintextT>
 class ContextClear : public Context<PlaintextT, PlaintextT> {   //plaintext and ciphertext are the same type
-
 public:
-
         typedef PlaintextT Plaintext;
         typedef PlaintextT Ciphertext;
   
@@ -55,19 +55,34 @@ public:
 		return result;
 	}
 
+	// In Add, Multiply, Subtract and Negate, we assume that
+	// Ciphertext is either unsigned or a two's complement integer
+	// type.  With a signed type, to avoid undefined behaviour,
+	// cast to the corresponding unsigned type, perform the
+	// operation, then cast back.  To do this with the .
+
+	// Work in the corresponding unsigned type and cast
+	// back, so overflow is well-defined.
+
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  std::cout<<"Using clear context's ADD"<<std::endl;
-	  return (a + b);
+		typedef typename std::make_unsigned<Ciphertext>::type uC;
+		uC au = static_cast<uC>(a);
+		uC bu = static_cast<uC>(b);
+		return static_cast<Ciphertext>(au + bu);
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	  std::cout<<"Using clear context's MULTIPLY"<<std::endl;
-	  return (a * b);
+		typedef typename std::make_unsigned<Ciphertext>::type uC;
+		uC au = static_cast<uC>(a);
+		uC bu = static_cast<uC>(b);
+		return static_cast<Ciphertext>(au * bu);
 	}
 
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	  std::cout<<"Using clear context's SUBTRACT"<<std::endl;
-	  return (a - b);
+		typedef typename std::make_unsigned<Ciphertext>::type uC;
+		uC au = static_cast<uC>(a);
+		uC bu = static_cast<uC>(b);
+		return static_cast<Ciphertext>(au - bu);
 	}
 
 	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
@@ -79,8 +94,14 @@ public:
 	}
 
 	Ciphertext Negate(Ciphertext a) {
-		return -1 * a;
-  }
+		if (std::is_same<Ciphertext, bool>::value) {
+			return Not(a);
+		} else {
+			typedef typename std::make_unsigned<Ciphertext>::type uC;
+			uC au = static_cast<uC>(a);
+			return static_cast<Ciphertext>(-au);
+		}
+	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
