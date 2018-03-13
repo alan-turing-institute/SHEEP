@@ -76,7 +76,7 @@ if (TFHE_FOUND)
 endif (TFHE_FOUND)
 
 if (HELIB_FOUND)
-    foreach(f IN ITEMS f2)
+    foreach(f IN ITEMS f2 fp)
     add_executable(test-helib-${f}-uint8_t-encrypt-decrypt
                      test-helib-${f}-uint8_t-encrypt-decrypt.cpp
 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
