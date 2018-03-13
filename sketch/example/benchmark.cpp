@@ -16,7 +16,7 @@ template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
 	if (context_type == "HElib") {
-	  auto ctx =  std::make_unique<HElib::ContextHElib<PlaintextT> >();
+	  auto ctx =  std::make_unique<HElib::ContextHElib_F2<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
@@ -31,8 +31,8 @@ make_context(std::string context_type, std::string context_params="") {
 
 
 template<typename T>
-std::list<T> read_inputs_file(std::string filename) {
-  std::list<T> inputs_list;
+std::vector<T> read_inputs_file(std::string filename) {
+  std::vector<T> inputs_list;
   std::ifstream inputstream(filename);	  
   if (inputstream.bad()) {
     std::cout<<"Empty or non-existent input file"<<std::endl;
@@ -64,7 +64,7 @@ std::list<T> read_inputs_file(std::string filename) {
 }
 
 template <typename PlaintextT>
-void print_outputs(std::list<PlaintextT> test_results, std::list<PlaintextT> control_results, std::vector<DurationT>& durations) {
+void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT> control_results, std::vector<DurationT>& durations) {
   std::cout<<std::endl<<"==============="<<std::endl;
   std::cout<<"=== RESULTS ==="<<std::endl<<std::endl;
   std::cout<<"== Processing times: =="<<std::endl;
@@ -111,10 +111,10 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::unique_ptr<BaseContext<PlaintextT> > clear_ctx = make_context<PlaintextT>("Clear");
 	
 	// read in inputs from input_filename
-	std::list<PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
-	std::list<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, inputs, durations);
+	std::vector<PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
+	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, inputs, durations);
 	std::vector<DurationT> dummy;
-	std::list<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, inputs, dummy);	
+	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, inputs, dummy);	
 
 
 	print_outputs(result_bench, result_clear, durations);

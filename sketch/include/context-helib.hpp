@@ -36,9 +36,12 @@ public:
 
   /// constructors
 
-  ContextHElib(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+  ContextHElib(long p,             // plaintext modulus
+	       long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
 	       bool bootstrap=true, // bootstrap or not?
-	       long haming_weight=128):   // Haming weight of secret key
+	       long haming_weight=128): // Haming weight of secret key
+
+    m_p(p),
     m_param_set(param_set),
     m_bootstrap(bootstrap),
     m_w(haming_weight)
@@ -46,7 +49,7 @@ public:
 
     /// BITWIDTH(bool) is 8, so need to deal with this by hand...
     //// (better to specialize class?)
-    
+    std::cout<<" param set "<<std::to_string(m_param_set)<<" p "<<std::to_string(p)<<std::endl;
     if (std::is_same<Plaintext, bool>::value)
       m_bitwidth = 1;
     else
@@ -64,7 +67,6 @@ public:
     };
 
     long* vals = mValues[m_param_set];
-    m_p = vals[0];
     
     long m = vals[2];
     
@@ -126,7 +128,8 @@ public:
     ////  populate the map that will allow us to set parameters via an input file (or string)
     
     m_param_name_map.insert({"param_set", m_param_set});
-    m_param_name_map.insert({"Haming_weight", m_w});    
+    m_param_name_map.insert({"Haming_weight", m_w});
+    m_param_name_map.insert({"p", m_p});        
   
 };
 
@@ -245,7 +248,18 @@ public:
   typedef PlaintextT Plaintext;
   typedef NTL::Vec<Ctxt> Ciphertext;  
   
-     
+  ContextHElib_F2(long p=2,           // plaintext modulus
+		  long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+		  bool bootstrap=true, // bootstrap or not?
+		  long haming_weight=128) // Haming weight of secret key
+    : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
+  {
+    ///    this->initialize();
+    this->print_parameters();  
+  }
+
+
+  
   Ciphertext encrypt(Plaintext pt) {
     Ctxt mu(*(this->m_publicKey));  /// use this to fill up the vector when resizing
     Ciphertext  ct;   /// now an NTL::Vec<Ctxt>
@@ -345,7 +359,17 @@ public:
   typedef PlaintextT Plaintext;
   typedef Ctxt Ciphertext;  
   
-     
+  ContextHElib_Fp(long p=65537,      // plaintext modulus
+		  long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+		  bool bootstrap=false, // bootstrap or not?
+		  long haming_weight=128) // Haming weight of secret key
+    : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
+  {
+    ///    this->initialize();
+    this->print_parameters();  
+  }
+
+  
   Ciphertext encrypt(Plaintext pt) {
 
 //// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
@@ -365,7 +389,6 @@ public:
     
     std::vector<long> pt;
     this->m_ea->decrypt(ct, *(this->m_secretKey), pt);
-    std::cout<<" answer before modulus is "<<std::to_string(pt[0])<<std::endl;
     long pt_transformed = pt[0];
     if ((pt[0]) > this->m_p / 2)    //// convention - treat this as a negative number
       pt_transformed = pt[0] - this->m_p;
@@ -382,6 +405,13 @@ public:
 
   }
 
+  Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+
+    a -= b;
+    return a;
+
+  }
+  
   
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 
