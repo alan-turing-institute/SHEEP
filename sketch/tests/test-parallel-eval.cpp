@@ -31,17 +31,20 @@ void test(const Circuit& C, std::vector<typename ContextT::Plaintext> inputs,
 {
 	ContextT ctx;
 	
-	std::chrono::duration<double, std::micro> duration1, duration2;
+	std::vector<std::chrono::duration<double, std::micro> > duration1, duration2;
 	
-	assert(all_equal(eval_with_plaintexts(ctx, C, inputs, duration1), outputs));
-	std::cout << "evaluating in serial took " << duration1.count() << " microseconds" << std::endl;
+	assert(all_equal(ctx.eval_with_plaintexts(C, inputs, duration1), outputs));
+	std::cout << "evaluating in serial took " << duration1[1].count()
+		  << " microseconds" << std::endl;
 	
 #if ! HAVE_TBB
 	try {
 #endif
-		assert(all_equal(eval_with_plaintexts(ctx, C, inputs, duration2, true), outputs));
+		assert(all_equal(ctx.eval_with_plaintexts(C, inputs, duration2, EvaluationStrategy::parallel),
+				 outputs));
 		assert(HAVE_TBB); // shouldn't get here if not build with TBB
-		std::cout << "evaluating in parallel took " << duration2.count() << " microseconds" << std::endl;
+		std::cout << "evaluating in parallel took " << duration2[1].count()
+			  << " microseconds" << std::endl;
 #if ! HAVE_TBB
 	} catch (const std::runtime_error&) {
 		std::cout << "TBB not defined, caught runtime_error as expected.\n";

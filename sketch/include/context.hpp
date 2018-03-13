@@ -7,7 +7,6 @@
 #include <chrono>
 #include <algorithm>
 #include <map>
-#include <list>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -21,12 +20,21 @@
 
 #include "circuit.hpp"
 
+enum class EvaluationStrategy {serial, parallel};
+
 /// Base base class
 template <typename PlaintextT>
 class BaseContext {
 public:
-  virtual std::list<PlaintextT>
-  eval_with_plaintexts(Circuit, std::list<PlaintextT>, std::vector<std::chrono::duration<double, std::micro> >&) = 0 ; 
+	virtual std::vector<PlaintextT>
+	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
+			     std::vector<std::chrono::duration<double, std::micro> >&,
+			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;	
+
+	// overloaded version for when we don't care about the timings
+	virtual std::vector<PlaintextT>
+	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
+			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
 };
 
 // Base class - abstract interface to each library
@@ -253,38 +261,56 @@ public:
 		return CircuitEvaluator(run);
 	}
 
-        virtual std::list<Plaintext> eval_with_plaintexts(Circuit C,
-							  std::list<Plaintext> plaintext_inputs,
-							  std::vector<std::chrono::duration<double, std::micro> >& durations) {
+        virtual std::vector<Plaintext> eval_with_plaintexts(
+		const Circuit& C,
+		std::vector<Plaintext> plaintext_inputs,
+		std::vector<std::chrono::duration<double, std::micro> >& durations,
+		EvaluationStrategy eval_strategy = EvaluationStrategy::serial)
+	{
+		typedef std::chrono::duration<double, std::micro> microsecond;
+		typedef std::chrono::high_resolution_clock high_res_clock;
+		auto enc_start_time = high_res_clock::now();
 
-	  typedef std::chrono::duration<double, std::micro> microsecond;
-	  typedef std::chrono::high_resolution_clock high_res_clock;
-	  auto enc_start_time = high_res_clock::now();
-	  
-	  /// encrypt the inputs
-	  std::list<Ciphertext> ciphertext_inputs;
-	  for (auto pt_iter = plaintext_inputs.begin(); pt_iter != plaintext_inputs.end(); ++pt_iter) 
-	    ciphertext_inputs.push_back(encrypt(*pt_iter));
-	  auto enc_end_time = high_res_clock::now();
-	  durations.push_back(microsecond(enc_end_time - enc_start_time));
-	  
-	  //// evaluate the circuit	  
-	  std::list<Ciphertext> ciphertext_outputs;
-	  microsecond eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs);
-	  durations.push_back(eval_duration);
+		/// encrypt the inputs
+		std::vector<Ciphertext> ciphertext_inputs;
+		for (auto pt : plaintext_inputs) ciphertext_inputs.push_back(encrypt(pt));
+		auto enc_end_time = high_res_clock::now();
+		durations.push_back(microsecond(enc_end_time - enc_start_time));
 
-	  //// decrypt the outputs again
-	  auto dec_start_time = high_res_clock::now();
-	  std::list<Plaintext> plaintext_outputs;
-	  for (auto ct_iter = ciphertext_outputs.begin(); ct_iter != ciphertext_outputs.end(); ++ct_iter) 
-	    plaintext_outputs.push_back(decrypt(*ct_iter));
-	  auto dec_end_time = high_res_clock::now();
-	  durations.push_back(microsecond(dec_end_time - dec_start_time));	  
-	  return plaintext_outputs;
+		//// evaluate the circuit	  
+		std::vector<Ciphertext> ciphertext_outputs;
+		microsecond eval_duration;
+		switch (eval_strategy) {
+		case EvaluationStrategy::serial:
+			eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs);
+			break;
+		case EvaluationStrategy::parallel:
+			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs);
+			break;
+		default:
+			std::runtime_error("eval_with_plaintexts: Unknown evaluation strategy");
+		}
+		durations.push_back(eval_duration);
+
+		//// decrypt the outputs again
+		auto dec_start_time = high_res_clock::now();
+		std::vector<Plaintext> plaintext_outputs;
+		for (auto ct : ciphertext_outputs) plaintext_outputs.push_back(decrypt(ct));
+		auto dec_end_time = high_res_clock::now();
+		durations.push_back(microsecond(dec_end_time - dec_start_time));	  
+
+		return plaintext_outputs;
 	}
-  
-  
-        virtual void read_params_from_file(std::string filename) {
+
+	virtual std::vector<PlaintextT>
+	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
+			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial)
+	{
+		std::vector<std::chrono::duration<double, std::micro> > ignored;
+		return eval_with_plaintexts(c, ptxts, ignored, eval_strategy);
+	}
+
+	virtual void read_params_from_file(std::string filename) {
 	  std::ifstream inputstream(filename);
 	  
 	  if (inputstream.bad()) {
@@ -366,43 +392,6 @@ void decrypt(ContextT& context,
 		       [&context](typename ContextT::Ciphertext ct){
 			       return context.decrypt(ct);
 		       });
-}
-
-template <typename ContextT,
-	  typename PlaintextContainer>
-PlaintextContainer eval_with_plaintexts(ContextT context,
-					Circuit circ,
-					PlaintextContainer plaintexts_in,
-					std::chrono::duration<double, std::micro>& duration,
-					bool parallel_eval = false)
-{
-	typedef std::list<typename ContextT::Ciphertext> CiphertextContainer;
-	CiphertextContainer ciphertexts_in, ciphertexts_out;
-	encrypt(context, plaintexts_in.begin(), plaintexts_in.end(),
-		std::back_inserter(ciphertexts_in));
-
-	if (parallel_eval) {
-		duration = context.parallel_eval(circ, ciphertexts_in, ciphertexts_out);
-	} else {
-		duration = context.eval(circ, ciphertexts_in, ciphertexts_out);
-	}
-
-	PlaintextContainer plaintexts_out;
-	decrypt(context, ciphertexts_out.begin(), ciphertexts_out.end(),
-		std::back_inserter(plaintexts_out));
-
-	return plaintexts_out;
-}
-
-template <typename ContextT,
-	  typename PlaintextContainer>
-PlaintextContainer eval_with_plaintexts(ContextT context,
-					Circuit circ,
-					PlaintextContainer plaintexts_in,
-					bool parallel_eval = false)
-{
-	std::chrono::duration<double, std::micro> ignore;
-	return eval_with_plaintexts(context, circ, plaintexts_in, ignore, parallel_eval);
 }
 
 #endif // CONTEXT_HPP

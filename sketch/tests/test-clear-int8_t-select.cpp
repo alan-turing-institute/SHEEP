@@ -17,7 +17,7 @@ int main(void) {
 
 	ContextClear<int8_t> ctx;
 	
-	assert(all_equal(eval_with_plaintexts(ctx, circ, PtVec{0, 2, -1}), PtVec{-1}));
-	assert(all_equal(eval_with_plaintexts(ctx, circ, PtVec{1, 0, 0}), PtVec{0}));
-	assert(all_equal(eval_with_plaintexts(ctx, circ, PtVec{1, 100, 0}), PtVec{100}));
+	assert(all_equal(ctx.eval_with_plaintexts(circ, {0, 2, -1}), {-1}));
+	assert(all_equal(ctx.eval_with_plaintexts(circ, {1, 0, 0}), {0}));
+	assert(all_equal(ctx.eval_with_plaintexts(circ, {1, 100, 0}), {100}));
 }
