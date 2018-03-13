@@ -76,30 +76,32 @@ if (TFHE_FOUND)
 endif (TFHE_FOUND)
 
 if (HELIB_FOUND)
-    add_executable(test-helib-uint8_t-encrypt-decrypt
-                     test-helib-uint8_t-encrypt-decrypt.cpp
+    foreach(f IN ITEMS f2)
+    add_executable(test-helib-${f}-uint8_t-encrypt-decrypt
+                     test-helib-${f}-uint8_t-encrypt-decrypt.cpp
 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    target_link_libraries(test-helib-uint8_t-encrypt-decrypt ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    add_test(NAME test-helib-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-helib-uint8_t-encrypt-decrypt>)
+    target_link_libraries(test-helib-${f}-uint8_t-encrypt-decrypt ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+    add_test(NAME test-helib-${f}-uint8_t-encrypt-decrypt COMMAND $<TARGET_FILE:test-helib-${f}-uint8_t-encrypt-decrypt>)
 
 
     foreach (op IN ITEMS addConst multByConst)
-        add_executable(test-helib-int8_t-${op}	
-    	                 test-helib-int8_t-${op}
+        add_executable(test-helib-${f}-int8_t-${op}	
+    	                 test-helib-${f}-int8_t-${op}
 			 	     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    	target_link_libraries(test-helib-int8_t-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    	add_test(NAME test-helib-int8_t-${op} COMMAND $<TARGET_FILE:test-helib-int8_t-${op}>)
+    	target_link_libraries(test-helib-${f}-int8_t-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+    	add_test(NAME test-helib-${f}-int8_t-${op} COMMAND $<TARGET_FILE:test-helib-${f}-int8_t-${op}>)
     endforeach(op)      
 
 
     foreach(type IN ITEMS bool int8_t uint8_t)
         foreach(op IN ITEMS add multiply subtract compare select)	
-    		add_executable(test-helib-${type}-${op}
-			test-helib-${type}-${op}.cpp	
+    		add_executable(test-helib-${f}-${type}-${op}
+			test-helib-${f}-${type}-${op}.cpp	
 			${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-		target_link_libraries(test-helib-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-		add_test(NAME test-helib-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${type}-${op}>)	
+		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
         endforeach(op)
-    endforeach(type)	
+    endforeach(type)
+    endforeach(f)
     
 endif (HELIB_FOUND)
