@@ -27,7 +27,9 @@ make test
 
  1. Download and build the package you would like to use, following the instructions that the authors will hopefully provide.
  2. Checkout the `master` branch of SHEEP, and then create a branch for working on your new package:
- ``` git checkout -b "add-MyNewHElibrary" ```
+ ```
+ git checkout -b "add-MyNewHElibrary"
+ ```
  3. In the directory `SHEEP/sketch/cmake/Modules`  write a `Find<package>.cmake` file, following the same pattern as the files
  that are already there, e.g. `FindHElib.cmake`.
    * For the first line (`find_path(...)`) specify the name of any header file in your package.  CMake will use this to check it
@@ -44,8 +46,9 @@ make test
   	: public Context< PlaintextT, My_New_HE_Ciphertext_Type >
   {   ... class definition in here ...
   ```
-  * You should do this in an namespace `Sheep::YourNewContext`, again following the examples of HElib and TFHE.
-  * Implement the encrypt/decrypt functions, and all the gates, using calls to your HE library.
+  * You should do this in a namespace `Sheep::YourNewContext`, again following the examples of HElib and TFHE.
+  * Implement the encrypt/decrypt functions, and all the gates you can, using calls to your HE library (see `context.hpp` for the
+  full list of gates - any that you don't implement will throw a `GateNotImplemented` exception if you try to then use them).
  5. In the directory `SHEEP/sketch/cmake/example/` create a file `mynewlib-context-example.cpp` with a `main()` function to
     test your new context, again following the examples of `tfhe-context-example.cpp` or `helib-context-example.cpp`.
  6. In `example/CMakeLists.txt` add the block to create your new executable.  Ideally, place it inside an `if (MyLIB_FOUND)` block,
