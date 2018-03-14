@@ -278,6 +278,24 @@ public:
     
   }
 
+
+  Ciphertext Negate(Ciphertext a) {
+    /// Two's complement negation - negate all bits then add one
+    std::cout<<" in HElib_F2::Negate"<<std::endl;
+    Ciphertext output;
+    for (int i=0; i < this->m_bitwidth; ++i) {
+      Ctxt abit = a[i];
+      //      abit.negate();
+      abit.addConstant(to_ZZX(1L));
+      output.append(abit);
+    }
+    if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
+    /// for integers, need to add 1.
+    Ciphertext one_enc = encrypt((Plaintext)1);
+    Ciphertext output_final = Add(output,one_enc);
+    return output_final;
+  }
+
   
   Ciphertext Compare(Ciphertext a, Ciphertext b) {
     if (this->m_bootstrap) {
@@ -301,6 +319,20 @@ public:
     return output;
   }
   
+  Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+
+    if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
+    
+    Ciphertext output;
+    Ciphertext b_neg = Negate(b);
+    CtPtrs_VecCt wout(output);
+    addTwoNumbers(wout,CtPtrs_VecCt(a),CtPtrs_VecCt(b_neg),
+		  this->m_bitwidth,
+		  &(this->m_unpackSlotEncoding));
+    return output;
+  }
+
+  
   Ciphertext Add(Ciphertext a, Ciphertext b) {
 
     Ciphertext sum;
@@ -310,6 +342,7 @@ public:
 		  &(this->m_unpackSlotEncoding));
     return sum;
   }
+  
 
   
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {

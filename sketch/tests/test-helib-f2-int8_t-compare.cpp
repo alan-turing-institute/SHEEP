@@ -42,7 +42,7 @@ int main(void) {
 	/// test second bigger - first one negative 
 	inputs = {-1, 112};
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" compare (1, 112) = "<<std::to_string(result.front())<<std::endl;
+	std::cout<<" compare (-1, 112) = "<<std::to_string(result.front())<<std::endl;
 	assert(result.front() == 0);
 	
 

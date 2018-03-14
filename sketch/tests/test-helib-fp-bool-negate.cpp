@@ -5,6 +5,8 @@
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
 
+typedef std::chrono::duration<double, std::micro> DurationT;
+
 int main(void) {
 	using namespace Sheep::HElib;
 	typedef std::vector<ContextHElib_Fp<bool>::Plaintext> PtVec;
@@ -13,32 +15,20 @@ int main(void) {
 	Wire in = circ.add_input("in");
 	Wire out = circ.add_assignment("out", Gate::Negate, in);
 	circ.set_output(out);
-
+	std::vector<DurationT> durations;
 	std::cout<<circ;
 	
 	ContextHElib_Fp<bool> ctx;
 
-	ContextHElib_Fp<bool>::CircuitEvaluator run_circuit;
-	run_circuit = ctx.compile(circ);
-
-	bool input = true;
-	std::cout<<"Input "<<std::to_string(input)<<std::endl;
-	std::vector<ContextHElib_Fp<bool>::Plaintext> plaintext_inputs = {input};
-	std::vector<ContextHElib_Fp<bool>::Ciphertext> ciphertext_inputs;
-	
-	for (ContextHElib_Fp<bool>::Plaintext pt: plaintext_inputs)
-	  ciphertext_inputs.push_back(ctx.encrypt(pt));
-	
-	std::vector<ContextHElib_Fp<bool>::Ciphertext> ciphertext_outputs;
-	using microsecond = std::chrono::duration<double, std::micro>;
-	microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
-	
-	std::vector<ContextHElib_Fp<bool>::Plaintext> plaintext_outputs;
-	for (ContextHElib_Fp<bool>::Ciphertext ct: ciphertext_outputs) {
-	  ContextHElib_Fp<bool>::Plaintext pt = ctx.decrypt(ct);
-	  plaintext_outputs.push_back(pt);
-	  std::cout << std::to_string(pt) << std::endl;
-	}	
-	assert(plaintext_outputs.front() == false);
+///  positive to negative
+        std::vector<bool> inputs = {true};
+        std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+        std::cout<<" negate(true) = "<<std::to_string(result.front())<<std::endl;      
+        assert(result.front() == false);
+	///  negative to positive
+	inputs = {false};
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+        std::cout<<" negate(false) = "<<std::to_string(result.front())<<std::endl;      
+        assert(result.front() == true);
 
 }
