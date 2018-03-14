@@ -20,17 +20,26 @@ add_executable(test-circuit-seq
   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
 add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
-
-foreach(op IN ITEMS add multiply subtract compare ripple-carry-add select)
-	  foreach(type IN ITEMS int8_t)
+foreach(type IN ITEMS bool int8_t uint8_t)		
+	     foreach(op IN ITEMS add multiply subtract compare select)
 	  	       add_executable(test-clear-${type}-${op}	
                        test-clear-${type}-${op}.cpp
 		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
 		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
-	  endforeach(type)
-endforeach(op)
+	  endforeach(op)
+endforeach(type)
+foreach(type IN ITEMS int8_t uint8_t)		
+	  foreach(op IN ITEMS ripple-carry-add)
+	  	       add_executable(test-clear-${type}-${op}	
+                       test-clear-${type}-${op}.cpp
+		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
+	  endforeach(op)
+endforeach(type)
 
 
 add_executable(test-bit-get-set test-bit-get-set.cpp)
