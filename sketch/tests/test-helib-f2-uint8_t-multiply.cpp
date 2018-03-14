@@ -32,7 +32,7 @@ int main(void) {
         /// test result going out of range positive
         inputs = {100, 127};
         result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" 100 + 127 = "<<std::to_string(result.front())<<std::endl;
+        std::cout<<" 100 * 127 = "<<std::to_string(result.front())<<std::endl;
         assert(result.front() == 156);
 
 }
