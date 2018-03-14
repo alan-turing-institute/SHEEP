@@ -1,6 +1,6 @@
 #include "circuit-repo.hpp"
 #include <fstream>
-
+#include <iostream>
 
 
 int main(int argc, const char** argv)
@@ -18,10 +18,15 @@ int main(int argc, const char** argv)
 
   
   CircuitRepo cr;
-  
-  Circuit c = cr.create_circuit(gate_name_map[gate_name],depth);
 
-  std::ofstream outfile(output_filename);
-  outfile << c;
-  
+  auto it = gate_name_map.find(gate_name);
+  if (it != gate_name_map.end()) {
+    Gate gate = it->second;
+    Circuit c = cr.create_circuit(gate,depth);
+
+    std::ofstream outfile(output_filename);
+    outfile << c;
+  } else {
+    throw std::runtime_error("gate name not found");
+  }
 }
