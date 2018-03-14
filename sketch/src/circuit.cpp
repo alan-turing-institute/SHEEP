@@ -127,9 +127,13 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
 	
 	if (found_gate && gate_inputs.size() > 0 && gate_output_names.size() > 0) {
 	  /// add this assignment
-	  const Wire& gateout = c.add_assignment(gate_output_names.front(),
-						 gate_name_map[gate_name],
-						 gate_inputs);
+	  auto it = gate_name_map.find(gate_name);
+	  if (it != gate_name_map.end()) {
+	    Gate gate = it->second;
+	    const Wire& gateout = c.add_assignment(gate_output_names.front(),
+						   gate,
+						   gate_inputs);
+	  }
 	}	
       }
     }
