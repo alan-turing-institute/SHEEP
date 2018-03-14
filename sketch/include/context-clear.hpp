@@ -10,12 +10,19 @@
 namespace Sheep {
 namespace Clear {
 
+template <typename Ciphertext>
+struct CiphertextWrapper { typedef Ciphertext type; };
+  
+template <>
+struct CiphertextWrapper<bool> { typedef int type; };
+  
 
 template<typename PlaintextT>
 class ContextClear : public Context<PlaintextT, PlaintextT> {   //plaintext and ciphertext are the same type
 public:
         typedef PlaintextT Plaintext;
-        typedef PlaintextT Ciphertext;
+        typedef PlaintextT Ciphertext;  
+
   
 	Ciphertext encrypt(Plaintext p) {
 	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
@@ -63,47 +70,62 @@ public:
 
 	// Work in the corresponding unsigned type and cast
 	// back, so overflow is well-defined.
-
+  
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-		typedef typename std::make_unsigned<Ciphertext>::type uC;
-		uC au = static_cast<uC>(a);
-		uC bu = static_cast<uC>(b);
-		return static_cast<Ciphertext>(au + bu);
+	  if (std::is_same<Ciphertext, bool>::value) {
+	    return a != b;
+	  } else {
+	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
+	    
+	    uC au = static_cast<uC>(a);
+	    uC bu = static_cast<uC>(b);
+	    return static_cast<Ciphertext>(au + bu);
+	  }
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-		typedef typename std::make_unsigned<Ciphertext>::type uC;
-		uC au = static_cast<uC>(a);
-		uC bu = static_cast<uC>(b);
-		return static_cast<Ciphertext>(au * bu);
+	  if (std::is_same<Ciphertext, bool>::value) {
+	    return a & b;
+	  } else {
+	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
+	    uC au = static_cast<uC>(a);
+	    uC bu = static_cast<uC>(b);
+	    return static_cast<Ciphertext>(au * bu);
+	  }
 	}
 
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-		typedef typename std::make_unsigned<Ciphertext>::type uC;
-		uC au = static_cast<uC>(a);
-		uC bu = static_cast<uC>(b);
-		return static_cast<Ciphertext>(au - bu);
+	  if (std::is_same<Ciphertext, bool>::value) {
+	    return Add(a,b);
+	  } else {
+	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
+	    
+	    uC au = static_cast<uC>(a);
+	    uC bu = static_cast<uC>(b);
+	    return static_cast<Ciphertext>(au - bu);
+	  }
 	}
 
 	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
 		return (a>=b)?a:b;
 	}
-
+  
 	Ciphertext Not(Ciphertext a) {
 		return !a;
 	}
-
+  
 	Ciphertext Negate(Ciphertext a) {
 
 	  if (std::is_same<Ciphertext, bool>::value) {
-			return Not(a);
-		} else {
-			typedef typename std::make_unsigned<Ciphertext>::type uC;
-			uC au = static_cast<uC>(a);
-			return static_cast<Ciphertext>(-au);
-		}
-
+	    return Not(a);
+	  } else {
+	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
+	    uC au = static_cast<uC>(a);
+	    return static_cast<Ciphertext>(-au);
+	  }
+	  
 	}
+  
   
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 		return (a > b);
