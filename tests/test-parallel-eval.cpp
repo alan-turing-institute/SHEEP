@@ -23,9 +23,13 @@
 #define HAVE_TBB 0
 #endif
 
+#ifdef HAVE_TFHE
 using namespace Sheep::TFHE;
+#endif
 
+#ifdef HAVE_TFHE
 using namespace Sheep::HElib;
+#endif
 
 template <typename ContextT>
 void test(const Circuit& C, std::vector<typename ContextT::Plaintext> inputs,
