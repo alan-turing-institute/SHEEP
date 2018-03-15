@@ -3,18 +3,6 @@
 #include <map>
 #include <sstream>
 
-static std::map<std::string, Gate> gate_name_map = {
-  {"ALIAS", Gate::Alias },
-  {"ID", Gate::Identity },
-  {"ADD", Gate::Add },
-  {"MULTIPLY", Gate::Multiply },
-  {"SUBTRACT", Gate::Subtract },
-  {"MAXIMUM", Gate::Maximum },
-  {"NEGATE", Gate::Negate },
-  {"COMPARE", Gate::Compare },
-  {"SELECT", Gate::Select }
-};
-
 // Wires are equal iff their names are the same
 bool operator==(const Wire& a, const Wire& b)
 {
@@ -139,9 +127,13 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
 	
 	if (found_gate && gate_inputs.size() > 0 && gate_output_names.size() > 0) {
 	  /// add this assignment
-	  const Wire& gateout = c.add_assignment(gate_output_names.front(),
-						 gate_name_map[gate_name],
-						 gate_inputs);
+	  auto it = gate_name_map.find(gate_name);
+	  if (it != gate_name_map.end()) {
+	    Gate gate = it->second;
+	    const Wire& gateout = c.add_assignment(gate_output_names.front(),
+						   gate,
+						   gate_inputs);
+	  }
 	}	
       }
     }

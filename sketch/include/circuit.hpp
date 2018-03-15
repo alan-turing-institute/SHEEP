@@ -9,6 +9,19 @@
 
 enum class Gate {Alias, Identity, Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
 
+static const std::map<std::string, Gate> gate_name_map = {
+  {"ALIAS", Gate::Alias },
+  {"ID", Gate::Identity },
+  {"ADD", Gate::Add },
+  {"MULTIPLY", Gate::Multiply },
+  {"SUBTRACT", Gate::Subtract },
+  {"MAXIMUM", Gate::Maximum },
+  {"NEGATE", Gate::Negate },
+  {"COMPARE", Gate::Compare },
+  {"SELECT", Gate::Select }
+};
+
+
 class Wire {
 	std::string name;
 public:

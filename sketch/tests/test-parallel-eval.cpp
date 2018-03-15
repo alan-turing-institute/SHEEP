@@ -12,7 +12,7 @@
 #include "context-tfhe.hpp"
 #endif
 
-#if HAVE_HELIB
+#if HAVE_HElib
 #include "context-helib.hpp"
 #endif
 
@@ -24,6 +24,8 @@
 #endif
 
 using namespace Sheep::TFHE;
+
+using namespace Sheep::HElib;
 
 template <typename ContextT>
 void test(const Circuit& C, std::vector<typename ContextT::Plaintext> inputs,
@@ -74,7 +76,7 @@ int main(void) {
 
 	test<Clear::ContextClear<int8_t> >(C, {1,2,3}, {16});
 #ifdef HAVE_HElib
-	test<HElib::ContextHElib<int8_t> >(C, {1,2,3}, {16});
+	test<HElib::ContextHElib_F2<int8_t> >(C, {1,2,3}, {16});
 #endif
 
 #ifdef HAVE_TFHE

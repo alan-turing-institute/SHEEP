@@ -8,11 +8,17 @@ from werkzeug.utils import secure_filename
 import subprocess
 
 
-from forms import CircuitForm, build_inputs_form
+from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form
 import utils
+import database
+import plotting
+import os
 
-EXECUTABLE_DIR = "/Users/nbarlow/SHEEP/sketch/build/bin"
-UPLOAD_FOLDER = "/Users/nbarlow/SHEEP/sketch/frontend/uploads"
+### NOTE that the below hard-coded locations assume that the user has the SHEEP repo checked out directly from
+### their home dir. TODO - better way of configuring the app.
+
+EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/sketch/build/bin"
+UPLOAD_FOLDER = os.environ["HOME"]+"/SHEEP/sketch/frontend/uploads"
 
 
 app = Flask(__name__)
@@ -57,22 +63,43 @@ def enter_input_vals():
     user for the input values.
     """
     iform = build_inputs_form(app.data["inputs"])(request.form)
+    circuit_text = open(app.data["uploaded_filenames"]["circuit_file"]).readlines()
     if request.method == "POST" and iform.validate():
-        print("Reading input values")
         input_vals = iform.data
         if utils.check_inputs(input_vals, app.data["input_type"]):
-            app.data["uploaded_filenames"]["inputs_file"] = utils.write_inputs_file(input_vals,
-                                                                                    app.config["UPLOAD_FOLDER"])            
+            app.data["uploaded_filenames"]["inputs_file"] = \
+                        utils.write_inputs_file(input_vals,
+                                                app.config["UPLOAD_FOLDER"])
             return redirect(url_for("execute_test"))
-    return render_template("enter_input_vals.html",form=iform)
+    return render_template("enter_input_vals.html",
+                           form=iform,
+                           circuit=circuit_text)
 
-@app.route("/view_results")
+
+@app.route("/view_results_table",methods=["POST","GET"])
 def results_table():
     """
-    results table.  Could get too complicated for a simple 2D table, may need some selectable
-    options e.g. how many cores in parallel?
+    allow the user to put in an SQL query, and show the resulting table
     """
-    return render_template("results_table.html")
+    rform = ResultsForm(request.form)
+    if request.method == "POST":
+        query = rform.data['sql_query']
+        columns, rdata = database.execute_query_sqlite3(query)
+        return render_template("results_table.html",columns=columns,results=rdata)
+    return render_template("results_query.html",form=rform)
+
+
+@app.route("/view_results_plots",methods=["POST","GET"])
+def results_plots():
+    """
+    plots, using nvd3 (i.e. D3.js with a Python wrapper)
+    """
+    pform = PlotsForm(request.form)
+    if request.method == "POST":
+        inputs = pform.data
+        filename = plotting.generate_plots(inputs)
+        return render_template(filename)
+    return render_template("result_plots_query.html",form=pform)
 
 
 @app.route("/execute_test",methods=["POST","GET"])
@@ -81,6 +108,9 @@ def execute_test():
     actually run the executable, passing it all the filenames, options etc as arguments.
     """
     proc_time, outputs = utils.run_test(app.data,app.config)   
+    if request.method == "POST":
+        database.upload_test_result(proc_time,app.data)
+        return "OK"
     return render_template("test_results.html",proc_time=proc_time,outputs=outputs,context_name=app.data["HE_library"])
 
 

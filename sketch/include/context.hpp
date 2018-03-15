@@ -65,6 +65,8 @@ public:
 	virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
 	// Select(s,a,b) := lsb(s)?a:b
 	virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
+	virtual Ciphertext AddConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
+	virtual Ciphertext MultByConstant(Ciphertext, long  ) { throw GateNotImplemented(); };    
 
 	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
 		using namespace std::placeholders;
@@ -161,7 +163,6 @@ public:
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
 			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
-		std::cout<<"duration here in context::eval is "<<duration.count()<<std::endl;
 		return duration;
 	}
 

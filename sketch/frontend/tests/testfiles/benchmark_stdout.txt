@@ -18,5 +18,6 @@ circuit_evaluation: 25377.6
 decryption: 398554
 Output values (test vs clear)
   test context : 75  clear context : 75
+  test context : -215  clear context : -215  
 
 ==== END RESULTS ===

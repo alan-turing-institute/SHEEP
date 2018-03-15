@@ -5,8 +5,13 @@ add_executable(circuit-parser
 add_executable(circuit-example
                  circuit-example.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
 add_test(NAME circuit-example COMMAND $<TARGET_FILE:circuit-example>)
+
+add_executable(simple-circuit-maker
+                 simple-circuit-maker.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+
 
 
 add_executable(clear-context-example
@@ -27,6 +32,17 @@ if (HELIB_FOUND)
 
     target_link_libraries(helib-context-example
                             ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+    add_executable(bitonic-sort-helib	       
+    		   bitonic-sort-helib.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+    target_link_libraries(bitonic-sort-helib
+			  ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+    add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
 
 
 
