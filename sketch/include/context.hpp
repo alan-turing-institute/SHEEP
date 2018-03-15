@@ -163,7 +163,6 @@ public:
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
 			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
-		std::cout<<"duration here in context::eval is "<<duration.count()<<std::endl;
 		return duration;
 	}
 
