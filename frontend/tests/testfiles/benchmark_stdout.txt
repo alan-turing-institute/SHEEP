@@ -1,0 +1,23 @@
+INPUTS a b
+OUTPUTS c
+ a b ADD c
+using HElib's ADD 
+duration here in context::eval is 25377.6
+encrypting plaintext 22
+encrypting plaintext 53
+Using clear context's ADD
+duration here in context::eval is 16.747
+
+===============
+=== RESULTS ===
+
+Processing times: 
+setup: 2.20317e+07
+encryption: 213142
+circuit_evaluation: 25377.6
+decryption: 398554
+Output values (test vs clear)
+  test context : 75  clear context : 75
+  test context : -215  clear context : -215  
+
+==== END RESULTS ===
