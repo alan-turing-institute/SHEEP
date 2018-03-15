@@ -398,8 +398,6 @@ public:
 	b[i].modDownToLevel(5);
       }
     }
-    
-
     /// s is 0 or 1
     /// for each bit of a,b,output, do output = s*a + (1-s)*b
     Ciphertext output;
