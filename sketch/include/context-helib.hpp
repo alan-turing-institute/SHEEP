@@ -49,7 +49,6 @@ public:
 
     /// BITWIDTH(bool) is 8, so need to deal with this by hand...
     //// (better to specialize class?)
-    std::cout<<" param set "<<std::to_string(m_param_set)<<" p "<<std::to_string(p)<<std::endl;
     if (std::is_same<Plaintext, bool>::value)
       m_bitwidth = 1;
     else
@@ -235,6 +234,10 @@ protected:
   bool m_bootstrap;
   
 };   //// end of ContextHElib class definition.
+
+
+
+
   
   ////////////////////////////////////////////////////////////////////////////////////
   ///  ContextHElib_F2 -  use p=2, do everything with arrays of Ciphertext,
@@ -254,8 +257,13 @@ public:
 		  long haming_weight=128) // Haming weight of secret key
     : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
   {
-    ///    this->initialize();
+
     this->print_parameters();  
+
+    /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
+    m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
+			  std::is_same<Plaintext, int16_t>::value ||
+			  std::is_same<Plaintext, int32_t>::value);
   }
 
 
@@ -280,8 +288,15 @@ public:
 
 
   Ciphertext Negate(Ciphertext a) {
+
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+      }
+    }
+
+    
     /// Two's complement negation - negate all bits then add one
-    std::cout<<" in HElib_F2::Negate"<<std::endl;
     Ciphertext output;
     for (int i=0; i < this->m_bitwidth; ++i) {
       Ctxt abit = a[i];
@@ -297,13 +312,8 @@ public:
   }
 
   
-  Ciphertext Compare(Ciphertext a, Ciphertext b) {
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-	b[i].modDownToLevel(5);
-      }
-    }
+  Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
+
     
     Ctxt mu(*(this->m_publicKey));
     Ctxt ni(*(this->m_publicKey));    
@@ -318,6 +328,29 @@ public:
     output.append(mu);
     return output;
   }
+
+  Ciphertext Compare_signed(Ciphertext a, Ciphertext b) {
+    //// subtract a-b and look at sign-bit
+    Ciphertext b_minus_a = Subtract(b,a);
+    Ciphertext output;
+
+    Ctxt sign_bit = b_minus_a[this->m_bitwidth -1];   /// is sign-bit set?  if yes, b
+    ///    sign_bit.addConstant(to_ZZX(1L));  //// now n
+    output.append(sign_bit);
+    return output;
+  }
+
+  Ciphertext Compare(Ciphertext a, Ciphertext b) {
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+	b[i].modDownToLevel(5);
+      }
+    }
+    if (this->m_signed_plaintext) return Compare_signed(a,b);
+    else return Compare_unsigned(a,b);
+  }
+  
   
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 
@@ -358,6 +391,15 @@ public:
 
   
   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+	b[i].modDownToLevel(5);
+      }
+    }
+    
+
     /// s is 0 or 1
     /// for each bit of a,b,output, do output = s*a + (1-s)*b
     Ciphertext output;
@@ -375,7 +417,10 @@ public:
     }
     return output;
   }
-  
+
+private:
+
+  bool m_signed_plaintext;
 
   
 };  /// end of class definition
