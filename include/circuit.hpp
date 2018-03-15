@@ -7,7 +7,7 @@
 #include <iostream>
 #include <map>
 
-enum class Gate {Alias, Identity, Multiply, Maximum, Add, Subtract, Negate, Compare, Select};
+enum class Gate {Alias, Identity, Multiply, Maximum, Add, Subtract, Negate, Compare, Select, MultByConstant, AddConstant};
 
 static const std::map<std::string, Gate> gate_name_map = {
   {"ALIAS", Gate::Alias },
@@ -18,7 +18,9 @@ static const std::map<std::string, Gate> gate_name_map = {
   {"MAXIMUM", Gate::Maximum },
   {"NEGATE", Gate::Negate },
   {"COMPARE", Gate::Compare },
-  {"SELECT", Gate::Select }
+  {"SELECT", Gate::Select },
+  {"MULTBYCONST", Gate::MultByConstant },
+  {"ADDCONST", Gate::AddConstant }  
 };
 
 
@@ -40,12 +42,14 @@ private:
 	Wire output;
 	Gate op;
 	WireList inputs;
+        WireList const_inputs;
 public:
 	template <typename... Ts>
 	Assignment(Wire output_, Gate op_, Ts... inputs_);
 
 	size_t input_count() const { return inputs.size();  }
 	const WireList& get_inputs() const { return inputs; }
+        const WireList& get_const_inputs() const { return const_inputs; }
 	Wire get_output() const { return output; }
 	Gate get_op() const { return op; }
 };
@@ -70,12 +74,18 @@ private:
 	WireList inputs;
 	WireList wires;
 	WireList outputs;
+        WireList const_inputs;
 	AssignmentList assignments;
 public:
 
 	Wire add_input(std::string name) {
 		inputs.emplace_back(name);
 		return inputs.back();
+	}
+
+  	Wire add_const_input(std::string name) {
+		const_inputs.emplace_back(name);
+		return const_inputs.back();
 	}
 
 	template <typename... Wires>
@@ -96,6 +106,10 @@ public:
 
 	const WireList& get_inputs() const {
 		return inputs;
+	}
+
+  	const WireList& get_const_inputs() const {
+		return const_inputs;
 	}
 
 	const WireList& get_wires() const {

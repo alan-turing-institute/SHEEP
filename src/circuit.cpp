@@ -39,6 +39,13 @@ bool operator!=(const Assignment& a, const Assignment& b)
 std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
 
   /// first print out inputs and outputs
+  if (c.get_const_inputs().size() > 0) {
+    stream<<"CONST_INPUTS";
+    for (auto const_input : c.get_const_inputs() ) {
+      stream<<" "<<const_input.get_name();
+    }
+    stream<<std::endl;
+  }
   
   stream<<"INPUTS";
   for (auto input : c.get_inputs() ) {
@@ -59,6 +66,10 @@ std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
     for (auto input : assignment.get_inputs()) {
       stream << " " << input.get_name();
     }
+    for (auto const_input : assignment.get_const_inputs()) {
+      stream << " " << const_input.get_name();
+    }
+    
     std::string gate_name = "";
     for (auto map_it = gate_name_map.begin(); map_it != gate_name_map.end(); ++map_it ) {
       if (map_it->second == assignment.get_op()) {
@@ -94,7 +105,12 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
       
       ////  see if the first word in the line is INPUTS or OUTPUTS
       auto token_iter = tokens.begin();
-      if (*token_iter == "INPUTS") {
+      if (*token_iter == "CONST_INPUTS") {
+	token_iter++;
+	for (; token_iter != tokens.end(); ++token_iter) {
+	  c.add_const_input(*token_iter);
+	}
+      } else if (*token_iter == "INPUTS") {
 	token_iter++;
 	for (; token_iter != tokens.end(); ++token_iter) {
 	  c.add_input(*token_iter);
