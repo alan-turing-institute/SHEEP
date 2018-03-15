@@ -30,6 +30,13 @@ int main(void) {
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front() == -2);
 	std::cout<<" 10 - 12 = "<<std::to_string(result.front())<<std::endl;
+	/// test bigger negative numbers
+	inputs = {1, 112};
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::cout<<" 1 - 112 = "<<std::to_string(result.front())<<std::endl;
+	assert(result.front() == -111);
+
+	
 	/// test result going out of range positive
 	inputs = {100, -127};
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
