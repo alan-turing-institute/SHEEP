@@ -38,7 +38,8 @@ RUN cd /SHEEP/lib/HElib/src ; make
 
 ### now build SHEEP
 
-RUN mkdir -p /SHEEP/build
+RUN rm -fr /SHEEP/build
+RUN mkdir /SHEEP/build
 RUN cd /SHEEP/build; cmake ../ ; make all 
 
 ### install python packages for the frontend
