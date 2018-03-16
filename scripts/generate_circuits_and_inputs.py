@@ -7,6 +7,7 @@ import random
 import os
 import re
 
+
 EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
 
 OUTPUT_DIR = os.environ["HOME"]+"/SHEEP/benchmark_inputs"

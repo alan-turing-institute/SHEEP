@@ -14,11 +14,12 @@ import database
 import plotting
 import os
 
-### NOTE that the below hard-coded locations assume that the user has the SHEEP repo checked out directly from
-### their home dir. TODO - better way of configuring the app.
-
-EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/sketch/build/bin"
-UPLOAD_FOLDER = os.environ["HOME"]+"/SHEEP/sketch/frontend/uploads"
+if "SHEEP_HOME" in os.environ.keys():
+    EXECUTABLE_DIR = os.environ["SHEEP_HOME"]+"/build/bin"
+    UPLOAD_FOLDER = os.environ["SHEEP_HOME"]+"/frontend/uploads"
+else:
+    EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
+    UPLOAD_FOLDER = os.environ["HOME"]+"/SHEEP/frontend/uploads"
 
 
 app = Flask(__name__)
