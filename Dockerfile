@@ -34,25 +34,25 @@ RUN cd gmp-6.1.2; ./configure; make; make install
 RUN wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
 RUN tar -xvzf ntl-10.5.0.tar.gz
 RUN cd ntl-10.5.0/src; ./configure NTL_GMP_LIP=on; make; make install
-RUN cd /SHEEP/lib/HElib/src ; make
+RUN cd /SHEEP/lib/HElib/src ; make clean; make;
 
 ### now build SHEEP
 
 RUN rm -fr /SHEEP/build
 RUN mkdir /SHEEP/build
-RUN cd /SHEEP/build; cmake ../ ; make all 
-
-### install python packages for the frontend
-
+##RUN cd /SHEEP/build; cmake ../ ; make all 
+##
+##### install python packages for the frontend
+##
 RUN pip install flask
 RUN pip install wtforms
 RUN pip install pytest
 RUN pip install sqlalchemy
 RUN pip install python-nvd3
-
-WORKDIR /SHEEP/frontend
-
-EXPOSE 5000
-ENV FLASK_APP app.py
-
-CMD ["python","app.py"]
+##
+##WORKDIR /SHEEP/frontend
+##
+##EXPOSE 5000
+##ENV FLASK_APP app.py
+##
+##CMD ["python","app.py"]
