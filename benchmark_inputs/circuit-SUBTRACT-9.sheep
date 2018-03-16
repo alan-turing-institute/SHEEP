@@ -1,0 +1,11 @@
+INPUTS input_0 input_1 input_2 input_3 input_4 input_5 input_6 input_7 input_8 input_9
+OUTPUTS output_8
+ input_0 input_1 SUBTRACT output_0
+ output_0 input_2 SUBTRACT output_1
+ output_1 input_3 SUBTRACT output_2
+ output_2 input_4 SUBTRACT output_3
+ output_3 input_5 SUBTRACT output_4
+ output_4 input_6 SUBTRACT output_5
+ output_5 input_7 SUBTRACT output_6
+ output_6 input_8 SUBTRACT output_7
+ output_7 input_9 SUBTRACT output_8
