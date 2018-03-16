@@ -59,6 +59,17 @@ if (TFHE_FOUND)
                             ${TFHE_LIBRARIES})
 endif(TFHE_FOUND)
 
+if (SEAL_FOUND)
+    add_executable(seal-example
+                     seal-example.cpp
+		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+    add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
+
+    target_link_libraries(seal-example
+                            ${SEAL_LIBRARIES})
+endif(SEAL_FOUND)
+
 add_executable(bitonic-sorting-circuit
   bitonic-sorting-circuit.cpp
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
