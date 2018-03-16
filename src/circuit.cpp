@@ -108,7 +108,8 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
       if (*token_iter == "CONST_INPUTS") {
 	token_iter++;
 	for (; token_iter != tokens.end(); ++token_iter) {
-	  c.add_const_input(*token_iter);
+	  //////	  c.add_const_input(*token_iter);
+	  c.add_input(*token_iter);	    //// TEMPORARY HACK!
 	}
       } else if (*token_iter == "INPUTS") {
 	token_iter++;
