@@ -61,3 +61,13 @@ docker build -t sheep ./
 docker run -p 5000:5000 sheep
 ```
 If you point your browser to `0.0.0.0:5000` you should get the SHEEP frontend.
+
+## Circuit language and input files
+
+The inputs to SHEEP are ***circuit*** files, which have the extension `.sheep` and the following format:
+```
+INPUTS <circuit_input_0> ...
+OUTPUTS <circuit_output_0> ...
+<gate_input_0> ...  <GATE> <gate_output>
+...
+```
