@@ -8,7 +8,7 @@ multiplication of the plaintexts. The goal of the project is to
 provide an accessible platform for testing the features and
 performance of the available Homomorphic Encryption libraries.
 
-## Installation
+## Installation - local
 
 After cloning:
 ```
@@ -41,16 +41,23 @@ cd build
 cmake ../
 make all
 ```
-Currently, this builds the examples in `build/bin`.
-
-It may be necessary to specify the installation location of TFHE, HElib or SEAL, if these are in a non-standard place.
-Replace `cmake ..` in the above with
-```
-CMAKE_LIBRARY_PATH=... CMAKE_INCLUDE_PATH=... cmake ..
-```
-where the '...' are replaced by a colon-separated list of the relevant paths.
+This builds the examples in `build/bin`.
 
 Run the tests with:
 ```
 make test
 ```
+
+## Installation - docker
+
+As above, clone this repo and then do
+```
+git submodule init
+git submodule update
+```
+Then (assuming you have Docker):
+```
+docker build -t sheep ./
+docker run -p 5000:5000 sheep
+```
+If you point your browser to `0.0.0.0:5000` you should get the SHEEP frontend.
