@@ -22,7 +22,7 @@ column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 ### use sqlite3, which is in turn only necessary until we translate SQL queries into
 ### sqlalchemy commands
 
-DB_LOCATION = os.environ["HOME"]+"/SHEEP/sketch/frontend/sheep.db"
+DB_LOCATION = os.environ["HOME"]+"/SHEEP/frontend/sheep.db"
 
 
 Base = declarative_base()
