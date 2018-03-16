@@ -54,5 +54,6 @@ WORKDIR SHEEP/frontend
 ##
 EXPOSE 5000
 ENV FLASK_APP app.py
+ENV SHEEP_HOME /SHEEP
 ##
 CMD ["python","app.py"]
