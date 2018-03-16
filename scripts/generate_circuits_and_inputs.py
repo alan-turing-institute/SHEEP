@@ -7,9 +7,9 @@ import random
 import os
 import re
 
-EXECUTABLE_DIR = os.env["HOME"]+"/SHEEP/sketch/build/bin"
+EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
 
-OUTPUT_DIR = os.env["HOME"]+"/SHEEP/sketch/benchmark_inputs"
+OUTPUT_DIR = os.environ["HOME"]+"/SHEEP/benchmark_inputs"
 
 def rnd_num_in_range(input_type):
     """ 
