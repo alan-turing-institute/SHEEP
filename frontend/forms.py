@@ -49,8 +49,8 @@ class PlotsForm(Form):
         ("gate_name","Gate"),        
     ],label="category var")
     context_selections = MultiCheckboxField('Select contexts', choices=[("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE")])
-    gate_selections = MultiCheckboxField('Select gate', choices=[("ADD","ADD"),("SUBTRACT","SUBTRACT"),("MULTIPLY","MULTIPLY")])    
-    input_type_selections = MultiCheckboxField('Select input_type', choices=[(1,"bool"),(8,"uint8_t"),(16,"uint16_t")])
+    gate_selections = MultiCheckboxField('Select gate', choices=[("ADD","ADD"),("SUBTRACT","SUBTRACT"),("MULTIPLY","MULTIPLY"),("NEGATE","NEGATE"),("SELECT","SELECT"),("COMPARE","COMPARE")])    
+    input_type_selections = MultiCheckboxField('Select input_type', choices=[(1,"bool"),(8,"uint8_t"),(16,"uint16_t"),(32,"uint32_t")])
 
     
 def build_inputs_form(inputs):
