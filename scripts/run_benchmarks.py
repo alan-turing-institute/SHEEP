@@ -85,7 +85,14 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
             bitwidth = get_bitwidth(input_type)
             for depth in range(1,max_depth):
                 circuit_file = "circuit-"+gate+"-"+str(depth)+".sheep"
-                inputs_file = "inputs-"+input_type+"-"+str(depth)+".inputs"
+                inputs_file = "inputs-"
+                if gate == "SELECT":
+                    inputs_file += "select-"
+                elif gate == "NEGATE":
+                    inputs_file += "1-to-1-"
+                else:
+                    inputs_file += "2-to-1"
+                inputs_file +=input_type+"-"+str(depth)+".inputs"
                 for context in contexts:
                     print("Doing benchmark for %s %s %i %s" %
                           (context,gate,depth,input_type))

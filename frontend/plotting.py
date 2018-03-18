@@ -8,20 +8,24 @@ from database import BenchmarkMeasurement, session
 import uuid
 from sqlalchemy import and_, or_
 
-def create_plot(xdata_list, ydata_dict):
+def create_plot(xdata_list, ydata_dict, xtitle=""):
     """
     x-data is a list of bins on the x-axis.
     y-data is a dict, with the keys being the category names,
     and the vals being the data value lists (each same length as x-data) 
     """
-    type = 'execution time (seconds)'
+    type = 'Results'
     chart = multiBarChart(name="SHEEP results",height=450,width=1000,x_axis_format=None)
     chart.set_containerheader("\n\n<h2>" + type + "</h2>\n\n")
+#    chart.create_y_axis("Execution_time","execution time (s)")
+#    chart.create_x_axis("x_var",xtitle)
     xdata = xdata_list
     for k,v in ydata_dict.items():
         chart.add_serie(name=k, y=v, x=xdata)
 
     extra_serie = {"tooltip": {"y_start": "", "y_end": " cal"}}
+
+    
     chart.buildhtml()
     unique_id = str(uuid.uuid4())
     filename = "results_plots_"+unique_id+".html"
@@ -85,5 +89,5 @@ def generate_plots(input_dict):
             ydata[category] = []
         execution_time = row.__getattribute__("execution_time")
         ydata[category].append(execution_time)
-    return create_plot(xdata, ydata)
+    return create_plot(xdata, ydata, input_dict["x_axis_var"])
 
