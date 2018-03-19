@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.7.0/nv.d3.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.7.0/nv.d3.min.js"></script>
+    </head>
+    <body>
+        
+    
+
+<h2>execution time (seconds)</h2>
+
+<div id="sheep_results"><svg style="width:1000px;height:450px;"></svg></div>
+
+
+    <script>
+
+
+
+        data_sheep_results=[{"values": [{"x": "HElib", "y": 0.026}, {"x": "TFHE", "y": 0.462}], "key": 1, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.051}, {"x": "TFHE", "y": 0.933}], "key": 2, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.076}, {"x": "TFHE", "y": 1.0}], "key": 3, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.103}, {"x": "TFHE", "y": 1.0}], "key": 4, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.128}, {"x": "TFHE", "y": 2.0}], "key": 5, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.153}, {"x": "TFHE", "y": 2.0}], "key": 6, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.178}, {"x": "TFHE", "y": 3.0}], "key": 7, "yAxis": "1"}, {"values": [{"x": "HElib", "y": 0.206}, {"x": "TFHE", "y": 3.0}], "key": 8, "yAxis": "1"}];
+
+    nv.addGraph(function() {
+        var chart = nv.models.multiBarChart();
+
+        chart.margin({top: 30, right: 60, bottom: 20, left: 60});
+
+        var datum = data_sheep_results;
+
+
+
+
+
+            chart.yAxis
+                .tickFormat(d3.format(',.2f'));
+
+
+      chart.showLegend(true);
+
+
+
+        
+
+
+        d3.select('#sheep_results svg')
+            .datum(datum)
+            .transition().duration(500)
+            .attr('width', 1000)
+            .attr('height', 450)
+            .call(chart);
+
+
+    });
+
+
+
+
+    </script>
+
+    </body>
+</html>

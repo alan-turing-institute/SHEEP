@@ -1,6 +1,6 @@
-[submodule "sketch/lib/tfhe"]
-	path = sketch/lib/tfhe
-	url = git@github.com:tfhe/tfhe.git
-[submodule "sketch/lib/HElib"]
-	path = sketch/lib/HElib
+[submodule "lib/HElib"]
+	path = lib/HElib
 	url = git@github.com:shaih/HElib.git
+[submodule "lib/tfhe"]
+	path = lib/tfhe
+	url = git@github.com:tfhe/tfhe.git
