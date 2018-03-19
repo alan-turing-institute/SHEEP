@@ -4,26 +4,19 @@
 #include "circuit.hpp"
 #include "context.hpp"
 #include "bits.hpp"
-#include <seal.h>
+#include <seal/seal.h>
 #include <type_traits>
 #include <cmath>
 
 namespace Sheep {
 namespace Seal {
 
-template <typename Ciphertext>
-struct CiphertextWrapper { typedef Ciphertext type; };
-  
-template <>
-struct CiphertextWrapper<bool> { typedef int type; };
-  
-
-template<typename PlaintextT>
-class ContextSeal : public Context<PlaintextT, PlaintextT> {
+template <typename PlaintextT>
+class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
 
 public:
 	typedef PlaintextT Plaintext;
-  	typedef PlaintextT Ciphertext;
+  	typedef seal::Ciphertext Ciphertext;
   
   // constructors
   
@@ -36,122 +29,106 @@ public:
 	m_security(security),
 	m_plaintext_modulus(plaintext_modulus) {
 
-	EncryptionParameters parms;
+	seal::EncryptionParameters parms;
 	parms.set_poly_modulus(poly_modulus);
 	if (security == 128) {
-		parms.set_coeff_modulus(coeff_modulus_128(2048));
+		parms.set_coeff_modulus(seal::coeff_modulus_128(2048));
 	} else if (security == 192) {
-		parms.set_coeff_modulus(coeff_modulus_192(2048)); // Not sure this is correct
+		parms.set_coeff_modulus(seal::coeff_modulus_192(2048)); // Not sure this is correct
 	} else {
-	  // Unsupported context configuration
+		throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 129");
 	}
-	EncryptionParameters parms;
+	
 	parms.set_plain_modulus(plaintext_modulus);
-	SEALContext m_context(parms);
-	IntegerEncoder m_encoder(context.plain_modulus()); // We default to an IntegerEncoder with base b=2. TODO: include CRT and fractional encoder
+	m_context = new seal::SEALContext(parms);
+	m_encoder = new seal::IntegerEncoder(m_context->plain_modulus()); // We default to an IntegerEncoder with base b=2. TODO: include CRT and fractional encoder
 
-	KeyGenerator keygen(context);
-	PublicKey m_public_key = keygen.public_key();
-	SecretKey m_secret_key = keygen.secret_key();
-	Encryptor m_encryptor(context, public_key);
-	Evaluator m_evaluator(context);
-	Decryptor m_decryptor(context, secret_key);
+	seal::KeyGenerator keygen(*m_context);
+	m_public_key = keygen.public_key();
+	m_secret_key = keygen.secret_key();
+
+	m_encryptor = new seal::Encryptor(*m_context, m_public_key);
+	m_evaluator = new seal::Evaluator(*m_context);
+	m_decryptor = new seal::Decryptor(*m_context, m_secret_key);
   }
 
   Ciphertext encrypt(Plaintext p) {
-	std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
-	return p; // plaintext and ciphertext are the same for this context
+	seal::Plaintext pt = m_encoder->encode(p);
+	seal::Ciphertext ct;
+	m_encryptor->encrypt(pt, ct);
+	return ct;
   }
 
-  Plaintext decrypt(Ciphertext c) {
-	return c; // plaintext and ciphertext are the same for this context
+  Plaintext decrypt(Ciphertext ct) {
+  	seal::Plaintext pt;
+    m_decryptor->decrypt(ct, pt);
+    Plaintext p = m_encoder->decode_int32(pt);
+    return p;
   }
-  
-  // In Add, Multiply, Subtract and Negate, we assume that
-  // Ciphertext is either unsigned or a two's complement integer
-  // type.  With a signed type, to avoid undefined behaviour,
-  // cast to the corresponding unsigned type, perform the
-  // operation, then cast back.  To do this with the .
-  
-  // Work in the corresponding unsigned type and cast
-  // back, so overflow is well-defined.
   
   Ciphertext Add(Ciphertext a, Ciphertext b) {
-	if (std::is_same<Ciphertext, bool>::value) {
-	  return a != b;
-	} else {
-	  typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	  
-	  uC au = static_cast<uC>(a);
-	  uC bu = static_cast<uC>(b);
-	  return static_cast<Ciphertext>(au + bu);
-	}
+  	m_evaluator->add(a, b);
+  	return a;
   }
-  
+
+
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	if (std::is_same<Ciphertext, bool>::value) {
-	  return a & b;
-	  } else {
-	  typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-		uC au = static_cast<uC>(a);
-		uC bu = static_cast<uC>(b);
-		return static_cast<Ciphertext>(au * bu);
-	}
+  	m_evaluator->multiply(a, b);
+  	return a;
   }
-  
+
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	if (std::is_same<Ciphertext, bool>::value) {
-	  return Add(a,b);
-	} else {
-	  typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	  
-		uC au = static_cast<uC>(a);
-		uC bu = static_cast<uC>(b);
-		return static_cast<Ciphertext>(au - bu);
-	}
-  }
-  
-  Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-	return (a>=b)?a:b;
-  }
-  
-  Ciphertext Not(Ciphertext a) {
-	return !a;
+  	m_evaluator->sub(a, b);
+  	return a;
   }
   
   Ciphertext Negate(Ciphertext a) {
-	
-	if (std::is_same<Ciphertext, bool>::value) {
-	  return Not(a);
-	} else {
-	  typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	  uC au = static_cast<uC>(a);
-	  return static_cast<Ciphertext>(-au);
-	}
-	
+  	m_evaluator->negate(a);
+  	return a;
   }
   
-  
-  Ciphertext Compare(Ciphertext a, Ciphertext b) {
-	return (a > b);
+  Ciphertext MultByConstant(Ciphertext a, long b) {
+  	seal::Plaintext pt = m_encoder->encode(b);
+  	m_evaluator->multiply_plain(a, pt);
+    return a;
   }
-  
+
+  Ciphertext AddConstant(Ciphertext a, long b) {
+    seal::Plaintext pt = m_encoder->encode(b);
+  	m_evaluator->multiply_plain(a, pt);
+    return a;
+  }
+
   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-	return (s % 2)?a:b;
+    /// s is 0 or 1
+    /// output is s*a + (1-s)*b
+    Ciphertext sa = Multiply(s,a);
+    Ciphertext one_minus_s = MultByConstant( AddConstant(s,-1L), -1L);
+    Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
+    return Add(sa, one_minus_s_times_b);
   }
+
+  // destructor
+  virtual ~ContextSeal() {
+    /// delete everything we new-ed in the constructor
+    if (m_context != NULL) delete m_context;
+    if (m_encoder != NULL) delete m_encoder;
+    if (m_encryptor != NULL) delete m_encryptor;
+    if (m_evaluator != NULL) delete m_evaluator;
+    if (m_decryptor != NULL) delete m_decryptor;
+  };
 
 protected:
-
 	char* m_poly_modulus;
   	int m_security;
   	int m_plaintext_modulus;
-  	SEALContext m_context;
-	IntegerEncoder m_encoder;
-	PublicKey m_public_key;
-	SecretKey m_secret_key;
-	Encryptor m_encryptor;
-	Evaluator m_evaluator;
-	Decryptor m_decryptor;
+  	seal::SEALContext* m_context;
+	seal::IntegerEncoder* m_encoder;
+	seal::PublicKey m_public_key;
+	seal::SecretKey m_secret_key;
+	seal::Encryptor* m_encryptor;
+	seal::Evaluator* m_evaluator;
+	seal::Decryptor* m_decryptor;
 };
 
 }  // Leaving Seal namespace
