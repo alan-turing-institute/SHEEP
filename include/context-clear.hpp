@@ -18,18 +18,20 @@ struct CiphertextWrapper<bool> { typedef int type; };
   
 
 template<typename PlaintextT>
-class ContextClear : public Context<PlaintextT, PlaintextT> {   //plaintext and ciphertext are the same type
+class ContextClear : public Context<PlaintextT, std::vector<PlaintextT> > {   //plaintext and ciphertext are the same type
 public:
         typedef PlaintextT Plaintext;
-        typedef PlaintextT Ciphertext;  
+        typedef Plaintext CiphertextElement;
+        typedef std::vector<CiphertextElement> Ciphertext;
+        typedef std::vector<Plaintext> PlaintextVec;
 
   
-	Ciphertext encrypt(Plaintext p) {
-	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
+	Ciphertext encrypt(PlaintextVec p) {
+	  std::cout<<"encrypting plaintext "<<std::to_string(p[0])<<std::endl;
 	  return p; // plaintext and ciphertext are the same for this context
 	}
 
-	Plaintext decrypt(Ciphertext c) {
+	PlaintextVec decrypt(Ciphertext c) {
 		return c; // plaintext and ciphertext are the same for this context
 	}
 
@@ -50,14 +52,19 @@ public:
 
 	Ciphertext RippleCarryAdd(Ciphertext a, Ciphertext b) {
 		Ciphertext result;
-		bool sum, carry;
-		std::tie(sum, carry) = HalfAdder(bit(0,a), bit(0,b));
-		set_bit(0, result, sum);
+		size_t min_nslots = std::min(a.size(), b.size());
+		for (int slot=0; slot < min_nslots; ++slot) {
+		  bool sum, carry;
+		  std::tie(sum, carry) = HalfAdder(bit(0,a[slot]), bit(0,b[slot]));
+		  CiphertextElement result_element;
+		  set_bit(0, result_element, sum);
 		// Note that the loop starts at ONE, since we have
 		// already computed the zeroth bit above
-		for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
-			std::tie(sum, carry) = FullAdder(bit(i,a), bit(i,b), carry);
-			set_bit(i, result, sum);
+		  for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
+		    std::tie(sum, carry) = FullAdder(bit(i,a), bit(i,b), carry);
+		    set_bit(i, result_element, sum);
+		  }
+		  result.push_back(result_element);
 		}
 		return result;
 	}
@@ -72,46 +79,79 @@ public:
 	// back, so overflow is well-defined.
   
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  if (std::is_same<Ciphertext, bool>::value) {
-	    return a != b;
-	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    
-	    uC au = static_cast<uC>(a);
-	    uC bu = static_cast<uC>(b);
-	    return static_cast<Ciphertext>(au + bu);
+	  Ciphertext result;
+	  size_t min_nslots = std::min(a.size(), b.size());
+	  for (int slot=0; slot < min_nslots; ++slot) {
+	    if (std::is_same<CiphertextElement, bool>::value) {
+	      CiphertextElement sum = a[slot] != b[slot];
+	      result.push_back(sum);
+	      
+	    } else {
+	      typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextElement>::type >::type uC;
+	      
+	      uC au = static_cast<uC>(a[slot]);
+	      uC bu = static_cast<uC>(b[slot]);
+	      CiphertextElement sum = static_cast<CiphertextElement>(au + bu);
+	      result.push_back(sum);
+	    }
 	  }
+	  return result;
 	}
-
+  
+  
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	  if (std::is_same<Ciphertext, bool>::value) {
-	    return a & b;
-	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    uC au = static_cast<uC>(a);
-	    uC bu = static_cast<uC>(b);
-	    return static_cast<Ciphertext>(au * bu);
+	  Ciphertext result;
+	  size_t min_nslots = std::min(a.size(), b.size());
+	  for (int slot=0; slot < min_nslots; ++slot) {
+	    if (std::is_same<CiphertextElement, bool>::value) {
+	      CiphertextElement product = a[slot] & b[slot];
+	      result.push_back(product);
+	      return result;
+	    } else {
+	      typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextElement>::type >::type uC;
+	      uC au = static_cast<uC>(a[slot]);
+	      uC bu = static_cast<uC>(b[slot]);
+	      CiphertextElement product = static_cast<CiphertextElement>(au * bu);
+	      result.push_back(product);
+	    }
 	  }
+	  return result;
 	}
-
+  
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	  if (std::is_same<Ciphertext, bool>::value) {
+	  
+	  if (std::is_same<CiphertextElement, bool>::value) {
 	    return Add(a,b);
 	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    
-	    uC au = static_cast<uC>(a);
-	    uC bu = static_cast<uC>(b);
-	    return static_cast<Ciphertext>(au - bu);
+	    typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextElement>::type >::type uC;
+	    Ciphertext result;
+	    size_t min_nslots = std::min(a.size(), b.size());
+	    for (int slot=0; slot < min_nslots; ++slot) {
+	      uC au = static_cast<uC>(a[slot]);
+	      uC bu = static_cast<uC>(b[slot]);
+	    CiphertextElement difference =  static_cast<CiphertextElement>(au - bu);
+	    result.push_back(difference);
+	    }
+	    return result;
 	  }
 	}
 
+  
 	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-		return (a>=b)?a:b;
+	  Ciphertext result;
+	  size_t min_nslots = std::min(a.size(), b.size());
+	  for (int slot=0; slot < min_nslots; ++slot) {
+	    result.push_back ((a[slot] >= b[slot])?a[slot]:b[slot]);
+	  }
+	  return result;
 	}
   
 	Ciphertext Not(Ciphertext a) {
-		return !a;
+	  Ciphertext result;
+	  for (int slot=0; slot < a.size(); ++slot) {
+	    result.push_back(!(a[slot])) ;
+	  }
+	  return result;
 	}
   
 	Ciphertext Negate(Ciphertext a) {
@@ -119,21 +159,36 @@ public:
 	  if (std::is_same<Ciphertext, bool>::value) {
 	    return Not(a);
 	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    uC au = static_cast<uC>(a);
-	    return static_cast<Ciphertext>(-au);
+	    Ciphertext result;
+	    typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextElement>::type >::type uC;
+	    for (int slot=0; slot < a.size(); ++slot) {
+	      uC au = static_cast<uC>(a[slot]);
+	      result.push_back(static_cast<CiphertextElement>(-au));
+	    }
+	    return result;
 	  }
-	  
 	}
   
   
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
-		return (a > b);
+	  Ciphertext result;
+	  size_t min_nslots = std::min(a.size(), b.size());
+	  for (int slot=0; slot < min_nslots; ++slot) {
+	    result.push_back(a[slot] > b[slot]);
+	  }
+	  return result;
 	}
 
 	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-		return (s % 2)?a:b;
+	  Ciphertext result;
+	  size_t min_nslots = std::min(a.size(), b.size());
+	  min_nslots = std::min(min_nslots, s.size());
+	  for (int slot=0; slot < min_nslots; ++slot) {
+	    result.push_back((s[slot] % 2)?a[slot]:b[slot]);
+	  }
+	  return result;
 	}
+  
 };
 
 }  // Leaving Clear namespace

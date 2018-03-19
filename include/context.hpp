@@ -26,14 +26,17 @@ enum class EvaluationStrategy {serial, parallel};
 template <typename PlaintextT>
 class BaseContext {
 public:
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
+
+        typedef std::vector<PlaintextT> PlaintextVec;
+  
+	virtual std::vector<PlaintextVec>
+	eval_with_plaintexts(const Circuit&, std::vector<PlaintextVec>,
 			     std::vector<std::chrono::duration<double, std::micro> >&,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;	
 
 	// overloaded version for when we don't care about the timings
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
+	virtual std::vector<PlaintextVec>
+	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextVec> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
 };
 
@@ -45,10 +48,13 @@ public:
 	typedef PlaintextT Plaintext;
 	typedef CiphertextT Ciphertext;
 
+        typedef std::vector<Plaintext> PlaintextVec;
+  ////        typedef std::vector<Ciphertext> CiphertextVec;  
+  
 	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
 	
-        virtual Ciphertext encrypt(Plaintext) =0;
-	virtual Plaintext decrypt(Ciphertext) =0;
+        virtual Ciphertext encrypt(PlaintextVec) =0;
+	virtual PlaintextVec decrypt(Ciphertext) =0;
 
 	struct GateNotImplemented : public std::runtime_error {
 		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
@@ -269,9 +275,9 @@ public:
 		return CircuitEvaluator(run);
 	}
 
-        virtual std::vector<Plaintext> eval_with_plaintexts(
+        virtual std::vector<PlaintextVec> eval_with_plaintexts(
 		const Circuit& C,
-		std::vector<Plaintext> plaintext_inputs,
+		std::vector<PlaintextVec> plaintext_inputs,
 		std::vector<std::chrono::duration<double, std::micro> >& durations,
 		EvaluationStrategy eval_strategy = EvaluationStrategy::serial)
 	{
@@ -302,7 +308,7 @@ public:
 
 		//// decrypt the outputs again
 		auto dec_start_time = high_res_clock::now();
-		std::vector<Plaintext> plaintext_outputs;
+		std::vector<PlaintextVec> plaintext_outputs;
 		for (auto ct : ciphertext_outputs) plaintext_outputs.push_back(decrypt(ct));
 		auto dec_end_time = high_res_clock::now();
 		durations.push_back(microsecond(dec_end_time - dec_start_time));	  
@@ -310,8 +316,8 @@ public:
 		return plaintext_outputs;
 	}
 
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
+	virtual std::vector<PlaintextVec>
+	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextVec> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial)
 	{
 		std::vector<std::chrono::duration<double, std::micro> > ignored;
