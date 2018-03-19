@@ -69,7 +69,8 @@ def generate_plots(input_dict):
     """
     filt = build_filter(input_dict)
     filtered_rows = session.query(BenchmarkMeasurement).filter(filt).all()
-
+    print("INPUT DICT")
+    print(input_dict)
     ### need to organise data so there is a list of unique x-axis vals in xdata,
     ### and a dictionary of { 'category_label' : [y-vals] } 
 
