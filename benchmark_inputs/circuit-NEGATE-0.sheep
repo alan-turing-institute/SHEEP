@@ -1,0 +1,3 @@
+INPUTS input_0
+OUTPUTS output_0
+ input_0 NEGATE output_0
