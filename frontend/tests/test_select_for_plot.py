@@ -12,12 +12,14 @@ test_dicts = [
      'category_field': 'context_name',
      'context_selections': ['HElib_F2'],
      'gate_selections': ['ADD'],
-     'input_type_selections': ['1', '8', '16', '32']},
+     'input_type_width': ['1', '8', '16', '32'],
+     'input_type_signed': [False]},
     {'x_axis_var': 'context_name',
      'category_field': 'depth',
      'context_selections': ['HElib_F2', 'HElib_Fp', 'TFHE'],
      'gate_selections': ['SUBTRACT'],
-     'input_type_selections': ['8']}
+     'input_type_width': ['8'],
+     'input_type_signed' : [False] }
     ]
 
 def test_query_db():

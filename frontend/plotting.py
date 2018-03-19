@@ -45,7 +45,8 @@ def build_filter(input_dict):
     field_to_attribute_dict = {
         "context_selections" : BenchmarkMeasurement.context_name,
         "gate_selections" : BenchmarkMeasurement.gate_name,
-        "input_type_selections" : BenchmarkMeasurement.input_bitwidth
+        "input_type_width" : BenchmarkMeasurement.input_bitwidth,
+        "input_type_signed" : BenchmarkMeasurement.input_signed
     }
     and_expr = and_()
     for field, values in input_dict.items():
