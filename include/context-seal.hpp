@@ -20,7 +20,7 @@ public:
   
   // constructors
   
-  ContextSeal(char* poly_modulus = "1x^2048 + 1", // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"
+  ContextSeal(const string poly_modulus = "1x^2048 + 1", // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"
   	int security = 128,  /* This is the security level (either 128 or 192).
   							We limit ourselves to 2 predefined choices,
   							as coefficient modules are preset by SEAL for these choices.*/
@@ -119,10 +119,10 @@ public:
   };
 
 protected:
-	char* m_poly_modulus;
-  	int m_security;
-  	int m_plaintext_modulus;
-  	seal::SEALContext* m_context;
+	const string m_poly_modulus;
+  int m_security;
+  int m_plaintext_modulus;
+  seal::SEALContext* m_context;
 	seal::IntegerEncoder* m_encoder;
 	seal::PublicKey m_public_key;
 	seal::SecretKey m_secret_key;
