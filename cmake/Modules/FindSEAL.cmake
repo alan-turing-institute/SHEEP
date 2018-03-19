@@ -1,5 +1,5 @@
-find_path(SEAL_INCLUDE_DIR NAMES seal.h)
-find_library(SEAL_LIBRARY NAMES libseal)
+find_path(SEAL_INCLUDE_DIR NAMES seal)
+find_library(SEAL_LIBRARY NAMES libseal.a)
 
 #set(SEAL_FOUND TRUE)
 set(SEAL_INCLUDE_DIRS ${SEAL_INCLUDE_DIR})

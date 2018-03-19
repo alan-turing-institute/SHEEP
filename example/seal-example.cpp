@@ -30,7 +30,7 @@ int main(void) {
   ContextSeal<int8_t>::CircuitEvaluator run_circuit;
   run_circuit = ctx.compile(C);
 	
-  std::list<ContextSeal<int8_t>::Plaintext> plaintext_inputs = {6, 9, 25,67};
+  std::list<ContextSeal<int8_t>::Plaintext> plaintext_inputs = {1, 1, 3, 0};
   std::list<ContextSeal<int8_t>::Ciphertext> ciphertext_inputs;
   
   for (ContextSeal<int8_t>::Plaintext pt: plaintext_inputs)
