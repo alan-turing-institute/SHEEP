@@ -20,6 +20,7 @@ from frontend.utils import parse_test_output, check_outputs, get_bitwidth
 
 def insert_measurement(context,
                        bitwidth,
+                       signed,
                        gate,
                        depth,
                        nslots,
@@ -33,6 +34,7 @@ def insert_measurement(context,
     
     m = BenchmarkMeasurement(context_name=context,
                              input_bitwidth=bitwidth,
+                             input_signed=signed,
                              gate_name=gate,
                              depth=depth,
                              num_slots=nslots,
@@ -47,7 +49,8 @@ def insert_measurement(context,
 def run_single_benchmark(input_circuit,
                          input_vals_file,
                          context,
-                         input_type):
+                         input_type,
+                         debug=False):
     """
     Call the executable "benchmark" with command-line args for a specific run,
     and parse the stdout output to get the processing time, and whether the 
@@ -62,11 +65,12 @@ def run_single_benchmark(input_circuit,
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
 ### write job's stdout to a file for debugging
-    debug_output_name = context+"_"+input_circuit.split(".")[0]+"_"+\
-                        input_vals_file.split(".")[0]
-    outfile = open(os.path.join(DEBUG_FILE_DIR,debug_output_name),"w")
-    outfile.write(job_output.decode("utf-8"))
-    outfile.close()
+    if debug:
+        debug_output_name = context+"_"+input_circuit.split(".")[0]+"_"+\
+                            input_vals_file.split(".")[0]
+        outfile = open(os.path.join(DEBUG_FILE_DIR,debug_output_name),"w")
+        outfile.write(job_output.decode("utf-8"))
+        outfile.close()
 ### parse the file, return the outputs
     processing_times, outputs = parse_test_output(job_output)
     is_correct = check_outputs(outputs)
@@ -83,9 +87,22 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
     for gate in gates:
         for input_type in types:
             bitwidth = get_bitwidth(input_type)
+            signed = input_type.startswith("i")
             for depth in range(1,max_depth):
                 circuit_file = "circuit-"+gate+"-"+str(depth)+".sheep"
-                inputs_file = "inputs-"+input_type+"-"+str(depth)+".inputs"
+
+### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
+### different requirements
+                
+                inputs_file = "inputs-"
+                if gate == "SELECT":
+                    inputs_file += "select-"
+                elif gate == "NEGATE":
+                    inputs_file += "1-to-1-"
+                else:
+                    inputs_file += "2-to-1-"
+                inputs_file +=input_type+"-"+str(depth)+".inputs"
+### loop over desired contexts
                 for context in contexts:
                     print("Doing benchmark for %s %s %i %s" %
                           (context,gate,depth,input_type))
@@ -99,6 +116,7 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
                     insert_measurement(
                         context,
                         bitwidth,
+                        signed,
                         gate,
                         depth,
                         1,

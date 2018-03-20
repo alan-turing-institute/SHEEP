@@ -7,9 +7,10 @@ import random
 import os
 import re
 
-EXECUTABLE_DIR = os.env["HOME"]+"/SHEEP/build/bin"
 
-OUTPUT_DIR = os.env["HOME"]+"/SHEEP/benchmark_inputs"
+EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
+
+OUTPUT_DIR = os.environ["HOME"]+"/SHEEP/benchmark_inputs"
 
 def rnd_num_in_range(input_type):
     """ 
@@ -26,30 +27,90 @@ def rnd_num_in_range(input_type):
                                   pow(2,int(bitwidth)-1)-1)            
         
 
+def generate_2_to_1_inputs(input_type, depth):
+    """
+    generate randomly-generated inputs for depth-level circuits where
+    each gate takes two inputs and gives one output.  For depth N, we need 
+    N+1 input values.
+    """
+    output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-2-to-1-"+input_type+"-"+str(depth)+".inputs")
+    output_inputs_file = open(output_inputs_filename,"w")
+    for i in range(depth+1):
+        output_inputs_file.write("input_"+str(i)+" "+str(rnd_num_in_range(input_type))+"\n")
+        
+    output_inputs_file.close()
 
+def generate_1_to_1_inputs(input_type, depth):
+    """
+    generate randomly-generated inputs for depth-level circuits where
+    each gate takes one inputs and gives one output.  
+    We only need one input value
+    """
+    output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-1-to-1-"+input_type+"-"+str(depth)+".inputs")
+    output_inputs_file = open(output_inputs_filename,"w")
+
+    output_inputs_file.write("input_0 "+str(rnd_num_in_range(input_type))+"\n")
+        
+    output_inputs_file.close()
+
+    
+def generate_select_inputs(input_type, depth):
+    """
+    generate randomly-generated inputs for depth-level circuits where
+    each gate takes two input values and a select value (bool).  
+    For depth N, we need N+1 input values.
+    Current format is input_i
+    """
+    output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-select-"+input_type+"-"+str(depth)+".inputs")
+    output_inputs_file = open(output_inputs_filename,"w")
+    for i in range(depth+1):
+        output_inputs_file.write("input_"+str(i)+" "+str(rnd_num_in_range(input_type))+"\n")
+        if i < depth:
+            output_inputs_file.write("select_"+str(i)+" "+str(rnd_num_in_range(input_type))+"\n")            
+        
+    output_inputs_file.close()
+    
+    
+
+        
+def generate_simple_circuit(gate,max_depth):
+    """
+    generate sets of circuits that contain sequences of the same gate,
+    using the simple-circuit-maker executable,
+    which in turn uses circuit-repo.hpp
+    """
+    for depth in range(max_depth):
+        output_circuit_filename = os.path.join(OUTPUT_DIR,"circuit-"+gate+"-"+str(depth)+".sheep")
+
+        run_cmd = []
+        run_cmd.append(os.path.join(EXECUTABLE_DIR,"simple-circuit-maker"))
+        run_cmd.append(gate)
+        run_cmd.append(str(depth))
+        run_cmd.append(output_circuit_filename)
+        p = subprocess.Popen(args=run_cmd, stdout=subprocess.PIPE)
+
+
+def generate_inputs(depth):
+    ## get list of input sizes sizes
+    input_types = ["bool"]
+    for bitwidth in ["8","16","32"]:
+        input_types.append("uint"+bitwidth+"_t")
+        input_types.append("int"+bitwidth+"_t")
+    for input_type in input_types:
+        generate_2_to_1_inputs(input_type,depth)
+        generate_1_to_1_inputs(input_type,depth)
+        generate_select_inputs(input_type,depth)
+        
+        
+
+    
 if __name__ == "__main__":
 
     for depth in range(1,10):
-        for gate in ["ADD","SUBTRACT","MULTIPLY"]:
-            output_circuit_filename = os.path.join(OUTPUT_DIR,"circuit-"+gate+"-"+str(depth)+".sheep")
-
-            run_cmd = []
-            run_cmd.append(os.path.join(EXECUTABLE_DIR,"simple-circuit-maker"))
-            run_cmd.append(gate)
-            run_cmd.append(str(depth))
-            run_cmd.append(output_circuit_filename)
-            p = subprocess.Popen(args=run_cmd, stdout=subprocess.PIPE)
+        for gate in ["ADD","SUBTRACT","MULTIPLY","SELECT","COMPARE","NEGATE"]:
+            generate_simple_circuit(gate,depth)
 ## now generate inputs of different sizes
-        input_types = ["bool"]
-        for bitwidth in ["8","16","32"]:
-            input_types.append("uint"+bitwidth+"_t")
-            input_types.append("int"+bitwidth+"_t")            
-        for input_type in input_types:
-            output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-"+input_type+"-"+str(depth)+".inputs")
-            output_inputs_file = open(output_inputs_filename,"w")
-            for i in range(depth+1):
-                output_inputs_file.write("input_"+str(i)+" "+str(rnd_num_in_range(input_type))+"\n")
+        generate_inputs(depth)
 
-            output_inputs_file.close()
                 
             

@@ -111,7 +111,7 @@ def execute_test():
     proc_time, outputs = utils.run_test(app.data,app.config)   
     if request.method == "POST":
         database.upload_test_result(proc_time,app.data)
-        return "OK"
+        return render_template("uploaded_ok.html")
     return render_template("test_results.html",proc_time=proc_time,outputs=outputs,context_name=app.data["HE_library"])
 
 

@@ -36,6 +36,7 @@ class BenchmarkMeasurement(Base):
     id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
     context_name = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
+    input_signed = Column(Boolean, nullable=False)    
     gate_name = Column(String(250), nullable=False)
     depth = Column(Integer, nullable=False)
     num_slots = Column(Integer, nullable=False)
