@@ -30,7 +30,7 @@ make_context(std::string context_type, std::string context_params="") {
 	  auto ctx =  std::make_unique<TFHE::ContextTFHE<PlaintextT> >();
 	  return ctx;
 	} else if (context_type == "SEAL") {
-	  auto ctx =  std::make_unique<Seal::ContextSEAL<PlaintextT> >();
+	  auto ctx =  std::make_unique<Seal::ContextSeal<PlaintextT> >();
 	  return ctx;
 	} else {
 	  return std::make_unique<Clear::ContextClear<PlaintextT> >();
