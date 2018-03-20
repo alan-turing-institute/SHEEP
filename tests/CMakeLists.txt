@@ -30,6 +30,14 @@ foreach(type IN ITEMS bool int8_t uint8_t)
 		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
 	  endforeach(op)
 endforeach(type)
+
+add_executable(test-clear-int8_t-multiply-binary
+                       test-clear-int8_t-multiply-binary.cpp
+		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+		       add_test(NAME test-clear-int8_t-multiply-binar COMMAND $<TARGET_FILE:test-clear-int8_t-multiply-binary>)
+
 foreach(type IN ITEMS int8_t uint8_t)		
 	  foreach(op IN ITEMS ripple-carry-add)
 	  	       add_executable(test-clear-${type}-${op}	
@@ -69,7 +77,7 @@ if (TFHE_FOUND)
         target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
         add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
 
-        foreach(op IN ITEMS add subtract negate compare select)
+        foreach(op IN ITEMS add subtract multiply negate compare select)
             add_executable(test-tfhe-${type}-${op}
                              test-tfhe-${type}-${op}.cpp
                              ${CMAKE_SOURCE_DIR}/src/circuit.cpp

@@ -65,12 +65,6 @@ public:
 		return pt;
 	}
 
-	// Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	bootsAND(result, a, b, cloud_key_cptr());
-	// 	return result;
-	// }
-
 	// Ciphertext Maximum(Ciphertext a, Ciphertext b) {
 	// 	Ciphertext result(parameters);
 	// 	bootsOR(result, a, b, cloud_key_cptr());
@@ -155,6 +149,42 @@ public:
 			bootsCOPY(result[i], diff, cloud_key_cptr());
 		}
 		return result;
+	}
+
+	std::pair<CiphertextBit, CiphertextBit> MultiplyBit(
+		LweSample *x, LweSample *y, LweSample *sum_in, LweSample *carry_in)
+	{
+		CiphertextBit sum_out(parameters), carry_out(parameters),
+			product_bit(parameters);
+		bootsAND(product_bit, x, y, cloud_key_cptr());
+		std::tie(sum_out, carry_out) = FullAdder(sum_in, product_bit, carry_in);
+		return std::make_pair(sum_out, carry_out);
+	}
+
+	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+	 	Ciphertext result(parameters);
+		std::vector<CiphertextArrayTFHE<BITWIDTH(Plaintext)+1> > carry;
+		CiphertextBit sum_bit(parameters), carry_bit(parameters);
+
+		// initialize the ciphertext array holding the carries
+		for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
+			carry.emplace_back(parameters);
+
+		for (int i = 0; i < BITWIDTH(Plaintext); i++)
+			bootsCONSTANT(result[i], 0, cloud_key_cptr());
+
+		// initialize the first level of carry to zero
+		for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
+			bootsCONSTANT(carry[0][i], 0, cloud_key_cptr());
+
+		for (int i = 0; i < BITWIDTH(Plaintext); i++) {
+			for (int j = 0; j <= i; j++) {
+				std::tie(sum_bit, carry_bit) = MultiplyBit(a[i-j], b[j], result[i], carry[j][i]);
+				bootsCOPY(result[i], sum_bit, cloud_key_cptr());
+				bootsCOPY(carry[j+1][i+1], carry_bit, cloud_key_cptr());				
+			}
+		}
+	 	return result;
 	}
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
