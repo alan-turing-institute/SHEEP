@@ -57,6 +57,18 @@ if (TFHE_FOUND)
 
     target_link_libraries(tfhe-example
                             ${TFHE_LIBRARIES})
+
+
+    add_executable(bitonic-sort-tfhe
+		   bitonic-sort-tfhe.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+    target_link_libraries(bitonic-sort-tfhe ${TFHE_LIBRARIES})
+
+    add_test(NAME bitonic-sort-tfhe COMMAND bitonic-sort-tfhe)
+
 endif(TFHE_FOUND)
 
 if (SEAL_FOUND)
@@ -70,15 +82,7 @@ if (SEAL_FOUND)
                             ${SEAL_LIBRARIES})
 endif(SEAL_FOUND)
 
-add_executable(bitonic-sorting-circuit
-  bitonic-sorting-circuit.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-target_link_libraries(bitonic-sorting-circuit ${TFHE_LIBRARIES})
-
-add_test(NAME bitonic-sorting-circuit COMMAND bitonic-sorting-circuit)
 
 if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
     add_executable(benchmark		       
