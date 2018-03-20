@@ -27,7 +27,7 @@
 using namespace Sheep::TFHE;
 #endif
 
-#ifdef HAVE_TFHE
+#ifdef HAVE_HElib
 using namespace Sheep::HElib;
 #endif
 
