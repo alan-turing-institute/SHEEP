@@ -122,7 +122,7 @@ endif (HELIB_FOUND)
 if (SEAL_FOUND)
 
     foreach(type IN ITEMS bool int8_t uint8_t)
-      foreach (op IN ITEMS add) # multiply select encrypt-decrypt negate subtract addConst multByConst)
+      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
           add_executable(test-seal-${type}-${op}
                           test-seal-${type}-${op}
         ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
