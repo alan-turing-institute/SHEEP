@@ -5,6 +5,7 @@
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
+#include "context-seal.hpp"
 
 
 using namespace Sheep;
@@ -27,6 +28,9 @@ make_context(std::string context_type, std::string context_params="") {
 	  return ctx;
 	} else if (context_type == "TFHE") {
 	  auto ctx =  std::make_unique<TFHE::ContextTFHE<PlaintextT> >();
+	  return ctx;
+	} else if (context_type == "SEAL") {
+	  auto ctx =  std::make_unique<Seal::ContextSEAL<PlaintextT> >();
 	  return ctx;
 	} else {
 	  return std::make_unique<Clear::ContextClear<PlaintextT> >();

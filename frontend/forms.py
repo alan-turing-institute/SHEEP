@@ -13,7 +13,7 @@ class CircuitForm(Form):
     Standard WTForm
     """
     circuit_file = FileField(validators=[validators.InputRequired()],label="Circuit file")
-    HE_library = SelectField(choices=[("Clear","Clear"),("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE")],label="HE library")
+    HE_library = SelectField(choices=[("Clear","Clear"),("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")],label="HE library")
 ##    parameter_file = FileField(validators=[validators.InputRequired()],label="Parameter file")
     input_type = SelectField(choices=[("bool","bool"),
                                       ("uint8_t","uint8_t"),
@@ -48,7 +48,8 @@ class PlotsForm(Form):
         ("input_bitwidth","Input bitwidth"),
         ("gate_name","Gate"),        
     ],label="category var")
-    context_selections = MultiCheckboxField('Select contexts', choices=[("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE")])
+    
+    context_selections = MultiCheckboxField('Select contexts', choices=[("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")])
     gate_selections = MultiCheckboxField('Select gate(s)', choices=[("ADD","ADD"),("SUBTRACT","SUBTRACT"),("MULTIPLY","MULTIPLY"),("NEGATE","NEGATE"),("SELECT","SELECT"),("COMPARE","COMPARE")])    
     input_type_width = MultiCheckboxField('Select input bitwidth(s)', choices=[(1,"1"),(8,"8"),(16,"16"),(32,"32")])
     input_type_signed = MultiCheckboxField('Select signed or unsigned input', choices=[(1,"signed"),(0,"unsigned")])
