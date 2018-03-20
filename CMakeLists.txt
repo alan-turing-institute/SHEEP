@@ -5,11 +5,15 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Default include and library dirs
+# TFHE
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/lib/tfhe/src/include/")
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/tfhe/build/libtfhe/")
-
+# HElib
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src")
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src")
+# SEAL
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/include/SEAL")
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/usr/local/lib/SEAL")
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
@@ -37,6 +41,12 @@ if (TBB_FOUND)
   link_libraries(tbb)
   include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
   add_definitions(-DHAVE_TBB)
+endif()
+
+find_package(SEAL)
+if (SEAL_FOUND)
+  include_directories(SYSTEM ${SEAL_INCLUDE_DIRS})
+  add_definitions(-DHAVE_SEAL)
 endif()
 
 add_subdirectory(example bin)
