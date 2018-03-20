@@ -5,7 +5,7 @@
 #include "circuit-test-util.hpp"
 
 int main(void) {
-	using namespace Sheep::Clear;
+	using namespace SHEEP;
 	typedef std::vector<ContextClear<int8_t>::Plaintext> PtVec;
 
 	Circuit circ;

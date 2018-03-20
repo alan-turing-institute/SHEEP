@@ -30,7 +30,7 @@ int main(void)
 	// The copy should represent the same circuit.  Compare result
 	// of evaluting original and copy
 	
-	using namespace Sheep::Clear;
+	using namespace SHEEP;
 	typedef std::vector<ContextClear<int32_t>::Plaintext> PtVec;
 	ContextClear<int32_t> ctx;
 	PtVec inputs{1,2,3,4,5};

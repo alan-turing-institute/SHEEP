@@ -20,8 +20,7 @@ NTL_CLIENT
 #include "binaryCompare.h"
 
 
-namespace Sheep {
-namespace HElib {
+namespace SHEEP {
 
 template <typename PlaintextT, typename CiphertextT>
 class ContextHElib : public Context< PlaintextT , CiphertextT> {
@@ -530,7 +529,6 @@ public:
 };  /// end of class definition
   
   
-}  // leavin HElib namespace
 }  // leaving Sheep namespace
   
 #endif // CONTEXT_HELIB_HPP

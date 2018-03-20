@@ -5,7 +5,7 @@
 #include "circuit-test-util.hpp"
 
 int main(void) {
-	using namespace Sheep::TFHE;
+	using namespace SHEEP;
 	typedef std::vector<ContextTFHE<bool>::Plaintext> PtVec;
 
 	// Both Add and Subract correspond to 'Xor' in binary circuit

@@ -5,7 +5,7 @@
 #include "circuit-repo.hpp"
 
 
-using namespace Sheep::Seal;
+using namespace SHEEP;
 
 int main(void) {
 
