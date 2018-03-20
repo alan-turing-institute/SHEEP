@@ -88,13 +88,13 @@ public:
   }
   
   Ciphertext MultByConstant(Ciphertext a, long b) {
-  	seal::Plaintext pt = m_encoder->encode(b);
+    seal::Plaintext pt = m_encoder->encode((int64_t)b);
   	m_evaluator->multiply_plain(a, pt);
     return a;
   }
 
   Ciphertext AddConstant(Ciphertext a, long b) {
-    seal::Plaintext pt = m_encoder->encode(b);
+    seal::Plaintext pt = m_encoder->encode((int64_t)b);
   	m_evaluator->multiply_plain(a, pt);
     return a;
   }
