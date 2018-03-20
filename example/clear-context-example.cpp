@@ -19,13 +19,13 @@ int main(void) {
 
   /// can either retrieve pre-build test circuits by name:
   
-  Circuit C = cr.get_circuit_by_name("TestCircuit1");
-  std::cout << C;
+  //  Circuit C = cr.get_circuit_by_name("TestCircuit1");
+  // std::cout << C;
 
   //// or build a circuit with a specified depth of a specified gate
   
-  // Circuit C2 = cr.create_circuit(Gate::Add, 3);
-  // std::cout << C2;
+   Circuit C = cr.create_circuit(Gate::Add, 1);
+   std::cout << C;
   
   
   ContextClear<int8_t> ctx;
@@ -34,14 +34,14 @@ int main(void) {
   run_circuit = ctx.compile(C);
 
   
+  std::cout<<" test "<< -179 % 128<<std::endl;
 
-  PlaintextVec input0 = { 6, 7, 8, 9, 10, 11 };
-  PlaintextVec input1 = { 9, 9, 9, 9, 9, 9 };
-  PlaintextVec input2 = { 25, 25, 25, 25, 25, 25 };
-  PlaintextVec input3 = { 67, 66, 65, 64, 63, 62 };
+  
+  PlaintextVec input0 = { -128, -128, -128, -128, 127, 127, 127, 127, 0, 0, 0, 0, -51, -51, -51, -51 };
+  PlaintextVec input1 = { -128, 127, 0, -51, -128, 127, 0, -51, -128, 127, 0, -51, -128, 127, 0, -51 };
   
 
-  std::vector< PlaintextVec > plaintext_inputs = {input0, input1, input2,input3};
+  std::vector< PlaintextVec > plaintext_inputs = {input0, input1};
   std::list<Ciphertext> ciphertext_inputs;
   
   for (PlaintextVec pt: plaintext_inputs)
@@ -55,13 +55,11 @@ int main(void) {
   for (Ciphertext ct: ciphertext_outputs) {
     PlaintextVec pt = ctx.decrypt(ct);
     plaintext_outputs.push_back(pt);
-    std::cout << "output: "
-	      << std::to_string(pt[0]) << " "
-	      << std::to_string(pt[1]) <<" "
-	      << std::to_string(pt[2]) <<" "
-	      << std::to_string(pt[3]) <<" "
-	      << std::to_string(pt[4]) <<" "      
-	      <<  std::endl;
+    std::cout << "output: ";
+    for (int i = 0; i< pt.size(); i++) {
+      std::cout<< std::to_string(pt[i]) << " ";
+    }
+    std::cout <<  std::endl;
   }
   std::cout << "time was " << time.count() << " microseconds\n";
   

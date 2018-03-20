@@ -1,5 +1,5 @@
-#ifndef CONTEXT_HELIB_F2_HPP
-#define CONTEXT_HELIB_F2_HPP
+#ifndef CONTEXT_HELIB_HPP
+#define CONTEXT_HELIB_HPP
 
 #include <unordered_map>
 #include <chrono>
@@ -32,7 +32,8 @@ class ContextHElib : public Context< PlaintextT , CiphertextT> {
 public:
 
   typedef PlaintextT Plaintext;
-  typedef CiphertextT Ciphertext;  
+  typedef CiphertextT Ciphertext;
+  typedef std::vector<Plaintext> PlaintextVec;
 
   /// constructors
 
@@ -190,8 +191,8 @@ public:
     }
   }
 
-  virtual Ciphertext encrypt(Plaintext pt) = 0;
-  virtual Plaintext decrypt(Ciphertext pt) = 0;  
+  virtual Ciphertext encrypt(PlaintextVec pt) = 0;
+  virtual PlaintextVec decrypt(Ciphertext pt) = 0;  
 
  
   
@@ -249,10 +250,11 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 public:
 
   typedef PlaintextT Plaintext;
+  typedef std::vector< Plaintext > PlaintextVec;
   typedef NTL::Vec<Ctxt> Ciphertext;  
   
   ContextHElib_F2(long p=2,           // plaintext modulus
-		  long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+		  long param_set=2,   // parameter set, from 0 (tiny) to 4 (huge)
 		  bool bootstrap=true, // bootstrap or not?
 		  long haming_weight=128) // Haming weight of secret key
     : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
@@ -263,26 +265,42 @@ public:
     /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
     m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
 			  std::is_same<Plaintext, int16_t>::value ||
-			  std::is_same<Plaintext, int32_t>::value);
+			  std::is_same<Plaintext, int32_t>::value ||
+			  std::is_same<Plaintext, int64_t>::value);
   }
 
 
   
-  Ciphertext encrypt(Plaintext pt) {
+  Ciphertext encrypt(PlaintextVec pt) {
     Ctxt mu(*(this->m_publicKey));  /// use this to fill up the vector when resizing
     Ciphertext  ct;   /// now an NTL::Vec<Ctxt>
     resize(ct,this->m_bitwidth, mu);
+
+
     for (int i=0; i < this->m_bitwidth; i++) {
-      this->m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
+      std::vector<long> pt_long;      
+      for (int slot=0; slot < pt.size(); slot++) pt_long.push_back((pt[slot] >> i)&1);
+      /// fill up the slots with zeros
+      for (int slot = pt.size(); slot < this->m_nslots; slot++) pt_long.push_back(0L);
+      ////      this->m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
+      //this->m_publicKey->Encrypt(ct[i], pt_long);
+
+      this->m_ea->encrypt(ct[i], *(this->m_publicKey), pt_long);
+
+      
     }
     return ct;  
   }
 
-  Plaintext decrypt(Ciphertext ct) {
-    std::vector<long> pt;
-    decryptBinaryNums(pt, CtPtrs_VecCt(ct), *(this->m_secretKey), *(this->m_ea));
-    long pt_transformed = pt[0];
-    return pt_transformed  % int(pow(2,this->m_bitwidth));
+  PlaintextVec decrypt(Ciphertext ct) {
+    PlaintextVec pt;
+    std::vector<long> pt_long;
+    decryptBinaryNums(pt_long, CtPtrs_VecCt(ct), *(this->m_secretKey), *(this->m_ea));
+    for (int i=0; i<pt_long.size(); i++) {
+      long pt_transformed = pt[i];
+      pt.push_back((Plaintext)(pt_transformed  % int(pow(2,this->m_bitwidth))));
+    }
+    return pt;
     
   }
 
@@ -306,7 +324,11 @@ public:
     }
     if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
     /// for integers, need to add 1.
-    Ciphertext one_enc = encrypt((Plaintext)1);
+    PlaintextVec ones;
+    for (int slot=0; slot< this->m_nslots; slot++) {
+      ones.push_back((Plaintext)1);
+    }
+    Ciphertext one_enc = encrypt(ones);
     Ciphertext output_final = Add(output,one_enc);
     return output_final;
   }
@@ -433,10 +455,11 @@ class ContextHElib_Fp : public ContextHElib< PlaintextT, Ctxt > {
 public:
 
   typedef PlaintextT Plaintext;
+  typedef std::vector<Plaintext> PlaintextVec; 
   typedef Ctxt Ciphertext;  
   
   ContextHElib_Fp(long p=65537,      // plaintext modulus
-		  long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+		  long param_set=2,   // parameter set, from 0 (tiny) to 4 (huge)
 		  bool bootstrap=false, // bootstrap or not?
 		  long haming_weight=128) // Haming weight of secret key
     : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
@@ -446,36 +469,41 @@ public:
   }
 
   
-  Ciphertext encrypt(Plaintext pt) {
+  Ciphertext encrypt(PlaintextVec pt) {
 
-//// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
-    std::vector<long> ptvec;
-    ptvec.push_back(pt);
-    
+    /// cast the elements of the plaintext vector into long ints for HElib
+    std::vector<long> pt_long;
+    for (int i=0; i< pt.size(); i++) pt_long.push_back((long)(pt[i]));
+    std::cout<<" input ptvec has "<<std::to_string(pt.size())<<" slots "<<std::to_string(pt[0])<<std::endl;
     ////// fill up nslots with zeros//// 
-    for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
+    for (int i = pt.size(); i < this->m_nslots; i++) pt_long.push_back(0L);
+    
+    std::cout<<" about to try and encrypt...  nslots is "<<std::to_string(this->m_nslots)<<" i have "<<std::to_string(pt_long.size())<<" "<<std::to_string(pt_long[0])<<std::endl;
     
     Ciphertext ct(*(this->m_publicKey));
-    this->m_ea->encrypt(ct, *(this->m_publicKey), ptvec);
+    this->m_ea->encrypt(ct, *(this->m_publicKey), pt_long);
     return ct; 
    
   }
 
-  Plaintext decrypt(Ciphertext ct) {
-    
-    std::vector<long> pt;
-    this->m_ea->decrypt(ct, *(this->m_secretKey), pt);
-    long pt_transformed = pt[0];
-    if ((pt[0]) > this->m_p / 2)    //// convention - treat this as a negative number
-      pt_transformed = pt[0] - this->m_p;
-    return pt_transformed  % int(pow(2,this->m_bitwidth));
-    
+  PlaintextVec decrypt(Ciphertext ct) {
+    PlaintextVec result;
+    std::vector<long> pt_long;
+    this->m_ea->decrypt(ct, *(this->m_secretKey), pt_long);
+    for (int i=0; i < pt_long.size(); i++) {
+      std::cout<<" decrypting "<<i<<" "<<std::to_string(pt_long[i])<<std::endl;
+      long pt_transformed = pt_long[i];
+      if ((pt_long[i]) > this->m_p / 2)    //// convention - treat this as a negative number
+	pt_transformed = pt_long[i] - this->m_p;
+      result.push_back((Plaintext)(pt_transformed  % int(pow(2,this->m_bitwidth))));
+    }
+    return result;
   }
 
   
   
   Ciphertext Add(Ciphertext a, Ciphertext b) {
-
+    std::cout<<" in HElib_Fp::Add "<<std::endl;
     a += b;
     return a;
 
