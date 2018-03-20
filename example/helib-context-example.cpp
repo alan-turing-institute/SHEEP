@@ -1,6 +1,7 @@
 #include <memory>
 
-#include "context-helib.hpp"
+#include "context-helib-fp.hpp"
+#include "context-helib-f2.hpp"
 
 #include "circuit-repo.hpp"
 
@@ -22,7 +23,7 @@ int main(void) {
   std::cout << c2;
 
   
-  ContextHElib_F2<int8_t> ctx;
+  ContextHElib_F2<int8_t> ctx(1);
 
   ///  std::cout<<"about to read params"<<std::endl;
   
@@ -33,10 +34,22 @@ int main(void) {
   ContextHElib_F2<int8_t>::CircuitEvaluator run_circuit;
   run_circuit = ctx.compile(c2);
 
-  PlaintextVec input0 = { -12, -128, -128, -128, 127, 127, 127, 127, 0, 0, 0, 0, -51, -51, -51, -51 };
+  PlaintextVec input0 = { 18, 120 , -128, -128, -128, 127, 127, 127, 127, 0, 0, 0, 0, -51, -51, -51, -51 };
+
+
+  //Ciphertext c1 = ctx.encrypt(input0);
+
+  //  PlaintextVec result = ctx.decrypt(c1);
+
+  //std::cout<<"decrypted "<<result.size()<<std::endl;
+  //std::cout<<" first element decrypted is "<<std::to_string(result[0])<<std::endl;
+  
+  
   PlaintextVec input1 = { -128, 127, 0, -51, -128, 127, 0, -51, -128, 127, 0, -51, -128, 127, 0, -51 };
   
 
+  
+  
   std::vector< PlaintextVec > plaintext_inputs = {input0, input1};
   std::list<Ciphertext> ciphertext_inputs;
   
@@ -58,5 +71,5 @@ int main(void) {
     std::cout <<  std::endl;
   }
   std::cout << "time was " << time.count() << " microseconds\n";
-
+  
 }
