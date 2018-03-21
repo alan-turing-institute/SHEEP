@@ -11,8 +11,7 @@
 #include "context-tfhe-common.hpp"
 #include "bits.hpp"
 
-namespace Sheep {
-namespace TFHE {
+namespace SHEEP {
 
 template <typename T>
 class ContextTFHE
@@ -213,7 +212,6 @@ public:
 	}
 };
 
-}
 }
 
 #endif // CONTEXT_TFHE_INTEGER_HPP

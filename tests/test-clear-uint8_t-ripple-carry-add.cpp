@@ -4,7 +4,7 @@
 #include "context-clear.hpp"
 
 
-using namespace Sheep::Clear;
+using namespace SHEEP;
 
 int main(void) {
 	ContextClear<uint8_t> ctx;

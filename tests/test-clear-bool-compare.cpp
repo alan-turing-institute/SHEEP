@@ -5,7 +5,7 @@
 #include "circuit-test-util.hpp"
 #include "simple-circuits.hpp"
 
-using namespace Sheep::Clear;
+using namespace SHEEP;
 
 int main(void) {
         typedef std::vector<ContextClear<bool>::Plaintext> PtVec;

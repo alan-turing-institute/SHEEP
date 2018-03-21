@@ -5,7 +5,7 @@
 #include "circuit-test-util.hpp"
 
 int main(void) {
-	using namespace Sheep::TFHE;
+	using namespace SHEEP;
 	typedef std::vector<ContextTFHE<bool>::Plaintext> PtVec;
 
 	Circuit circ;

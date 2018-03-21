@@ -4,7 +4,7 @@
 
 #include "circuit-repo.hpp"
 
-using namespace Sheep::HElib;
+using namespace SHEEP;
 
 
 int main(void) {

@@ -7,8 +7,7 @@
 #include <type_traits>
 #include <cmath>
 
-namespace Sheep {
-namespace Clear {
+namespace SHEEP {
 
 template <typename Ciphertext>
 struct CiphertextWrapper { typedef Ciphertext type; };
@@ -165,7 +164,7 @@ public:
 	}
 };
 
-}  // Leaving Clear namespace
+
 }  // Leaving Sheep namespace
   
 #endif // CONTEXT_CLEAR_HPP

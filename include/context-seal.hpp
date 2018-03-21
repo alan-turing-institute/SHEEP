@@ -8,8 +8,7 @@
 #include <type_traits>
 #include <cmath>
 
-namespace Sheep {
-namespace Seal {
+namespace SHEEP {
 
 template <typename PlaintextT>
 class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
@@ -131,7 +130,6 @@ protected:
 	seal::Decryptor* m_decryptor;
 };
 
-}  // Leaving Seal namespace
 }  // Leaving Sheep namespace
 
 #endif // CONTEXT_SEAL_HPP

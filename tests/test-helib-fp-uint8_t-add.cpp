@@ -10,7 +10,7 @@
 typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
-	using namespace Sheep::HElib;
+	using namespace SHEEP;
 
     //// instantiate the Circuit Repository
 	CircuitRepo cr;

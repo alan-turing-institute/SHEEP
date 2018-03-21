@@ -6,7 +6,7 @@
 #include "simple-circuits.hpp"
 
 int main(void) {
-	using namespace Sheep::TFHE;
+	using namespace SHEEP;
 	typedef std::vector<ContextTFHE<int8_t>::Plaintext> PtVec;
 
 	Circuit circ = single_binary_gate_circuit(Gate::Compare);

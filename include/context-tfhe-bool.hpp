@@ -9,8 +9,7 @@
 #include "context.hpp"
 #include "context-tfhe-common.hpp"
 
-namespace Sheep {
-namespace TFHE {
+namespace SHEEP {
 	
 template <>
 class ContextTFHE<bool> : public Context<bool, CiphertextTFHE> {
@@ -88,7 +87,6 @@ public:
 	}
 };
 
-}
 }
 
 #endif // CONTEXT_TFHE_BOOL_HPP

@@ -10,7 +10,7 @@
 
 int main(void) {
 
-  using namespace Sheep::Seal;
+  using namespace SHEEP;
   
 	ContextSeal<int8_t> ctx;
 

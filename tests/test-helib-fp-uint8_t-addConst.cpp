@@ -10,7 +10,7 @@
 
 int main(void) {
 
-  using namespace Sheep::HElib;
+  using namespace SHEEP;
   
 	ContextHElib_Fp<uint8_t> ctx;
 
