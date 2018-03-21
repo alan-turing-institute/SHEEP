@@ -42,8 +42,7 @@ public:
     m_bootstrap(bootstrap),
     m_w(haming_weight)
   {
-    this->m_configured = false;
-    
+
     /// BITWIDTH(bool) is 8, so need to deal with this by hand...
     //// (better to specialize class?)
     if (std::is_same<Plaintext, bool>::value)
@@ -51,9 +50,18 @@ public:
     else
       m_bitwidth = BITWIDTH(Plaintext);
 
-    /// set default values for all parameters
-
-        long mValues[][15] = { 
+    ////  populate the map that will allow us to set parameters via an input file (or string)
+    
+    this->m_param_name_map.insert({"param_set", m_param_set});
+    this->m_param_name_map.insert({"Haming_weight", m_w});
+    
+    /// configure
+    configure();
+  }
+  void configure() {
+    /// Set all the other parameters.
+    
+    long mValues[][15] = { 
       // { p, phi(m),   m,   d, m1, m2, m3,    g1,   g2,   g3, ord1,ord2,ord3, B,c}
       {  2,    48,   105, 12,  3, 35,  0,    71,    76,    0,   2,  2,   0, 25, 2},
       {  2 ,  600,  1023, 10, 11, 93,  0,   838,   584,    0,  10,  6,   0, 25, 2},
@@ -61,104 +69,40 @@ public:
       {  2, 15004, 15709, 22, 23,683,  0,  4099, 13663,    0,  22, 31,   0, 25, 3},
       {  2, 27000, 32767, 15, 31,  7, 151, 11628, 28087,25824, 30,  6, -10, 28, 4}
     };
-    std::cout<<" in configure p1"<<std::endl;
+
     long* vals = mValues[m_param_set];
-
-    std::cout<<" in configure p2"<<std::endl;
     
-    m_m = vals[2];
-    m_phim = vals[1];
-    m_d = vals[3];
-    m_m1 = vals[4];
-    m_m2 = vals[5];
-    m_m3 = vals[6];
-    m_g1 = vals[7];
-    m_g2 = vals[8];
-    m_g3 = vals[9];
-    m_ord1 = vals[10];
-    m_ord2 = vals[11];
-    m_ord3 = vals[12];
-    m_B = vals[13];
-    m_c = vals[14];    
+    long m = vals[2];
     
-    m_L = 30;
-
- 
+    NTL::Vec<long> mvec;
+    append(mvec, vals[4]);
+    if (vals[5]>1) append(mvec, vals[5]);
+    if (vals[6]>1) append(mvec, vals[6]);
 
     std::vector<long> gens;
-    gens.push_back(m_g1);
-    if (m_g2>1) gens.push_back(m_g2);
-    if (m_g3>1) gens.push_back(m_g3);
+    gens.push_back(vals[7]);
+    if (vals[8]>1) gens.push_back(vals[8]);
+    if (vals[9]>1) gens.push_back(vals[9]);
 
     std::vector<long> ords;
-    ords.push_back(m_ord1);
-    if (abs(m_ord2)>1) ords.push_back(m_ord3);
-    if (abs(m_ord3)>1) ords.push_back(m_ord3);
+    ords.push_back(vals[10]);
+    if (abs(vals[11])>1) ords.push_back(vals[11]);
+    if (abs(vals[12])>1) ords.push_back(vals[12]);
     
-    m_helib_context = new FHEcontext(m_m, m_p, 1, gens, ords);
-    ///    this->configure();
+    m_B = vals[13];
+    m_c = vals[14];
 
-    ////  populate the map that will allow us to set parameters via an input file (or string)
-    
-    this->m_param_name_map.insert({"param_set", m_param_set});
-    this->m_param_name_map.insert({"Haming_weight", m_w});
-    this->m_param_name_map.insert({"bootstrap", m_bootstrapl});            
-    this->m_param_name_map.insert({"m",m_m});
-    this->m_param_name_map.insert({"phi(m)",m_phim});
-    this->m_param_name_map.insert({"d",m_d});
-    this->m_param_name_map.insert({"m1",m_m1});
-    this->m_param_name_map.insert({"m2",m_m2});
-    this->m_param_name_map.insert({"m3",m_m3});
-    this->m_param_name_map.insert({"g1",m_g1});
-    this->m_param_name_map.insert({"g2",m_g2});
-    this->m_param_name_map.insert({"g3",m_g3});
-    this->m_param_name_map.insert({"ord1",m_ord1});
-    this->m_param_name_map.insert({"ord2",m_ord2});
-    this->m_param_name_map.insert({"ord3",m_ord3});
-    this->m_param_name_map.insert({"c",m_c});
-    this->m_param_name_map.insert({"B",m_B});
-    this->m_param_name_map.insert({"levels",m_L});    
-
-    
-  }
-
-  // destructor
-  virtual ~ContextHElib() {
-    /// delete everything we new-ed in the constructor
-    if (m_ea != NULL) delete m_ea;
-    if (m_secretKey != NULL) delete m_secretKey;
-    if (m_helib_context != NULL) delete m_helib_context;
-  }
-
-  virtual void configure() {
-    /// Set all the other parameters.
-    std::cout<<" in configure p0"<<std::endl;
-
-    NTL::Vec<long> mvec;
-    append(mvec, m_m1);
-    if (m_m2>1) append(mvec, m_m2);
-    if (m_m3>1) append(mvec, m_m3);
-    std::cout<<" in configure p3"<<std::endl;    
-    
-    m_bootstrap = (bool)m_bootstrapl;
- 
-    
-    std::cout<<" in configure p4"<<std::endl;
     /// number of levels
     
     if (m_bootstrap) m_L = 30; // that should be enough
     else m_L = 3 + NTL::NumBits(m_bitwidth+2);
-    // std::cout<<" in configure p4a "<<std::to_string(m_m)<<" "<<std::to_string(m_p)<<" "<<std::to_string(gens[0])<<" "<<std::to_string(ords[0])<<std::endl;
+    
     /// initialize HElib context
-    // m_helib_context = new FHEcontext(m_m, m_p, 1, gens, ords);
-    std::cout<<" in configure p4b "<<std::to_string(m_B)<<std::endl;    
+    m_helib_context = new FHEcontext(m, m_p, 1, gens, ords);
     m_helib_context->bitsPerLevel = m_B;
     /// modify context, add primes to modulus chain
-    std::cout<<" in configure p4c "<<std::to_string(m_L)<<" "<<std::to_string(m_c)<<std::endl;        
     buildModChain(*m_helib_context, m_L, m_c,8);
 
-    std::cout<<" in configure p5"<<std::endl;
-    
     if (m_bootstrap) {
       m_helib_context->makeBootstrappable(mvec, /*t=*/0,
 					  /*flag=*/false, /*cacheType=DCRT*/2);
@@ -173,7 +117,7 @@ public:
     m_publicKey = m_secretKey;  //// points to the same place
   
     /// generate a secret key
-    m_secretKey->GenSecKey(m_w);   /// Haming weight 
+    m_secretKey->GenSecKey(m_w);   /// Haming weight of 128
      
     addSome1DMatrices(*m_secretKey);
     addFrbMatrices(*m_secretKey);
@@ -185,9 +129,16 @@ public:
     
     m_nslots = m_ea->size();
 
-    std::cout<<" in configure p6"<<std::endl;
-    
-  }
+
+};
+
+  // destructor
+  virtual ~ContextHElib() {
+    /// delete everything we new-ed in the constructor
+    if (m_ea != NULL) delete m_ea;
+    if (m_secretKey != NULL) delete m_secretKey;
+    if (m_helib_context != NULL) delete m_helib_context;
+  };
 
   virtual Ciphertext encrypt(Plaintext pt) = 0;
   virtual Plaintext decrypt(Ciphertext pt) = 0;  
@@ -216,30 +167,6 @@ protected:
 
   long m_nslots;  // number of SIMD operations that can be done at a time
 
-  long m_m;
-
-  long m_phim;
-
-  long m_d;
-
-  long m_m1;
-
-  long m_m2;
-
-  long m_m3;
-
-  long m_g1;
-
-  long m_g2;
-
-  long m_g3;
-
-  long m_ord1;
-
-  long m_ord2;
-
-  long m_ord3;
-  
   EncryptedArray* m_ea; 
 
   FHESecKey* m_secretKey;
@@ -252,13 +179,9 @@ protected:
 
   std::vector<zzX> m_unpackSlotEncoding;
 
-  long m_bootstrapl; /// to go into the param_name_map (can't mix longs and bools)
   bool m_bootstrap;
   
 };   //// end of ContextHElib class definition.
-
-
-
 
   
   ////////////////////////////////////////////////////////////////////////////////////
@@ -278,18 +201,18 @@ public:
 		  long haming_weight=128) // Haming weight of secret key
     : ContextHElib<Plaintext,Ciphertext>(2,param_set,bootstrap,haming_weight)
   {
-
+    
 
     /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
     m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
 			  std::is_same<Plaintext, int16_t>::value ||
 			  std::is_same<Plaintext, int32_t>::value);
+
   }
 
 
   
   Ciphertext encrypt(Plaintext pt) {
-    if (! this->m_configured) this->configure();
     Ctxt mu(*(this->m_publicKey));  /// use this to fill up the vector when resizing
     Ciphertext  ct;   /// now an NTL::Vec<Ctxt>
     resize(ct,this->m_bitwidth, mu);
@@ -462,15 +385,13 @@ public:
 		  long haming_weight=128) // Haming weight of secret key
     : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
   {
-    this->m_param_name_map.insert({"p", this->m_p});
+    this->m_param_name_map.insert({"p", this->m_p});     
   }
 
   
   Ciphertext encrypt(Plaintext pt) {
 
-    if (! this->m_configured) this->configure();
-
-    /// convert our plaintext into a vector of longs (even if we only use first element for now!)
+//// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
     std::vector<long> ptvec;
     ptvec.push_back(pt);
     
