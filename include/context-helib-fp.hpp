@@ -18,8 +18,7 @@ NTL_CLIENT
 #include "intraSlot.h"
 
 
-namespace Sheep {
-namespace HElib {
+namespace SHEEP {
 
 template <typename PlaintextT >
 class ContextHElib_Fp : public Context< PlaintextT , Ctxt> {
@@ -208,7 +207,6 @@ private:
 };  /// end of class definition
   
   
-}  // leaving HElib namespace
 }  // leaving Sheep namespace
   
 #endif // CONTEXT_HELIB_HPP
