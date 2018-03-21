@@ -41,7 +41,7 @@ def homepage():
 def new_test():
     """
     Get the user to upload a circuit file and parameter, and select input type, and 
-    which HE lib to use.
+    which HE libs to use.
     """
     cform = CircuitForm(request.form)
     if request.method == "POST":
@@ -56,6 +56,14 @@ def new_test():
         result = None
     return render_template("new_test.html", form=cform)
         
+@app.route("/enter_parameters",methods=["POST","GET"])
+def enter_parameters():
+    """
+    query the selected contexts for their configurable parameters
+    and default values.
+    """
+    contexts = app.data["HE_library"]
+
 
 @app.route("/enter_input_vals",methods=["POST","GET"])
 def enter_input_vals():

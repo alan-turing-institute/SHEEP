@@ -13,7 +13,7 @@ namespace SHEEP {
 	
 template <>
 class ContextTFHE<bool> : public Context<bool, CiphertextTFHE> {
-	const int minimum_lambda;
+  //	const int minimum_lambda;
 	// shared pointers, since these are handles that are referred to elsewhere
 	std::shared_ptr<TFheGateBootstrappingParameterSet> parameters;
 	std::shared_ptr<TFheGateBootstrappingSecretKeySet> secret_key;
@@ -21,15 +21,15 @@ class ContextTFHE<bool> : public Context<bool, CiphertextTFHE> {
 	const TFheGateBootstrappingCloudKeySet *cloud_key_cptr() { return &secret_key.get()->cloud; }
 
 public:
-	ContextTFHE()
+	ContextTFHE(int minimum_lambda=110)
 		:
 		// fixed security level that works with
 		// new_default_gate_bootstrapping_parameter_set, see
 		// TFHE documentation and examples.
-		minimum_lambda(110),
+		m_minimum_lambda(minimum_lambda),
 		// parameters and key, with the appropriate clean-up routines
 		parameters(std::shared_ptr<TFheGateBootstrappingParameterSet>(
-				   new_default_gate_bootstrapping_parameters(minimum_lambda),
+				   new_default_gate_bootstrapping_parameters(m_minimum_lambda),
 				   [](TFheGateBootstrappingParameterSet *p) {
 					   delete_gate_bootstrapping_parameters(p);
 				   })),
@@ -38,7 +38,9 @@ public:
 				   [](TFheGateBootstrappingSecretKeySet *p) {
 					     delete_gate_bootstrapping_secret_keyset(p);
 				   }))
-	{ }
+	{
+	  this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
+	}
 
 	Ciphertext encrypt(Plaintext pt) {
 		Ciphertext ct(parameters);
@@ -85,6 +87,11 @@ public:
 		bootsMUX(result, s, a, b, cloud_key_cptr());
 		return result;
 	}
+
+private:
+  
+  long m_minimum_lambda;
+  
 };
 
 }

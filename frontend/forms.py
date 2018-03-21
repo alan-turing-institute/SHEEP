@@ -13,7 +13,7 @@ class CircuitForm(Form):
     Standard WTForm
     """
     circuit_file = FileField(validators=[validators.InputRequired()],label="Circuit file")
-    HE_library = SelectField(choices=[("Clear","Clear"),("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")],label="HE library")
+##    HE_library = SelectField(choices=[("Clear","Clear"),("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")],label="HE library")
 ##    parameter_file = FileField(validators=[validators.InputRequired()],label="Parameter file")
     input_type = SelectField(choices=[("bool","bool"),
                                       ("uint8_t","uint8_t"),
@@ -23,7 +23,7 @@ class CircuitForm(Form):
                                       ("uint32_t","uint32_t"),
                                       ("int32_t","int32_t")]
                              ,label="Input type")
-
+    HE_library = MultiCheckboxField('Select HE libraries:', choices=[("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")])    
 
 class ResultsForm(Form):
     """
