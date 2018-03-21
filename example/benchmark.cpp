@@ -40,8 +40,9 @@ make_context(std::string context_type, std::string context_params="") {
 
 
 template<typename T>
-std::vector<T> read_inputs_file(std::string filename) {
+std::map<std::string, T> read_inputs_file(std::string filename) {
   std::vector<T> inputs_list;
+  std::map<std::string, T> inputs_map;
   std::ifstream inputstream(filename);	  
   if (inputstream.bad()) {
     std::cout<<"Empty or non-existent input file"<<std::endl;
@@ -63,13 +64,15 @@ std::vector<T> read_inputs_file(std::string filename) {
       while (ss >> buffer) tokens.push_back(buffer);
       
       if (tokens.size() == 2) {   /// assume we have param_name param_value
+	std::string input_name = (std::string)(tokens[0]);
 	long input_val_long = stol(tokens[1]);
 	T input_val = (T)(input_val_long);
+	inputs_map.insert({input_name, input_val});
 	inputs_list.push_back(input_val);
       }	      
     }    
   } // end of loop over lines
-  return inputs_list;
+  return inputs_map;
 }
 
 template <typename PlaintextT>
@@ -100,6 +103,17 @@ void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT>
   
 }
 
+template <typename T>
+std::vector<T> match_inputs_to_circuit(Circuit C, std::map<std::string, T> inputs_map) {
+  std::vector<T> ordered_inputs;
+  for (auto input : C.get_inputs() ) {
+    if (inputs_map.find(input.get_name()) != inputs_map.end()) {
+      ordered_inputs.push_back(inputs_map.find(input.get_name())->second);
+    }
+  }
+  return ordered_inputs;
+}
+
 template <typename PlaintextT>
 bool benchmark_run(std::string context_name, std::string parameter_file,
 		   Circuit C,
@@ -120,10 +134,11 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::unique_ptr<BaseContext<PlaintextT> > clear_ctx = make_context<PlaintextT>("Clear");
 	
 	// read in inputs from input_filename
-	std::vector<PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
-	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, inputs, durations);
+	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
+	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
+	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
 	std::vector<DurationT> dummy;
-	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, inputs, dummy);	
+	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, dummy);	
 
 
 	print_outputs(result_bench, result_clear, durations);
