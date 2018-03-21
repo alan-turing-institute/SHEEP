@@ -7,10 +7,16 @@ import random
 import os
 import re
 
+if "SHEEP_HOME" in os.environ.keys():
+    BASE_DIR = os.environ["SHEEP_HOME"]
+else:
+    BASE_DIR = os.environ["HOME"]+"/SHEEP"    
 
-EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
 
-OUTPUT_DIR = os.environ["HOME"]+"/SHEEP/benchmark_inputs"
+EXECUTABLE_DIR = BASE_DIR+"/build/bin"
+
+CIRCUIT_DIR_LOW = BASE_DIR+"/benchmark_inputs/low_level/circuits"
+INPUTS_DIR_LOW  = BASE_DIR+"/benchmark_inputs/low_level/inputs"
 
 def rnd_num_in_range(input_type):
     """ 
@@ -33,7 +39,7 @@ def generate_2_to_1_inputs(input_type, depth):
     each gate takes two inputs and gives one output.  For depth N, we need 
     N+1 input values.
     """
-    output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-2-to-1-"+input_type+"-"+str(depth)+".inputs")
+    output_inputs_filename = os.path.join(INPUTS_DIR_LOW,"inputs-2-to-1-"+input_type+"-"+str(depth)+".inputs")
     output_inputs_file = open(output_inputs_filename,"w")
     for i in range(depth+1):
         output_inputs_file.write("input_"+str(i)+" "+str(rnd_num_in_range(input_type))+"\n")
@@ -46,7 +52,7 @@ def generate_1_to_1_inputs(input_type, depth):
     each gate takes one inputs and gives one output.  
     We only need one input value
     """
-    output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-1-to-1-"+input_type+"-"+str(depth)+".inputs")
+    output_inputs_filename = os.path.join(INPUTS_DIR_LOW,"inputs-1-to-1-"+input_type+"-"+str(depth)+".inputs")
     output_inputs_file = open(output_inputs_filename,"w")
 
     output_inputs_file.write("input_0 "+str(rnd_num_in_range(input_type))+"\n")
@@ -61,7 +67,7 @@ def generate_select_inputs(input_type, depth):
     For depth N, we need N+1 input values.
     Current format is input_i
     """
-    output_inputs_filename = os.path.join(OUTPUT_DIR,"inputs-select-"+input_type+"-"+str(depth)+".inputs")
+    output_inputs_filename = os.path.join(INPUTS_DIR_LOW,"inputs-select-"+input_type+"-"+str(depth)+".inputs")
     output_inputs_file = open(output_inputs_filename,"w")
     for i in range(depth+1):
         output_inputs_file.write("input_"+str(i)+" "+str(rnd_num_in_range(input_type))+"\n")
@@ -80,7 +86,7 @@ def generate_simple_circuit(gate,max_depth):
     which in turn uses circuit-repo.hpp
     """
     for depth in range(max_depth):
-        output_circuit_filename = os.path.join(OUTPUT_DIR,"circuit-"+gate+"-"+str(depth)+".sheep")
+        output_circuit_filename = os.path.join(CIRCUIT_DIR_LOW,"circuit-"+gate+"-"+str(depth)+".sheep")
 
         run_cmd = []
         run_cmd.append(os.path.join(EXECUTABLE_DIR,"simple-circuit-maker"))

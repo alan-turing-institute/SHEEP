@@ -1,0 +1,9 @@
+INPUTS input_0 input_1 input_2 input_3 input_4 input_5 input_6 input_7
+OUTPUTS output_6
+ input_0 input_1 COMPARE output_0
+ output_0 input_2 COMPARE output_1
+ output_1 input_3 COMPARE output_2
+ output_2 input_4 COMPARE output_3
+ output_3 input_5 COMPARE output_4
+ output_4 input_6 COMPARE output_5
+ output_5 input_7 COMPARE output_6
