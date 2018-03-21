@@ -5,7 +5,7 @@
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
-#include "context-seal.hpp"
+///#include "context-seal.hpp"
 
 
 using namespace SHEEP;
@@ -28,10 +28,14 @@ make_context(std::string context_type, std::string context_params="") {
 	  return ctx;
 	} else if (context_type == "TFHE") {
 	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
+	  if (context_params.length() > 0)
+	    ctx->read_params_from_file(context_params);
 	  return ctx;
-	} else if (context_type == "SEAL") {
-	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
-	  return ctx;
+	  //	} else if (context_type == "SEAL") {
+	  // auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
+	  if (context_params.length() > 0)
+	    ctx->read_params_from_file(context_params);
+	  // return ctx;
 	} else {
 	  return std::make_unique<ContextClear<PlaintextT> >();
 	}
@@ -101,6 +105,14 @@ void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT>
 }
 
 template <typename PlaintextT>
+void param_print(std::string context_name, std::string parameter_file="") {
+
+  std::unique_ptr<BaseContext<PlaintextT> > test_ctx =
+    make_context<PlaintextT>(context_name, parameter_file);
+  test_ctx->print_parameters();
+}
+
+template <typename PlaintextT>
 bool benchmark_run(std::string context_name, std::string parameter_file,
 		   Circuit C,
 		   std::string input_filename)
@@ -139,12 +151,29 @@ int
 main(int argc, const char** argv) {
 
   
-  if (argc < 5) {
+  if (argc < 3) {
 
-    std::cout<<"Usage: <path_to>/custom_example circuit_file context_name input_type inputs_file [params_file]"<<std::endl;
+    std::cout<<"Usage: \n ./benchmark  <circuit_file> <context_name> <input_type> <inputs_file> [<params_file>]"<<std::endl;
+    std::cout<<"OR: \n ./benchmark PARAMS  <context_name> <input_type> [<params_file>]"<<std::endl;    
     return 0;
   }
 
+  if (strncmp(argv[1],"PARAMS",5) == 0) {
+    std::string context_name = argv[2];
+    std::string input_type = argv[3];
+    std::string param_file = "";
+    if (argc == 5) param_file = argv[4];
+    if (input_type == "bool") param_print<bool>(context_name, param_file);
+    else if (input_type == "int8_t") param_print<int8_t>(context_name, param_file);
+    else if (input_type == "uint8_t") param_print<uint8_t>(context_name, param_file);
+    else if (input_type == "int16_t") param_print<int16_t>(context_name, param_file);
+    else if (input_type == "uint16_t") param_print<uint16_t>(context_name, param_file);
+    else if (input_type == "int32_t") param_print<int32_t>(context_name, param_file);
+    else if (input_type == "uint32_t") param_print<uint32_t>(context_name, param_file);  
+    return 0;
+  }
+
+  
   /// read the circuit
   std::ifstream input_circuit(argv[1]);
   Circuit C;

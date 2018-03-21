@@ -22,8 +22,9 @@ public:
         typedef PlaintextT Plaintext;
         typedef PlaintextT Ciphertext;  
 
-  
+        
 	Ciphertext encrypt(Plaintext p) {
+	  if (! this->m_configured) this->configure();
 	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
 	  return p; // plaintext and ciphertext are the same for this context
 	}
@@ -99,7 +100,7 @@ public:
 		product_bit = x & y;
 		return FullAdder(sum_in, product_bit, carry_in);
 	}
-
+  /*
 	Ciphertext MultiplyBinary(Ciphertext a, Ciphertext b) {
 	 	Ciphertext result;
 		std::vector<std::array<bool, BITWIDTH(Plaintext)+1> > carry(BITWIDTH(Plaintext)+1);
@@ -121,7 +122,7 @@ public:
 		}
 	 	return result;
 	}
-
+  */
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 	  if (std::is_same<Ciphertext, bool>::value) {
 	    return Add(a,b);

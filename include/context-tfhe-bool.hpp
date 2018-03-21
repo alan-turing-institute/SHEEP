@@ -18,30 +18,36 @@ class ContextTFHE<bool> : public Context<bool, CiphertextTFHE> {
 	std::shared_ptr<TFheGateBootstrappingParameterSet> parameters;
 	std::shared_ptr<TFheGateBootstrappingSecretKeySet> secret_key;
 
-	const TFheGateBootstrappingCloudKeySet *cloud_key_cptr() { return &secret_key.get()->cloud; }
+	const TFheGateBootstrappingCloudKeySet *cloud_key_cptr() { return &secret_key.get()->cloud;
+	}
 
 public:
-	ContextTFHE(int minimum_lambda=110)
+	ContextTFHE(long minimum_lambda=110)
 		:
 		// fixed security level that works with
 		// new_default_gate_bootstrapping_parameter_set, see
 		// TFHE documentation and examples.
-		m_minimum_lambda(minimum_lambda),
-		// parameters and key, with the appropriate clean-up routines
-		parameters(std::shared_ptr<TFheGateBootstrappingParameterSet>(
+		m_minimum_lambda(minimum_lambda)
+	{
+	  this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
+	  this->m_configured = false;
+	}
+
+	void configure() {
+		  		// parameters and key, with the appropriate clean-up routines
+		parameters = std::shared_ptr<TFheGateBootstrappingParameterSet>(
 				   new_default_gate_bootstrapping_parameters(m_minimum_lambda),
 				   [](TFheGateBootstrappingParameterSet *p) {
 					   delete_gate_bootstrapping_parameters(p);
-				   })),
-		secret_key(std::shared_ptr<TFheGateBootstrappingSecretKeySet>(
+				   });
+		secret_key = std::shared_ptr<TFheGateBootstrappingSecretKeySet>(
 				   new_random_gate_bootstrapping_secret_keyset(parameters.get()),
 				   [](TFheGateBootstrappingSecretKeySet *p) {
 					     delete_gate_bootstrapping_secret_keyset(p);
-				   }))
-	{
-	  this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
+				   });
+		this->m_configured = true;
 	}
-
+		
 	Ciphertext encrypt(Plaintext pt) {
 		Ciphertext ct(parameters);
 		bootsSymEncrypt(ct, pt, secret_key.get());
