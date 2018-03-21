@@ -1,3 +1,4 @@
+
 #add_executable(test-write-read-circuit
 #                 test-write-read-circuit.cpp
 #		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -133,3 +134,34 @@
 ##endif(HELIB_FOUND AND TFHE_FOUND)  
 ##
 ##add_test(NAME test-parallel-eval COMMAND test-parallel-eval)
+
+#if (SEAL_FOUND)
+#
+#    foreach(type IN ITEMS bool int8_t uint8_t)
+#      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
+#          add_executable(test-seal-${type}-${op}
+#                          test-seal-${type}-${op}
+#        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
+#        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
+#      endforeach(op)
+#    endforeach(type)
+#
+#endif (SEAL_FOUND)
+#
+#add_executable(test-parallel-eval test-parallel-eval.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+#if (HELIB_FOUND AND TFHE_FOUND)
+#   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+#elseif (HELIB_FOUND)
+#   target_link_libraries(test-parallel-eval ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+#elseif (TFHE_FOUND)
+#   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} )
+#else(HELIB_FOUND_AND_TFHE_FOUND)
+#   target_link_libraries(test-parallel-eval)
+#endif(HELIB_FOUND AND TFHE_FOUND)  
+#
+#add_test(NAME test-parallel-eval COMMAND test-parallel-eval)
+

@@ -1,8 +1,7 @@
 #ifndef CONTEXT_TFHE_COMMON_HPP
 #define CONTEXT_TFHE_COMMON_HPP
 
-namespace Sheep {
-namespace TFHE {
+namespace SHEEP {
 
 struct CiphertextTFHE {
 	std::shared_ptr<LweSample> sample;
@@ -45,7 +44,6 @@ public:
 template <typename WireValueT>
 class ContextTFHE;
 
-}
 }
 
 #endif //CONTEXT_TFHE_COMMON_HPP

@@ -8,7 +8,7 @@
 typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
-	using namespace Sheep::HElib;
+	using namespace SHEEP;
 	typedef std::vector<ContextHElib_F2<int8_t>::Plaintext> PtVec;
 
 	Circuit circ;

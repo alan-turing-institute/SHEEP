@@ -5,7 +5,7 @@
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
 
-using namespace Sheep::TFHE;
+using namespace SHEEP;
 typedef ContextTFHE<bool>::Plaintext Plaintext;
 typedef ContextTFHE<bool>::Ciphertext Ciphertext;
 

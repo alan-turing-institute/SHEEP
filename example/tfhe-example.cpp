@@ -15,7 +15,7 @@ int main(void) {
 	C.set_output(w3);
 	C.set_output(d);
 
-	using namespace Sheep::TFHE;
+	using namespace SHEEP;
 	
 	ContextTFHE<bool> ctx;
 	

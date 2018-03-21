@@ -5,7 +5,7 @@
 
 #include "circuit-repo.hpp"
 
-using namespace Sheep::HElib;
+using namespace SHEEP;
 
 typedef ContextHElib_F2<int8_t>::Plaintext Plaintext;
 typedef std::vector< Plaintext > PlaintextVec;  

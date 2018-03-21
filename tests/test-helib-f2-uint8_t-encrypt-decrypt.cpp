@@ -5,7 +5,7 @@
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
 
-using namespace Sheep::HElib;
+using namespace SHEEP;
 typedef ContextHElib_F2<uint8_t>::Plaintext Plaintext;
 typedef ContextHElib_F2<uint8_t>::Ciphertext Ciphertext;
 

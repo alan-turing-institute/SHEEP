@@ -1,4 +1,4 @@
-find_path(TFHE_INCLUDE_DIR NAMES tfhe.h)
+find_path(TFHE_INCLUDE_DIR NAMES tfhe.h tfhe/tfhe.h)
 find_library(TFHE_LIBRARY NAMES tfhe-fftw libtfhe-fftw)
 # Use the following to link against the nayuki fft library
 #find_library(TFHE_LIBRARY NAMES tfhe-nayuki-avx libtfhe-nayuki-avx)

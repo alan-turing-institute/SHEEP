@@ -23,13 +23,9 @@
 #define HAVE_TBB 0
 #endif
 
-#ifdef HAVE_TFHE
-using namespace Sheep::TFHE;
-#endif
 
-#ifdef HAVE_TFHE
-using namespace Sheep::HElib;
-#endif
+using namespace SHEEP;
+
 
 template <typename ContextT>
 void test(const Circuit& C, std::vector<typename ContextT::Plaintext> inputs,
@@ -59,7 +55,6 @@ void test(const Circuit& C, std::vector<typename ContextT::Plaintext> inputs,
 }
 
 int main(void) {
-	using namespace Sheep;
 
 	Circuit C;
 	Wire a = C.add_input("a");
@@ -78,13 +73,13 @@ int main(void) {
 
 	C.set_output(d);
 
-	test<Clear::ContextClear<int8_t> >(C, {1,2,3}, {16});
+	test<ContextClear<int8_t> >(C, {1,2,3}, {16});
 #ifdef HAVE_HElib
-	test<HElib::ContextHElib_F2<int8_t> >(C, {1,2,3}, {16});
+	test<ContextHElib_F2<int8_t> >(C, {1,2,3}, {16});
 #endif
 
 #ifdef HAVE_TFHE
-	test<TFHE::ContextTFHE<int8_t> >(C, {1,2,3}, {16});
+	test<ContextTFHE<int8_t> >(C, {1,2,3}, {16});
 #endif
 
 }

@@ -20,8 +20,7 @@ NTL_CLIENT
 #include "binaryCompare.h"
 
 
-namespace Sheep {
-namespace HElib {
+namespace SHEEP {
 
   ////////////////////////////////////////////////////////////////////////////////////
   ///  ContextHElib_F2 -  use p=2, do everything with arrays of Ciphertext,
@@ -425,7 +424,6 @@ private:
 };   //// end of ContextHElib_F2 class definition.
 
 
-}  // leaving HElib namespace
 }  // leaving Sheep namespace
   
 #endif // CONTEXT_HELIB_F2_HPP
