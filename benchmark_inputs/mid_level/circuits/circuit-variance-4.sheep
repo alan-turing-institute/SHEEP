@@ -1,0 +1,27 @@
+CONST_INPUTS  N
+INPUTS  x_0 x_1 x_2 x_3
+OUTPUTS  varianceN3
+x_0 x_1 ADD y_0
+y_0 x_2 ADD y_1
+y_1 x_3 ADD y_2
+y_2 ALIAS Nxbar
+x_0 N  MULTBYCONST Nx_0
+Nxbar Nx_0 SUBTRACT v_0
+v_0 ALIAS vv_0
+v_0 vv_0 MULTIPLY s_0
+x_1 N  MULTBYCONST Nx_1
+Nxbar Nx_1 SUBTRACT v_1
+v_1 ALIAS vv_1
+v_1 vv_1 MULTIPLY s_1
+x_2 N  MULTBYCONST Nx_2
+Nxbar Nx_2 SUBTRACT v_2
+v_2 ALIAS vv_2
+v_2 vv_2 MULTIPLY s_2
+x_3 N  MULTBYCONST Nx_3
+Nxbar Nx_3 SUBTRACT v_3
+v_3 ALIAS vv_3
+v_3 vv_3 MULTIPLY s_3
+s_0 s_1 ADD ss_0
+ss_0 s_2 ADD ss_1
+ss_1 s_3 ADD ss_2
+ss_2 ALIAS varianceN3
