@@ -12,7 +12,6 @@
   <script>
         function loading(){
         document.getElementById("loading").style.display = "block";
-        document.getElementById("circuit").style.display = "none";
         }
   </script>
   <style>
@@ -54,22 +53,21 @@
             </div>
         </div>
 	<div>
-	  <form method="POST" action="" enctype="multipart/form-data">
-	    <table>
-	      {% for field in form %}
-	      <tr>
-		<td>{{ field.label }}</td><td>{{ field }}</td>
-	      </tr>
-	      {% endfor %}
-	    </table>
-	    <p><input type=submit value="Go!" onclick="loading();"></form></p>
+	  <table>
+	    
+	    <div>
+	      <form method="POST" action="" enctype="multipart/form-data">
+		<table>
+		  {% for field in form %}
+		  <tr>
+		    <td>{{ field.label }}</td><td>{{ field }}</td>
+		  </tr>
+		  {% endfor %}
+		</table>
+		<p><input type=submit value="Apply" onclick="loading();"></form></p>
 </div>
-<div id="circuit">
-  <p> <h3>  Circuit:</h3></p>
-<p> {% for line in  circuit %} </p>
-<br> {{ line }} <br>
-{% endfor %}
-  </div>
+</table>
+</div>
 
 
  <div id="loading">

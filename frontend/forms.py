@@ -65,3 +65,14 @@ def build_inputs_form(inputs):
         field = IntegerField(label=i)
         setattr(InputsForm,i,field)
     return InputsForm
+
+def build_param_form(params_dict):
+    """ 
+    return a class of WTForm with custom fields specified by the "parameters" list.
+    """
+    class ParamsForm(Form):
+        pass
+    for p,v in params_dict.items():
+        field = IntegerField(label=p,default=v)
+        setattr(ParamsForm,p,field)
+    return ParamsForm

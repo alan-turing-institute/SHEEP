@@ -31,12 +31,12 @@ foreach(type IN ITEMS bool int8_t uint8_t)
 	  endforeach(op)
 endforeach(type)
 
-add_executable(test-clear-int8_t-multiply-binary
-                       test-clear-int8_t-multiply-binary.cpp
-		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
-		       add_test(NAME test-clear-int8_t-multiply-binar COMMAND $<TARGET_FILE:test-clear-int8_t-multiply-binary>)
+#add_executable(test-clear-int8_t-multiply-binary
+#                       test-clear-int8_t-multiply-binary.cpp
+#		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+#		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+#		       add_test(NAME test-clear-int8_t-multiply-binar COMMAND $<TARGET_FILE:test-clear-int8_t-multiply-binary>)
 
 foreach(type IN ITEMS int8_t uint8_t)		
 	  foreach(op IN ITEMS ripple-carry-add)
@@ -127,19 +127,19 @@ if (HELIB_FOUND)
 endif (HELIB_FOUND)
 
 
-if (SEAL_FOUND)
-
-    foreach(type IN ITEMS bool int8_t uint8_t)
-      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
-          add_executable(test-seal-${type}-${op}
-                          test-seal-${type}-${op}
-        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
-        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
-      endforeach(op)
-    endforeach(type)
-
-endif (SEAL_FOUND)
+#if (SEAL_FOUND)
+#
+#    foreach(type IN ITEMS bool int8_t uint8_t)
+#      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
+#          add_executable(test-seal-${type}-${op}
+#                          test-seal-${type}-${op}
+#        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
+#        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
+#      endforeach(op)
+#    endforeach(type)
+#
+#endif (SEAL_FOUND)
 
 add_executable(test-parallel-eval test-parallel-eval.cpp
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp

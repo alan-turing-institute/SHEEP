@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 import subprocess
 
 
-from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form
+from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form, build_param_form
 import utils
 import database
 import plotting
@@ -51,18 +51,30 @@ def new_test():
         app.data["input_type"] = cform.input_type.data
         app.data["HE_library"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
-        return redirect(url_for("enter_input_vals"))
+        app.data["params"] = utils.get_params(app.data["HE_library"],app.data["input_type"],app.config)
+        return redirect(url_for("enter_parameters"))
     else:
         result = None
     return render_template("new_test.html", form=cform)
-        
+
+
 @app.route("/enter_parameters",methods=["POST","GET"])
 def enter_parameters():
     """
     query the selected contexts for their configurable parameters
     and default values.
     """
-    contexts = app.data["HE_library"]
+    params = app.data["params"]
+    print(params)
+    pforms = {}
+    context = list(params.keys())[0]
+    for context in params.keys():
+        pform = build_param_form(params[context])(request.form)
+        pforms[context] = pform
+    if request.method == "POST":
+        app.data["param_files"] = utils.write_param_files(pforms)
+        return redirect(url_for("enter_input_vals"))
+    return render_template("enter_parameters.html",form=pforms)
 
 
 @app.route("/enter_input_vals",methods=["POST","GET"])

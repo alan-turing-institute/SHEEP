@@ -107,6 +107,22 @@ def construct_run_cmd(data,config):
     return run_cmd
 
 
+def construct_get_param_cmd(context_name,input_type,config,parameter_file=None):
+    """
+    Build up the list of arguments to be sent to subprocess.Popen in order to run
+    the benchmark test to get the params for chosen context.
+    """
+
+    # run_cmd is a list of arguments to be passed to subprocess.run()
+    run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
+    run_cmd.append("PARAMS")
+    run_cmd.append(context_name)    
+    run_cmd.append(input_type) 
+    if parameter_file:
+        run_cmd.append(parameter_file)
+    return run_cmd
+
+
 def cleanup_time_string(t):
     """
     convert from microseconds to seconds, and only output 3 s.f.
@@ -169,6 +185,19 @@ def parse_test_output(outputstring):
             pass
     return processing_times, outputs
 
+def parse_param_output(outputstring):
+    """
+    read the output of benchmark PARAMS <context_name>
+    and return a dict {param_name: val , ... }
+    """
+    params = {}
+    for line in outputstring.decode("utf-8").splitlines():
+        if line.startswith("Parameter"):
+            #### line will be of format "Parameter x = y" - we want x and y
+            tokens = line.strip().split()
+            params[tokens[1]] = tokens[3]
+    return params
+
 def run_test(data,config):
     """
     Run the executable in a subprocess, and capture the stdout output.
@@ -177,3 +206,18 @@ def run_test(data,config):
     p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     output = p.communicate()[0]
     return parse_test_output(output)
+
+
+def get_params(context_list,input_type,config):
+    """
+    Run the benchmark executable to printout params and default values.
+    Return a dict with the key being context_name, and the vals being 
+    dicts of param_name:default_val.
+    """
+    all_params = {}
+    for context in context_list:
+        run_cmd = construct_get_param_cmd(context,input_type,config)
+        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+        output = p.communicate()[0]
+        all_params[context] = parse_param_output(output)
+    return all_params
