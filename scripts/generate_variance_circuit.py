@@ -8,6 +8,30 @@ Sum_i=0..N ( (N.xbar - N.x_i)^2 )
 
 The output will be N^3 * variance.
 """
+import os
+import random
+
+
+if "SHEEP_HOME" in os.environ.keys():
+    BASE_DIR = os.environ["SHEEP_HOME"]
+else:
+    BASE_DIR = os.environ["HOME"]+"/SHEEP"    
+
+CIRCUIT_DIR_MID = BASE_DIR+"/benchmark_inputs/mid_level/circuits"
+INPUTS_DIR_MID  = BASE_DIR+"/benchmark_inputs/mid_level/inputs"
+
+
+def generate_inputs(num_inputs):
+    """
+    randomly generate inputs from a gaussian distribution (rounded to integers).
+    however, these values should not be too large, to avoid integer overflows..
+    """
+    values = []
+    for i in range(num_inputs):
+        values.append(int(random.gauss(50,10)))
+    return values
+                    
+
 
 def generate_circuit(num_inputs):
     """
@@ -15,7 +39,7 @@ def generate_circuit(num_inputs):
     """
     const_inputs = ["N"]
     inputs = []
-    outputs = ["varianceN3"]
+    outputs = ["varianceN3"]  ### variance * N^3
     assignments = []
     last_output = ""
 
@@ -53,8 +77,20 @@ def generate_circuit(num_inputs):
 
     return const_inputs, inputs, outputs, assignments
     
+def write_inputs_file(filename, input_vals):
+    """
+    write input values to a file.
+    """
+    outfile = open(filename,"w")
+    outfile.write("N "+str(len(input_vals))+"\n")
+    for i in range(len(input_vals)):
+        outfile.write("x_"+str(i)+" "+str(input_vals[i])+"\n")
+        pass
+    outfile.close()
+        
 
-def write_output(filename, const_inputs,inputs,outputs,assignments):
+
+def write_circuit_file(filename, const_inputs,inputs,outputs,assignments):
     """
     write the circuit to a file.
     """
@@ -78,5 +114,8 @@ def write_output(filename, const_inputs,inputs,outputs,assignments):
 
 
 if __name__ == "__main__":
-    const_inputs, inputs, outputs, assignments = generate_circuit(4)
-    write_output("test-variance.sheep",const_inputs,inputs,outputs,assignments)
+    for num_inputs in range(4,20):
+        const_inputs, inputs, outputs, assignments = generate_circuit(num_inputs)
+        write_circuit_file(CIRCUIT_DIR_MID+"/circuit-variance-"+str(num_inputs)+".sheep",const_inputs,inputs,outputs,assignments)
+        input_vals = generate_inputs(num_inputs)
+        write_inputs_file(INPUTS_DIR_MID+"/inputs-variance-"+str(num_inputs)+".inputs",input_vals)
