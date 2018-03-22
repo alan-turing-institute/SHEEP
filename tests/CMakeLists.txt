@@ -31,12 +31,6 @@ foreach(type IN ITEMS bool int8_t uint8_t)
 	  endforeach(op)
 endforeach(type)
 
-#add_executable(test-clear-int8_t-multiply-binary
-#                       test-clear-int8_t-multiply-binary.cpp
-#		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-#		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
-#		       add_test(NAME test-clear-int8_t-multiply-binar COMMAND $<TARGET_FILE:test-clear-int8_t-multiply-binary>)
 
 foreach(type IN ITEMS int8_t uint8_t)		
 	  foreach(op IN ITEMS ripple-carry-add)
