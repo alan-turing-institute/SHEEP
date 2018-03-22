@@ -27,36 +27,23 @@
         </div>
  
         <div class="jumbotron" id="content">
-            <p class="lead"></p>
-	    <h2>Processing times: </h2>
-	    <table>
-	      <tr>
-		<td> Setup (key generation etc.): </td>
-		<td>{{ proc_time[0] }} seconds  </td>
-	      </tr>
-	      <tr>
-		<td> Encrypting plaintext inputs: </td>
-		<td>{{ proc_time[1] }} seconds  </td>
-	      </tr>
-	      <tr>
-		<td> Evaluating circuit: </td>
-		<td>{{ proc_time[2] }} seconds  </td>
-	      </tr>
-	      <tr>
-		<td> Decrypting outputs: </td>
-		<td>{{ proc_time[3] }} seconds  </td>
-	      </tr>	      
-	    </table>
-	    <p class="lead"></p>
-	    <h2>Output values: </h2>
-	    <table>
-	      {% for output in outputs %}
-	      <tr>
-		<td>{{ context_name }} output: {{ output[0] }}     </td>
-		<td>      </td>
-		<td>ClearContext output: {{ output [1] }}</td>
-	      </tr>
-	      {% endfor %}
+          <p class="lead"></p>
+	  <table>
+	    <tr>
+	      {% for context, result in results.items() %}
+	      <td>
+		<table>
+		<tr><h2> {{ context }} </h2></tr>
+		{% for category, vals in result.items() %}
+		<tr><h3> {{ category }} </h3></tr>
+		{% for k, v in vals.items() %}
+		<tr><td> {{ k }}</td><td> {{ v }} </td> </tr>
+		{% endfor %}
+		{% endfor %}
+		</table>
+	      </td>
+	      {% endfor %}		
+	    </tr>
 	    </table>
         </div>
 	<div>

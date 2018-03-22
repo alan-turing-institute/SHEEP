@@ -95,18 +95,15 @@ def write_inputs_file(inputs,upload_folder):
     f.close()
     return inputs_filename
 
-def construct_run_cmd(data,config):
+def construct_run_cmd(context_name,data,config, parameter_file):
     """
     Build up the list of arguments to be sent to subprocess.Popen in order to run
     the benchmark test.
     """
     circuit_file = data["uploaded_filenames"]["circuit_file"]
     inputs_file = data["uploaded_filenames"]["inputs_file"]
-    context_name = data["HE_library"]
     input_type = data["input_type"]
-    parameter_file = None
-    if "parameter_file" in data["uploaded_filenames"].keys():
-        parameter_file = data["uploaded_filenames"]["parameter_file"]
+
     # run_cmd is a list of arguments to be passed to subprocess.run()
     run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
     run_cmd.append(circuit_file)
@@ -159,26 +156,33 @@ def check_outputs(output_list):
     return True
 
 
-def parse_test_output(outputstring):
+def parse_test_output(outputstring,debug_filename=None):
     """
     Extract values from the stdout output of the "benchmark" executable.
+    return a dict in the format { "processing times (seconds)" : {}, "outputs" : {}, "sizes" : {} }
     """
-    processing_times = []
-    test_outputs = []
-    clear_outputs = []
+    results = {}
+    processing_times = {}
+    test_outputs = {}
+##    clear_outputs = []
     outputs = []
     in_results_section = False
     in_processing_times = False
     in_outputs = False
+    if debug_filename:
+        debugfile=open(debug_filename,"w")
 ### parse the file, assuming we have processing times then outputs.
     for line in outputstring.decode("utf-8").splitlines():
+        if debug_filename:
+            debugfile.write(line+"\n")
         if in_results_section:
             if in_processing_times:
-                num_search = re.search("[\d][\d\.e\+]+",line)
+                num_search = re.search("([\w]+)\:[\s]+([\d][\d\.e\+]+)",line)
                 if num_search:
-                    processing_time = num_search.group()
+                    label = num_search.groups()[0]
+                    processing_time = num_search.groups()[1]
                     processing_time = cleanup_time_string(processing_time) ## and convert to seconds
-                    processing_times.append(processing_time)  ## assume we keep the same order - setup, enc, eval, dec
+                    processing_times[label] = processing_time
                 if "Output values" in line:
                     in_processing_times = False
                     in_outputs = True
@@ -194,7 +198,10 @@ def parse_test_output(outputstring):
         elif "=== RESULTS" in line:
             in_results_section = True
             pass
-    return processing_times, outputs
+    results["Processing times (s)"] = processing_times
+    if debug_filename:
+        debugfile.close()
+    return results
 
 def parse_param_output(outputstring):
     """
@@ -209,14 +216,38 @@ def parse_param_output(outputstring):
             params[tokens[1]] = tokens[3]
     return params
 
+
+def find_param_file(context,config):
+    """
+    If parameters have been set by hand via the frontend, they will
+    be in UPLOAD_FOLDER / params_[context].txt.
+    return this path if it exists, or None if it doesn't.
+    """
+    param_filename = config["UPLOAD_FOLDER"]+"/params_"+context+".txt"
+    if os.path.exists(param_filename):
+        return param_filename
+    else:
+        return None
+
+
 def run_test(data,config):
     """
     Run the executable in a subprocess, and capture the stdout output.
+    return a dict of results {"context_name": {"processing_times" : {},
+                                                 "sizes" : {},
+                                                 "outputs" : {} 
+                                                }, ... 
     """
-    run_cmd = construct_run_cmd(data,config)
-    p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
-    output = p.communicate()[0]
-    return parse_test_output(output)
+    results = {}
+    for context in data["HE_libraries"]:
+        param_file = find_param_file(context,config,param_file)
+        run_cmd = construct_run_cmd(context,data,config)
+        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+        output = p.communicate()[0]
+        debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
+        results[context] = parse_test_output(output,debug_filename)
+        
+    return results
 
 
 def get_params_all_contexts(context_list,input_type,config):

@@ -53,9 +53,9 @@ def new_test():
         inputs = utils.parse_circuit_file(uploaded_filenames["circuit_file"])
         app.data["inputs"] = inputs
         app.data["input_type"] = cform.input_type.data
-        app.data["HE_library"] = cform.HE_library.data
+        app.data["HE_libraries"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
-        app.data["params"] = utils.get_params_all_contexts(app.data["HE_library"],app.data["input_type"],app.config)
+        app.data["params"] = utils.get_params_all_contexts(app.data["HE_libraries"],app.data["input_type"],app.config)
         return redirect(url_for("enter_parameters"))
     else:
         result = None
@@ -83,8 +83,9 @@ def enter_parameters():
             print("Checking for context "+context)
             if context in request.form.keys():
                 print("Got DATA from "+context)
-                app.data["params"][context] = utils.update_params(context,request.form,
-                                                                  app.data,app.config)
+                params = utils.update_params(context,request.form,
+                                             app.data,app.config)
+                app.data["params"][context] = params
                 return redirect(url_for("enter_parameters"))
 
                 
@@ -119,19 +120,21 @@ def enter_input_vals():
                            form=iform,
                            circuit=circuit_text)
 
+#### FOR TESTING DEBUGGING ONLY 
 
-@app.route("/view_results_table",methods=["POST","GET"])
-def results_table():
-    """
-    allow the user to put in an SQL query, and show the resulting table
-    """
-    rform = ResultsForm(request.form)
-    if request.method == "POST":
-        query = rform.data['sql_query']
-        columns, rdata = database.execute_query_sqlite3(query)
-        return render_template("results_table.html",columns=columns,results=rdata)
-    return render_template("results_query.html",form=rform)
+#@app.route("/view_results_table",methods=["POST","GET"])
+#def results_table():
+#    """
+#    allow the user to put in an SQL query, and show the resulting table
+#    """
+#    rform = ResultsForm(request.form)
+#    if request.method == "POST":
+#        query = rform.data['sql_query']
+#        columns, rdata = database.execute_query_sqlite3(query)
+#        return render_template("results_table.html",columns=columns,results=rdata)
+#    return render_template("results_query.html",form=rform)
 
+######################
 
 @app.route("/view_results_plots",methods=["POST","GET"])
 def results_plots():
@@ -150,12 +153,19 @@ def results_plots():
 def execute_test():
     """
     actually run the executable, passing it all the filenames, options etc as arguments.
+    Get back a dict of results {"context_name": {"processing_times" : {},
+                                                 "sizes" : {},
+                                                 "outputs" : {} 
+                                                }, ...
+                                }
     """
-    proc_time, outputs = utils.run_test(app.data,app.config)   
+    results = utils.run_test(app.data,app.config)   
     if request.method == "POST":
-        database.upload_test_result(proc_time,app.data)
+        database.upload_test_result(proc_times,app.data)
         return render_template("uploaded_ok.html")
-    return render_template("test_results.html",proc_time=proc_time,outputs=outputs,context_name=app.data["HE_library"])
+    return render_template("test_results.html",results = results)
+  #proc_time=proc_times,
+  #                         outputs=outputs,context_names=app.data["HE_libraries"])
 
 
 if __name__ == "__main__":
