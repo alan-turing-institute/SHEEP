@@ -2,7 +2,7 @@
 WTForms forms for user to enter configuration of an HE test - choose circuit file, context etc.
 """
 from wtforms import Form, FloatField, FormField, IntegerField, FileField, \
-    SelectField, validators, FieldList, StringField,SelectMultipleField, widgets
+    SelectField, validators, FieldList, StringField,SelectMultipleField, HiddenField, widgets
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
@@ -72,6 +72,7 @@ def build_param_form(params_dict):
     """
     class ParamsForm(Form):
         pass
+##    context = HiddenField(context_name)
     for p,v in params_dict.items():
         field = IntegerField(label=p,default=v)
         setattr(ParamsForm,p,field)

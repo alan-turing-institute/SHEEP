@@ -46,7 +46,7 @@
         <div>
             <h1>Enter parameters</h1>
         </div>
- 
+	<br>
         <div class="row marketing">
             <div class="col-lg-6">
 
@@ -54,18 +54,36 @@
         </div>
 	<div>
 	  <table>
-	    
-	    <div>
-	      <form method="POST" action="" enctype="multipart/form-data">
-		<table>
-		  {% for field in form %}
+
+
 		  <tr>
-		    <td>{{ field.label }}</td><td>{{ field }}</td>
+		    {% for key,value in forms.items() %}
+		    <td>
+		      <table>
+		    <form method="POST" action="" enctype="multipart/form-data">
+
+		      <tr>
+			<td><h2>{{ key }} </h2></td>
+		      </tr>
+		      {% for field in value %}
+		      <tr>			
+			<td>{{ field.label }}</td><td>{{ field }}</td>
+		      </tr> 
+		      {% endfor %}
+		      <tr>
+			<td> <input type=submit name={{ key }} value="Apply" onclick="loading();"> </td>
+		      </tr>
+		    </form> 
+		    </table>
+		    </td>
+		    {% endfor %}
 		  </tr>
-		  {% endfor %}
-		</table>
-		<p><input type=submit value="Apply" onclick="loading();"></form></p>
-</div>
+		  <tr>
+		    
+		<form method="POST" action="" enctype="multipart/form-data">
+		    <td> <input type=submit name="next" value="Next" onclick="loading();"> </td>
+		</form>
+		  </tr>
 </table>
 </div>
 

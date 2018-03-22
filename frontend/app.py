@@ -43,6 +43,10 @@ def new_test():
     Get the user to upload a circuit file and parameter, and select input type, and 
     which HE libs to use.
     """
+    ###
+    ## first cleanup the files created by previous tests.
+    utils.cleanup_upload_dir(app.config)
+    ## create the form to choose circuit file, input_type, and which HE libraries to test
     cform = CircuitForm(request.form)
     if request.method == "POST":
         uploaded_filenames = utils.upload_files(request.files, app.config["UPLOAD_FOLDER"])
@@ -51,7 +55,7 @@ def new_test():
         app.data["input_type"] = cform.input_type.data
         app.data["HE_library"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
-        app.data["params"] = utils.get_params(app.data["HE_library"],app.data["input_type"],app.config)
+        app.data["params"] = utils.get_params_all_contexts(app.data["HE_library"],app.data["input_type"],app.config)
         return redirect(url_for("enter_parameters"))
     else:
         result = None
@@ -64,17 +68,36 @@ def enter_parameters():
     query the selected contexts for their configurable parameters
     and default values.
     """
+
     params = app.data["params"]
-    print(params)
+
     pforms = {}
-    context = list(params.keys())[0]
     for context in params.keys():
         pform = build_param_form(params[context])(request.form)
         pforms[context] = pform
     if request.method == "POST":
-        app.data["param_files"] = utils.write_param_files(pforms)
-        return redirect(url_for("enter_input_vals"))
-    return render_template("enter_parameters.html",form=pforms)
+        print(request.form)
+        print("PARAMS",params)
+        print("PFORMS",list(pforms.keys()))
+        for context in pforms.keys():
+            print("Checking for context "+context)
+            if context in request.form.keys():
+                print("Got DATA from "+context)
+                app.data["params"][context] = utils.update_params(context,request.form,
+                                                                  app.data,app.config)
+                return redirect(url_for("enter_parameters"))
+
+                
+        param_sets = {}
+        for k,v in pforms.items():
+            param_sets[k] = v.data
+            print("params for "+k,param_sets[k])
+            pass
+#        print("BUTTON "+request.form['submit'])
+#        app.data["param_files"] = utils.write_param_files(pforms)
+        if request.form["next"] == "Next":
+            return redirect(url_for("enter_input_vals"))
+    return render_template("enter_parameters.html",forms=pforms)
 
 
 @app.route("/enter_input_vals",methods=["POST","GET"])

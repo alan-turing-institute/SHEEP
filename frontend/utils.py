@@ -7,6 +7,17 @@ import re
 import uuid
 import subprocess
 
+def cleanup_upload_dir(config):
+    """
+    At the start of a new test, remove all the uploaded circuits, inputs, and parameters
+    files from the uploads dir.
+    """
+    for file_prefix in ["circuit","inputs","param"]:
+        cmd = "rm "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
+        os.system(cmd)
+        
+    
+
 
 def get_bitwidth(input_type):
     """
@@ -208,16 +219,48 @@ def run_test(data,config):
     return parse_test_output(output)
 
 
-def get_params(context_list,input_type,config):
+def get_params_all_contexts(context_list,input_type,config):
     """
-    Run the benchmark executable to printout params and default values.
     Return a dict with the key being context_name, and the vals being 
     dicts of param_name:default_val.
     """
     all_params = {}
     for context in context_list:
-        run_cmd = construct_get_param_cmd(context,input_type,config)
-        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
-        output = p.communicate()[0]
-        all_params[context] = parse_param_output(output)
+        all_params[context] = get_params_single_context(context,input_type,config)
     return all_params
+
+def get_params_single_context(context,input_type,config,params_file=None):
+    """
+    Run the benchmark executable to printout params and default values.
+    """
+    run_cmd = construct_get_param_cmd(context,input_type,config,params_file)
+    print("run_cmd is ",run_cmd)
+    p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+    output = p.communicate()[0]
+    params = parse_param_output(output)
+    return params
+    
+def update_params(context,param_dict,appdata,appconfig):
+    """
+    We have received a dict of params for a given context from the web form.  
+    However, we need to get the benchmark executable to calculate params, if e.g. A_predefined_param_set 
+    was changed for HElib.  
+    So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse 
+    the output, write that to a file, and return it.
+    """
+    param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
+    param_file = open(param_filename,"w")
+    for k,v in param_dict.items():
+        ### ignore the "apply" button:
+        if v=="Apply":
+            continue
+        print("writing "+k+" to "+str(v))
+        param_file.write(k+" "+str(v)+"\n")
+    param_file.close()
+    updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
+    param_file = open(param_filename,"w")
+    for k,v in updated_params.items():
+        print("writing updated "+k+" to "+str(v))
+        param_file.write(k+" "+str(v)+"\n")
+    param_file.close()
+    return updated_params
