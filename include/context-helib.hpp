@@ -52,7 +52,7 @@ public:
 
     ////  populate the map that will allow us to set parameters via an input file (or string)
     
-    this->m_param_name_map.insert({"_predefined_param_set", m_param_set});
+    this->m_param_name_map.insert({"A_predefined_param_set", m_param_set});
     this->m_param_name_map.insert({"Haming_weight", m_w});
     this->m_param_name_map.insert({"bootstrap", m_bootstrapl});            
     this->m_param_name_map.insert({"m",m_m});
