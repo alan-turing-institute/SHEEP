@@ -95,7 +95,7 @@ def write_inputs_file(inputs,upload_folder):
     f.close()
     return inputs_filename
 
-def construct_run_cmd(context_name,data,config, parameter_file):
+def construct_run_cmd(context_name,data,config, parameter_file=None):
     """
     Build up the list of arguments to be sent to subprocess.Popen in order to run
     the benchmark test.
@@ -187,9 +187,11 @@ def parse_test_output(outputstring,debug_filename=None):
                     in_processing_times = False
                     in_outputs = True
             elif in_outputs:
-                output_vals = re.findall("[\-\d]+",line)
-                if len(output_vals) > 0:
-                    outputs.append(output_vals)
+                output_search = re.search("([\w]+)\:[\s]+([\d]+)",line)
+                if output_search:
+                    label = output_search.groups()[0]
+                    val = output_search.groups()[1]
+                    test_outputs[label] = val
                 if "END RESULTS" in line:
                     in_results_section = False
             elif "Processing times" in line:
@@ -199,6 +201,7 @@ def parse_test_output(outputstring,debug_filename=None):
             in_results_section = True
             pass
     results["Processing times (s)"] = processing_times
+    results["Outputs"] = test_outputs
     if debug_filename:
         debugfile.close()
     return results
@@ -223,8 +226,9 @@ def find_param_file(context,config):
     be in UPLOAD_FOLDER / params_[context].txt.
     return this path if it exists, or None if it doesn't.
     """
-    param_filename = config["UPLOAD_FOLDER"]+"/params_"+context+".txt"
+    param_filename = config["UPLOAD_FOLDER"]+"/parameters_"+context+".txt"
     if os.path.exists(param_filename):
+        print("FOUND PARAMS ",param_filename)
         return param_filename
     else:
         return None
@@ -239,9 +243,12 @@ def run_test(data,config):
                                                 }, ... 
     """
     results = {}
-    for context in data["HE_libraries"]:
-        param_file = find_param_file(context,config,param_file)
-        run_cmd = construct_run_cmd(context,data,config)
+    contexts_to_run = data["HE_libraries"] 
+### always run clear context, for comparison
+    contexts_to_run.append("Clear")
+    for context in contexts_to_run:
+        param_file = find_param_file(context,config)
+        run_cmd = construct_run_cmd(context,data,config,param_file)
         p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
         output = p.communicate()[0]
         debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"

@@ -30,7 +30,7 @@ public:
 		m_minimum_lambda(minimum_lambda)
 	{
 	  this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
-	  this->m_configured = false;
+	  configure();
 	}
 
 	void configure() {

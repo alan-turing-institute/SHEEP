@@ -33,12 +33,14 @@
 	      {% for context, result in results.items() %}
 	      <td>
 		<table>
-		<tr><h2> {{ context }} </h2></tr>
+		<tr><td><h2> {{ context }} </h2></td></tr>
 		{% for category, vals in result.items() %}
-		<tr><h3> {{ category }} </h3></tr>
+		<tr><td><h3> {{ category }} </h3></td></tr>
+		
 		{% for k, v in vals.items() %}
-		<tr><td> {{ k }}</td><td> {{ v }} </td> </tr>
+		<tr><td> {{ k }} :  </td><td> {{ v }} </td> </tr>
 		{% endfor %}
+		
 		{% endfor %}
 		</table>
 	      </td>
