@@ -80,7 +80,7 @@ std::map<std::string, T> read_inputs_file(std::string filename) {
 }
 
 template <typename PlaintextT>
-void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT> control_results, std::vector<DurationT>& durations) {
+void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<DurationT>& durations) {
   std::cout<<std::endl<<"==============="<<std::endl;
   std::cout<<"=== RESULTS ==="<<std::endl<<std::endl;
   std::cout<<"== Processing times: =="<<std::endl;
@@ -90,18 +90,17 @@ void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT>
   std::cout<<"decryption: "<<durations[3].count()<<std::endl;    
   std::cout<<std::endl;
   
-  if (test_results.size() != control_results.size()) {
-    std::cout<<"Outputs have different size - something went wrong!"<<std::endl;
-    return;
-  }
-  std::cout<<"== Output values (test vs clear) =="<<std::endl;
+  std::vector<Wire> circuit_outputs = C.get_outputs();
+  if (circuit_outputs.size() != test_results.size())
+    throw std::runtime_error("outputs have different sizes");
+  std::cout<<"== Output values =="<<std::endl;
+
   auto test_iter = test_results.begin();
-  auto ctrl_iter = control_results.begin();
+  auto wire_iter = circuit_outputs.begin();
   while (test_iter != test_results.end()) {
-    std::cout<<"  test context : "<<std::to_string(*test_iter);
-    std::cout<<"  clear context : "<<std::to_string(*ctrl_iter)<<std::endl;
+    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter);
+    wire_iter++;
     test_iter++;
-    ctrl_iter++;
   }
   std::cout<<endl<<"==== END RESULTS ==="<<std::endl;
   
@@ -149,11 +148,12 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
 	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
+	/*   don't do this any more - will run clear as a separate benchmark run.
 	std::vector<DurationT> dummy;
 	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, dummy);	
+	*/
 
-
-	print_outputs(result_bench, result_clear, durations);
+	print_outputs(C,result_bench, durations);
 	
 	return true;
 }
