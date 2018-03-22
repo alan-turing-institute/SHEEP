@@ -76,13 +76,8 @@ def enter_parameters():
         pform = build_param_form(params[context])(request.form)
         pforms[context] = pform
     if request.method == "POST":
-        print(request.form)
-        print("PARAMS",params)
-        print("PFORMS",list(pforms.keys()))
         for context in pforms.keys():
-            print("Checking for context "+context)
             if context in request.form.keys():
-                print("Got DATA from "+context)
                 params = utils.update_params(context,request.form,
                                              app.data,app.config)
                 app.data["params"][context] = params
@@ -92,10 +87,7 @@ def enter_parameters():
         param_sets = {}
         for k,v in pforms.items():
             param_sets[k] = v.data
-            print("params for "+k,param_sets[k])
             pass
-#        print("BUTTON "+request.form['submit'])
-#        app.data["param_files"] = utils.write_param_files(pforms)
         if request.form["next"] == "Next":
             return redirect(url_for("enter_input_vals"))
     return render_template("enter_parameters.html",forms=pforms)

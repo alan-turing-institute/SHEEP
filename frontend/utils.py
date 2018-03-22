@@ -228,7 +228,6 @@ def find_param_file(context,config):
     """
     param_filename = config["UPLOAD_FOLDER"]+"/parameters_"+context+".txt"
     if os.path.exists(param_filename):
-        print("FOUND PARAMS ",param_filename)
         return param_filename
     else:
         return None
@@ -292,13 +291,11 @@ def update_params(context,param_dict,appdata,appconfig):
         ### ignore the "apply" button:
         if v=="Apply":
             continue
-        print("writing "+k+" to "+str(v))
         param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
     param_file = open(param_filename,"w")
     for k,v in updated_params.items():
-        print("writing updated "+k+" to "+str(v))
         param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     return updated_params

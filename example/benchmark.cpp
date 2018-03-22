@@ -5,7 +5,7 @@
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
-///#include "context-seal.hpp"
+#include "context-seal.hpp"
 
 
 using namespace SHEEP;
@@ -16,28 +16,30 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
-	if (context_type == "HElib_F2") {
-	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
+  	if (context_type == "HElib_F2") {
+  	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
+  	  if (context_params.length() > 0)
+  	    ctx->read_params_from_file(context_params);
+  	  return ctx;
+  	} else if (context_type == "HElib_Fp") {
+  	  auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
+  	  if (context_params.length() > 0)
+  	    ctx->read_params_from_file(context_params);
+  	  return ctx;
+  	} else if (context_type == "TFHE") {
+  	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
+  	  if (context_params.length() > 0)
+  	    ctx->read_params_from_file(context_params);
+  	  return ctx;
+  	} else if (context_type == "SEAL") {
+	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
-	} else if (context_type == "HElib_Fp") {
-	  auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
-	  if (context_params.length() > 0)
-	    ctx->read_params_from_file(context_params);
-	  return ctx;
-	} else if (context_type == "TFHE") {
-	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
-	  if (context_params.length() > 0)
-	    ctx->read_params_from_file(context_params);
-	  return ctx;
-	  //	} else if (context_type == "SEAL") {
-	  // auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
-	  if (context_params.length() > 0)
-	    ctx->read_params_from_file(context_params);
-	  // return ctx;
-	} else {
+	} else if (context_type == "Clear") {
 	  return std::make_unique<ContextClear<PlaintextT> >();
+	} else {
+	  throw std::runtime_error("Unknown context requested");
 	}
 }
 
@@ -122,6 +124,7 @@ void param_print(std::string context_name, std::string parameter_file="") {
 
   std::unique_ptr<BaseContext<PlaintextT> > test_ctx =
     make_context<PlaintextT>(context_name, parameter_file);
+  std::cout<<" made context for "<<context_name<<std::endl;
   test_ctx->print_parameters();
 }
 
