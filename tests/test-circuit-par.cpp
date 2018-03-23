@@ -17,5 +17,5 @@ int main(void)
 
 	std::cout << par(C,C) << std::endl;
 
-	assert(false);	
+	//	assert(false);	
 }
