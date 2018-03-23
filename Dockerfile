@@ -14,6 +14,11 @@ RUN apt-get -y install wget
 
 RUN apt-get install -y libfftw3-dev
 
+
+####### install intel-tbb for parallelisation
+RUN apt-get -y install libtbb-dev
+
+
 ###### get gmp (needed for HElib)
 RUN apt-get -y install m4
 RUN wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
@@ -26,12 +31,16 @@ RUN wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
 RUN tar -xvzf ntl-10.5.0.tar.gz
 RUN cd ntl-10.5.0/src; ./configure NTL_GMP_LIP=on; make; make install
 
-###### install python packages for the frontend
-RUN pip install flask
-RUN pip install wtforms
-RUN pip install pytest
-RUN pip install sqlalchemy
-RUN pip install python-nvd3
+####### install python packages for the frontend
+RUN apt-get install -y python3
+RUN apt-get install -y python3-pip 
+
+RUN pip3 install  flask
+RUN pip3 install  wtforms
+RUN pip3 install  pytest
+RUN pip3 install  sqlalchemy
+RUN pip3 install  python-nvd3
+
 
 
 ## build SEAL
@@ -41,9 +50,11 @@ RUN tar xf SEAL_v2.3.0-4_Linux.tar.gz
 RUN cd SEAL/SEAL; export CC=gcc; export CXX=g++; ./configure; sed -i.bak 's/-march=native//g' Makefile Makefile.in; make; make install;
 
 
-#############################################################################################################
-#####  Everything before this can be run to give a base docker image, to avoid having to recompile everything.
-#####  From this point on, things might change as SHEEP code evolves.
+##############################################################################################################
+######  Everything before this can be run to give a base docker image, to avoid having to recompile everything.
+######  From this point on, things might change as SHEEP code evolves.
+
+##FROM sheep_base
 
 ADD . SHEEP
 
@@ -73,10 +84,12 @@ RUN cd SHEEP/build; cmake ../ ; make all
 
 ### run the flask app
 
+
+
 WORKDIR SHEEP/frontend
 ###
 EXPOSE 5000
 ENV FLASK_APP app.py
 ENV SHEEP_HOME /SHEEP
 ###
-CMD ["python","app.py"]
+CMD ["python3","app.py"]
