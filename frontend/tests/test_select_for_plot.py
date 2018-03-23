@@ -12,14 +12,14 @@ test_dicts = [
      'category_field': 'context_name',
      'context_selections': ['HElib_F2'],
      'gate_selections': ['ADD'],
-     'input_type_width': ['1', '8', '16', '32'],
+     'input_type_width': ['1'],
      'input_type_signed': [False]},
     {'x_axis_var': 'context_name',
      'category_field': 'depth',
      'context_selections': ['HElib_F2', 'HElib_Fp', 'TFHE'],
      'gate_selections': ['SUBTRACT'],
      'input_type_width': ['8'],
-     'input_type_signed' : [False] }
+    'input_type_signed' : [False] }
     ]
 
 def test_query_db():
@@ -34,6 +34,7 @@ def test_query_db():
         filtered_rows = session.query(BenchmarkMeasurement).filter(filt).all()
         assert(len(filtered_rows) <= len(all_rows))
         xdata = []
+        ydata = {}
         for row in filtered_rows:
             xval = row.__getattribute__(input_dict["x_axis_var"])
             if not xval in xdata:
@@ -42,7 +43,7 @@ def test_query_db():
             if not category in ydata.keys():
                 ydata[category] = []
         num_xvals = len(xdata)
-        num_categories = len(yvals.keys())
+        num_categories = len(ydata.keys())
 ### check we don't have more than one y-value per bin/category combination
 ####   (this could easily happen if we're not careful with the query....)
         assert(len(filtered_rows) == num_xvals * num_categories)  

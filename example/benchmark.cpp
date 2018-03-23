@@ -1,3 +1,14 @@
+////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+/// This is the main executable that is used by the frontend to:
+/// 1) run a benchmark test on a specified circuit file
+///      ./benchmark <circuit_file> <context_name> <input_type> <inputs_file> [<params_file>]
+/// 2) print out the paramaters for a given context
+///      ./benchmark PARAMS <context_name> <input_type> [<params_file>]
+/// 3) print out the key and ciphertext sizes for a given context.
+///      ./benchmark SIZES <context_name> <input_type> [<params_file>]
+///
+
 #include <memory>
 #include <fstream>
 #include <map>
@@ -16,24 +27,30 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
-	if (context_type == "HElib_F2") {
-	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
-	  if (context_params.length() > 0)
-	    ctx->read_params_from_file(context_params);
-	  return ctx;
-	} else if (context_type == "HElib_Fp") {
-	  auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
-	  if (context_params.length() > 0)
-	    ctx->read_params_from_file(context_params);
-	  return ctx;
-	} else if (context_type == "TFHE") {
-	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
-	  return ctx;
+  	if (context_type == "HElib_F2") {
+  	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
+  	  if (context_params.length() > 0)
+  	    ctx->read_params_from_file(context_params);
+  	  return ctx;
+  	} else if (context_type == "HElib_Fp") {
+  	  auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
+  	  if (context_params.length() > 0)
+  	    ctx->read_params_from_file(context_params);
+  	  return ctx;
+  	} else if (context_type == "TFHE") {
+  	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
+  	  if (context_params.length() > 0)
+  	    ctx->read_params_from_file(context_params);
+  	  return ctx;
 	} else if (context_type == "SEAL") {
 	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
+	  if (context_params.length() > 0)
+	    ctx->read_params_from_file(context_params);
 	  return ctx;
-	} else {
+	} else if (context_type == "Clear") {
 	  return std::make_unique<ContextClear<PlaintextT> >();
+	} else {
+	  throw std::runtime_error("Unknown context requested");
 	}
 }
 
@@ -76,7 +93,7 @@ std::map<std::string, T> read_inputs_file(std::string filename) {
 }
 
 template <typename PlaintextT>
-void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT> control_results, std::vector<DurationT>& durations) {
+void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<DurationT>& durations) {
   std::cout<<std::endl<<"==============="<<std::endl;
   std::cout<<"=== RESULTS ==="<<std::endl<<std::endl;
   std::cout<<"== Processing times: =="<<std::endl;
@@ -86,18 +103,17 @@ void print_outputs(std::vector<PlaintextT> test_results, std::vector<PlaintextT>
   std::cout<<"decryption: "<<durations[3].count()<<std::endl;    
   std::cout<<std::endl;
   
-  if (test_results.size() != control_results.size()) {
-    std::cout<<"Outputs have different size - something went wrong!"<<std::endl;
-    return;
-  }
-  std::cout<<"== Output values (test vs clear) =="<<std::endl;
+  std::vector<Wire> circuit_outputs = C.get_outputs();
+  if (circuit_outputs.size() != test_results.size())
+    throw std::runtime_error("outputs have different sizes");
+  std::cout<<"== Output values =="<<std::endl;
+
   auto test_iter = test_results.begin();
-  auto ctrl_iter = control_results.begin();
+  auto wire_iter = circuit_outputs.begin();
   while (test_iter != test_results.end()) {
-    std::cout<<"  test context : "<<std::to_string(*test_iter);
-    std::cout<<"  clear context : "<<std::to_string(*ctrl_iter)<<std::endl;
+    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter);
+    wire_iter++;
     test_iter++;
-    ctrl_iter++;
   }
   std::cout<<endl<<"==== END RESULTS ==="<<std::endl;
   
@@ -112,6 +128,15 @@ std::vector<T> match_inputs_to_circuit(Circuit C, std::map<std::string, T> input
     }
   }
   return ordered_inputs;
+}
+
+template <typename PlaintextT>
+void param_print(std::string context_name, std::string parameter_file="") {
+
+  std::unique_ptr<BaseContext<PlaintextT> > test_ctx =
+    make_context<PlaintextT>(context_name, parameter_file);
+  std::cout<<" made context for "<<context_name<<std::endl;
+  test_ctx->print_parameters();
 }
 
 template <typename PlaintextT>
@@ -137,11 +162,10 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
 	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
-	std::vector<DurationT> dummy;
-	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, dummy);	
+	test_ctx->print_parameters();
+	test_ctx->print_sizes();
 
-
-	print_outputs(result_bench, result_clear, durations);
+	print_outputs(C,result_bench, durations);
 	
 	return true;
 }
@@ -154,12 +178,29 @@ int
 main(int argc, const char** argv) {
 
   
-  if (argc < 5) {
+  if (argc < 3) {
 
-    std::cout<<"Usage: <path_to>/custom_example circuit_file context_name input_type inputs_file [params_file]"<<std::endl;
+    std::cout<<"Usage: \n ./benchmark  <circuit_file> <context_name> <input_type> <inputs_file> [<params_file>]"<<std::endl;
+    std::cout<<"OR: \n ./benchmark PARAMS  <context_name> <input_type> [<params_file>]"<<std::endl;    
     return 0;
   }
 
+  if (strncmp(argv[1],"PARAMS",5) == 0) {
+    std::string context_name = argv[2];
+    std::string input_type = argv[3];
+    std::string param_file = "";
+    if (argc == 5) param_file = argv[4];
+    if (input_type == "bool") param_print<bool>(context_name, param_file);
+    else if (input_type == "int8_t") param_print<int8_t>(context_name, param_file);
+    else if (input_type == "uint8_t") param_print<uint8_t>(context_name, param_file);
+    else if (input_type == "int16_t") param_print<int16_t>(context_name, param_file);
+    else if (input_type == "uint16_t") param_print<uint16_t>(context_name, param_file);
+    else if (input_type == "int32_t") param_print<int32_t>(context_name, param_file);
+    else if (input_type == "uint32_t") param_print<uint32_t>(context_name, param_file);  
+    return 0;
+  }
+
+  
   /// read the circuit
   std::ifstream input_circuit(argv[1]);
   Circuit C;

@@ -4,9 +4,9 @@ generate D3.js plots, using the nvd3 python wrapper, building lists of data usin
 
 
 from nvd3 import multiBarChart
-from database import BenchmarkMeasurement, session
+from database import BenchmarkMeasurement, session, build_filter
 import uuid
-from sqlalchemy import and_, or_
+
 
 def create_plot(xdata_list, ydata_dict, xtitle=""):
     """
@@ -17,8 +17,6 @@ def create_plot(xdata_list, ydata_dict, xtitle=""):
     type = 'Results'
     chart = multiBarChart(name="SHEEP results",height=450,width=1000,x_axis_format=None)
     chart.set_containerheader("\n\n<h2>" + type + "</h2>\n\n")
-#    chart.create_y_axis("Execution_time","execution time (s)")
-#    chart.create_x_axis("x_var",xtitle)
     xdata = xdata_list
     for k,v in ydata_dict.items():
         chart.add_serie(name=k, y=v, x=xdata)
@@ -35,28 +33,6 @@ def create_plot(xdata_list, ydata_dict, xtitle=""):
     output_file.write(chart.htmlcontent)
     output_file.close()
     return filename
-
-
-
-def build_filter(input_dict):
-    """
-    convert dict of inputs from web form PlotsForm into SQLAlchemy filter.
-    """
-    field_to_attribute_dict = {
-        "context_selections" : BenchmarkMeasurement.context_name,
-        "gate_selections" : BenchmarkMeasurement.gate_name,
-        "input_type_width" : BenchmarkMeasurement.input_bitwidth,
-        "input_type_signed" : BenchmarkMeasurement.input_signed
-    }
-    and_expr = and_()
-    for field, values in input_dict.items():
-        if not field in field_to_attribute_dict.keys():
-            continue
-        or_expr = or_()
-        for val in values:
-            or_expr += field_to_attribute_dict[field] == val
-        and_expr &= or_expr
-    return and_expr
 
     
 

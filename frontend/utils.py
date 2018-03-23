@@ -7,6 +7,17 @@ import re
 import uuid
 import subprocess
 
+def cleanup_upload_dir(config):
+    """
+    At the start of a new test, remove all the uploaded circuits, inputs, and parameters
+    files from the uploads dir.
+    """
+    for file_prefix in ["circuit","inputs","param"]:
+        cmd = "rm "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
+        os.system(cmd)
+        
+    
+
 
 def get_bitwidth(input_type):
     """
@@ -84,24 +95,37 @@ def write_inputs_file(inputs,upload_folder):
     f.close()
     return inputs_filename
 
-def construct_run_cmd(data,config):
+def construct_run_cmd(context_name,data,config, parameter_file=None):
     """
     Build up the list of arguments to be sent to subprocess.Popen in order to run
     the benchmark test.
     """
     circuit_file = data["uploaded_filenames"]["circuit_file"]
     inputs_file = data["uploaded_filenames"]["inputs_file"]
-    context_name = data["HE_library"]
     input_type = data["input_type"]
-    parameter_file = None
-    if "parameter_file" in data["uploaded_filenames"].keys():
-        parameter_file = data["uploaded_filenames"]["parameter_file"]
+
     # run_cmd is a list of arguments to be passed to subprocess.run()
     run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
     run_cmd.append(circuit_file)
     run_cmd.append(context_name)    
     run_cmd.append(input_type) 
     run_cmd.append(inputs_file)    
+    if parameter_file:
+        run_cmd.append(parameter_file)
+    return run_cmd
+
+
+def construct_get_param_cmd(context_name,input_type,config,parameter_file=None):
+    """
+    Build up the list of arguments to be sent to subprocess.Popen in order to run
+    the benchmark test to get the params for chosen context.
+    """
+
+    # run_cmd is a list of arguments to be passed to subprocess.run()
+    run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
+    run_cmd.append("PARAMS")
+    run_cmd.append(context_name)    
+    run_cmd.append(input_type) 
     if parameter_file:
         run_cmd.append(parameter_file)
     return run_cmd
@@ -132,33 +156,51 @@ def check_outputs(output_list):
     return True
 
 
-def parse_test_output(outputstring):
+def parse_test_output(outputstring,debug_filename=None):
     """
     Extract values from the stdout output of the "benchmark" executable.
+    return a dict in the format { "processing times (seconds)" : {}, "outputs" : {}, "sizes" : {}, "params":{}, "sizes"{} }
     """
-    processing_times = []
-    test_outputs = []
-    clear_outputs = []
-    outputs = []
+    results = {}
+    processing_times = {}
+    test_outputs = {}
+    params = {}
+    sizes = {}
+    
     in_results_section = False
     in_processing_times = False
     in_outputs = False
+    if debug_filename:
+        debugfile=open(debug_filename,"w")
 ### parse the file, assuming we have processing times then outputs.
     for line in outputstring.decode("utf-8").splitlines():
+        if debug_filename:
+            debugfile.write(line+"\n")
+#### read lines where parameters are printed out
+        param_search = re.search("Parameter ([\S]+) = ([\d]+)",line)
+        if param_search:
+            params[param_search.groups()[0]] = param_search.groups()[1]
+#### read lines where sizes of keys or ciphertexts are printed out
+        size_search = re.search("size of ([\S]+):[\s]+([\d]+)",line)
+        if size_search:
+            sizes[size_search.groups()[0]] = size_search.groups()[1]
         if in_results_section:
             if in_processing_times:
-                num_search = re.search("[\d][\d\.e\+]+",line)
+                num_search = re.search("([\w]+)\:[\s]+([\d][\d\.e\+]+)",line)
                 if num_search:
-                    processing_time = num_search.group()
+                    label = num_search.groups()[0]
+                    processing_time = num_search.groups()[1]
                     processing_time = cleanup_time_string(processing_time) ## and convert to seconds
-                    processing_times.append(processing_time)  ## assume we keep the same order - setup, enc, eval, dec
+                    processing_times[label] = processing_time
                 if "Output values" in line:
                     in_processing_times = False
                     in_outputs = True
             elif in_outputs:
-                output_vals = re.findall("[\-\d]+",line)
-                if len(output_vals) > 0:
-                    outputs.append(output_vals)
+                output_search = re.search("([\w]+)\:[\s]+([\d]+)",line)
+                if output_search:
+                    label = output_search.groups()[0]
+                    val = output_search.groups()[1]
+                    test_outputs[label] = val
                 if "END RESULTS" in line:
                     in_results_section = False
             elif "Processing times" in line:
@@ -167,13 +209,110 @@ def parse_test_output(outputstring):
         elif "=== RESULTS" in line:
             in_results_section = True
             pass
-    return processing_times, outputs
+    results["Processing times (s)"] = processing_times
+    results["Outputs"] = test_outputs
+    results["Object sizes (bytes)"] = sizes
+    results["Parameter values"] = params
+    if debug_filename:
+        debugfile.close()
+    return results
+
+def parse_param_output(outputstring):
+    """
+    read the output of benchmark PARAMS <context_name>
+    and return a dict {param_name: val , ... }
+    """
+    params = {}
+    for line in outputstring.decode("utf-8").splitlines():
+        if line.startswith("Parameter"):
+            #### line will be of format "Parameter x = y" - we want x and y
+            tokens = line.strip().split()
+            params[tokens[1]] = tokens[3]
+    return params
+
+
+def find_param_file(context,config):
+    """
+    If parameters have been set by hand via the frontend, they will
+    be in UPLOAD_FOLDER / params_[context].txt.
+    return this path if it exists, or None if it doesn't.
+    """
+    param_filename = config["UPLOAD_FOLDER"]+"/parameters_"+context+".txt"
+    if os.path.exists(param_filename):
+        return param_filename
+    else:
+        return None
+
 
 def run_test(data,config):
     """
     Run the executable in a subprocess, and capture the stdout output.
+    return a dict of results {"context_name": {"processing_times" : {},
+                                                 "sizes" : {},
+                                                 "outputs" : {} 
+                                                }, ... 
     """
-    run_cmd = construct_run_cmd(data,config)
+    results = {}
+    contexts_to_run = data["HE_libraries"] 
+### always run clear context, for comparison, unless we already have 4 contexts
+### in which case the outputs page would be too cluttered...
+    if len(contexts_to_run) < 4:
+        contexts_to_run.append("Clear")
+    for context in contexts_to_run:
+        param_file = find_param_file(context,config)
+        run_cmd = construct_run_cmd(context,data,config,param_file)
+        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+        output = p.communicate()[0]
+        debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
+        results[context] = parse_test_output(output,debug_filename)
+        
+    return results
+
+
+def get_params_all_contexts(context_list,input_type,config):
+    """
+    Return a dict with the key being context_name, and the vals being 
+    dicts of param_name:default_val.
+    """
+    all_params = {}
+    for context in context_list:
+        all_params[context] = get_params_single_context(context,input_type,config)
+    return all_params
+
+def get_params_single_context(context,input_type,config,params_file=None):
+    """
+    Run the benchmark executable to printout params and default values.
+    """
+    run_cmd = construct_get_param_cmd(context,input_type,config,params_file)
+    print("run_cmd is ",run_cmd)
     p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     output = p.communicate()[0]
-    return parse_test_output(output)
+    params = parse_param_output(output)
+    return params
+    
+def update_params(context,param_dict,appdata,appconfig):
+    """
+    We have received a dict of params for a given context from the web form.  
+    However, we need to get the benchmark executable to calculate params, if e.g. A_predefined_param_set 
+    was changed for HElib.  
+    So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse 
+    the output, write that to a file, and return it.
+    """
+    param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
+    param_file = open(param_filename,"w")
+    for k,v in param_dict.items():
+        ### ignore the "apply" button:
+        if v=="Apply":
+            continue
+        param_file.write(k+" "+str(v)+"\n")
+    param_file.close()
+    updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
+    param_file = open(param_filename,"w")
+    if len(updated_params) == 0:  ### something went wrong, e..g.  bad set of parameters
+        ### return the default params (i.e. run get_params_single_context with no params file
+        params = get_params_single_context(context, appdata["input_type"],appconfig)
+        return params
+    for k,v in updated_params.items():
+        param_file.write(k+" "+str(v)+"\n")
+    param_file.close()
+    return updated_params

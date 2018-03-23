@@ -88,7 +88,7 @@ if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
     add_executable(benchmark		       
     		  benchmark.cpp
                   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    target_link_libraries(benchmark		  
+    target_link_libraries(benchmark
 		  		${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES} ${TFHE_LIBRARIES} ${SEAL_LIBRARIES})
 
     add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)

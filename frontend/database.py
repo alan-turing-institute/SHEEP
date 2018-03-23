@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
+from sqlalchemy import and_, or_
 
 import sqlite3
 
@@ -29,7 +30,8 @@ else:
 
     
 Base = declarative_base()
-engine = create_engine("sqlite:///sheep.db")
+##engine = create_engine("sqlite:///sheep.db")
+engine = create_engine("sqlite:///"+DB_LOCATION)
 
 class BenchmarkMeasurement(Base):
     __tablename__ = "benchmarks"
@@ -117,3 +119,22 @@ def upload_test_result(timing_data,app_data):
     session.add(cm)
     session.commit()
         
+def build_filter(input_dict):
+    """
+    convert dict of inputs from web form PlotsForm into SQLAlchemy filter.
+    """
+    field_to_attribute_dict = {
+        "context_selections" : BenchmarkMeasurement.context_name,
+        "gate_selections" : BenchmarkMeasurement.gate_name,
+        "input_type_width" : BenchmarkMeasurement.input_bitwidth,
+        "input_type_signed" : BenchmarkMeasurement.input_signed
+    }
+    and_expr = and_()
+    for field, values in input_dict.items():
+        if not field in field_to_attribute_dict.keys():
+            continue
+        or_expr = or_()
+        for val in values:
+            or_expr += field_to_attribute_dict[field] == val
+        and_expr &= or_expr
+    return and_expr

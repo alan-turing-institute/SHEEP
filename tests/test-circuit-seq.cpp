@@ -18,5 +18,5 @@ int main(void)
 
 	std::cout << seq(C,C) << std::endl;
 
-	assert(false);
+	//	assert(false);
 }

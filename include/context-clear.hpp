@@ -22,9 +22,18 @@ public:
         typedef PlaintextT Plaintext;
         typedef PlaintextT Ciphertext;  
 
-  
+  /// constructor
+
+        ContextClear() {
+	  this->m_public_key_size = 0;
+	  this->m_private_key_size = 0;
+	  this->m_ciphertext_size = 0;
+	  
+        }
 	Ciphertext encrypt(Plaintext p) {
+	  if (! this->m_configured) this->configure();
 	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
+	  this->m_ciphertext_size = sizeof(p);
 	  return p; // plaintext and ciphertext are the same for this context
 	}
 
@@ -99,29 +108,8 @@ public:
 		product_bit = x & y;
 		return FullAdder(sum_in, product_bit, carry_in);
 	}
-
-	Ciphertext MultiplyBinary(Ciphertext a, Ciphertext b) {
-	 	Ciphertext result;
-		std::vector<std::array<bool, BITWIDTH(Plaintext)+1> > carry(BITWIDTH(Plaintext)+1);
-		
-		bool sum_bit, carry_bit;
-
-		result = 0;
-
-		// initialize the first level of carry to zero
-		for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
-			carry[0][i] = 0;
-
-		for (int i = 0; i < BITWIDTH(Plaintext); i++) {
-			for (int j = 0; j <= i; j++) {
-				std::tie(sum_bit, carry_bit) = MultiplyBit(bit(i-j, a), bit(j,b), bit(i,result), carry[j][i]);
-				set_bit(i, result, sum_bit);
-				carry[j+1][i+1] = carry_bit;
-			}
-		}
-	 	return result;
-	}
-
+  
+  
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 	  if (std::is_same<Ciphertext, bool>::value) {
 	    return Add(a,b);
