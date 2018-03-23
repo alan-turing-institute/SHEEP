@@ -42,16 +42,20 @@ class BenchmarkMeasurement(Base):
     gate_name = Column(String(250), nullable=False)
     depth = Column(Integer, nullable=False)
     num_slots = Column(Integer, nullable=False)
-    num_threads = Column(Integer, nullable=False)
+    tbb_enabled = Column(Boolean, nullable=True)
     parameters = Column(String(250), nullable=False)
     execution_time = Column(Float, nullable=False)
     is_correct = Column(Boolean, nullable=False)
+    ciphertext_size = Column(Integer, nullable=True)
+    private_key_size = Column(Integer, nullable=True)
+    public_key_size = Column(Integer, nullable=True)        
     
     
 class CustomMeasurement(Base):
     __tablename__ = "circuit_tests"
     id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
-    circuit_path = Column(String(250), nullable=False)
+    circuit_name = Column(String(250), nullable=False)
+    num_inputs = Column(Integer, nullable=False)
     context_name = Column(String(250), nullable=False)
     input_type = Column(String(250), nullable=False)
     setup_time = Column(Float, nullable=False)
