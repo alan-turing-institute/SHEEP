@@ -30,7 +30,8 @@ else:
 
     
 Base = declarative_base()
-engine = create_engine("sqlite:///sheep.db")
+##engine = create_engine("sqlite:///sheep.db")
+engine = create_engine("sqlite:///"+DB_LOCATION)
 
 class BenchmarkMeasurement(Base):
     __tablename__ = "benchmarks"
