@@ -17,7 +17,7 @@ template <typename T>
 class ContextTFHE
 	: public Context<T, CiphertextArrayTFHE<BITWIDTH(T)> >
 {
-	const int minimum_lambda;
+  //const int minimum_lambda;
 	// shared pointers, since these are handles that are referred to elsewhere
 	std::shared_ptr<TFheGateBootstrappingParameterSet> parameters;
 	std::shared_ptr<TFheGateBootstrappingSecretKeySet> secret_key;
@@ -29,26 +29,36 @@ public:
 	typedef typename Context_::Plaintext Plaintext;
 	typedef typename Context_::Ciphertext Ciphertext;
 
-	ContextTFHE()
+	ContextTFHE(long minimum_lambda=110)
 		:
 		// fixed security level that works with
 		// new_default_gate_bootstrapping_parameter_set, see
 		// TFHE documentation and examples.
-		minimum_lambda(110),
+		m_minimum_lambda(minimum_lambda)
 		// parameters and key, with the appropriate clean-up routines
-		parameters(std::shared_ptr<TFheGateBootstrappingParameterSet>(
-				   new_default_gate_bootstrapping_parameters(minimum_lambda),
+
+        {
+
+		this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
+		configure();
+	}
+
+  
+        void configure() {
+    		parameters = std::shared_ptr<TFheGateBootstrappingParameterSet>(
+				   new_default_gate_bootstrapping_parameters(m_minimum_lambda),
 				   [](TFheGateBootstrappingParameterSet *p) {
 					   delete_gate_bootstrapping_parameters(p);
-				   })),
-		secret_key(std::shared_ptr<TFheGateBootstrappingSecretKeySet>(
+				   });
+		secret_key = std::shared_ptr<TFheGateBootstrappingSecretKeySet>(
 				   new_random_gate_bootstrapping_secret_keyset(parameters.get()),
 				   [](TFheGateBootstrappingSecretKeySet *p) {
 					     delete_gate_bootstrapping_secret_keyset(p);
-				   }))
-	{ }
+				   });
+		this->m_configured = true;
+	}
 
-	Ciphertext encrypt(Plaintext pt) {
+       Ciphertext encrypt(Plaintext pt) {
 		Ciphertext ct(parameters);
 		for (int i = 0; i < BITWIDTH(Plaintext); i++) { // traits
 			bootsSymEncrypt(ct[i], bit(i,pt), secret_key.get());
@@ -64,11 +74,6 @@ public:
 		return pt;
 	}
 
-	// Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	bootsOR(result, a, b, cloud_key_cptr());
-	// 	return result;
-	// }
 
 	typedef CiphertextTFHE CiphertextBit;
 	
@@ -210,6 +215,10 @@ public:
 
 		return result;
 	}
+  private:
+
+          long m_minimum_lambda;
+
 };
 
 }

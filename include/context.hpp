@@ -35,6 +35,7 @@ public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
+        virtual void print_parameters() =0;
 };
 
 // Base class - abstract interface to each library
@@ -46,9 +47,10 @@ public:
 	typedef CiphertextT Ciphertext;
 
 	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
-	
+
+        virtual void       configure()                     { m_configured = true; };
         virtual Ciphertext encrypt(Plaintext) =0;
-	virtual Plaintext decrypt(Ciphertext) =0;
+	virtual Plaintext  decrypt(Ciphertext) =0;
 
 	struct GateNotImplemented : public std::runtime_error {
 		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
@@ -345,6 +347,9 @@ public:
 	      }	      
 	    }    
 	  } // end of loop over lines
+
+	  //// now configure the library
+	  configure();
 	}
   
   
@@ -362,6 +367,7 @@ public:
 	}
 
         virtual void print_parameters() {
+
 	  for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
 	    std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
 	  }
@@ -371,7 +377,7 @@ public:
 protected:
 
         std::map<std::string, long& > m_param_name_map;
-
+        bool m_configured;
 };
 
 template <typename ContextT,

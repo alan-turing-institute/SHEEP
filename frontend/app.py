@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 import subprocess
 
 
-from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form
+from forms import CircuitForm, ResultsForm, PlotsForm, build_inputs_form, build_param_form
 import utils
 import database
 import plotting
@@ -41,21 +41,57 @@ def homepage():
 def new_test():
     """
     Get the user to upload a circuit file and parameter, and select input type, and 
-    which HE lib to use.
+    which HE libs to use.
     """
+    ###
+    ## first cleanup the files created by previous tests.
+    utils.cleanup_upload_dir(app.config)
+    ## create the form to choose circuit file, input_type, and which HE libraries to test
     cform = CircuitForm(request.form)
     if request.method == "POST":
         uploaded_filenames = utils.upload_files(request.files, app.config["UPLOAD_FOLDER"])
         inputs = utils.parse_circuit_file(uploaded_filenames["circuit_file"])
         app.data["inputs"] = inputs
         app.data["input_type"] = cform.input_type.data
-        app.data["HE_library"] = cform.HE_library.data
+        app.data["HE_libraries"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
-        return redirect(url_for("enter_input_vals"))
+        app.data["params"] = utils.get_params_all_contexts(app.data["HE_libraries"],app.data["input_type"],app.config)
+        return redirect(url_for("enter_parameters"))
     else:
         result = None
     return render_template("new_test.html", form=cform)
-        
+
+
+@app.route("/enter_parameters",methods=["POST","GET"])
+def enter_parameters():
+    """
+    query the selected contexts for their configurable parameters
+    and default values.
+    """
+
+    params = app.data["params"]
+
+    pforms = {}
+    for context in params.keys():
+        pform = build_param_form(params[context])(request.form)
+        pforms[context] = pform
+    if request.method == "POST":
+        for context in pforms.keys():
+            if context in request.form.keys():
+                params = utils.update_params(context,request.form,
+                                             app.data,app.config)
+                app.data["params"][context] = params
+                return redirect(url_for("enter_parameters"))
+
+                
+        param_sets = {}
+        for k,v in pforms.items():
+            param_sets[k] = v.data
+            pass
+        if request.form["next"] == "Next":
+            return redirect(url_for("enter_input_vals"))
+    return render_template("enter_parameters.html",forms=pforms)
+
 
 @app.route("/enter_input_vals",methods=["POST","GET"])
 def enter_input_vals():
@@ -76,19 +112,21 @@ def enter_input_vals():
                            form=iform,
                            circuit=circuit_text)
 
+#### FOR TESTING DEBUGGING ONLY 
 
-@app.route("/view_results_table",methods=["POST","GET"])
-def results_table():
-    """
-    allow the user to put in an SQL query, and show the resulting table
-    """
-    rform = ResultsForm(request.form)
-    if request.method == "POST":
-        query = rform.data['sql_query']
-        columns, rdata = database.execute_query_sqlite3(query)
-        return render_template("results_table.html",columns=columns,results=rdata)
-    return render_template("results_query.html",form=rform)
+#@app.route("/view_results_table",methods=["POST","GET"])
+#def results_table():
+#    """
+#    allow the user to put in an SQL query, and show the resulting table
+#    """
+#    rform = ResultsForm(request.form)
+#    if request.method == "POST":
+#        query = rform.data['sql_query']
+#        columns, rdata = database.execute_query_sqlite3(query)
+#        return render_template("results_table.html",columns=columns,results=rdata)
+#    return render_template("results_query.html",form=rform)
 
+######################
 
 @app.route("/view_results_plots",methods=["POST","GET"])
 def results_plots():
@@ -107,12 +145,19 @@ def results_plots():
 def execute_test():
     """
     actually run the executable, passing it all the filenames, options etc as arguments.
+    Get back a dict of results {"context_name": {"processing_times" : {},
+                                                 "sizes" : {},
+                                                 "outputs" : {} 
+                                                }, ...
+                                }
     """
-    proc_time, outputs = utils.run_test(app.data,app.config)   
+    results = utils.run_test(app.data,app.config)   
     if request.method == "POST":
-        database.upload_test_result(proc_time,app.data)
+        database.upload_test_result(proc_times,app.data)
         return render_template("uploaded_ok.html")
-    return render_template("test_results.html",proc_time=proc_time,outputs=outputs,context_name=app.data["HE_library"])
+    return render_template("test_results.html",results = results)
+  #proc_time=proc_times,
+  #                         outputs=outputs,context_names=app.data["HE_libraries"])
 
 
 if __name__ == "__main__":

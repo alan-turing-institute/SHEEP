@@ -25,9 +25,6 @@ namespace SHEEP {
 template <typename PlaintextT, typename CiphertextT>
 class ContextHElib : public Context< PlaintextT , CiphertextT> {
 
-
-		       	     //				     NTL::Vec<Ctxt> > {
-
 public:
 
   typedef PlaintextT Plaintext;
@@ -37,12 +34,12 @@ public:
 
   ContextHElib(long p,             // plaintext modulus
 	       long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
-	       bool bootstrap=true, // bootstrap or not?
+	       long bootstrapl=1, // bootstrap or not?
 	       long haming_weight=128): // Haming weight of secret key
 
     m_p(p),
     m_param_set(param_set),
-    m_bootstrap(bootstrap),
+    m_bootstrapl(bootstrapl),
     m_w(haming_weight)
   {
 
@@ -53,6 +50,36 @@ public:
     else
       m_bitwidth = BITWIDTH(Plaintext);
 
+    ////  populate the map that will allow us to set parameters via an input file (or string)
+    
+    this->m_param_name_map.insert({"A_predefined_param_set", m_param_set});
+    this->m_param_name_map.insert({"Haming_weight", m_w});
+    this->m_param_name_map.insert({"bootstrap", m_bootstrapl});            
+    this->m_param_name_map.insert({"m",m_m});
+    this->m_param_name_map.insert({"phi(m)",m_phim});
+    this->m_param_name_map.insert({"d",m_d});
+    this->m_param_name_map.insert({"m1",m_m1});
+    this->m_param_name_map.insert({"m2",m_m2});
+    this->m_param_name_map.insert({"m3",m_m3});
+    this->m_param_name_map.insert({"g1",m_g1});
+    this->m_param_name_map.insert({"g2",m_g2});
+    this->m_param_name_map.insert({"g3",m_g3});
+    this->m_param_name_map.insert({"ord1",m_ord1});
+    this->m_param_name_map.insert({"ord2",m_ord2});
+    this->m_param_name_map.insert({"ord3",m_ord3});
+    this->m_param_name_map.insert({"c",m_c});
+    this->m_param_name_map.insert({"B",m_B});
+    this->m_param_name_map.insert({"levels",m_L});
+
+    
+    /// configure
+    configure();
+  }
+
+  
+  void configure() {
+
+    m_bootstrap = (bool)m_bootstrapl;
     /// Set all the other parameters.
     
     long mValues[][15] = { 
@@ -66,8 +93,24 @@ public:
 
     long* vals = mValues[m_param_set];
     
-    long m = vals[2];
-    
+    ///    long m = vals[2];
+
+    m_m = vals[2];
+    m_phim = vals[1];
+    m_d = vals[3];
+    m_m1 = vals[4];
+    m_m2 = vals[5];
+    m_m3 = vals[6];
+    m_g1 = vals[7];
+    m_g2 = vals[8];
+    m_g3 = vals[9];
+    m_ord1 = vals[10];
+    m_ord2 = vals[11];
+    m_ord3 = vals[12];
+    m_B = vals[13];
+    m_c = vals[14];    
+
+    /*    
     NTL::Vec<long> mvec;
     append(mvec, vals[4]);
     if (vals[5]>1) append(mvec, vals[5]);
@@ -82,7 +125,22 @@ public:
     ords.push_back(vals[10]);
     if (abs(vals[11])>1) ords.push_back(vals[11]);
     if (abs(vals[12])>1) ords.push_back(vals[12]);
+    */
+
+    NTL::Vec<long> mvec;
+    append(mvec, m_m1);
+    if (m_m2>1) append(mvec, m_m2);
+    if (m_m3>1) append(mvec, m_m3);
     
+    std::vector<long> gens;
+    gens.push_back(m_g1);
+    if (m_g2>1) gens.push_back(m_g2);
+    if (m_g3>1) gens.push_back(m_g3);
+
+    std::vector<long> ords;
+    ords.push_back(m_ord1);
+    if (abs(m_ord2)>1) ords.push_back(m_ord2);
+    if (abs(m_ord3)>1) ords.push_back(m_ord3);
     m_B = vals[13];
     m_c = vals[14];
 
@@ -92,7 +150,7 @@ public:
     else m_L = 3 + NTL::NumBits(m_bitwidth+2);
     
     /// initialize HElib context
-    m_helib_context = new FHEcontext(m, m_p, 1, gens, ords);
+    m_helib_context = new FHEcontext(m_m, m_p, 1, gens, ords);
     m_helib_context->bitsPerLevel = m_B;
     /// modify context, add primes to modulus chain
     buildModChain(*m_helib_context, m_L, m_c,8);
@@ -123,12 +181,7 @@ public:
     
     m_nslots = m_ea->size();
 
-    ////  populate the map that will allow us to set parameters via an input file (or string)
-    
-    m_param_name_map.insert({"param_set", m_param_set});
-    m_param_name_map.insert({"Haming_weight", m_w});
-    m_param_name_map.insert({"p", m_p});        
-  
+
 };
 
   // destructor
@@ -138,56 +191,6 @@ public:
     if (m_secretKey != NULL) delete m_secretKey;
     if (m_helib_context != NULL) delete m_helib_context;
   };
-
-  void read_params_from_file(std::string filename) {
-    std::ifstream inputstream(filename);
-
-    if (inputstream.bad()) {
-      std::cout<<"Empty or non-existent input file"<<std::endl;
-    }
-    
-    /// loop over all lines in the input file 
-    std::string line;
-    while (std::getline(inputstream, line) ) {
-      /// remove comments (lines starting with #) and empty lines
-      int found= line.find_first_not_of(" \t");
-      if( found != std::string::npos) {   
-	if ( line[found] == '#') 
-	  continue;
-	
-	/// split up by whitespace
-	std::string buffer;
-	std::vector<std::string> tokens;
-	std::stringstream ss(line);
-	while (ss >> buffer) tokens.push_back(buffer);
-	
-	if (tokens.size() == 2) {   /// assume we have param_name param_value
-	  set_parameter(tokens[0],stol(tokens[1])); 
-	  
-	}
-	
-      }    
-    } // end of loop over lines
-  }
-
-
-  void set_parameter(std::string param_name, long param_value) {
-    auto map_iter = m_param_name_map.find(param_name);
-    if ( map_iter == m_param_name_map.end() ) {
-      std::cout<<"Parameter "<<param_name<<" not found."<<std::endl;
-      return;
-    } else {
-      std::cout<<"Setting parameter "<<map_iter->first<<" to "<<param_value<<std::endl;
-      map_iter->second = param_value;
-      return;
-    }
-  }
-
-  void print_parameters() {
-    for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
-      std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
-    }
-  }
 
   virtual Ciphertext encrypt(Plaintext pt) = 0;
   virtual Plaintext decrypt(Ciphertext pt) = 0;  
@@ -216,7 +219,29 @@ protected:
 
   long m_nslots;  // number of SIMD operations that can be done at a time
 
-  std::map<std::string, long& > m_param_name_map;
+  long m_m;
+
+  long m_phim;
+
+  long m_d;
+
+  long m_m1;
+
+  long m_m2;
+
+  long m_m3;
+
+  long m_g1;
+
+  long m_g2;
+
+  long m_g3;
+
+  long m_ord1;
+
+  long m_ord2;
+
+  long m_ord3;
   
   EncryptedArray* m_ea; 
 
@@ -231,11 +256,10 @@ protected:
   std::vector<zzX> m_unpackSlotEncoding;
 
   bool m_bootstrap;
+
+  long m_bootstrapl;
   
 };   //// end of ContextHElib class definition.
-
-
-
 
   
   ////////////////////////////////////////////////////////////////////////////////////
@@ -250,19 +274,18 @@ public:
   typedef PlaintextT Plaintext;
   typedef NTL::Vec<Ctxt> Ciphertext;  
   
-  ContextHElib_F2(long p=2,           // plaintext modulus
-		  long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+  ContextHElib_F2(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
 		  bool bootstrap=true, // bootstrap or not?
 		  long haming_weight=128) // Haming weight of secret key
-    : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
+    : ContextHElib<Plaintext,Ciphertext>(2,param_set,bootstrap,haming_weight)
   {
-
-    this->print_parameters();  
+    
 
     /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
     m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
 			  std::is_same<Plaintext, int16_t>::value ||
 			  std::is_same<Plaintext, int32_t>::value);
+
   }
 
 
@@ -440,8 +463,7 @@ public:
 		  long haming_weight=128) // Haming weight of secret key
     : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
   {
-    ///    this->initialize();
-    this->print_parameters();  
+    this->m_param_name_map.insert({"p", this->m_p});     
   }
 
   

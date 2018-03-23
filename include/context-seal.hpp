@@ -19,26 +19,34 @@ public:
   
   // constructors
   
-  ContextSeal(int plaintext_modulus = (1 << 8),
-    int security = 128,  /* This is the security level (either 128 or 192).
+  ContextSeal(long plaintext_modulus = (1 << 8),
+    long security = 128,  /* This is the security level (either 128 or 192).
                 We limit ourselves to 2 predefined choices,
                 as coefficient modules are preset by SEAL for these choices.*/
     const string poly_modulus = "1x^2048 + 1"): // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"):
 	m_poly_modulus(poly_modulus),
 	m_security(security),
 	m_plaintext_modulus(plaintext_modulus) {
+    this->m_param_name_map.insert({"plaintext_modulus",m_plaintext_modulus});
+    this->m_param_name_map.insert({"security",m_security});
 
+    configure();
+    this->print_parameters();
+  }
+
+  void configure() {
+    
 	seal::EncryptionParameters parms;
-	parms.set_poly_modulus(poly_modulus);
-	if (security == 128) {
+	parms.set_poly_modulus(m_poly_modulus);
+	if (m_security == 128) {
 		parms.set_coeff_modulus(seal::coeff_modulus_128(2048));
-	} else if (security == 192) {
+	} else if (m_security == 192) {
 		parms.set_coeff_modulus(seal::coeff_modulus_192(2048)); // Not sure this is correct
 	} else {
 		throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 129");
 	}
 	
-	parms.set_plain_modulus(plaintext_modulus);
+	parms.set_plain_modulus(m_plaintext_modulus);
 	m_context = new seal::SEALContext(parms);
 	m_encoder = new seal::IntegerEncoder(m_context->plain_modulus()); // We default to an IntegerEncoder with base b=2. TODO: include CRT and fractional encoder
 
@@ -119,8 +127,8 @@ public:
 
 protected:
 	const string m_poly_modulus;
-  int m_security;
-  int m_plaintext_modulus;
+  long m_security;
+  long m_plaintext_modulus;
   seal::SEALContext* m_context;
 	seal::IntegerEncoder* m_encoder;
 	seal::PublicKey m_public_key;

@@ -2,7 +2,7 @@
 WTForms forms for user to enter configuration of an HE test - choose circuit file, context etc.
 """
 from wtforms import Form, FloatField, FormField, IntegerField, FileField, \
-    SelectField, validators, FieldList, StringField,SelectMultipleField, widgets
+    SelectField, validators, FieldList, StringField,SelectMultipleField, HiddenField, widgets
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
@@ -13,7 +13,7 @@ class CircuitForm(Form):
     Standard WTForm
     """
     circuit_file = FileField(validators=[validators.InputRequired()],label="Circuit file")
-    HE_library = SelectField(choices=[("Clear","Clear"),("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")],label="HE library")
+##    HE_library = SelectField(choices=[("Clear","Clear"),("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")],label="HE library")
 ##    parameter_file = FileField(validators=[validators.InputRequired()],label="Parameter file")
     input_type = SelectField(choices=[("bool","bool"),
                                       ("uint8_t","uint8_t"),
@@ -23,7 +23,7 @@ class CircuitForm(Form):
                                       ("uint32_t","uint32_t"),
                                       ("int32_t","int32_t")]
                              ,label="Input type")
-
+    HE_library = MultiCheckboxField('Select HE libraries:', choices=[("HElib_F2","HElib_F2"),("HElib_Fp","HElib_Fp"),("TFHE","TFHE"),("SEAL","SEAL")])    
 
 class ResultsForm(Form):
     """
@@ -65,3 +65,15 @@ def build_inputs_form(inputs):
         field = IntegerField(label=i)
         setattr(InputsForm,i,field)
     return InputsForm
+
+def build_param_form(params_dict):
+    """ 
+    return a class of WTForm with custom fields specified by the "parameters" list.
+    """
+    class ParamsForm(Form):
+        pass
+##    context = HiddenField(context_name)
+    for p,v in params_dict.items():
+        field = IntegerField(label=p,default=v)
+        setattr(ParamsForm,p,field)
+    return ParamsForm
