@@ -72,7 +72,10 @@ def run_single_benchmark(input_circuit,
         outfile.write(job_output.decode("utf-8"))
         outfile.close()
 ### parse the file, return the outputs
-    processing_times, outputs = parse_test_output(job_output)
+
+    results = parse_test_output(job_output)
+    processing_times = results["Processing times (s)"]
+    outputs = results["Outputs"] 
     is_correct = check_outputs(outputs)
     eval_time = processing_times[2]
     return eval_time, is_correct
