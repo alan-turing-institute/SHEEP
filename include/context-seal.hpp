@@ -30,8 +30,11 @@ public:
     this->m_param_name_map.insert({"plaintext_modulus",m_plaintext_modulus});
     this->m_param_name_map.insert({"security",m_security});
 
+    this->m_private_key_size = 0;
+    this->m_public_key_size = 0;
+    this->m_ciphertext_size = 0;
+    
     configure();
-    this->print_parameters();
   }
 
   void configure() {
@@ -54,6 +57,10 @@ public:
 	m_public_key = keygen.public_key();
 	m_secret_key = keygen.secret_key();
 
+	//// sizes of objects, in bytes
+	this->m_public_key_size = sizeof(m_public_key);
+	this->m_private_key_size = sizeof(m_secret_key);	
+	
 	m_encryptor = new seal::Encryptor(*m_context, m_public_key);
 	m_evaluator = new seal::Evaluator(*m_context);
 	m_decryptor = new seal::Decryptor(*m_context, m_secret_key);
@@ -63,6 +70,7 @@ public:
 	seal::Plaintext pt = m_encoder->encode(p);
 	seal::Ciphertext ct;
 	m_encryptor->encrypt(pt, ct);
+	this->m_ciphertext_size = sizeof(ct);
 	return ct;
   }
 
