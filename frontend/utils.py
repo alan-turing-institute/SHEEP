@@ -295,6 +295,10 @@ def update_params(context,param_dict,appdata,appconfig):
     param_file.close()
     updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
     param_file = open(param_filename,"w")
+    if len(updated_params) == 0:  ### something went wrong, e..g.  bad set of parameters
+        ### return the default params (i.e. run get_params_single_context with no params file
+        params = get_params_single_context(context, appdata["input_type"],appconfig)
+        return params
     for k,v in updated_params.items():
         param_file.write(k+" "+str(v)+"\n")
     param_file.close()
