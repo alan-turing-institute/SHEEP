@@ -159,13 +159,14 @@ def check_outputs(output_list):
 def parse_test_output(outputstring,debug_filename=None):
     """
     Extract values from the stdout output of the "benchmark" executable.
-    return a dict in the format { "processing times (seconds)" : {}, "outputs" : {}, "sizes" : {} }
+    return a dict in the format { "processing times (seconds)" : {}, "outputs" : {}, "sizes" : {}, "params":{}, "sizes"{} }
     """
     results = {}
     processing_times = {}
     test_outputs = {}
-##    clear_outputs = []
-    outputs = []
+    params = {}
+    sizes = {}
+    
     in_results_section = False
     in_processing_times = False
     in_outputs = False
@@ -175,6 +176,14 @@ def parse_test_output(outputstring,debug_filename=None):
     for line in outputstring.decode("utf-8").splitlines():
         if debug_filename:
             debugfile.write(line+"\n")
+#### read lines where parameters are printed out
+        param_search = re.search("Parameter ([\S]+) = ([\d]+)",line)
+        if param_search:
+            params[param_search.groups()[0]] = param_search.groups()[1]
+#### read lines where sizes of keys or ciphertexts are printed out
+        size_search = re.search("size of ([\S]+):[\s]+([\d]+)",line)
+        if size_search:
+            sizes[size_search.groups()[0]] = size_search.groups()[1]
         if in_results_section:
             if in_processing_times:
                 num_search = re.search("([\w]+)\:[\s]+([\d][\d\.e\+]+)",line)
@@ -202,6 +211,8 @@ def parse_test_output(outputstring,debug_filename=None):
             pass
     results["Processing times (s)"] = processing_times
     results["Outputs"] = test_outputs
+    results["Object sizes (bytes)"] = sizes
+    results["Parameter values"] = params
     if debug_filename:
         debugfile.close()
     return results
@@ -243,8 +254,10 @@ def run_test(data,config):
     """
     results = {}
     contexts_to_run = data["HE_libraries"] 
-### always run clear context, for comparison
-    contexts_to_run.append("Clear")
+### always run clear context, for comparison, unless we already have 4 contexts
+### in which case the outputs page would be too cluttered...
+    if len(contexts_to_run) < 4:
+        contexts_to_run.append("Clear")
     for context in contexts_to_run:
         param_file = find_param_file(context,config)
         run_cmd = construct_run_cmd(context,data,config,param_file)

@@ -1,3 +1,14 @@
+////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+/// This is the main executable that is used by the frontend to:
+/// 1) run a benchmark test on a specified circuit file
+///      ./benchmark <circuit_file> <context_name> <input_type> <inputs_file> [<params_file>]
+/// 2) print out the paramaters for a given context
+///      ./benchmark PARAMS <context_name> <input_type> [<params_file>]
+/// 3) print out the key and ciphertext sizes for a given context.
+///      ./benchmark SIZES <context_name> <input_type> [<params_file>]
+///
+
 #include <memory>
 #include <fstream>
 #include <map>
@@ -31,7 +42,7 @@ make_context(std::string context_type, std::string context_params="") {
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
-  	} else if (context_type == "SEAL") {
+	} else if (context_type == "SEAL") {
 	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
@@ -151,10 +162,8 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
 	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
-	/*   don't do this any more - will run clear as a separate benchmark run.
-	std::vector<DurationT> dummy;
-	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, dummy);	
-	*/
+	test_ctx->print_parameters();
+	test_ctx->print_sizes();
 
 	print_outputs(C,result_bench, durations);
 	
