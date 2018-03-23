@@ -51,11 +51,13 @@ out1 c ADD total
 This circuit will sum three inputs a,b,c to give the output called "total".
 
 
-#### Input types
+#### Circuit inputs
 
-The choice of input type is kept separate from the circuit description in SHEEP - the same circuit file can be
+The choice of input type, and the assignment of values to the inputs, are both kept separate
+from the circuit description in SHEEP - the same circuit file can be
 used to represent any type of input.
-At present, the following choices of input are supported:
+
+At present, the following choices of input type are supported:
 * boolean
 * int8_t
 * uint8_t
@@ -66,15 +68,17 @@ At present, the following choices of input are supported:
 Preliminary developments on a branch of the project also allow arbitrary-length vectors of the above types to be
 represented - this facilitates "SIMD" operations for those HE libraries that support them.
 
+
+
 #### Contexts
 
 The interface between the SHEEP code and an external HE library is encapsulated in a ***Context*** class.
 These all inherit from a base context class that defines the interface.  All concrete context classes must therefore
 implement the following functions:
-'''
+```
 Ciphertext encrypt(Plaintext)
 Plaintext decrypt(Ciphertext)
-'''
+```
 as well as all the "Gate" operations, operating on ciphertexts. 
 In the ideal situation, the implementation of a Gate within a given context
 will just be a library call to the corresponding function in that HE library.
@@ -86,8 +90,25 @@ in the SHEEP TFHE context, it is necessary to encode the integers as bit arrays
 and construct the binary circuit.
 
 The base context class contains methods to:
-* Compile an input circuit into a ***CircuitEvaluator*** object.
+* Compile an input circuit into a ***CircuitEvaluator*** object, which takes ciphertext inputs and computes the sequence of
+assignments in the circuit.
+* Go through the entire chain of encryption to circuit-evaluation to decryption, taking in a vector of plaintext inputs and
+return a vector of plaintext outputs.
 * Read parameters from a file, and print parameter values to stdout.
+
+#### Build environment, testing, and deployment
+
+The ***cmake*** build-management system is used to compile the C++ code for SHEEP.  This takes care of finding the
+external library and header files for the HE libraries, and conditional statements in the cmake
+configuration files ensured that executables are only built when the libraries on which they depend are present.
+
+CMake is also used to run the suite of test programs, which cover all combinations of context, gate, and input-type, and
+test edge-cases of input values (e.g. maximum or minimum integer values for a given type).
+
+The ***Docker*** containerization software can be used to run and deploy SHEEP.  The `Dockerfile` in the main SHEEP directory
+contains all the instructions necessary to download necessary software, and compile and run SHEEP, based on an Ubuntu Linux
+image.   The resulting Docker image can then be shared. or deployed on a web-server, for example as an ***Azure web app*** to
+provide a public website.
 
 
 
