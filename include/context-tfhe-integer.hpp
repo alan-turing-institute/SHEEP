@@ -40,6 +40,9 @@ public:
         {
 
 		this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
+		this->m_private_key_size = 0;
+		this->m_public_key_size = 0;
+		this->m_ciphertext_size = 0;
 		configure();
 	}
 
@@ -55,6 +58,9 @@ public:
 				   [](TFheGateBootstrappingSecretKeySet *p) {
 					     delete_gate_bootstrapping_secret_keyset(p);
 				   });
+		this->m_private_key_size = sizeof(*secret_key);
+		//// no public key used here? 
+		this->m_public_key_size = sizeof(*secret_key);		
 		this->m_configured = true;
 	}
 
@@ -63,6 +69,7 @@ public:
 		for (int i = 0; i < BITWIDTH(Plaintext); i++) { // traits
 			bootsSymEncrypt(ct[i], bit(i,pt), secret_key.get());
 		}
+		this->m_ciphertext_size = sizeof(*ct);
 		return ct;
 	}
 

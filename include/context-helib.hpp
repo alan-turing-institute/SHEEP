@@ -70,7 +70,10 @@ public:
     this->m_param_name_map.insert({"c",m_c});
     this->m_param_name_map.insert({"B",m_B});
     this->m_param_name_map.insert({"levels",m_L});
-
+    /// sizes of objects in bytes.  Assign values when they are constructed.
+    this->m_ciphertext_size = 0;
+    this->m_public_key_size = 0;
+    this->m_private_key_size = 0;
     
     /// configure
     configure();
@@ -174,6 +177,11 @@ public:
     addSome1DMatrices(*m_secretKey);
     addFrbMatrices(*m_secretKey);
 
+    /// how big are keys?
+    this->m_private_key_size = sizeof(*m_secretKey);
+    this->m_public_key_size = sizeof(*m_publicKey);    
+
+    
     if (m_bootstrap) m_secretKey->genRecryptData();
 
     
@@ -297,6 +305,7 @@ public:
     for (int i=0; i < this->m_bitwidth; i++) {
       this->m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
     }
+    this->m_ciphertext_size = sizeof(ct[0]) * this->m_bitwidth; 
     return ct;  
   }
 
@@ -469,7 +478,7 @@ public:
   
   Ciphertext encrypt(Plaintext pt) {
 
-//// if plaintext is a bool, convert it into a vector of longs, with just the first element as 1 or zero
+//// if convert plaintext input into a vector of longs, even if we use just the first element..
     std::vector<long> ptvec;
     ptvec.push_back(pt);
     
@@ -478,6 +487,7 @@ public:
     
     Ciphertext ct(*(this->m_publicKey));
     this->m_ea->encrypt(ct, *(this->m_publicKey), ptvec);
+    this->m_ciphertext_size = sizeof(ct);
     return ct; 
    
   }

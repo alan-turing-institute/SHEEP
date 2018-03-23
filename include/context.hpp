@@ -36,6 +36,7 @@ public:
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
         virtual void print_parameters() =0;
+        virtual void print_sizes() = 0;
 };
 
 // Base class - abstract interface to each library
@@ -372,12 +373,22 @@ public:
 	    std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
 	  }
 	}
-
+  
+        virtual void print_sizes() {
+	  std::cout<<"size of publicKey: "<<m_public_key_size<<std::endl;
+	  std::cout<<"size of privateKey: "<<m_private_key_size<<std::endl;	  
+	  std::cout<<"size of ciphertext: "<<m_ciphertext_size<<std::endl;
+	}
   
 protected:
 
         std::map<std::string, long& > m_param_name_map;
         bool m_configured;
+
+  ////  sizes (in bytes) of keys and ciphertext
+        int  m_private_key_size;
+        int  m_public_key_size;
+        int  m_ciphertext_size;
 };
 
 template <typename ContextT,
