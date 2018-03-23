@@ -96,6 +96,19 @@ assignments in the circuit.
 return a vector of plaintext outputs.
 * Read parameters from a file, and print parameter values to stdout.
 
+The contexts that have been implemented to date are:
+* ***ContextClear***:  no encryption - used to check outputs of other contexts.
+* ***ContextTFHE***:  interface to the ***TFHE*** library.  Integer inputs are encoded into vectors of binary numbers which are encrypted
+individually, and operations are implemented as binary circuits.
+* ***ContextHElib_F2***: interface to the ***HElib*** library, with plaintext space modulus parameter ***p*** set to 2, such that
+integer inputs are encoded into vectors of binary numbers.  Although HElib natively supports SIMD operations with vectors of
+input integers, we are currently not exploiting this capability in our main development branch.
+* ***ContextHElib_Fp***: interface to the ***HElib*** library, with ***p*** set to a larger (prime) number, such that integer inputs
+(provided they are smaller than ***p***) can be operated on directly.
+* ***ContextSEAL***: interface to the ***SEAL*** library.  SEAL has a lot of flexibility in how it can be configured in terms
+of encoding inputs as binary numbers, or using multiple "slots" for SIMD operations.  For the first tests, we are using
+integer input space.
+
 #### Build environment, testing, and deployment
 
 The ***cmake*** build-management system is used to compile the C++ code for SHEEP.  This takes care of finding the
@@ -110,6 +123,10 @@ contains all the instructions necessary to download necessary software, and comp
 image.   The resulting Docker image can then be shared. or deployed on a web-server, for example as an ***Azure web app*** to
 provide a public website.
 
+#### Parallelization
+
+The Intel ***TBB*** (Thread Building Blocks) library can be used in SHEEP to speed up the evaluation of circuits.
+At present this has only been fully utilized in ***ContextTFHE***.
 
 
 
