@@ -311,10 +311,8 @@ def update_params(context,param_dict,appdata,appconfig):
     the output, write that to a file, and return it.
     """
     old_params = appdata["params"][context]
-    print("OLD_PARMS",old_params)
     param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
     param_file = open(param_filename,"w")
-    print("PARAM DICT", param_dict)
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
