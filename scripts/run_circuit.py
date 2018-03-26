@@ -12,7 +12,10 @@ if not "SHEEP_HOME" in os.environ.keys():
 else:
     BASE_DIR = os.environ["SHEEP_HOME"]
 
-INPUTS_DIR = BASE_DIR+"/benchmark_inputs/mid_level/inputs/"
+TMP_INPUTS_DIR = BASE_DIR+"/benchmark_inputs/mid_level/inputs/TMP"
+if not os.path.exists(TMP_INPUTS_DIR):
+    os.system("mkdir "+TMP_INPUTS_DIR)
+    
 EXECUTABLE_DIR = BASE_DIR+"/build/bin"
 
 
@@ -32,7 +35,7 @@ def write_inputs_file(value_dict):
     write k,v pairs into a file.  Randomly generate the filename
     and return to the user.
     """
-    filename = INPUTS_DIR+"inputs-"+str(uuid.uuid4())+".txt"
+    filename = TMP_INPUTS_DIR+"inputs-"+str(uuid.uuid4())+".txt"
     inputs_file = open(filename,"w")
     for k,v in value_dict.items():
         inputs_file.write(k+" "+str(v)+"\n")
@@ -40,7 +43,7 @@ def write_inputs_file(value_dict):
     return filename
                        
 
-def run_circuit(circuit_file,inputs_file,input_type,context,num_inputs=None):
+def run_circuit(circuit_file,inputs_file,input_type,context,num_inputs=None,debugfilename=None):
     """
     run the circuit and retrieve the results.
     """
@@ -52,4 +55,5 @@ def run_circuit(circuit_file,inputs_file,input_type,context,num_inputs=None):
     run_cmd.append(inputs_file)    
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
-    results = parse_test_output(job_output)
+    results = parse_test_output(job_output,debugfilename)
+    return results["Outputs"]

@@ -12,7 +12,7 @@ else:
     BASE_DIR = os.environ["SHEEP_HOME"]
 
     
-CIRCUIT_DIR = BASE_DIR+"/benchmark_inputs/mid_level/circuits/"
+CIRCUIT_DIR = BASE_DIR+"/benchmark_inputs/mid_level/circuits"
 
 
 def new_var():

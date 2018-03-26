@@ -196,7 +196,7 @@ def parse_test_output(outputstring,debug_filename=None):
                     in_processing_times = False
                     in_outputs = True
             elif in_outputs:
-                output_search = re.search("([\w]+)\:[\s]+([\d]+)",line)
+                output_search = re.search("([\w]+)\:[\s]+([-\d]+)",line)
                 if output_search:
                     label = output_search.groups()[0]
                     val = output_search.groups()[1]
