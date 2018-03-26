@@ -49,7 +49,22 @@ class BenchmarkMeasurement(Base):
     ciphertext_size = Column(Integer, nullable=True)
     private_key_size = Column(Integer, nullable=True)
     public_key_size = Column(Integer, nullable=True)        
-    
+
+
+class MidLevelBenchmark(Base):
+    __tablename__ = "mid_level_benchmarks"
+    id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
+    context_name = Column(String(250), nullable=False)
+    input_bitwidth = Column(Integer, nullable=False)
+    input_signed = Column(Boolean, nullable=False)    
+    circuit_name = Column(String(250), nullable=False)
+    tbb_enabled = Column(Boolean, nullable=True)
+    parameters = Column(String(250), nullable=False)
+    execution_time = Column(Float, nullable=False)
+    is_correct = Column(Boolean, nullable=False)
+    ciphertext_size = Column(Integer, nullable=True)
+    private_key_size = Column(Integer, nullable=True)
+    public_key_size = Column(Integer, nullable=True)   
     
 class CustomMeasurement(Base):
     __tablename__ = "circuit_tests"

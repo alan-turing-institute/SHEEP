@@ -5,13 +5,23 @@ import subprocess
 import os
 import re
 
-EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
+if not "SHEEP_HOME" in os.environ.keys():
+    BASE_DIR = os.environ["HOME"]+"/SHEEP"
+else:
+    BASE_DIR = os.environ["SHEEP_HOME"]
 
-INPUT_FILE_DIR = os.environ["HOME"]+"/SHEEP/benchmark_inputs"
+
+EXECUTABLE_DIR = BASE_DIR+"/build/bin"
+
+CIRCUIT_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/circuits"
+if not os.path.exists(CIRCUIT_FILE_DIR):
+    os.system("mkdir "+CIRCUIT_FILE_DIR)
+
+INPUT_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/inputs"
 if not os.path.exists(INPUT_FILE_DIR):
-    os.system("mkdir "+INPUT_FILE_DIR)
+    os.system("mkdir "+INPUT_FILE_DIR)    
 
-DEBUG_FILE_DIR = os.environ["HOME"]+"/SHEEP/debug"
+DEBUG_FILE_DIR = BASE_DIR+"/debug"
 if not os.path.exists(DEBUG_FILE_DIR):
     os.system("mkdir "+DEBUG_FILE_DIR)
 
@@ -58,7 +68,7 @@ def run_single_benchmark(input_circuit,
     """
     run_cmd=[]
     run_cmd.append(os.path.join(EXECUTABLE_DIR,"benchmark"))
-    run_cmd.append(os.path.join(INPUT_FILE_DIR,input_circuit))
+    run_cmd.append(os.path.join(CIRCUIT_FILE_DIR,input_circuit))
     run_cmd.append(context)
     run_cmd.append(input_type)
     run_cmd.append(os.path.join(INPUT_FILE_DIR,input_vals_file))    

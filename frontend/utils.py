@@ -138,7 +138,7 @@ def cleanup_time_string(t):
     time_in_seconds = float(t)/1e6
 
     if time_in_seconds < 1:
-        time_in_seconds = round(time_in_seconds,3)
+        time_in_seconds = round(time_in_seconds,5)
     else:
         time_in_seconds = int(time_in_seconds)
     timestring = str(time_in_seconds)
