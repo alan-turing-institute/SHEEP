@@ -35,7 +35,7 @@ def write_inputs_file(value_dict):
     write k,v pairs into a file.  Randomly generate the filename
     and return to the user.
     """
-    filename = TMP_INPUTS_DIR+"inputs-"+str(uuid.uuid4())+".txt"
+    filename = TMP_INPUTS_DIR+"/inputs-"+str(uuid.uuid4())+".txt"
     inputs_file = open(filename,"w")
     for k,v in value_dict.items():
         inputs_file.write(k+" "+str(v)+"\n")
