@@ -1,31 +1,26 @@
 #include <cstdint>
 #include <iostream>
+#include <fstream>
 #include "simple-circuits.hpp"
-//#include "context-clear.hpp"
-#include "context-tfhe.hpp"
 #include "all_equal.hpp"
+#include "context.hpp"
 
-int main(void)
+
+int main(int argc, const char** argv)
 {
-	using namespace Sheep::TFHE;
-	typedef std::vector<ContextTFHE<int8_t>::Plaintext> PtVec;
+  if (argc < 3) {
+    std::cout<<"Usage:  bitonic-sorting-circuit <num_inputs> <filename>"<<std::endl;
+    return 0;
+  }
+  int num_inputs = std::stoi(argv[1]);
+  std::string filename = argv[2];
 
-	std::cout << "Constructing context...\n";
-	ContextTFHE<int8_t> ctx;
+  std::ofstream outfile(filename);
+  
+  Circuit bitonic = bitonic_sort(num_inputs, false);
 
-	std::cout << "The bitonic sorting network is:\n";
-	Circuit bitonic = bitonic_sort(4, false);
-	std::cout << bitonic << std::endl;
+  outfile << bitonic;
+  outfile.close();
 
-	PtVec inputs {7, 3, 10, 0};
 
-	std::cout << "Inputs are: ";
-	for (auto x : inputs) std::cout << std::to_string(x) << " ";
-	std::cout << std::endl;
-
-	PtVec sorted = ctx.eval_with_plaintexts(bitonic, inputs);
-
-	std::cout << "Sorted result is: ";
-	for (auto x : sorted) std::cout << std::to_string(x) << " ";
-	std::cout << std::endl;
 }
