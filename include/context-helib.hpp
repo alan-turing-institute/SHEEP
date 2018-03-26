@@ -79,7 +79,7 @@ public:
     configure();
   }
 
-  
+
   void configure() {
 
     m_bootstrap = (bool)m_bootstrapl;
@@ -95,40 +95,23 @@ public:
     };
 
     long* vals = mValues[m_param_set];
+    //// if parameters were not set explicitly in a parameters file, take the value from
+    ////  the mValues array.  (But if they were set explicitly, use that value!)
     
-    ///    long m = vals[2];
-
-    m_m = vals[2];
-    m_phim = vals[1];
-    m_d = vals[3];
-    m_m1 = vals[4];
-    m_m2 = vals[5];
-    m_m3 = vals[6];
-    m_g1 = vals[7];
-    m_g2 = vals[8];
-    m_g3 = vals[9];
-    m_ord1 = vals[10];
-    m_ord2 = vals[11];
-    m_ord3 = vals[12];
-    m_B = vals[13];
-    m_c = vals[14];    
-
-    /*    
-    NTL::Vec<long> mvec;
-    append(mvec, vals[4]);
-    if (vals[5]>1) append(mvec, vals[5]);
-    if (vals[6]>1) append(mvec, vals[6]);
-
-    std::vector<long> gens;
-    gens.push_back(vals[7]);
-    if (vals[8]>1) gens.push_back(vals[8]);
-    if (vals[9]>1) gens.push_back(vals[9]);
-
-    std::vector<long> ords;
-    ords.push_back(vals[10]);
-    if (abs(vals[11])>1) ords.push_back(vals[11]);
-    if (abs(vals[12])>1) ords.push_back(vals[12]);
-    */
+    if ( ! this->override_param("m"))  m_m = vals[2];
+    if ( ! this->override_param("phi(m)")) m_phim = vals[1];
+    if ( ! this->override_param("d"))  m_d = vals[3];
+    if ( ! this->override_param("m1")) m_m1 = vals[4];
+    if ( ! this->override_param("m2"))  m_m2 = vals[5];
+    if ( ! this->override_param("m3"))  m_m3 = vals[6];
+    if ( ! this->override_param("g1"))  m_g1 = vals[7];
+    if ( ! this->override_param("g2")) m_g2 = vals[8];
+    if ( ! this->override_param("g3"))  m_g3 = vals[9];
+    if ( ! this->override_param("ord1")) m_ord1 = vals[10];
+    if ( ! this->override_param("ord2")) m_ord2 = vals[11];
+    if ( ! this->override_param("ord3")) m_ord3 = vals[12];
+    if ( ! this->override_param("B"))  m_B = vals[13];
+    if ( ! this->override_param("c"))  m_c = vals[14];    
 
     NTL::Vec<long> mvec;
     append(mvec, m_m1);
@@ -144,14 +127,12 @@ public:
     ords.push_back(m_ord1);
     if (abs(m_ord2)>1) ords.push_back(m_ord2);
     if (abs(m_ord3)>1) ords.push_back(m_ord3);
-    m_B = vals[13];
-    m_c = vals[14];
 
     /// number of levels
-    
-    if (m_bootstrap) m_L = 30; // that should be enough
-    else m_L = 3 + NTL::NumBits(m_bitwidth+2);
-    
+    if ( ! this->override_param("levels")) {
+      if (m_bootstrap) m_L = 30; 
+      else m_L = 3 + NTL::NumBits(m_bitwidth+2);
+    }
     /// initialize HElib context
     m_helib_context = new FHEcontext(m_m, m_p, 1, gens, ords);
     m_helib_context->bitsPerLevel = m_B;
@@ -265,7 +246,7 @@ protected:
 
   bool m_bootstrap;
 
-  long m_bootstrapl;
+  long m_bootstrapl;   /// long version of the bootstrap flag to allow it to be settable from param_name_map
   
 };   //// end of ContextHElib class definition.
 

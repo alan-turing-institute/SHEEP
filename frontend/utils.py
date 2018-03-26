@@ -32,10 +32,9 @@ def get_bitwidth(input_type):
     return bitwidth
 
 
-
-def check_inputs(input_dict, input_type):
-    """ 
-    check that the supplied inputs are within the ranges for the specified input type.
+def get_min_max(input_type):
+    """
+    minimum and maximum values for a given data type
     Assume we have bools, or signed-or-unsigned 8,16,32,64 bit integers
     """
     min_allowed = 0
@@ -50,7 +49,15 @@ def check_inputs(input_dict, input_type):
             max_allowed = pow(2,int(bitwidth)) -1
         else:
             min_allowed = -1* pow(2,int(bitwidth)-1)
-            max_allowed = pow(2,int(bitwidth)-1) -1    
+            max_allowed = pow(2,int(bitwidth)-1) -1
+    return min_allowed, max_allowed
+
+    
+def check_inputs(input_dict, input_type):
+    """ 
+    check that the supplied inputs are within the ranges for the specified input type.
+    """
+    min_allowed, max_allowed = get_min_max(input_type)
 
     for val in input_dict.values():
         if int(val) < min_allowed or int(val) > max_allowed:
@@ -303,13 +310,18 @@ def update_params(context,param_dict,appdata,appconfig):
     So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse 
     the output, write that to a file, and return it.
     """
+    old_params = appdata["params"][context]
+    print("OLD_PARMS",old_params)
     param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
     param_file = open(param_filename,"w")
+    print("PARAM DICT", param_dict)
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
             continue
-        param_file.write(k+" "+str(v)+"\n")
+        ### only write to file if the new param is different to the old one
+        if v != old_params[k]:
+            param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
     param_file = open(param_filename,"w")
