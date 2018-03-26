@@ -111,7 +111,7 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
   auto test_iter = test_results.begin();
   auto wire_iter = circuit_outputs.begin();
   while (test_iter != test_results.end()) {
-    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter);
+    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter)<<std::endl;
     wire_iter++;
     test_iter++;
   }
@@ -152,7 +152,7 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	
 	std::unique_ptr<BaseContext<PlaintextT> > test_ctx =
 	  make_context<PlaintextT>(context_name, parameter_file);
-
+	std::cout<<" === Made context "<<context_name<<std::endl;
 	auto setup_end_time = high_res_clock::now();	
 	durations.push_back(microsecond(setup_end_time - setup_start_time));	
 
@@ -160,8 +160,11 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	
 	// read in inputs from input_filename
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
+	std::cout<<" === Read inputs file - found "<<inputs.size()<<" values."<<std::endl;
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
+	std::cout<<" === Matched inputs from file with circuit inputs"<<std::endl;
 	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
+	std::cout<<" === Ran benchmark test. "<<std::endl;
 	test_ctx->print_parameters();
 	test_ctx->print_sizes();
 
@@ -216,9 +219,10 @@ main(int argc, const char** argv) {
   if (argc == 6)
     parameter_file = argv[5];
 
-  std::cout<<"Benchmark: circuit: " <<argv[1]<<" context "<<context_name
-	   <<" input_type "<<input_type<<" inputs_file "<<inputs_file
-	   <<" parameter_file "<<parameter_file<<std::endl;
+  std::cout<<"======  Running benchmark test with:  ======="<<std::endl
+	   <<"Circuit file: " <<argv[1]<<std::endl<<"Context: "<<context_name<<std::endl
+	   <<"Input type: "<<input_type<<std::endl<<"Inputs_file "<<inputs_file<<std::endl
+	   <<"Parameter file: "<<parameter_file<<std::endl;
 
   /// run the benchmark
   bool isOK = false;
