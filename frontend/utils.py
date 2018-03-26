@@ -166,7 +166,7 @@ def parse_test_output(outputstring,debug_filename=None):
     test_outputs = {}
     params = {}
     sizes = {}
-    
+    clear_check = {}
     in_results_section = False
     in_processing_times = False
     in_outputs = False
@@ -185,6 +185,10 @@ def parse_test_output(outputstring,debug_filename=None):
         if size_search:
             sizes[size_search.groups()[0]] = size_search.groups()[1]
         if in_results_section:
+#### parse the check against clear context:
+            if line.startswith("Cleartext check"):
+                clear_check["is_correct"] = "passed OK" in line
+
             if in_processing_times:
                 num_search = re.search("([\w]+)\:[\s]+([\d][\d\.e\+]+)",line)
                 if num_search:
@@ -213,6 +217,7 @@ def parse_test_output(outputstring,debug_filename=None):
     results["Outputs"] = test_outputs
     results["Object sizes (bytes)"] = sizes
     results["Parameter values"] = params
+    results["Cleartext check"] = clear_check
     if debug_filename:
         debugfile.close()
     return results

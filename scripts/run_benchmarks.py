@@ -33,10 +33,13 @@ def insert_measurement(context,
                        signed,
                        gate,
                        depth,
-                       nslots,
+                       ciphertext_size,
+                       private_key_size,
+                       public_key_size,
                        execution_time,
                        is_correct,
-                       num_threads=1,
+                       nslots=1,
+                       tbb_enabled=False,
                        parameters="Default"):
     """
     insert a single benchmark run into the database.
@@ -48,10 +51,13 @@ def insert_measurement(context,
                              gate_name=gate,
                              depth=depth,
                              num_slots=nslots,
-                             num_threads=num_threads,
+                             tbb_enabled=tbb_enabled,
                              parameters=parameters,
                              execution_time=execution_time,
-                             is_correct=is_correct)
+                             is_correct=is_correct,
+                             ciphertext_size=ciphertext_size,
+                             public_key_size=public_key_size,
+                             private_key_size =private_key_size)
     session.add(m)
     session.commit()
 
@@ -83,12 +89,13 @@ def run_single_benchmark(input_circuit,
         outfile.close()
 ### parse the file, return the outputs
 
-    results = parse_test_output(job_output)
+    results = parse_test_output(job_output,"debugfile.txt")
     processing_times = results["Processing times (s)"]
     outputs = results["Outputs"] 
-    is_correct = check_outputs(outputs)
-    eval_time = processing_times[2]
-    return eval_time, is_correct
+    is_correct = results["Cleartext check"]["is_correct"]
+    eval_time = processing_times["circuit_evaluation"]
+    sizes = results["Object sizes (bytes)"]
+    return eval_time, is_correct, sizes
 
 
 
@@ -120,11 +127,14 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
                     print("Doing benchmark for %s %s %i %s" %
                           (context,gate,depth,input_type))
 ### run the test
-                    eval_time, is_correct = run_single_benchmark(
+                    eval_time, is_correct, sizes = run_single_benchmark(
                         circuit_file,
                         inputs_file,
                         context,
                         input_type)
+                    ciphertext_size = sizes["ciphertext"]
+                    public_key_size = sizes["publicKey"]
+                    private_key_size = sizes["privateKey"]
 ### insert the measurement into the database                    
                     insert_measurement(
                         context,
@@ -132,9 +142,12 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
                         signed,
                         gate,
                         depth,
-                        1,
+                        ciphertext_size,
+                        public_key_size,
+                        private_key_size,
                         eval_time,
                         is_correct)
+
                 
                     
             
