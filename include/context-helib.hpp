@@ -52,9 +52,9 @@ public:
 
     ////  populate the map that will allow us to set parameters via an input file (or string)
     
-    this->m_param_name_map.insert({"A_predefined_param_set", m_param_set});
-    this->m_param_name_map.insert({"Haming_weight", m_w});
-    this->m_param_name_map.insert({"bootstrap", m_bootstrapl});            
+    this->m_param_name_map.insert({"BaseParamSet", m_param_set});
+    this->m_param_name_map.insert({"HamingWeight", m_w});
+    this->m_param_name_map.insert({"Bootstrap", m_bootstrapl});            
     this->m_param_name_map.insert({"m",m_m});
     this->m_param_name_map.insert({"phi(m)",m_phim});
     this->m_param_name_map.insert({"d",m_d});
@@ -68,8 +68,8 @@ public:
     this->m_param_name_map.insert({"ord2",m_ord2});
     this->m_param_name_map.insert({"ord3",m_ord3});
     this->m_param_name_map.insert({"c",m_c});
-    this->m_param_name_map.insert({"B",m_B});
-    this->m_param_name_map.insert({"levels",m_L});
+    this->m_param_name_map.insert({"BitsPerLevel",m_B});
+    this->m_param_name_map.insert({"Levels",m_L});
     /// sizes of objects in bytes.  Assign values when they are constructed.
     this->m_ciphertext_size = 0;
     this->m_public_key_size = 0;
@@ -128,7 +128,7 @@ public:
     if (abs(m_ord2)>1) ords.push_back(m_ord2);
     if (abs(m_ord3)>1) ords.push_back(m_ord3);
 
-    /// number of levels
+    /// number of levels  (copied from HElib's Test_binaryCompare)
     if ( ! this->override_param("levels")) {
       if (m_bootstrap) m_L = 30; 
       else m_L = 3 + NTL::NumBits(m_bitwidth+2);
@@ -301,6 +301,7 @@ public:
 
   Ciphertext Negate(Ciphertext a) {
 
+    /// bootstrapping method copied from HElib's Test_binaryCompare
     if (this->m_bootstrap) {
       for (int i=0; i< this->m_bitwidth; ++i) {
 	a[i].modDownToLevel(5);
@@ -367,6 +368,12 @@ public:
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 
     if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
+
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+      }
+    }
     
     Ciphertext output;
     Ciphertext b_neg = Negate(b);
@@ -380,6 +387,12 @@ public:
   
   Ciphertext Add(Ciphertext a, Ciphertext b) {
 
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+      }
+    }
+    
     Ciphertext sum;
     CtPtrs_VecCt wsum(sum);
     addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
@@ -391,6 +404,12 @@ public:
 
   
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	a[i].modDownToLevel(5);
+      }
+    }
     
     Ciphertext product;
     CtPtrs_VecCt wprod(product);
