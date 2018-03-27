@@ -39,7 +39,7 @@ public:
 
         {
 
-		this->m_param_name_map.insert({"minimum_lambda",m_minimum_lambda});
+		this->m_param_name_map.insert({"MinimumLambda",m_minimum_lambda});
 		this->m_private_key_size = 0;
 		this->m_public_key_size = 0;
 		this->m_ciphertext_size = 0;

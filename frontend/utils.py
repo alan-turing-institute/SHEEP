@@ -32,10 +32,9 @@ def get_bitwidth(input_type):
     return bitwidth
 
 
-
-def check_inputs(input_dict, input_type):
-    """ 
-    check that the supplied inputs are within the ranges for the specified input type.
+def get_min_max(input_type):
+    """
+    minimum and maximum values for a given data type
     Assume we have bools, or signed-or-unsigned 8,16,32,64 bit integers
     """
     min_allowed = 0
@@ -50,7 +49,15 @@ def check_inputs(input_dict, input_type):
             max_allowed = pow(2,int(bitwidth)) -1
         else:
             min_allowed = -1* pow(2,int(bitwidth)-1)
-            max_allowed = pow(2,int(bitwidth)-1) -1    
+            max_allowed = pow(2,int(bitwidth)-1) -1
+    return min_allowed, max_allowed
+
+    
+def check_inputs(input_dict, input_type):
+    """ 
+    check that the supplied inputs are within the ranges for the specified input type.
+    """
+    min_allowed, max_allowed = get_min_max(input_type)
 
     for val in input_dict.values():
         if int(val) < min_allowed or int(val) > max_allowed:
@@ -138,7 +145,7 @@ def cleanup_time_string(t):
     time_in_seconds = float(t)/1e6
 
     if time_in_seconds < 1:
-        time_in_seconds = round(time_in_seconds,3)
+        time_in_seconds = round(time_in_seconds,5)
     else:
         time_in_seconds = int(time_in_seconds)
     timestring = str(time_in_seconds)
@@ -166,7 +173,7 @@ def parse_test_output(outputstring,debug_filename=None):
     test_outputs = {}
     params = {}
     sizes = {}
-    
+    clear_check = {}
     in_results_section = False
     in_processing_times = False
     in_outputs = False
@@ -185,6 +192,10 @@ def parse_test_output(outputstring,debug_filename=None):
         if size_search:
             sizes[size_search.groups()[0]] = size_search.groups()[1]
         if in_results_section:
+#### parse the check against clear context:
+            if line.startswith("Cleartext check"):
+                clear_check["is_correct"] = "passed OK" in line
+
             if in_processing_times:
                 num_search = re.search("([\w]+)\:[\s]+([\d][\d\.e\+]+)",line)
                 if num_search:
@@ -196,7 +207,7 @@ def parse_test_output(outputstring,debug_filename=None):
                     in_processing_times = False
                     in_outputs = True
             elif in_outputs:
-                output_search = re.search("([\w]+)\:[\s]+([\d]+)",line)
+                output_search = re.search("([\w]+)\:[\s]+([-\d]+)",line)
                 if output_search:
                     label = output_search.groups()[0]
                     val = output_search.groups()[1]
@@ -213,6 +224,7 @@ def parse_test_output(outputstring,debug_filename=None):
     results["Outputs"] = test_outputs
     results["Object sizes (bytes)"] = sizes
     results["Parameter values"] = params
+    results["Cleartext check"] = clear_check
     if debug_filename:
         debugfile.close()
     return results
@@ -298,13 +310,16 @@ def update_params(context,param_dict,appdata,appconfig):
     So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse 
     the output, write that to a file, and return it.
     """
+    old_params = appdata["params"][context]
     param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
     param_file = open(param_filename,"w")
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
             continue
-        param_file.write(k+" "+str(v)+"\n")
+        ### only write to file if the new param is different to the old one
+        if v != old_params[k]:
+            param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
     param_file = open(param_filename,"w")

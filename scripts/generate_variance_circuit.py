@@ -6,7 +6,7 @@ The circuit then calculates
 Sum_i=0..N ( (N.xbar - N.x_i)^2 )    
 (where N.xbar is the sum of all the x_i,  i.e. N*mean(x_i) )
 
-The output will be N^3 * variance.
+The outputs will be (N * mean) and (N^3 * variance).
 """
 import os
 import random
@@ -18,17 +18,18 @@ else:
     BASE_DIR = os.environ["HOME"]+"/SHEEP"    
 
 CIRCUIT_DIR_MID = BASE_DIR+"/benchmark_inputs/mid_level/circuits"
-INPUTS_DIR_MID  = BASE_DIR+"/benchmark_inputs/mid_level/inputs"
+INPUTS_DIR_MID  = BASE_DIR+"/benchmark_inputs/mid_level/inputs/TMP"
 
 
-def generate_inputs(num_inputs):
+def generate_inputs(num_inputs,mean,sigma):
     """
     randomly generate inputs from a gaussian distribution (rounded to integers).
     however, these values should not be too large, to avoid integer overflows..
     """
-    values = []
+    values = {}
+    values["N"] = num_inputs
     for i in range(num_inputs):
-        values.append(int(random.gauss(50,10)))
+        values["x_"+str(i)] = (int(random.gauss(mean,sigma)))
     return values
                     
 
@@ -39,7 +40,7 @@ def generate_circuit(num_inputs):
     """
     const_inputs = ["N"]
     inputs = []
-    outputs = ["varianceN3"]  ### variance * N^3
+    outputs = ["Nxbar", "varianceN3"]  ### (mean * N) and (variance * N^3)
     assignments = []
     last_output = ""
 
@@ -59,7 +60,7 @@ def generate_circuit(num_inputs):
 
     ## now multiply each of the inputs by N and subtract from Nxbar
     for i in range(num_inputs):
-        assignments.append("x_"+str(i)+" N  MULTBYCONST Nx_"+str(i))
+        assignments.append("x_"+str(i)+" N  MULTIPLY Nx_"+str(i))
         assignments.append("Nxbar Nx_"+str(i)+" SUBTRACT v_"+str(i))
     ## now square each of these outputs by multiplying with an ALIAS of themself
         assignments.append("v_"+str(i)+" ALIAS vv_"+str(i))
@@ -95,11 +96,9 @@ def write_circuit_file(filename, const_inputs,inputs,outputs,assignments):
     write the circuit to a file.
     """
     outfile = open(filename,"w")
-    outfile.write("CONST_INPUTS ")
+    outfile.write("INPUTS ")
     for ci in const_inputs:
         outfile.write(" "+ci)
-    outfile.write("\n")
-    outfile.write("INPUTS ")
     for i in inputs:
         outfile.write(" "+i)
     outfile.write("\n")
@@ -111,6 +110,16 @@ def write_circuit_file(filename, const_inputs,inputs,outputs,assignments):
         outfile.write(a+"\n")
     outfile.close()
 
+
+
+def generate(num_inputs):
+    """ 
+    To be called by e.g. jupyter notebook - generate a circuit and put it in a standard location.
+    """
+    const_inputs, inputs, outputs, assignments = generate_circuit(num_inputs)
+    filename = CIRCUIT_DIR_MID+"/circuit-variance-"+str(num_inputs)+".sheep"
+    write_circuit_file(filename,const_inputs,inputs,outputs,assignments)    
+    return filename
 
 
 if __name__ == "__main__":

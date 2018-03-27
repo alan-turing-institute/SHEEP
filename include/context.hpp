@@ -363,9 +363,18 @@ public:
 	  } else {
 	    std::cout<<"Setting parameter "<<map_iter->first<<" to "<<param_value<<std::endl;
 	    map_iter->second = param_value;
+	    m_param_overrides.push_back(map_iter->first);
 	    return;
 	  }
 	}
+
+  /// see if a parameter was explicitly set, in order to avoid accidentally overwriting it
+        virtual bool override_param(std::string param_name) {
+	  return std::find(m_param_overrides.begin(),
+			   m_param_overrides.end(),
+			   param_name)  != m_param_overrides.end();
+	}
+  
 
         virtual void print_parameters() {
 
@@ -383,6 +392,7 @@ public:
 protected:
 
         std::map<std::string, long& > m_param_name_map;
+        std::vector<std::string> m_param_overrides;
         bool m_configured;
 
   ////  sizes (in bytes) of keys and ciphertext

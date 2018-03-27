@@ -11,7 +11,11 @@ add_executable(simple-circuit-maker
                  simple-circuit-maker.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-
+add_executable(bitonic-sorting-circuit		
+    		   bitonic-sorting-circuit.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+  		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
 
 add_executable(clear-context-example
@@ -19,8 +23,6 @@ add_executable(clear-context-example
                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
 add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
-
-
 
 
 if (HELIB_FOUND)
@@ -75,11 +77,15 @@ if (SEAL_FOUND)
     add_executable(seal-example
                      seal-example.cpp
 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
     add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
-
     target_link_libraries(seal-example
                             ${SEAL_LIBRARIES})
+
+    add_executable(seal-param-selector
+                     seal-param-selector.cpp)
+    target_link_libraries(seal-param-selector
+                            ${SEAL_LIBRARIES})
+
 endif(SEAL_FOUND)
 
 
@@ -90,6 +96,7 @@ if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
                   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
     target_link_libraries(benchmark
 		  		${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES} ${TFHE_LIBRARIES} ${SEAL_LIBRARIES})
+
 
     add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 

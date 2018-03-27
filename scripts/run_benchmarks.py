@@ -5,45 +5,30 @@ import subprocess
 import os
 import re
 
-EXECUTABLE_DIR = os.environ["HOME"]+"/SHEEP/build/bin"
+if not "SHEEP_HOME" in os.environ.keys():
+    BASE_DIR = os.environ["HOME"]+"/SHEEP"
+else:
+    BASE_DIR = os.environ["SHEEP_HOME"]
 
-INPUT_FILE_DIR = os.environ["HOME"]+"/SHEEP/benchmark_inputs"
+
+EXECUTABLE_DIR = BASE_DIR+"/build/bin"
+
+CIRCUIT_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/circuits"
+if not os.path.exists(CIRCUIT_FILE_DIR):
+    os.system("mkdir "+CIRCUIT_FILE_DIR)
+
+INPUT_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/inputs"
 if not os.path.exists(INPUT_FILE_DIR):
-    os.system("mkdir "+INPUT_FILE_DIR)
+    os.system("mkdir "+INPUT_FILE_DIR)    
 
-DEBUG_FILE_DIR = os.environ["HOME"]+"/SHEEP/debug"
+DEBUG_FILE_DIR = BASE_DIR+"/debug"
 if not os.path.exists(DEBUG_FILE_DIR):
     os.system("mkdir "+DEBUG_FILE_DIR)
 
-from frontend.database import BenchmarkMeasurement,session
 from frontend.utils import parse_test_output, check_outputs, get_bitwidth
+from scripts.run_circuit import upload_measurement, run_circuit
 
-def insert_measurement(context,
-                       bitwidth,
-                       signed,
-                       gate,
-                       depth,
-                       nslots,
-                       execution_time,
-                       is_correct,
-                       num_threads=1,
-                       parameters="Default"):
-    """
-    insert a single benchmark run into the database.
-    """
-    
-    m = BenchmarkMeasurement(context_name=context,
-                             input_bitwidth=bitwidth,
-                             input_signed=signed,
-                             gate_name=gate,
-                             depth=depth,
-                             num_slots=nslots,
-                             num_threads=num_threads,
-                             parameters=parameters,
-                             execution_time=execution_time,
-                             is_correct=is_correct)
-    session.add(m)
-    session.commit()
+
 
 
 def run_single_benchmark(input_circuit,
@@ -58,7 +43,7 @@ def run_single_benchmark(input_circuit,
     """
     run_cmd=[]
     run_cmd.append(os.path.join(EXECUTABLE_DIR,"benchmark"))
-    run_cmd.append(os.path.join(INPUT_FILE_DIR,input_circuit))
+    run_cmd.append(os.path.join(CIRCUIT_FILE_DIR,input_circuit))
     run_cmd.append(context)
     run_cmd.append(input_type)
     run_cmd.append(os.path.join(INPUT_FILE_DIR,input_vals_file))    
@@ -73,12 +58,9 @@ def run_single_benchmark(input_circuit,
         outfile.close()
 ### parse the file, return the outputs
 
-    results = parse_test_output(job_output)
-    processing_times = results["Processing times (s)"]
-    outputs = results["Outputs"] 
-    is_correct = check_outputs(outputs)
-    eval_time = processing_times[2]
-    return eval_time, is_correct
+    results = parse_test_output(job_output,"debugfile.txt")
+
+    return results
 
 
 
@@ -92,12 +74,12 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
             bitwidth = get_bitwidth(input_type)
             signed = input_type.startswith("i")
             for depth in range(1,max_depth):
-                circuit_file = "circuit-"+gate+"-"+str(depth)+".sheep"
+                circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-"+str(depth)+".sheep"
 
 ### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
 ### different requirements
                 
-                inputs_file = "inputs-"
+                inputs_file = INPUT_FILE_DIR+"/inputs-"
                 if gate == "SELECT":
                     inputs_file += "select-"
                 elif gate == "NEGATE":
@@ -110,24 +92,11 @@ def run_many_benchmarks(gates,types,contexts,max_depth=9):
                     print("Doing benchmark for %s %s %i %s" %
                           (context,gate,depth,input_type))
 ### run the test
-                    eval_time, is_correct = run_single_benchmark(
-                        circuit_file,
-                        inputs_file,
-                        context,
-                        input_type)
-### insert the measurement into the database                    
-                    insert_measurement(
-                        context,
-                        bitwidth,
-                        signed,
-                        gate,
-                        depth,
-                        1,
-                        eval_time,
-                        is_correct)
-                
-                    
-            
+                    results = run_circuit(circuit_file,
+                                          inputs_file,
+                                          input_type,
+                                          context,"debug_"+context+".txt")
+
 
 
 if __name__ == "__main__":

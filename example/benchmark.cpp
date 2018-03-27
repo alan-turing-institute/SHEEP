@@ -27,17 +27,17 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
-  	if (context_type == "HElib_F2") {
+    	if (context_type == "HElib_F2") {
   	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
   	  if (context_params.length() > 0)
-  	    ctx->read_params_from_file(context_params);
+   	    ctx->read_params_from_file(context_params);
   	  return ctx;
   	} else if (context_type == "HElib_Fp") {
   	  auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
-  	} else if (context_type == "TFHE") {
+    	} else if (context_type == "TFHE") {
   	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
@@ -92,8 +92,26 @@ std::map<std::string, T> read_inputs_file(std::string filename) {
   return inputs_map;
 }
 
+template<typename PlaintextT>
+bool check_correct(std::vector<PlaintextT> test_results, std::vector<PlaintextT> plaintext_results) {
+  if (test_results.size() != plaintext_results.size())
+    throw std::runtime_error("outputs have different sizes");
+  if (test_results.size() == 0)
+    throw std::runtime_error("zero length output");    
+  bool all_correct = true;
+  auto test_iter = test_results.begin();
+  auto plaintext_iter = plaintext_results.begin();
+  while (test_iter != test_results.end()) {
+    all_correct &= (*test_iter == *plaintext_iter);
+    test_iter++;
+    plaintext_iter++;
+  }
+  return all_correct;
+}
+
+
 template <typename PlaintextT>
-void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<DurationT>& durations) {
+void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<PlaintextT> cleartext_results, std::vector<DurationT>& durations) {
   std::cout<<std::endl<<"==============="<<std::endl;
   std::cout<<"=== RESULTS ==="<<std::endl<<std::endl;
   std::cout<<"== Processing times: =="<<std::endl;
@@ -111,10 +129,15 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
   auto test_iter = test_results.begin();
   auto wire_iter = circuit_outputs.begin();
   while (test_iter != test_results.end()) {
-    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter);
+    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter)<<std::endl;
     wire_iter++;
     test_iter++;
   }
+  //// comparison with the same circuit+inputs evaluated in clear context
+  std::cout<<std::endl<<"== Check against cleartext context =="<<std::endl;
+  bool matches = check_correct<PlaintextT>(test_results, cleartext_results);
+  if (matches) std::cout<<"Cleartext check passed OK"<<std::endl;
+  else std::cout<<"Cleartext check failed"<<std::endl;
   std::cout<<endl<<"==== END RESULTS ==="<<std::endl;
   
 }
@@ -152,7 +175,7 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	
 	std::unique_ptr<BaseContext<PlaintextT> > test_ctx =
 	  make_context<PlaintextT>(context_name, parameter_file);
-
+	std::cout<<" === Made context "<<context_name<<std::endl;
 	auto setup_end_time = high_res_clock::now();	
 	durations.push_back(microsecond(setup_end_time - setup_start_time));	
 
@@ -160,12 +183,15 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	
 	// read in inputs from input_filename
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
+	std::cout<<" === Read inputs file - found "<<inputs.size()<<" values."<<std::endl;
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
+	std::cout<<" === Matched inputs from file with circuit inputs"<<std::endl;
 	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
+	std::cout<<" === Ran benchmark test. "<<std::endl;
 	test_ctx->print_parameters();
 	test_ctx->print_sizes();
-
-	print_outputs(C,result_bench, durations);
+	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
+	print_outputs(C,result_bench, result_clear, durations);
 	
 	return true;
 }
@@ -216,9 +242,10 @@ main(int argc, const char** argv) {
   if (argc == 6)
     parameter_file = argv[5];
 
-  std::cout<<"Benchmark: circuit: " <<argv[1]<<" context "<<context_name
-	   <<" input_type "<<input_type<<" inputs_file "<<inputs_file
-	   <<" parameter_file "<<parameter_file<<std::endl;
+  std::cout<<"======  Running benchmark test with:  ======="<<std::endl
+	   <<"Circuit file: " <<argv[1]<<std::endl<<"Context: "<<context_name<<std::endl
+	   <<"Input type: "<<input_type<<std::endl<<"Inputs_file "<<inputs_file<<std::endl
+	   <<"Parameter file: "<<parameter_file<<std::endl;
 
   /// run the benchmark
   bool isOK = false;

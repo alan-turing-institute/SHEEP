@@ -1,7 +1,19 @@
 """
 Script to generate a circuit for single server PIR, using the recursive pir trick.
 """
+
+import os
+
 VAR_COUNT = 0
+
+if not "SHEEP_HOME" in os.environ.keys():
+    BASE_DIR = os.environ["HOME"]+"/SHEEP"
+else:
+    BASE_DIR = os.environ["SHEEP_HOME"]
+
+    
+CIRCUIT_DIR = BASE_DIR+"/benchmark_inputs/mid_level/circuits"
+
 
 def new_var():
     global VAR_COUNT
@@ -110,7 +122,13 @@ def write_output(operations, inputs, outputs, filename):
                 outfile.write('\n')
     outfile.close()
 
-
+def generate(dbsize, alphas):
+    outputfile = CIRCUIT_DIR+"/circuit-pir-"+str(dbsize)
+    for a in alphas:
+        outputfile+="_"+str(a)
+    outputfile+= ".sheep"
+    generate_circuit(outputfile,dbsize,alphas)
+    return outputfile
 
 if __name__ == "__main__":
     #generate_circuit('pir_32_2_2_2_2_2.sheep', 32, [2, 2, 2, 2, 2])
