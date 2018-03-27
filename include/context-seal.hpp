@@ -7,6 +7,7 @@
 #include <seal/seal.h>
 #include <type_traits>
 #include <cmath>
+#include <sstream>
 
 namespace SHEEP {
 
@@ -23,11 +24,11 @@ public:
     long security = 128,  /* This is the security level (either 128 or 192).
                 We limit ourselves to 2 predefined choices,
                 as coefficient modules are preset by SEAL for these choices.*/
-    const string poly_modulus = "1x^2048 + 1"): // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"):
-	m_poly_modulus(poly_modulus),
+    long N = 2048): // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"):
+  m_N(N),
 	m_security(security),
 	m_plaintext_modulus(plaintext_modulus) {
-    this->m_param_name_map.insert({"PolyModulus",m_poly_modulus});    
+    this->m_param_name_map.insert({"N",m_N});    
     this->m_param_name_map.insert({"PlaintextModulus",m_plaintext_modulus});
     this->m_param_name_map.insert({"Security",m_security});
 
@@ -40,6 +41,9 @@ public:
 
   void configure() {
     
+  std::stringstream x;
+  x << "1x^" << m_N << " + 1"; 
+  this->m_poly_modulus = x.str();
 	seal::EncryptionParameters parms;
 	parms.set_poly_modulus(m_poly_modulus);
 	if (m_security == 128) {
@@ -135,8 +139,9 @@ public:
   };
 
 protected:
-	const string m_poly_modulus;
+	string m_poly_modulus;
   long m_security;
+  long m_N;
   long m_plaintext_modulus;
   seal::SEALContext* m_context;
 	seal::IntegerEncoder* m_encoder;
