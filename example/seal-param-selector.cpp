@@ -23,24 +23,74 @@ void print_parameters(const SEALContext &context)
     cout << endl;
 }
 
+void run_chain_test(const string op, size_t depth, SEALContext context) {
+    KeyGenerator keygen(context);
+    PublicKey public_key = keygen.public_key();
+    SecretKey secret_key = keygen.secret_key();
+    
+    Encryptor encryptor(context, public_key);
+    Evaluator evaluator(context);
+    Decryptor decryptor(context, secret_key);
+    IntegerEncoder encoder(context.plain_modulus());
+    cout << "Encrypting " << depth << " values...";
+    vector<Ciphertext> inputs(depth);
+    for (size_t i = 0; i < depth; ++i) {
+        encryptor.encrypt(encoder.encode(2), inputs[i]);
+    }
+    cout << "Done" << endl;
+    cout << "Computing " << depth << " nested " << op <<"s on encrypted data...";
+    Ciphertext c;
+    for (size_t i = 0; i < depth - 1; ++i) {
+        Ciphertext c1, c2;
+        if (i == 0) {
+            c1 = inputs[0];
+            c2 = inputs[1]; 
+        } else {
+            c1 = c;
+            c2 = inputs[i + 1];
+        }
+        if (op == "MULTIPLY") {
+            evaluator.multiply(c1, c2, c);
+        } else if (op == "ADD") {
+            evaluator.add(c1, c2, c);
+        }
+    }
+    cout << "Done" << endl;
+    Plaintext result;
+    cout << "Decrypting...";
+    decryptor.decrypt(c, result);
+    cout << "Done" << endl;
+    cout << "Result = " << encoder.decode_int32(result) << endl;
+}
+
+void custom_context_nested_op(const string op, size_t depth, const string poly_modulus, uint64_t plain_modulus) {
+    EncryptionParameters parms;
+    parms.set_poly_modulus(poly_modulus);
+    parms.set_coeff_modulus(coeff_modulus_128(parms.poly_modulus().coeff_count() - 1));
+    parms.set_plain_modulus(plain_modulus);
+    SEALContext context(parms);
+    print_parameters(context);
+    run_chain_test(op, depth, context);
+}
+
 void parameters_selection_nested_op(const string op, size_t depth){
 
     ChooserEncoder chooser_encoder(3);
     ChooserEvaluator chooser_evaluator;
-    vector<ChooserPoly> inputs;
+    vector<ChooserPoly> c_inputs;
     for (size_t i = 0; i < depth; ++i) {
         ChooserPoly c_input(10, 1);
-        inputs.push_back(c_input);
+        c_inputs.push_back(c_input);
     }
     ChooserPoly t;
     for (size_t i = 0; i < depth - 1; ++i) {
         ChooserPoly p1, p2;
         if (i == 0) {
-            p1 = inputs[0];
-            p2 = inputs[1]; 
+            p1 = c_inputs[0];
+            p2 = c_inputs[1]; 
         } else {
             p1 = t;
-            p2 = inputs[i + 1];
+            p2 = c_inputs[i + 1];
         }
         if (op == "MULTIPLY") {
             t = chooser_evaluator.multiply(p1, p2);
@@ -51,8 +101,11 @@ void parameters_selection_nested_op(const string op, size_t depth){
     EncryptionParameters optimal_parms;
     chooser_evaluator.select_parameters({ t }, 0, optimal_parms);
     cout << "Done" << endl;
-    //SEALContext optimal_context(optimal_parms);
     print_parameters(optimal_parms);
+
+    SEALContext optimal_context(optimal_parms);
+    run_chain_test(op, depth, optimal_context);
+
 }
 
 void example_parameter_selection()
@@ -199,6 +252,10 @@ void example_parameter_selection()
 
 int main(){
     //example_parameter_selection();
-    parameters_selection_nested_op("MULTIPLY", 8);
-    parameters_selection_nested_op("ADD", 8);
+    int depth = 8;
+    const string op = "MULTIPLY";
+    parameters_selection_nested_op(op, depth);
+    custom_context_nested_op(op, depth, "1x^16384 + 1", (1ll << 32));
+
+    //parameters_selection_nested_op("ADD", 2);
 }
