@@ -1,5 +1,5 @@
 """
-SQLAlchemy classes to describe the tables of benchmark measurements
+SQLAlchemy classes to describe the tables of benchmark measurements.
 """
 
 from sqlalchemy import create_engine
@@ -19,18 +19,16 @@ import re
 table_regex = re.compile("(FROM|from) ([\w]+)")
 column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 
-### this hard-coded location of an sqlite file is only necessary if we explicitly
-### use sqlite3, which is in turn only necessary until we translate SQL queries into
-### sqlalchemy commands
+### location of the sqlite file holding the DB
+### (at some point may replace with e.g. postgres DB, but
+### this will only require minimal changes, thanks to sqlalchemy).
 
 if "SHEEP_HOME" in os.environ.keys():
     DB_LOCATION = os.environ["SHEEP_HOME"]+"/frontend/sheep.db"
 else:
     DB_LOCATION = os.environ["HOME"]+"/SHEEP/frontend/sheep.db"
 
-    
 Base = declarative_base()
-##engine = create_engine("sqlite:///sheep.db")
 engine = create_engine("sqlite:///"+DB_LOCATION)
 
 class BenchmarkMeasurement(Base):
@@ -39,10 +37,13 @@ class BenchmarkMeasurement(Base):
     context_name = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
     input_signed = Column(Boolean, nullable=False)    
-    gate_name = Column(String(250), nullable=False)
-    depth = Column(Integer, nullable=False)
-    num_slots = Column(Integer, nullable=False)
+    gate_name = Column(String(250), nullable=True)
+    circuit_name = Column(String(250), nullable=True)
+    depth = Column(Integer, nullable=True)
+    num_slots = Column(Integer, nullable=True)
     tbb_enabled = Column(Boolean, nullable=True)
+    setup_time = Column(Float, nullable=True)
+    encryption_time = Column(Float, nullable=True)    
     execution_time = Column(Float, nullable=False)
     is_correct = Column(Boolean, nullable=False)
     ciphertext_size = Column(Integer, nullable=True)
@@ -69,34 +70,9 @@ class BenchmarkMeasurement(Base):
     HElib_phim = Column(Integer, nullable=True)    
     TFHE_MinimumLambda = Column(Integer, nullable=True)
     SEAL_PlaintextModulus = Column(Integer, nullable=True)
+    SEAL_PolyModulus = Column(Integer, nullable=True)    
     SEAL_Security = Column(Integer, nullable=True)
 
-class MidLevelBenchmark(Base):
-    __tablename__ = "mid_level_benchmarks"
-    id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
-    context_name = Column(String(250), nullable=False)
-    input_bitwidth = Column(Integer, nullable=False)
-    input_signed = Column(Boolean, nullable=False)    
-    circuit_name = Column(String(250), nullable=False)
-    tbb_enabled = Column(Boolean, nullable=True)
-    parameters = Column(String(250), nullable=False)
-    execution_time = Column(Float, nullable=False)
-    is_correct = Column(Boolean, nullable=False)
-    ciphertext_size = Column(Integer, nullable=True)
-    private_key_size = Column(Integer, nullable=True)
-    public_key_size = Column(Integer, nullable=True)   
-    
-class CustomMeasurement(Base):
-    __tablename__ = "circuit_tests"
-    id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
-    circuit_name = Column(String(250), nullable=False)
-    num_inputs = Column(Integer, nullable=False)
-    context_name = Column(String(250), nullable=False)
-    input_type = Column(String(250), nullable=False)
-    setup_time = Column(Float, nullable=False)
-    encryption_time = Column(Float, nullable=False)
-    evaluation_time = Column(Float, nullable=False)
-    decryption_time = Column(Float, nullable=False)
 
     
 Base.metadata.create_all(engine)

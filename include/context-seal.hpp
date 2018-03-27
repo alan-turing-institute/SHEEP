@@ -27,6 +27,7 @@ public:
 	m_poly_modulus(poly_modulus),
 	m_security(security),
 	m_plaintext_modulus(plaintext_modulus) {
+    this->m_param_name_map.insert({"PolyModulus",m_poly_modulus});    
     this->m_param_name_map.insert({"PlaintextModulus",m_plaintext_modulus});
     this->m_param_name_map.insert({"Security",m_security});
 

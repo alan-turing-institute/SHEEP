@@ -56,7 +56,7 @@ public:
     this->m_param_name_map.insert({"HamingWeight", m_w});
     this->m_param_name_map.insert({"Bootstrap", m_bootstrapl});            
     this->m_param_name_map.insert({"m",m_m});
-    this->m_param_name_map.insert({"phi(m)",m_phim});
+    this->m_param_name_map.insert({"phim",m_phim});
     this->m_param_name_map.insert({"d",m_d});
     this->m_param_name_map.insert({"m1",m_m1});
     this->m_param_name_map.insert({"m2",m_m2});
