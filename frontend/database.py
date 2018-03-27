@@ -70,7 +70,7 @@ class BenchmarkMeasurement(Base):
     HElib_phim = Column(Integer, nullable=True)    
     TFHE_MinimumLambda = Column(Integer, nullable=True)
     SEAL_PlaintextModulus = Column(Integer, nullable=True)
-    SEAL_PolyModulus = Column(Integer, nullable=True)    
+    SEAL_PolyModulus = Column(String, nullable=True)    
     SEAL_Security = Column(Integer, nullable=True)
 
 

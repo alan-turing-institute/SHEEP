@@ -1,6 +1,7 @@
 """
 A set of scripts, likely to be run via Jupyter notebook, to allow setting input 
 and parameter values to temporary files, and running the benchmark job.
+
 """
 import subprocess
 import os, uuid
@@ -17,7 +18,6 @@ TMP_INPUTS_DIR = BASE_DIR+"/benchmark_inputs/mid_level/inputs/TMP"
 if not os.path.exists(TMP_INPUTS_DIR):
     os.system("mkdir "+TMP_INPUTS_DIR)
     
-
 
 TMP_PARAMS_DIR = BASE_DIR+"/benchmark_inputs/params/TMP"
 if not os.path.exists(TMP_PARAMS_DIR):
@@ -81,8 +81,8 @@ def get_circuit_name(circuit_filename):
 def get_gate_name(circuit_filename):
     """
     parse the circuit filename, and, assuming it follows a naming convention,
-    return the name of the circuit and the number of inputs.
-    If it doesn't follow the convention, just return the filename and 0.
+    return the name of the gate and the depth.
+    If it doesn't follow the convention, just return None,None
     """
     filename_without_path = circuit_filename.split("/")[-1]
     match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
@@ -92,7 +92,7 @@ def get_gate_name(circuit_filename):
     return None, None
 
     
-def run_circuit(circuit_filepath,inputs_file,input_type,context,debugfilename=None):
+def run_circuit(circuit_filepath,inputs_file,input_type,context,params_file=None,debugfilename=None):
     """
     run the circuit and retrieve the results.
     """
@@ -101,7 +101,9 @@ def run_circuit(circuit_filepath,inputs_file,input_type,context,debugfilename=No
     run_cmd.append(circuit_filepath)
     run_cmd.append(context)
     run_cmd.append(input_type)
-    run_cmd.append(inputs_file)    
+    run_cmd.append(inputs_file)
+    if params_file:
+        run_cmd.append(params_file)
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
     results = parse_test_output(job_output,debugfilename)
