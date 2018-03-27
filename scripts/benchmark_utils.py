@@ -55,7 +55,7 @@ def write_params_file(param_dict):
     """
     filename = TMP_PARAMS_DIR+"/params-"+str(uuid.uuid4())+".params"
     params_file = open(filename,"w")
-    for k,v in value_dict.items():
+    for k,v in param_dict.items():
         inputs_file.write(k+" "+str(v)+"\n")
     params_file.close()
     return filename
