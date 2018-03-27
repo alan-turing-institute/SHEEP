@@ -43,9 +43,9 @@ public:
 	seal::EncryptionParameters parms;
 	parms.set_poly_modulus(m_poly_modulus);
 	if (m_security == 128) {
-		parms.set_coeff_modulus(seal::coeff_modulus_128(2048));
+		parms.set_coeff_modulus(seal::coeff_modulus_128(parms.poly_modulus().coeff_count() - 1));
 	} else if (m_security == 192) {
-		parms.set_coeff_modulus(seal::coeff_modulus_192(2048)); // Not sure this is correct
+		parms.set_coeff_modulus(seal::coeff_modulus_192(parms.poly_modulus().coeff_count() - 1));
 	} else {
 		throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 129");
 	}
