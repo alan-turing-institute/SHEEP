@@ -1,6 +1,6 @@
 """
-Simple script to write user-specified keys and values into an inputs file
-that can be given to run_circuit.py.
+A set of scripts, likely to be run via Jupyter notebook, to allow setting input 
+and parameter values to temporary files, and running the benchmark job.
 """
 import subprocess
 import os, uuid
@@ -16,9 +16,14 @@ TMP_INPUTS_DIR = BASE_DIR+"/benchmark_inputs/mid_level/inputs/TMP"
 if not os.path.exists(TMP_INPUTS_DIR):
     os.system("mkdir "+TMP_INPUTS_DIR)
     
+
+
+TMP_PARAMS_DIR = BASE_DIR+"/benchmark_inputs/params/TMP"
+if not os.path.exists(TMP_PARAMS_DIR):
+    os.system("mkdir "+TMP_PARAMS_DIR)
+
 EXECUTABLE_DIR = BASE_DIR+"/build/bin"
-
-
+    
 def get_inputs(circuit_file):
     """ 
     print out the inputs that a circuit file expects.
@@ -35,15 +40,26 @@ def write_inputs_file(value_dict):
     write k,v pairs into a file.  Randomly generate the filename
     and return to the user.
     """
-    filename = TMP_INPUTS_DIR+"/inputs-"+str(uuid.uuid4())+".txt"
+    filename = TMP_INPUTS_DIR+"/inputs-"+str(uuid.uuid4())+".inputs"
     inputs_file = open(filename,"w")
     for k,v in value_dict.items():
         inputs_file.write(k+" "+str(v)+"\n")
     inputs_file.close()
     return filename
-                       
 
-def run_circuit(circuit_file,inputs_file,input_type,context,num_inputs=None,debugfilename=None):
+def write_params_file(param_dict):
+    """
+    write k,v pairs into a file.  Randomly generate the filename
+    and return to the user.
+    """
+    filename = TMP_PARAMS_DIR+"/params-"+str(uuid.uuid4())+".params"
+    params_file = open(filename,"w")
+    for k,v in value_dict.items():
+        inputs_file.write(k+" "+str(v)+"\n")
+    params_file.close()
+    return filename
+
+def run_circuit(circuit_file,inputs_file,input_type,context,debugfilename=None):
     """
     run the circuit and retrieve the results.
     """
@@ -56,4 +72,5 @@ def run_circuit(circuit_file,inputs_file,input_type,context,num_inputs=None,debu
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
     results = parse_test_output(job_output,debugfilename)
+    upload_to_db(results,circuit_file,input_type,context,num_inputs)
     return results["Outputs"]
