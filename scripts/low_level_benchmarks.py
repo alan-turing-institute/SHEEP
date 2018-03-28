@@ -57,6 +57,7 @@ def low_level_benchmarks(gates,types,contexts,max_depth=10):
                                           inputs_file,
                                           input_type,
                                           context,
+                                          "serial",
                                           params,
                                           "debug_"+context+".txt")
 
@@ -112,6 +113,7 @@ def scan_1(contexts=["HElib_Fp","SEAL"]):
                                           inputs_file,
                                           input_type,
                                           context,
+                                          "serial",
                                           param_file,
                                           DEBUG_FILE_DIR+"/debug_"+gate+str(d)+input_type+".txt"
                                           )
@@ -143,6 +145,7 @@ def scan_2(contexts=["HElib_Fp","SEAL"]):
                                           inputs_file,
                                           input_type,
                                           context,
+                                          "serial",
                                           param_file,
                                           DEBUG_FILE_DIR+"/debug_"+gate+str(d)+input_type+".txt"
                                           )    
@@ -174,6 +177,7 @@ def scan_3(contexts=["TFHE","HElib_F2","HElib_Fp","SEAL"]):
                                           inputs_file,
                                           input_type,
                                           context,
+                                          "serial",
                                           param_file,
                                           DEBUG_FILE_DIR+"/debug_"+gate+str(d)+input_type+".txt"
                                           )    
