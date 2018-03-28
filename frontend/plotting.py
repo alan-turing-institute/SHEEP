@@ -57,12 +57,15 @@ def generate_plots(input_dict):
     
     xdata = []    
     ydata = {}
-    
+    seen_combinations = []
     for row in filtered_rows:
         xval = row.__getattribute__(input_dict["x_axis_var"])
+        category = row.__getattribute__(input_dict["category_field"])
+        if (xval, category) in seen_combinations:
+            continue
+        seen_combinations.append((xval, category))
         if not xval in xdata:
             xdata.append(xval)
-        category = row.__getattribute__(input_dict["category_field"])
         if not category in ydata.keys():
             ydata[category] = []
         execution_time = row.__getattribute__("execution_time")
