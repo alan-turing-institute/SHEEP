@@ -6,7 +6,7 @@ import os
 import re
 import uuid
 import subprocess
-from database import session,BenchmarkMeasurement
+from frontend.database import session,BenchmarkMeasurement
 
 
 
@@ -47,7 +47,7 @@ def cleanup_upload_dir(config):
     files from the uploads dir.
     """
     for file_prefix in ["circuit","inputs","param"]:
-        cmd = "rm "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
+        cmd = "rm -p "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
         os.system(cmd)
         
     
@@ -275,6 +275,7 @@ def parse_param_output(outputstring):
             #### line will be of format "Parameter x = y" - we want x and y
             tokens = line.strip().split()
             params[tokens[1]] = tokens[3]
+    print("PARAM_OUTPUT",params)
     return params
 
 
@@ -286,6 +287,7 @@ def find_param_file(context,config):
     """
     param_filename = config["UPLOAD_FOLDER"]+"/parameters_"+context+".txt"
     if os.path.exists(param_filename):
+        print("Found PARAM FILE ",param_filename)
         return param_filename
     else:
         return None
@@ -339,6 +341,7 @@ def get_params_single_context(context,input_type,config,params_file=None):
     p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     output = p.communicate()[0]
     params = parse_param_output(output)
+    print("OUTPUT ",output)
     return params
     
 def update_params(context,param_dict,appdata,appconfig):
@@ -350,14 +353,18 @@ def update_params(context,param_dict,appdata,appconfig):
     the output, write that to a file, and return it.
     """
     old_params = appdata["params"][context]
+    print("OLD_PARAMS",old_params)
     param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
+    print( " param_filename",param_filename)
     param_file = open(param_filename,"w")
+    print("param_dict ", param_dict)
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
             continue
         ### only write to file if the new param is different to the old one
         if v != old_params[k]:
+            print("Writing %s %s to params file" % (k,v))
             param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)

@@ -40,6 +40,7 @@ class BenchmarkMeasurement(Base):
     gate_name = Column(String(250), nullable=True)
     circuit_name = Column(String(250), nullable=True)
     depth = Column(Integer, nullable=True)
+    num_inputs = Column(Integer, nullable=True)    
     num_slots = Column(Integer, nullable=True)
     tbb_enabled = Column(Boolean, nullable=True)
     setup_time = Column(Float, nullable=True)
