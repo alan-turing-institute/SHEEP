@@ -165,7 +165,7 @@ void param_print(std::string context_name, std::string parameter_file="") {
 template <typename PlaintextT>
 bool benchmark_run(std::string context_name, std::string parameter_file,
 		   Circuit C,
-		   std::string input_filename)
+		   std::string input_filename, EvaluationStrategy eval_strategy)
 {
 
         std::vector<DurationT> durations;
@@ -186,11 +186,11 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::cout<<" === Read inputs file - found "<<inputs.size()<<" values."<<std::endl;
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
 	std::cout<<" === Matched inputs from file with circuit inputs"<<std::endl;
-	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
+	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
 	std::cout<<" === Ran benchmark test. "<<std::endl;
 	test_ctx->print_parameters();
 	test_ctx->print_sizes();
-	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations);
+	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
 	print_outputs(C,result_bench, result_clear, durations);
 	
 	return true;
@@ -206,7 +206,7 @@ main(int argc, const char** argv) {
   
   if (argc < 3) {
 
-    std::cout<<"Usage: \n ./benchmark  <circuit_file> <context_name> <input_type> <inputs_file> [<params_file>]"<<std::endl;
+    std::cout<<"Usage: \n ./benchmark  <circuit_file> <context_name> <input_type> <inputs_file> <eval_strategy> [<params_file>]"<<std::endl;
     std::cout<<"OR: \n ./benchmark PARAMS  <context_name> <input_type> [<params_file>]"<<std::endl;    
     return 0;
   }
@@ -238,31 +238,43 @@ main(int argc, const char** argv) {
   std::string context_name = argv[2];  
   std::string input_type = argv[3];
   std::string inputs_file = argv[4];
+  std::string eval_strategy_string = argv[5];
   std::string parameter_file = "";
-  if (argc == 6)
-    parameter_file = argv[5];
+  if (argc == 7)
+    parameter_file = argv[6];
 
+  EvaluationStrategy eval_strategy;
+  std::string eval_strategy_used;
+  if (eval_strategy_string == "parallel") {
+	  eval_strategy = EvaluationStrategy::parallel;
+	  eval_strategy_used = "parallel";
+  } else {
+	  eval_strategy = EvaluationStrategy::serial;
+	  eval_stategy_used = "serial";
+  }
+ 
   std::cout<<"======  Running benchmark test with:  ======="<<std::endl
 	   <<"Circuit file: " <<argv[1]<<std::endl<<"Context: "<<context_name<<std::endl
 	   <<"Input type: "<<input_type<<std::endl<<"Inputs_file "<<inputs_file<<std::endl
+	   <<"Evaluation strategy: "<<eval_strategy_used<<std::endl
 	   <<"Parameter file: "<<parameter_file<<std::endl;
 
   /// run the benchmark
   bool isOK = false;
   if (input_type == "bool") {
-    isOK = benchmark_run<bool>(context_name, parameter_file, C, inputs_file);
+    isOK = benchmark_run<bool>(context_name, parameter_file, C, inputs_file, eval_strategy);
   } else if (input_type == "uint8_t") {
-    isOK = benchmark_run<uint8_t>(context_name, parameter_file,C, inputs_file);    
+    isOK = benchmark_run<uint8_t>(context_name, parameter_file,C, inputs_file, eval_strategy);    
   } else if (input_type == "int8_t") {
-    isOK = benchmark_run<int8_t>(context_name, parameter_file, C, inputs_file);
+    isOK = benchmark_run<int8_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   }  else if (input_type == "uint16_t") {
-    isOK = benchmark_run<uint16_t>(context_name, parameter_file, C, inputs_file);
+    isOK = benchmark_run<uint16_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   } else if (input_type == "int16_t") {
-    isOK = benchmark_run<int16_t>(context_name, parameter_file, C, inputs_file);
+    isOK = benchmark_run<int16_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   } else if (input_type == "uint32_t") {
-    isOK = benchmark_run<int32_t>(context_name, parameter_file, C, inputs_file);
+    isOK = benchmark_run<int32_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   } else if (input_type == "int32_t") {
-    isOK = benchmark_run<int32_t>(context_name, parameter_file, C, inputs_file);
+    isOK = benchmark_run<int32_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   }
     
   return isOK;
