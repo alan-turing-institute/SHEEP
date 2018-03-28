@@ -250,7 +250,7 @@ main(int argc, const char** argv) {
 	  eval_strategy_used = "parallel";
   } else {
 	  eval_strategy = EvaluationStrategy::serial;
-	  eval_stategy_used = "serial";
+	  eval_strategy_used = "serial";
   }
  
   std::cout<<"======  Running benchmark test with:  ======="<<std::endl
