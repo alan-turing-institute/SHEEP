@@ -6,6 +6,40 @@ import os
 import re
 import uuid
 import subprocess
+from database import session,BenchmarkMeasurement
+
+
+
+def get_circuit_name(circuit_filename):
+    """
+    parse the circuit filename, and, assuming it follows a naming convention,
+    return the name of the circuit and the number of inputs.
+    If it doesn't follow the convention, just return the filename and 0.
+    """
+    filename_without_path = circuit_filename.split("/")[-1]
+    match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
+    if match:
+        return match.groups()[0], int(match.groups()[1])
+### some circuits (e.g. PIR) follow a different convention:
+    match = re.search("circuit-([-_\w]+).sheep",filename_without_path)
+    if match:
+        return match.groups()[0], 0
+### if we got to here, just return the filename
+    return filename_without_path, 0
+
+
+def get_gate_name(circuit_filename):
+    """
+    parse the circuit filename, and, assuming it follows a naming convention,
+    return the name of the gate and the depth.
+    If it doesn't follow the convention, just return None,None
+    """
+    filename_without_path = circuit_filename.split("/")[-1]
+    match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
+    if match:
+        return match.groups()[0], int(match.groups()[1])
+### Didn't find matching names - return None
+    return None, None
 
 def cleanup_upload_dir(config):
     """
@@ -331,3 +365,42 @@ def update_params(context,param_dict,appdata,appconfig):
         param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     return updated_params
+
+
+def upload_test_result(results,app_data):
+    """
+    Save data from a user-specified circuit test.
+    """
+    print("Uploading results to DB")
+    for context in app_data["HE_libraries"]:
+        result = results[context]
+        ### see if it follows naming convention for a low-level benchmark test
+        circuit_path = app_data["uploaded_filenames"]["circuit_file"]
+        circuit_name, num_inputs = get_circuit_name(circuit_path)
+        execution_time = result["Processing times (s)"]["circuit_evaluation"]
+        is_correct = result["Cleartext check"]["is_correct"]
+        sizes = result["Object sizes (bytes)"]                    
+        ciphertext_size = sizes["ciphertext"]
+        public_key_size = sizes["publicKey"]
+        private_key_size = sizes["privateKey"]
+        param_dict = result["Parameter values"]    
+        cm = BenchmarkMeasurement(
+            circuit_name = circuit_name,
+##            num_inputs = num_inputs,
+            context_name = context,
+            input_bitwidth = get_bitwidth(app_data["input_type"]),
+            input_signed = app_data["input_type"].startswith("i"),
+            execution_time = execution_time,
+            is_correct = is_correct,
+            ciphertext_size = sizes["ciphertext"],
+            private_key_size = sizes["privateKey"],
+            public_key_size = sizes["publicKey"]
+        )
+
+        context_prefix = context.split("_")[0]  ### only have HElib, not HElib_F2 and HElib_Fp
+        for k,v in param_dict.items():
+            column = context_prefix+"_"+k
+            cm.__setattr__(column,v)
+        session.add(cm)
+        session.commit()
+    return

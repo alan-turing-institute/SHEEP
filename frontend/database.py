@@ -112,27 +112,13 @@ def execute_query_sqlite3(query):
     output = cursor.fetchall()
     return columns, output
 
-def execute_query_sqlalchemy(query):
+def execute_query_sqlalchemy(filt):
     """
     Perform a query on the db
     """
-    session.query(BenchmarkMeasurement).all()
+    session.query(BenchmarkMeasurement).filter(filt).all()
     
-def upload_test_result(timing_data,app_data):
-    """
-    Save data from a user-specified circuit test.
-    """
-    print("Uploading result to DB")
-    cm = CustomMeasurement(
-        circuit_path = app_data["uploaded_filenames"]["circuit_file"],
-        context_name = app_data["HE_library"],
-        input_type = app_data["input_type"],
-        setup_time = timing_data[0],
-        encryption_time = timing_data[1],
-        evaluation_time = timing_data[2],
-        decryption_time = timing_data[3])
-    session.add(cm)
-    session.commit()
+
         
 def build_filter(input_dict):
     """
