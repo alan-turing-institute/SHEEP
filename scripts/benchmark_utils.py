@@ -92,7 +92,7 @@ def get_gate_name(circuit_filename):
     return None, None
 
     
-def run_circuit(circuit_filepath,inputs_file,input_type,context,params_file=None,debugfilename=None):
+def run_circuit(circuit_filepath,inputs_file,input_type,context,eval_strategy="serial",params_file=None,debugfilename=None):
     """
     run the circuit and retrieve the results.
     """
@@ -102,6 +102,7 @@ def run_circuit(circuit_filepath,inputs_file,input_type,context,params_file=None
     run_cmd.append(context)
     run_cmd.append(input_type)
     run_cmd.append(inputs_file)
+    run_cmd.append(eval_strategy)
     if params_file:
         run_cmd.append(params_file)
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)

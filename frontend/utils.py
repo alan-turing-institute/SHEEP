@@ -102,7 +102,7 @@ def write_inputs_file(inputs,upload_folder):
     f.close()
     return inputs_filename
 
-def construct_run_cmd(context_name,data,config, parameter_file=None):
+def construct_run_cmd(context_name,data,config, eval_strategy="serial", parameter_file=None):
     """
     Build up the list of arguments to be sent to subprocess.Popen in order to run
     the benchmark test.
@@ -116,7 +116,8 @@ def construct_run_cmd(context_name,data,config, parameter_file=None):
     run_cmd.append(circuit_file)
     run_cmd.append(context_name)    
     run_cmd.append(input_type) 
-    run_cmd.append(inputs_file)    
+    run_cmd.append(inputs_file)
+    run_cmd.append(eval_strategy)
     if parameter_file:
         run_cmd.append(parameter_file)
     return run_cmd
@@ -272,7 +273,11 @@ def run_test(data,config):
         contexts_to_run.append("Clear")
     for context in contexts_to_run:
         param_file = find_param_file(context,config)
-        run_cmd = construct_run_cmd(context,data,config,param_file)
+        if not "eval_strategy" in data.keys():
+            eval_strategy = "serial"
+        else:
+            eval_strategy = data["eval_strategy"]
+        run_cmd = construct_run_cmd(context,data,config,eval_strategy,param_file)
         p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
         output = p.communicate()[0]
         debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
