@@ -5,7 +5,7 @@ and parameter values to temporary files, and running the benchmark job.
 """
 import subprocess
 import os, uuid
-from frontend.utils import parse_test_output, get_bitwidth
+from frontend.utils import parse_test_output, get_bitwidth, get_circuit_name, get_gate_name
 from frontend.database import BenchmarkMeasurement, session
 import re
 
@@ -60,36 +60,7 @@ def write_params_file(param_dict):
     params_file.close()
     return filename
 
-def get_circuit_name(circuit_filename):
-    """
-    parse the circuit filename, and, assuming it follows a naming convention,
-    return the name of the circuit and the number of inputs.
-    If it doesn't follow the convention, just return the filename and 0.
-    """
-    filename_without_path = circuit_filename.split("/")[-1]
-    match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
-    if match:
-        return match.groups()[0], int(match.groups()[1])
-### some circuits (e.g. PIR) follow a different convention:
-    match = re.search("circuit-([-_\w]+).sheep",filename_without_path)
-    if match:
-        return match.groups()[0], 0
-### if we got to here, just return the filename
-    return filename_without_path, 0
 
-
-def get_gate_name(circuit_filename):
-    """
-    parse the circuit filename, and, assuming it follows a naming convention,
-    return the name of the gate and the depth.
-    If it doesn't follow the convention, just return None,None
-    """
-    filename_without_path = circuit_filename.split("/")[-1]
-    match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
-    if match:
-        return match.groups()[0], int(match.groups()[1])
-### Didn't find matching names - return None
-    return None, None
 
     
 def run_circuit(circuit_filepath,inputs_file,input_type,context,params_file=None,debugfilename=None):
