@@ -94,6 +94,8 @@ def run_circuit(circuit_filepath,inputs_file,input_type,context,eval_strategy="s
         results["circuit_name"] = circuit_name
         results["num_inputs"] = num_inputs
 
+    if eval_strategy == "parallel":
+        results["tbb_enabled"] = True
 
     upload_measurement(results)
     return results["Outputs"]
