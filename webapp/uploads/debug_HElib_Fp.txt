@@ -1,0 +1,58 @@
+INPUTS input_0 input_1 input_2 input_3
+OUTPUTS output_2
+ input_0 input_1 ADD output_0
+ output_0 input_2 ADD output_1
+ output_1 input_3 ADD output_2
+======  Running benchmark test with:  =======
+Circuit file: /Users/nbarlow/SHEEP/frontend/uploads/circuit-ADD-3.sheep
+Context: HElib_Fp
+Input type: bool
+Inputs_file /Users/nbarlow/SHEEP/frontend/uploads/inputs_8c53dbfd-502f-4d58-aba1-f059391daa73.inputs
+Parameter file: 
+ === Made context HElib_Fp
+ === Read inputs file - found 4 values.
+ === Matched inputs from file with circuit inputs
+ === Ran benchmark test. 
+Parameter BaseParamSet = 0
+Parameter BitsPerLevel = 25
+Parameter Bootstrap = 0
+Parameter HamingWeight = 128
+Parameter Levels = 5
+Parameter c = 2
+Parameter d = 12
+Parameter g1 = 71
+Parameter g2 = 76
+Parameter g3 = 0
+Parameter m = 105
+Parameter m1 = 3
+Parameter m2 = 35
+Parameter m3 = 0
+Parameter ord1 = 2
+Parameter ord2 = 2
+Parameter ord3 = 0
+Parameter p = 65537
+Parameter phim = 48
+size of publicKey: 320
+size of privateKey: 344
+size of ciphertext: 112
+encrypting plaintext 0
+encrypting plaintext 0
+encrypting plaintext 0
+encrypting plaintext 0
+
+===============
+=== RESULTS ===
+
+== Processing times: ==
+setup: 6748.15
+encryption: 399.457
+circuit_evaluation: 228.213
+decryption: 124.976
+
+== Output values ==
+output_2: 0
+
+== Check against cleartext context ==
+Cleartext check passed OK
+
+==== END RESULTS ===

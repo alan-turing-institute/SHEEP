@@ -1,0 +1,42 @@
+INPUTS input_0 input_1
+OUTPUTS output_0
+ input_0 input_1 ADD output_0
+======  Running benchmark test with:  =======
+Circuit file: /Users/nbarlow/SHEEP/webapp/uploads/circuit-ADD-1.sheep
+Context: SEAL
+Input type: bool
+Inputs_file /Users/nbarlow/SHEEP/webapp/uploads/inputs_0092c389-1dca-4588-af02-b993d0921814.inputs
+Evaluation strategy: serial
+Parameter file: /Users/nbarlow/SHEEP/webapp/uploads/parameters_SEAL.txt
+Setting parameter N to 2048
+Setting parameter PlaintextModulus to 256
+Setting parameter Security to 128
+ === Made context SEAL
+ === Read inputs file - found 2 values.
+ === Matched inputs from file with circuit inputs
+ === Ran benchmark test. 
+Parameter N = 2048
+Parameter PlaintextModulus = 256
+Parameter Security = 128
+size of publicKey: 96
+size of privateKey: 120
+size of ciphertext: 96
+encrypting plaintext 0
+encrypting plaintext 1
+
+===============
+=== RESULTS ===
+
+== Processing times: ==
+setup: 37519
+encryption: 3362
+circuit_evaluation: 122
+decryption: 145
+
+== Output values ==
+output_0: 1
+
+== Check against cleartext context ==
+Cleartext check passed OK
+
+==== END RESULTS ===

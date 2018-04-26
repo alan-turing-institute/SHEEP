@@ -1,0 +1,38 @@
+INPUTS input_0 input_1
+OUTPUTS output_0
+ input_0 input_1 ADD output_0
+======  Running benchmark test with:  =======
+Circuit file: /Users/nbarlow/SHEEP/webapp/uploads/circuit-ADD-1.sheep
+Context: Clear
+Input type: bool
+Inputs_file /Users/nbarlow/SHEEP/webapp/uploads/inputs_0092c389-1dca-4588-af02-b993d0921814.inputs
+Evaluation strategy: serial
+Parameter file: 
+ === Made context Clear
+ === Read inputs file - found 2 values.
+ === Matched inputs from file with circuit inputs
+encrypting plaintext 0
+encrypting plaintext 1
+ === Ran benchmark test. 
+size of publicKey: 0
+size of privateKey: 0
+size of ciphertext: 1
+encrypting plaintext 0
+encrypting plaintext 1
+
+===============
+=== RESULTS ===
+
+== Processing times: ==
+setup: 10
+encryption: 11
+circuit_evaluation: 14
+decryption: 1
+
+== Output values ==
+output_0: 1
+
+== Check against cleartext context ==
+Cleartext check passed OK
+
+==== END RESULTS ===
