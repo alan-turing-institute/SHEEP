@@ -3,6 +3,8 @@ Python functions that are useful for both the notebooks and the frontend.
 """
 
 import re
+import os
+import uuid
 
 def get_inputs(circuit_file):
     """ 
@@ -102,6 +104,22 @@ def check_inputs(input_dict, input_type):
         if int(val) < min_allowed or int(val) > max_allowed:
             return False
     return True  # all inputs were ok
+
+
+def cleanup_time_string(t):
+    """
+    convert from microseconds to seconds, and only output 3 s.f.
+    """
+    time_in_seconds = float(t)/1e6
+
+    if time_in_seconds < 1:
+        time_in_seconds = round(time_in_seconds,5)
+    else:
+        time_in_seconds = int(time_in_seconds)
+    timestring = str(time_in_seconds)
+    return timestring
+
+
 
 def parse_test_output(outputstring,debug_filename=None):
     """

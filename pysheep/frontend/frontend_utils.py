@@ -73,30 +73,6 @@ def construct_get_param_cmd(context_name,input_type,config,parameter_file=None):
     return run_cmd
 
 
-def cleanup_time_string(t):
-    """
-    convert from microseconds to seconds, and only output 3 s.f.
-    """
-    time_in_seconds = float(t)/1e6
-
-    if time_in_seconds < 1:
-        time_in_seconds = round(time_in_seconds,5)
-    else:
-        time_in_seconds = int(time_in_seconds)
-    timestring = str(time_in_seconds)
-    return timestring
-
-def check_outputs(output_list):
-    """
-    take a list of outputs - each should be [test_result,clear_result]
-    and check that in each case, the test and clear results are equal.
-    """
-
-    for output in output_list:
-        if output[0] != output[1]:
-            return False
-    return True
-
 def parse_param_output(outputstring):
     """
     read the output of benchmark PARAMS <context_name>
@@ -150,7 +126,7 @@ def run_test(data,config):
         p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
         output = p.communicate()[0]
         debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
-        results[context] = parse_test_output(output,debug_filename)
+        results[context] = common_utils.parse_test_output(output,debug_filename)
         
     return results
 
