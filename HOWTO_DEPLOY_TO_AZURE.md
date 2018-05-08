@@ -52,7 +52,7 @@ docker push <username>/<repo_name>
  get the info for it, including the URL, which should be
  https://<webapp_name>/azurewebsites.net
  * Finally, we need to configure the app to use the correct port.  Go to
- the 
+ the "Application Settings" of the app in the Azure portal, click ```+ Add new setting``` and add a setting called ```PORT``` with value ```80:5000``` (for the web app) or ```80:8888``` (for the notebooks).   Then go back to the "Overview" and restart the app using the button at the top.
  * In practice, even after the Azure portal said it was available and healthy,
  it took a long time to respond when I first tried to access it through my browser.
  
