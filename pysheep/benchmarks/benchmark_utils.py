@@ -5,7 +5,7 @@ and parameter values to temporary files, and running the benchmark job.
 """
 import subprocess
 import os, uuid
-from ..common.comon_utils import parse_test_output, get_bitwidth, get_circuit_name, get_gate_name
+from ..common import common_utils
 from ..common.database import BenchmarkMeasurement, session
 import re
 
@@ -67,15 +67,15 @@ def run_circuit(circuit_filepath,inputs_file,input_type,context,eval_strategy="s
         run_cmd.append(params_file)
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
-    results = parse_test_output(job_output,debugfilename)
+    results = common_utils.parse_test_output(job_output,debugfilename)
     #### now just add other fields into the "results" dict, to go into the db
     results["context"] = context    
-    input_bitwidth = get_bitwidth(input_type)
+    input_bitwidth = common_utils.get_bitwidth(input_type)
     input_signed = input_type.startswith("i")
     results["input_bitwidth"] = input_bitwidth
     results["input_signed"] = input_signed
     if "low_level" in circuit_filepath:
-        gate_name, depth = get_gate_name(circuit_filepath)
+        gate_name, depth = common_utils.get_gate_name(circuit_filepath)
         results["gate_name"] = gate_name
         results["depth"] = depth
     elif "mid_level" in circuit_filepath:

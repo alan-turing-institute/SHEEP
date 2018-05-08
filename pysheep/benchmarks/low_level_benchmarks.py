@@ -72,6 +72,7 @@ def scan_1(contexts=["HElib_Fp","SEAL"]):
     for gate in ["ADD","SUBTRACT","MULTIPLY","SELECT","NEGATE"]:
         for input_type in ["bool","uint8_t","int8_t","uint16_t","int16_t","uint32_t","int32_t"]:
             for d in [1,4,8]:
+                print("Using context %i" % len(contexts))
                 for context in contexts:
                     param_file = params_for_level(context,d)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-1.sheep"

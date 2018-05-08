@@ -107,7 +107,7 @@ def enter_input_vals():
         input_vals = iform.data
         if common_utils.check_inputs(input_vals, app.data["input_type"]):
             app.data["uploaded_filenames"]["inputs_file"] = \
-                    frontend_utils.write_inputs_file(input_vals,
+                    common_utils.write_inputs_file(input_vals,
                                                      app.config["UPLOAD_FOLDER"])
             return redirect(url_for("execute_test"))
     return render_template("enter_input_vals.html",
