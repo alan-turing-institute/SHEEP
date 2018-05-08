@@ -1,5 +1,4 @@
-## How to build a docker image for either the notebook server or the web app,
-and deploy on Azure.
+## How to build a docker image for either the notebook server or the web app, and deploy on Azure.
 
 (Assuming you have an Azure subscription and Docker Hub account.)
 
