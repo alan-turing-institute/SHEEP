@@ -16,8 +16,9 @@ def cleanup_upload_dir(config):
     files from the uploads dir.
     """
     for file_prefix in ["circuit","inputs","param"]:
-        cmd = "rm -p "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
+        cmd = "rm -fr "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
         os.system(cmd)
+        os.makedirs(config["UPLOAD_FOLDER"],exist_ok=True)
 
 
 def upload_files(filedict,upload_folder):
@@ -30,10 +31,6 @@ def upload_files(filedict,upload_folder):
         v.save(uploaded_filename)
         uploaded_filenames[k] = uploaded_filename
     return uploaded_filenames
-
-
-
-
 
 
 def construct_run_cmd(context_name,data,config, eval_strategy="serial", parameter_file=None):
