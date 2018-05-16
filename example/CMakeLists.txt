@@ -73,31 +73,58 @@ if (TFHE_FOUND)
 
 endif(TFHE_FOUND)
 
-if (SEAL_FOUND)
-    add_executable(seal-example
-                     seal-example.cpp
-		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
-    target_link_libraries(seal-example
-                            ${SEAL_LIBRARIES})
+#if (SEAL_FOUND)
+#    add_executable(seal-example
+#                     seal-example.cpp
+#		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#    add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
+#    target_link_libraries(seal-example
+#                            ${SEAL_LIBRARIES})
+#
+#    add_executable(seal-param-selector
+#                     seal-param-selector.cpp)
+#    target_link_libraries(seal-param-selector
+#                            ${SEAL_LIBRARIES})
+#
+#endif(SEAL_FOUND)
 
-    add_executable(seal-param-selector
-                     seal-param-selector.cpp)
-    target_link_libraries(seal-param-selector
-                            ${SEAL_LIBRARIES})
-
-endif(SEAL_FOUND)
 
 
-
-if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
+if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
     add_executable(benchmark		       
     		  benchmark.cpp
-                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+		  )
     target_link_libraries(benchmark
-		  		${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES} ${TFHE_LIBRARIES} ${SEAL_LIBRARIES})
+		  		${HElib_LIBRARIES}
+				${NTL_LIBRARIES}
+				${GMP_LIBRARIES}
+				${TFHE_LIBRARIES}
+				# ${SEAL_LIBRARIES}
+		  		cpprestsdk::cpprest
+		  		${CMAKE_THREAD_LIBS_INIT}
+		  		${Boost_LIBRARIES}
+				)
 
 
     add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
-endif(HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
+    add_executable(sheep-server		       
+    		  sheep-server.cpp
+                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+		  )
+    target_link_libraries(sheep-server
+		  		${HElib_LIBRARIES}
+				${NTL_LIBRARIES}
+				${GMP_LIBRARIES}
+				${TFHE_LIBRARIES}
+				# ${SEAL_LIBRARIES}
+		  		cpprestsdk::cpprest
+		  		${CMAKE_THREAD_LIBS_INIT}
+		  		${Boost_LIBRARIES}
+				)
+
+
+    add_test(NAME sheep-server COMMAND $<TARGET_FILE:sheep-server>)
+
+endif(HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)

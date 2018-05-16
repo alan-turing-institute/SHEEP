@@ -16,7 +16,7 @@
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
-#include "context-seal.hpp"
+//#include "context-seal.hpp"
 
 
 using namespace SHEEP;
@@ -42,11 +42,11 @@ make_context(std::string context_type, std::string context_params="") {
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
-	} else if (context_type == "SEAL") {
-	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
-	  if (context_params.length() > 0)
-	    ctx->read_params_from_file(context_params);
-	  return ctx;
+	  //	} else if (context_type == "SEAL") {
+	  //auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
+	  // if (context_params.length() > 0)
+	  //  ctx->read_params_from_file(context_params);
+	  // return ctx;
 	} else if (context_type == "Clear") {
 	  return std::make_unique<ContextClear<PlaintextT> >();
 	} else {
