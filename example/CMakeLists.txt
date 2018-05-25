@@ -90,14 +90,14 @@ endif(SEAL_FOUND)
 
 
 
-if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
+if (HELIB_FOUND AND TFHE_FOUND)
     add_executable(benchmark		       
     		  benchmark.cpp
                   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
     target_link_libraries(benchmark
-		  		${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES} ${TFHE_LIBRARIES} ${SEAL_LIBRARIES})
+		  		${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES} ${TFHE_LIBRARIES})
 
 
     add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
-endif(HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
+endif(HELIB_FOUND AND TFHE_FOUND)
