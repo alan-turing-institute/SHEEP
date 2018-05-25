@@ -38,6 +38,17 @@ def get_inputs(circuit_file):
             return inputs
 
 
+def get_outputs(circuit_file):
+    """ 
+    print out the inputs that a circuit file expects.
+    """
+    circuit = open(circuit_file)
+    for line in circuit.readlines():
+        if line.startswith("OUTPUTS"):
+            inputs = line.strip().split()[1:]
+            return inputs
+
+
 def write_inputs_file(value_dict):
     """
     write k,v pairs into a file.  Randomly generate the filename

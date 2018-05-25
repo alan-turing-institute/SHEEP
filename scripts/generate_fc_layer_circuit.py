@@ -1,11 +1,7 @@
 """
-Script to element wise multiply :
-a binary weight (cleartext) with a binary input (ciphertext).
-The number of input vals needs to be passed to the circuit as a "CONST_INPUT"
-The circuit then calculates
-
-The output will be a vector y_i = w_i XNOR x_i
+Generate circuit for a FC layer
 """
+import generate_xnor_circuit
 import os
 import random
 
@@ -19,48 +15,30 @@ CIRCUIT_DIR_MID = BASE_DIR + "/benchmark_inputs/mid_level/circuits"
 INPUTS_DIR_MID = BASE_DIR + "/benchmark_inputs/mid_level/inputs/TMP"
 
 
-def generate_inputs(num_inputs, mean, sigma):
-    """
-    randomly generate inputs from a gaussian
-    distribution (rounded to integers).
-    however, these values should not be too large, to avoid integer overflows..
-    """
-    values = {}
-    values["N"] = num_inputs
-    for i in range(num_inputs):
-        values["x_" + str(i)] = (int(random.gauss(mean, sigma)))
-    return values
-
-
-def generate_circuit(num_inputs, weight, circuit_name='XNOR', inputs=None):
+def generate_circuit(num_inputs, weight, circuit_name='FC'):
     """
     Generate the circuit.
     """
-    const_inputs = []
-    if inputs is None:
-        print(circuit_name)
-        inputs = [circuit_name + 'INPUT_' + str(i) for i in range(weight.size)]
-    outputs = [circuit_name + 'OUTPUT_' + str(i) for i in range(weight.size)]
-    assignments = []
+    inputs = [circuit_name + 'INPUT_' + str(i) for i in range(weight.size)]
 
-    for i in range(num_inputs):
-        if weight[i]:
-            assignments.append(inputs[i] + ' ALIAS ' + outputs[i])
-        else:
-            assignments.append(inputs[i] + ' NEGATE ' + outputs[i])
-
+    fc_const_inputs, fc_inputs, fc_outputs, fc_assignments =\
+        generate_xnor_circuit.generate_circuit(
+            num_inputs, weight, inputs=inputs)
+    const_inputs = fc_const_inputs
+    inputs = fc_inputs
+    outputs = fc_outputs
+    assignments = fc_assignments
     return const_inputs, inputs, outputs, assignments
 
 
-def write_inputs_file(filename, input_vals, circuit_name='XNOR'):
+def write_inputs_file(filename, input_vals):
     """
     write input values to a file.
     """
     outfile = open(filename, "w")
     outfile.write("N " + str(len(input_vals)) + "\n")
     for i in range(len(input_vals)):
-        outfile.write(circuit_name + "INPUT_" + str(i) +
-                      " " + str(input_vals[i]) + "\n")
+        outfile.write("INPUT_" + str(i) + " " + str(input_vals[i]) + "\n")
         pass
     outfile.close()
 
@@ -92,7 +70,7 @@ def generate(num_inputs, weight):
     """
     const_inputs, inputs, outputs, assignments = generate_circuit(
         num_inputs, weight)
-    filename = CIRCUIT_DIR_MID + "/circuit-xnor_multiply-" + \
+    filename = CIRCUIT_DIR_MID + "/circuit-fc_layer-" + \
         str(num_inputs) + ".sheep"
     write_circuit_file(filename, const_inputs, inputs, outputs, assignments)
     return filename
