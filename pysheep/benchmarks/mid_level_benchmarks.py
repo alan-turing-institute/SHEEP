@@ -27,7 +27,7 @@ def generate_pir_circuit(database_size, alphas):
     """
     Generate the circuit.
     """
-    filename = CIRCUIT_DIR+"/circuit-pir-"+str(dbsize)
+    filename = CIRCUIT_DIR+"/circuit-pir-"+str(database_size)
     for a in alphas:
         filename += "_"+str(a)
     filename += ".sheep"
@@ -128,8 +128,3 @@ def write_output(operations, inputs, outputs, filename):
                 outfile.write(s)
                 outfile.write('\n')
     outfile.close()
-
-def generate_pir_circuit(dbsize, alphas):
-
-    generate_circuit(outputfile,dbsize,alphas)
-    return outputfile
