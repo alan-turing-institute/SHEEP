@@ -1,3 +1,6 @@
+benchmark_inputs
+frontend/sheep.db
+
 # -*- mode: gitignore; -*-
 *~
 \#*\#

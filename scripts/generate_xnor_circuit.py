@@ -32,50 +32,20 @@ def generate_inputs(num_inputs, mean, sigma):
     return values
 
 
-def generate_circuit(num_inputs):
+def generate_circuit(num_inputs, weight):
     """
     Generate the circuit.
     """
-    const_inputs = ["N"]
-    inputs = []
-    outputs = ["Nxbar", "varianceN3"]  # (mean * N) and (variance * N^3)
+    const_inputs = []
+    inputs = ['INPUT_' + str(i) for i in range(weight.size)]
+    outputs = ['OUTPUT_' + str(i) for i in range(weight.size)]
     assignments = []
-    last_output = ""
 
-    # first, add all the inputs, to get the sum N.xbar
     for i in range(num_inputs):
-        inputs.append("x_" + str(i))
-        if i == 0:
-            continue
-        elif i == 1:
-            assignments.append("x_0 x_1 ADD y_0")
+        if weight[i]:
+            assignments.append(inputs[i] + ' ALIAS ' + outputs[i])
         else:
-            assignments.append("y_" + str(i - 2) + " x_" +
-                               str(i) + " ADD y_" + str(i - 1))
-            pass
-        pass
-    last_output = assignments[-1].split()[-1]
-    assignments.append(last_output + " ALIAS Nxbar")
-
-    # now multiply each of the inputs by N and subtract from Nxbar
-    for i in range(num_inputs):
-        assignments.append("x_" + str(i) + " N  MULTIPLY Nx_" + str(i))
-        assignments.append("Nxbar Nx_" + str(i) + " SUBTRACT v_" + str(i))
-    # now square each of these outputs by multiplying with an ALIAS of themself
-        assignments.append("v_" + str(i) + " ALIAS vv_" + str(i))
-        assignments.append("v_" + str(i) + " vv_" +
-                           str(i) + " MULTIPLY s_" + str(i))
-    # finally sum these squares
-    for i in range(1, num_inputs):
-        if i == 1:
-            assignments.append("s_0 s_1 ADD ss_0")
-        else:
-            assignments.append("ss_" + str(i - 2) + " s_" +
-                               str(i) + " ADD ss_" + str(i - 1))
-            pass
-        pass
-    last_output = assignments[-1].split()[-1]
-    assignments.append(last_output + " ALIAS varianceN3")
+            assignments.append(inputs[i] + ' NEGATE ' + outputs[i])
 
     return const_inputs, inputs, outputs, assignments
 
@@ -87,7 +57,7 @@ def write_inputs_file(filename, input_vals):
     outfile = open(filename, "w")
     outfile.write("N " + str(len(input_vals)) + "\n")
     for i in range(len(input_vals)):
-        outfile.write("x_" + str(i) + " " + str(input_vals[i]) + "\n")
+        outfile.write("INPUT_" + str(i) + " " + str(input_vals[i]) + "\n")
         pass
     outfile.close()
 
@@ -112,12 +82,13 @@ def write_circuit_file(filename, const_inputs, inputs, outputs, assignments):
     outfile.close()
 
 
-def generate(num_inputs):
+def generate(num_inputs, weight):
     """
     To be called by e.g. jupyter notebook -
     generate a circuit and put it in a standard location.
     """
-    const_inputs, inputs, outputs, assignments = generate_circuit(num_inputs)
+    const_inputs, inputs, outputs, assignments = generate_circuit(
+        num_inputs, weight)
     filename = CIRCUIT_DIR_MID + "/circuit-xnor_multiply-" + \
         str(num_inputs) + ".sheep"
     write_circuit_file(filename, const_inputs, inputs, outputs, assignments)
