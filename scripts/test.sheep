@@ -1,0 +1,7 @@
+INPUTS  x y cin
+OUTPUTS  sum carry
+x y ADD 2b_adder_tmp16612A2
+2b_adder_tmp16612A2 cin ADD sum
+x y MULTIPLY 2b_adder_tmp2D16FE1
+cin 2b_adder_tmp16612A2 MULTIPLY 2b_adder_tmp38E8E41
+2b_adder_tmp38E8E41 2b_adder_tmp2D16FE1 MAXIMUM carry

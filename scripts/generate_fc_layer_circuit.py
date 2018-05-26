@@ -3,8 +3,6 @@ Generate circuit for a FC layer
 """
 import generate_xnor_circuit
 import os
-import random
-
 
 if "SHEEP_HOME" in os.environ.keys():
     BASE_DIR = os.environ["SHEEP_HOME"]
