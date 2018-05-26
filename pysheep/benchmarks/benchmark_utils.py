@@ -79,7 +79,7 @@ def run_circuit(circuit_filepath,inputs_file,input_type,context,eval_strategy="s
         results["gate_name"] = gate_name
         results["depth"] = depth
     elif "mid_level" in circuit_filepath:
-        circuit_name, num_inputs = get_circuit_name(circuit_filepath)
+        circuit_name, num_inputs = common_utils.get_circuit_name(circuit_filepath)
         results["circuit_name"] = circuit_name
         results["num_inputs"] = num_inputs
 

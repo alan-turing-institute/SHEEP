@@ -7,7 +7,7 @@ Script to generate circuits and inputs for mid-level benchmarks, in particular:
 
 import os
 import subprocess
-
+import random
 
 if not "SHEEP_HOME" in os.environ.keys():
     BASE_DIR = os.environ["HOME"]+"/SHEEP"
@@ -147,7 +147,18 @@ def generate_bitonic_sort_circuit(num_inputs):
     job_output = p.communicate()[0]
     return circuit_filename
 
+def generate_gaussian_inputs(num_inputs,mean,sigma):
+    """
+    randomly generate inputs from a gaussian distribution (rounded to integers).
+    however, these values should not be too large, to avoid integer overflows..
+    """
+    values = {}
+    values["N"] = num_inputs
+    for i in range(num_inputs):
+        values["x_"+str(i)] = (int(random.gauss(mean,sigma)))
+    return values
 
+        
 def generate_variance_circuit(num_inputs):
     """
     Generate the circuit.
