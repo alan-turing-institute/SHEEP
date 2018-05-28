@@ -1,5 +1,5 @@
 benchmark_inputs
-frontend/sheep.db
+./frontend/sheep.db
 
 # -*- mode: gitignore; -*-
 *~

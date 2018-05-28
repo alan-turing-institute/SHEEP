@@ -11,60 +11,9 @@ CIRCUIT_DIR_MID = BASE_DIR + "/benchmark_inputs/mid_level/circuits/"
 INPUTS_DIR_MID = BASE_DIR + "/benchmark_inputs/mid_level/inputs/TMP/"
 
 
-class enc_vec(object):
-    def __init__(self, name, nb=None, lst=None, randomize_name=4,
-                 name_list=None):
-        self.randomize_name = randomize_name
-        self.name = name
-        self._lst = lst
-        self.nb = nb
-        assert (not (self.nb is None and self._lst is None)
-                ), "Need to provide something"
-        try:
-            assert(self._lst is None or isinstance(self._lst, list))
-        except Exception:
-            raise NotImplementedError
-        self.create(name_list)
-
-    def create(self, name_list):
-        if name_list is None:
-            self._lst = [variables(name=self.name + str(idx),
-                                   randomize_name=self.randomize_name)
-                         for idx in range(self.nb)]
-        else:
-            assert(len(name_list) == self.nb), "Name list has differnt length"
-            self._lst = [variables(name=name_list[idx])
-                         for idx in range(self.nb)]
-
-    def get_input_dict(self, inp_var):
-        assert(isinstance(inp_var, list)), "Input should be a list"
-        assert(len(inp_var) == self.nb), "length should be the same as vec"
-        inp_dict = {}
-        for idx in range(self.nb):
-            inp_dict[self._lst[idx].name] = inp_var[idx]
-        return inp_dict
-
-    def __getitem__(self, item):
-        return self._lst[item]
-
-    def __add__(self, next_list):
-        assert isinstance(next_list, enc_vec)
-        new_name = self.name + '_' + next_list.name
-        randomize_name = max(self.randomize_name, next_list.randomize_name)
-        new_nb = self.nb + next_list.nb
-        new_lst = self._lst + next_list._lst
-        new_vec = enc_vec(name=new_name,
-                          nb=new_nb,
-                          lst=new_lst,
-                          randomize_name=randomize_name)
-        return new_vec
-
-    def __len__(self):
-        return self.nb
-
-
 class circuit(object):
-    def __init__(self, name, circuit, const_inputs=[]):
+    def __init__(self, name, circuit,
+                 const_inputs=[]):
         self.name = name
         self.circuit = circuit
         self.const_inputs = const_inputs
