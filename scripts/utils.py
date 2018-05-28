@@ -1,7 +1,8 @@
 import sys
 import networkx as nx
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
+from networkx.drawing.nx_agraph import graphviz_layout, to_agraph
+from PIL import Image
 
 
 class node(object):
@@ -30,25 +31,74 @@ class node(object):
 
 
 class networkx_graph(object):
-    def __init__(self, node):
+    def __init__(self, node, filename='test'):
         self.output = node
+        self.filename = filename
         self.G = nx.DiGraph()
         self.labeldict = {}
+        self.edge_label = {}
+        self.short_names = {'NEGATE': '~',
+                            'ALIAS': '=',
+                            'MULTIPLY': '&',
+                            'ADD': 'XR',
+                            'MAXIMUM': '|',
+                            'GOD': 'OUT'}
         self.G.add_node(self.construct(node))
+        self.contract_graph()
+
+    def contract_graph(self):
+        for v1 in self.G.nodes(data=True):
+            if v1[1]['label'] == '=':
+                print(v1)
 
     def construct(self, curr_node):
+        if curr_node.op != 'INPUT' and curr_node.op != 'OUTPUT':
+            self.G.add_node(
+                curr_node.val, label=self.short_names[curr_node.op])
+            self.labeldict[curr_node.val] = self.short_names[curr_node.op]
+        elif curr_node.op == 'OUTPUT':
+            self.G.add_node(
+                curr_node.val,
+                color='red',
+                label=curr_node.val[:-3])
+            self.labeldict[curr_node.val] = curr_node.val[:-3]
+        else:
+            self.G.add_node(
+                curr_node.val,
+                color='red',
+                label=curr_node.val[:-3])
+            self.labeldict[curr_node.val] = curr_node.val[:-3]
         for child in curr_node.children:
-            self.G.add_edge(curr_node.val, self.construct(
-                child))
-        self.labeldict[curr_node.val] = curr_node.op
+            target_node = self.construct(child)
+            self.G.add_edge(target_node, curr_node.val,
+                            label=target_node[-4:])
+            self.edge_label[(target_node, curr_node.val)
+                            ] = target_node[-4:]
+
         return curr_node.val
 
     def draw(self):
+        options = {
+            'node_color': 'blue',
+            'node_size': 10,
+            'width': 1,
+            'font_size': 9
+        }
         nx.draw_networkx(self.G, labels=self.labeldict,
-                         pos=graphviz_layout(self.G),
-                         with_label=True,
-                         node_size=20)
-        plt.show()
+                         pos=graphviz_layout(self.G, prog='neato'),
+                         with_label=True, **options)
+        nx.draw_networkx_edges(self.G, pos=graphviz_layout(
+            self.G, prog='neato'), arrowstyle='->', arrow=True)
+        nx.draw_networkx_edge_labels(self.G, pos=graphviz_layout(
+            self.G, prog='neato'), edge_labels=self.edge_label,
+            arrowstyle='-')
+
+        self.G.graph['graph'] = {'rankdir': 'TD', 'size': "20.,20"}
+        self.G.graph['edges'] = {'arrowsize': '10.0'}
+        G_agraph = to_agraph(self.G)
+        G_agraph.layout(prog='dot')
+        G_agraph.draw(self.filename.split('.')[0] + '.png')
+        Image.open(self.filename.split('.')[0] + '.png').show()
 
 
 def get_circuit_graph(filename):
@@ -70,7 +120,8 @@ def get_circuit_graph(filename):
                 outs = args[1:]
                 for vals in outs:
                     nodes[vals] = node(val=vals,
-                                       node_type='OUTPUT')
+                                       node_type='OUTPUT',
+                                       op='OUTPUT')
                     nodes['OUTPUT'].children.append(nodes[vals])
             else:
                 if len(args) == 4:
