@@ -5,7 +5,7 @@ import math
 
 
 class reduce_add(mini_mod):
-    def __init__(self, name, inp_bits, out_bits):
+    def __init__(self, name, inputs, outputs):
         '''
         Inputs :
         ================================
@@ -16,7 +16,7 @@ class reduce_add(mini_mod):
         ==================================
         Output a circuit for reduce function as a tree
         '''
-        mini_mod.__init__(self, name=name, inputs=inp_bits, outputs=out_bits)
+        mini_mod.__init__(self, name=name, inputs=inputs, outputs=outputs)
         self.nb = len(self.inputs)
         self.create()
 
