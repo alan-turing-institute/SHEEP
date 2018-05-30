@@ -46,10 +46,11 @@ class sign_fn(nn_layer):
                             outputs=self.outputs))
 
 
-class linear_layer(nn_layer):
+class linear_layer_1d(nn_layer):
     def __init__(self, name, weight, inputs, outputs):
         nn_layer.__init__(self, name=name, inputs=inputs,
-                          outputs=outputs, weight=weight, layer_type='linear')
+                          outputs=outputs, weight=weight,
+                          layer_type='linear_1d')
         self.nb = weight.size
         self.create()
 
@@ -58,7 +59,8 @@ class linear_layer(nn_layer):
         Only supports vector ops for now.
         '''
         assert(self.weight.ndim == 1)
-        assert(self.weight.size == len(self.inputs))
+        assert(self.weight.size == len(self.inputs)), str(
+            self.weight.size) + ' ~ ' + str(len(self.inputs))
 
     def create(self):
         _tmp = enc_vec(nb=len(self.inputs), name=self.name + '_xnor_tmp_')
@@ -76,10 +78,36 @@ class linear_layer(nn_layer):
                          input_length=len(self.inputs)))
 
 
+class linear_layer(nn_layer):
+    def __init__(self, name, weight, inputs, outputs):
+        nn_layer.__init__(self, name=name, inputs=inputs,
+                          outputs=outputs, weight=weight,
+                          layer_type='linear')
+        self.nb = weight[1].size
+        self.create()
+
+    def check_weight_validity(self):
+        '''
+        Only supports vector ops for now.
+        '''
+        assert(self.weight.ndim == 2)
+        assert(self.weight.shape[1] == len(self.inputs[0])), str(
+            self.weight.shape[1]) + ' ~ ' + str(len(self.inputs[0]))
+        assert(self.weight.shape[0] == len(self.outputs)), str(
+            self.weight.shape[0]) + " ~ " + str(len(self.outputs))
+
+    def create(self):
+        for idx in range(len(self.weight)):
+            self.add(linear_layer_1d(name=self.name + 'lin_lyr' + str(idx),
+                                     weight=self.weight[idx],
+                                     inputs=self.inputs[0],
+                                     outputs=self.outputs[idx]))
+
+
 if __name__ == '__main__':
     weight = np.asarray([0, 1, 1, 1])
     inputs = enc_vec(name='nn_input', nb=4)
     outputs = enc_vec(name='nn_outputs', nb=4)
-    layer = linear_layer(name='linear', weight=weight,
-                         inputs=inputs, outputs=outputs)
+    layer = linear_layer_1d(name='linear', weight=weight,
+                            inputs=inputs, outputs=outputs)
     print(layer)

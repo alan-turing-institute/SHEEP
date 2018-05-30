@@ -33,11 +33,11 @@ class circuit(object):
             outfile.write("INPUTS ")
             for ci in self.flag_inputs:
                 outfile.write(" " + ci)
-            for i in self.inputs:
+            for i in self.inputs.get_variables():
                 outfile.write(" " + i)
             outfile.write("\n")
             outfile.write("OUTPUTS ")
-            for o in self.outputs:
+            for o in self.outputs.get_variables():
                 outfile.write(" " + o)
             outfile.write("\n")
             outfile.write(str(self.circuit))
