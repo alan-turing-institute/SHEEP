@@ -1,6 +1,5 @@
 import sys
 import networkx as nx
-import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout, to_agraph
 from PIL import Image
 
@@ -42,14 +41,10 @@ class networkx_graph(object):
                             'MULTIPLY': '&',
                             'ADD': 'XR',
                             'MAXIMUM': '|',
-                            'GOD': 'OUT'}
+                            'GOD': 'OUT',
+                            'SELECT': 'SEL',
+                            'MULTBYCONST': '&c'}
         self.G.add_node(self.construct(node))
-        self.contract_graph()
-
-    def contract_graph(self):
-        for v1 in self.G.nodes(data=True):
-            if v1[1]['label'] == '=':
-                print(v1)
 
     def construct(self, curr_node):
         if curr_node.op != 'INPUT' and curr_node.op != 'OUTPUT':
@@ -68,10 +63,10 @@ class networkx_graph(object):
                 color='red',
                 label=curr_node.val[:-3])
             self.labeldict[curr_node.val] = curr_node.val[:-3]
-        for child in curr_node.children:
+        for idx, child in enumerate(curr_node.children):
             target_node = self.construct(child)
             self.G.add_edge(target_node, curr_node.val,
-                            label=target_node[-4:])
+                            label=str(idx))
             self.edge_label[(target_node, curr_node.val)
                             ] = target_node[-4:]
 
@@ -110,13 +105,13 @@ def get_circuit_graph(filename):
     with open(filename, 'rb') as f:
         for idx, line in enumerate(f.readlines()):
             args = line.split()
-            if idx == 0:
+            if idx <= 1:
                 inps = args[1:]
                 for vals in inps:
                     nodes[vals] = node(val=vals,
                                        node_type='INPUT',
                                        op='INPUT')
-            elif idx == 1:
+            elif idx == 2:
                 outs = args[1:]
                 for vals in outs:
                     nodes[vals] = node(val=vals,
@@ -124,9 +119,21 @@ def get_circuit_graph(filename):
                                        op='OUTPUT')
                     nodes['OUTPUT'].children.append(nodes[vals])
             else:
+                if len(args) == 5:
+                    if args[-1] not in nodes.keys():
+                        nodes[args[-1]] = node(val=args[-1],
+                                               node_type='TRI_OP_OUT')
+                    assert(args[0] in nodes.keys()), "Can't find " + args[0]
+                    assert(args[1] in nodes.keys()), "Can't find " + args[1]
+                    assert(args[2] in nodes.keys()), "Can't find " + args[2]
+                    nodes[args[-1]].op = args[3]
+                    nodes[args[-1]].children.append(nodes[args[0]])
+                    nodes[args[-1]].children.append(nodes[args[1]])
+                    nodes[args[-1]].children.append(nodes[args[2]])
                 if len(args) == 4:
-                    nodes[args[-1]] = node(val=args[-1],
-                                           node_type='BI_OP_OUT')
+                    if args[-1] not in nodes.keys():
+                        nodes[args[-1]] = node(val=args[-1],
+                                               node_type='BI_OP_OUT')
                     assert(args[0] in nodes.keys()), "Can't find " + args[0]
                     assert(args[1] in nodes.keys()), "Can't find " + args[1]
                     nodes[args[-1]].op = args[2]
@@ -145,6 +152,6 @@ def get_circuit_graph(filename):
 if __name__ == '__main__':
     assert(len(sys.argv) == 2)
     complete_node = get_circuit_graph(sys.argv[-1])
-    print(complete_node)
+    # print(complete_node)
     ng = networkx_graph(complete_node)
     ng.draw()

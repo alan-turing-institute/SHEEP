@@ -63,7 +63,8 @@ class bi_assign(assignments):
             ','.join(map(lambda x: str(x), lhs))
         self.ass_comms = {'xor': 'ADD',
                           'and': 'MULTIPLY',
-                          'or': 'MAXIMUM'}
+                          'or': 'MAXIMUM',
+                          'constand': 'MULTBYCONST'}
 
     def interpret(self):
         try:
@@ -79,14 +80,36 @@ class bi_assign(assignments):
         return lhs_args + ' ' + self.command + ' ' + self.rhs
 
 
+class tri_assign(assignments):
+    def __init__(self, ass_type, lhs, rhs):
+        assignments.__init__(self, ass_type, lhs, rhs)
+        assert self.nargs == 3, "Must have 3 elements: " + \
+            rhs + " <= " + ass_type + ' ' + \
+            ','.join(map(lambda x: str(x), lhs))
+        self.ass_comms = {'mux': 'SELECT'}
+
+    def interpret(self):
+        try:
+            assert self.ass_type is not None
+            self.command = self.ass_comms[self.ass_type]
+        except KeyError:
+            print("Maybe use one of  : " + ' | '.join(self.ass_comms))
+            sys.exit()
+
+    def __str__(self):
+        self.interpret()
+        lhs_args = self.lhs[0] + ' ' + self.lhs[1] + ' ' + self.lhs[2]
+        return lhs_args + ' ' + self.command + ' ' + self.rhs
+
+
 class mini_mod(object):
     def __init__(self, name, inputs, outputs):
         self.name = name
         self.inputs = inputs
         self.outputs = outputs
         self.commands = collections.OrderedDict()
-        self.zero = variables(name='ZERO')
-        self.one = variables(name='ONE')
+        self.zero = variables(name='FALSE')
+        self.one = variables(name='TRUE')
 
     def add(self, op):
         try:

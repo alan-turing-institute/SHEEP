@@ -15,8 +15,10 @@ class circuit(object):
     def __init__(self, name, circuit,
                  const_inputs=[]):
         self.name = name
+
         self.circuit = circuit
         self.const_inputs = const_inputs
+        self.flag_inputs = ['TRUE', 'FALSE']
 
     def get_inputs(self):
         assert self.circuit is not None
@@ -26,8 +28,10 @@ class circuit(object):
 
     def output_circuit(self, filename):
         with open(filename, 'wb') as outfile:
+            outfile.write("CONST_INPUTS")
+            outfile.write("\n")
             outfile.write("INPUTS ")
-            for ci in self.const_inputs:
+            for ci in self.flag_inputs:
                 outfile.write(" " + ci)
             for i in self.inputs:
                 outfile.write(" " + i)

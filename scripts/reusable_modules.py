@@ -1,5 +1,5 @@
-from particles import variables
-from interactions import mono_assign, bi_assign, mini_mod
+from particles import variables, enc_vec
+from interactions import mono_assign, bi_assign, mini_mod, tri_assign
 import copy
 
 
@@ -87,6 +87,7 @@ class nb_adder(mini_mod):
             self.add(mono_assign(ass_type='alias',
                                  lhs=[self.inputs[0]],
                                  rhs=self.carry_list[0]))
+            self.carry_list[0] = self.inputs[0]
         for bit_id in range(self.nb):
             if bit_id > 0 or carry_in:
                 self.add(oneb_adder(name=self.name + '2b_adder_' + str(bit_id),
@@ -178,6 +179,39 @@ class nb_adder_xy(mini_mod):
             self.add(mono_assign(ass_type='alias',
                                  lhs=[self.carry_list[-1]],
                                  rhs=self.outputs[-1]))
+
+
+class compare_cp(mini_mod):
+    def __init__(self, name, inputs, outputs):
+        mini_mod.__init__(self, inputs=inputs[0], outputs=outputs, name=name)
+        self.plaintext = [x for x in bin(inputs[1])[::-1][:-2]]
+        self.create()
+
+    def create(self):
+        temp1 = enc_vec(name=self.name + 'out_bit', nb=len(self.inputs))
+        self.add(bi_assign(ass_type='and', lhs=[self.inputs[0],
+                                                self.zero],
+                           rhs=temp1[0]))
+        temp2 = enc_vec(name=self.name + 'flag_bit', nb=len(self.inputs))
+        for idx in range(len(self.inputs)):
+            if idx < len(self.plaintext) and int(self.plaintext[idx]) == 1:
+                self.add(tri_assign(ass_type='mux',
+                                    lhs=[self.inputs[idx],
+                                         temp1[idx],
+                                         self.zero],
+                                    rhs=temp2[idx]))
+            else:
+                self.add(tri_assign(ass_type='mux',
+                                    lhs=[self.inputs[idx],
+                                         self.one,
+                                         temp1[idx]],
+                                    rhs=temp2[idx]))
+            if idx < len(self.inputs) - 1:
+                self.add(mono_assign(ass_type='alias',
+                                     lhs=[temp2[idx]], rhs=temp1[idx + 1]))
+            else:
+                self.add(mono_assign(ass_type='alias',
+                                     lhs=[temp2[idx]], rhs=self.outputs[0]))
 
 
 if __name__ == '__main__':

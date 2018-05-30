@@ -71,7 +71,7 @@ class enc_vec(object):
         '''
         assert(isinstance(inp_var, list)), "Input should be a list"
         assert(len(inp_var) == self.nb), "length should be the same as vec"
-        inp_dict = {}
+        inp_dict = {'TRUE': 1, 'FALSE': 0}
         for idx in range(self.nb):
             inp_dict[self._lst[idx].name] = inp_var[idx]
         return inp_dict
@@ -92,6 +92,9 @@ class enc_vec(object):
                            name_list=self.name_list[item])
         else:
             return target_lst
+
+    def __setitem__(self, key, value):
+        self._lst[key] = value
 
     def __add__(self, next_list):
         '''

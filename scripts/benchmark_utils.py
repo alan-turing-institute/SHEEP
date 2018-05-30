@@ -107,7 +107,8 @@ def get_gate_name(circuit_filename):
     return None, None
 
 
-def run_circuit(circuit_filepath, inputs_file, input_type, context, eval_strategy="serial", params_file=None, debugfilename=None):
+def run_circuit(circuit_filepath, inputs_file, input_type, context,
+                eval_strategy="serial", params_file=None, debugfilename=None):
     """
     run the circuit and retrieve the results.
     """
