@@ -1,5 +1,7 @@
 import sys
 import uuid
+import copy
+import numpy as np
 if sys.version_info[0] < 3:
     __VERSION__ = 2
 else:
@@ -30,17 +32,15 @@ class variables(object):
 
 class enc_vec(object):
     def __init__(self, name, nb=None, lst=None, randomize_name=4,
-                 name_list=None):
+                 name_list=[]):
         self.randomize_name = randomize_name
         self.name = name
         self._lst = lst
         self.nb = nb
+        self.size = nb
         assert (not (self.nb is None and self._lst is None)
                 ), "Need to provide something"
-        try:
-            assert(self._lst is None or isinstance(self._lst, list))
-        except Exception:
-            raise NotImplementedError
+        self.name_list = name_list
         self.create(name_list)
         self.name_list = self.get_variables()
 
@@ -48,7 +48,7 @@ class enc_vec(object):
         '''
         An yet unbuilt vec constructor
         '''
-        if name_list is None:
+        if len(name_list) == 0:
             self._lst = [variables(name=self.name + str(idx),
                                    randomize_name=self.randomize_name)
                          for idx in range(self.nb)]
@@ -95,6 +95,7 @@ class enc_vec(object):
 
     def __setitem__(self, key, value):
         self._lst[key] = value
+        self.name_list[key] = value
 
     def __add__(self, next_list):
         '''
@@ -145,14 +146,16 @@ class enc_mat(object):
         assert (not (self.nb is None and self._lst is None)
                 ), "Need to provide something"
         self._lst = []
-        self.name_list = []
+        self.name_list = name_list
         self.create(name_list)
 
     def create(self, name_list):
         '''
         An yet unbuilt vec constructor
         '''
-        if name_list is None:
+
+        if self.name_list is None:
+            self.name_list = []
             for row_idx in range(self.size[0]):
                 self._lst.append([variables(
                     name=self.name + str(row_idx) + str(col_idx),
@@ -160,13 +163,24 @@ class enc_mat(object):
                     for col_idx in range(self.size[1])])
                 self.name_list.append([var.name for var in self._lst[-1]])
         else:
-            assert(len(name_list) == self.size[0])
-            assert(len(name_list[0]) == self.size[1]), "Name list \
+            assert(len(self.name_list) == self.size[0])
+            assert(len(self.name_list[0]) == self.size[1]), "Name list \
             has differnt length " + \
-                str(len(name_list[0])) + " , " + str(self.nb)
+                str(len(self.name_list[0])) + " , " + str(self.nb)
             for row_idx in range(self.size[0]):
-                self._lst.append([variables(name=name_list[row_idx][col_idx])
-                                  for col_idx in range(self.size[1])])
+                self._lst.append([
+                    variables(name=self.name_list[row_idx][col_idx])
+                    for col_idx in range(self.size[1])])
+
+    def transpose(self, order):
+        def lst_trans(lst, order):
+            np_arr = np.asarray(lst)
+            np_trans = np_arr.transpose(order)
+            return np_trans.shape, np_trans.tolist()
+        new_mat = copy.deepcopy(self)
+        new_mat.size, new_mat._lst = lst_trans(new_mat._lst, order)
+        _, new_mat.name_list = lst_trans(new_mat.name_list, order)
+        return new_mat
 
     def get_input_dict(self, inp_var):
         '''
@@ -201,11 +215,139 @@ class enc_mat(object):
         '''
         assert not isinstance(item, slice), "NO advanced slicing"
         return enc_vec(name=self.name + '_sl_' + str(item),
-                       name_list=self.name_list[item], randomize_name=0,
+                       name_list=self.name_list[item],
+                       randomize_name=0,
                        nb=len(self.name_list[item]))
 
     def __setitem__(self, key, value):
         self._lst[key[0]][key[1]] = value
+        self.name_list[key[0]][key[1]] = value.name
+
+    def __add__(self, next_list):
+        '''
+        Concatenate two mats
+        '''
+        try:
+            raise NotImplementedError
+        except NotImplementedError:
+            print("SORRY! Can't add enc mats")
+            sys.exit()
+
+    def __len__(self):
+        return self.size[0]
+
+    def append(self, obj):
+        '''
+        Append a variable at the end
+        '''
+        try:
+            raise NotImplementedError
+        except NotImplementedError:
+            print("SORRY! Can't append to enc mats")
+            sys.exit()
+
+    def push(self, obj):
+        '''
+        Append a variable at the beginning
+        '''
+        try:
+            raise NotImplementedError
+        except NotImplementedError:
+            print("SORRY! Can't push to enc mats")
+            sys.exit()
+
+
+class enc_tensor3(object):
+    def __init__(self, name, size=None, randomize_name=4,
+                 name_list=None):
+        self.randomize_name = randomize_name
+        self.name = name
+        self.size = size
+        self.nb = size[0] * size[1] * size[2]
+        assert (not (self.nb is None and self._lst is None)
+                ), "Need to provide something"
+        self._lst = []
+        self.name_list = []
+        self.create(name_list)
+
+    def create(self, name_list):
+        '''
+        An yet unbuilt vec constructor
+        '''
+        if name_list is None:
+            for outer_idx in range(self.size[0]):
+                temp_lst_ = []
+                temp_name_list = []
+                for row_idx in range(self.size[1]):
+                    temp_lst_.append([variables(
+                        name=self.name + str(outer_idx) +
+                        str(row_idx) + str(col_idx),
+                        randomize_name=self.randomize_name)
+                        for col_idx in range(self.size[2])])
+                    temp_name_list.append([var.name for var in temp_lst_[-1]])
+                self._lst.append(temp_lst_)
+                self.name_list.append(temp_name_list)
+        else:
+            assert(len(name_list) == self.size[0])
+            assert(len(name_list[0]) == self.size[1])
+            assert(len(name_list[2]) == self.size[2])
+            for outer_idx in range(self.size[0]):
+                for row_idx in range(self.size[1]):
+                    self._lst.append([variables(
+                        name=name_list[row_idx][col_idx])
+                        for col_idx in range(self.size[2])])
+
+    def transpose(self, order):
+        def lst_trans(lst, order):
+            np_arr = np.asarray(lst)
+            np_trans = np_arr.transpose(order)
+            return np_trans.shape, np_trans.tolist()
+        new_mat = copy.deepcopy(self)
+        new_mat.size, new_mat._lst = lst_trans(new_mat._lst, order)
+        _, new_mat.name_list = lst_trans(new_mat.name_list, order)
+        return new_mat
+
+    def get_input_dict(self, inp_var):
+        '''
+        Input : A list of valyues
+        Output : A dictionary
+        =========================
+        Creates the input dictionary
+        for each variable in the same order
+        as _lst. This is necessary as some lists can
+        have difficult names
+        '''
+        assert(isinstance(inp_var, list)), "Input should be a list"
+        assert(len(inp_var) == self.size[0] * self.size[1] * self.size[2]
+               ), str(len(inp_var)) + " ~ " +\
+            str(self.size[0] * self.size[1] * self.size[2])
+        inp_dict = {'TRUE': 1, 'FALSE': 0}
+        var_list = self.get_variables()
+        for idx, var in enumerate(var_list):
+            inp_dict[var] = inp_var[idx]
+        return inp_dict
+
+    def get_variables(self):
+        var_list = []
+        for outer_idx in range(self.size[0]):
+            for row_idx in range(self.size[1]):
+                var_list = var_list +\
+                    [self._lst[outer_idx][row_idx]
+                        [col_idx].name for col_idx in range(self.size[2])]
+        return var_list
+
+    def __getitem__(self, item):
+        '''
+        Index an item
+        '''
+        assert not isinstance(item, slice), "NO advanced slicing"
+        return enc_mat(name=self.name + '_sl_' + str(item),
+                       name_list=self.name_list[item], randomize_name=0,
+                       size=(self.size[1], self.size[2]))
+
+    def __setitem__(self, key, value):
+        self._lst[key[0]][key[1]][key[2]] = value
+        self.name_list[key[0]][key[1]][key[2]] = value.name
 
     def __add__(self, next_list):
         '''

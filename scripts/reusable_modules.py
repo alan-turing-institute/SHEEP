@@ -188,6 +188,10 @@ class compare_cp(mini_mod):
         self.create()
 
     def create(self):
+        if isinstance(self.outputs, enc_vec):
+            rel_out = self.outputs[0]
+        else:
+            rel_out = self.outputs
         temp1 = enc_vec(name=self.name + 'out_bit', nb=len(self.inputs))
         self.add(bi_assign(ass_type='and', lhs=[self.inputs[0],
                                                 self.zero],
@@ -211,7 +215,7 @@ class compare_cp(mini_mod):
                                      lhs=[temp2[idx]], rhs=temp1[idx + 1]))
             else:
                 self.add(mono_assign(ass_type='alias',
-                                     lhs=[temp2[idx]], rhs=self.outputs[0]))
+                                     lhs=[temp2[idx]], rhs=rel_out))
 
 
 if __name__ == '__main__':
