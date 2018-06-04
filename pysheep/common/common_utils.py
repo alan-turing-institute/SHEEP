@@ -16,7 +16,7 @@ def get_inputs(circuit_file):
             inputs = line.strip().split()[1:]
             return inputs
 
-def write_inputs_file(inputs,upload_folder):
+def write_inputs_file(inputs,upload_folder="/tmp"):
     """
     write the input names and values to a file, 
     just because that's easier to pass to the executable.

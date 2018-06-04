@@ -6,6 +6,8 @@ Script to generate circuits and inputs for mid-level benchmarks, in particular:
 """
 
 import os
+import subprocess
+import random
 
 if not "SHEEP_HOME" in os.environ.keys():
     BASE_DIR = os.environ["HOME"]+"/SHEEP"
@@ -13,8 +15,7 @@ else:
     BASE_DIR = os.environ["SHEEP_HOME"]
 
 CIRCUIT_DIR = BASE_DIR+"/benchmark_inputs/mid_level/circuits"
-
-
+EXECUTABLE_DIR = BASE_DIR+"/build/bin"
 
 VAR_COUNT = 0
 
@@ -27,7 +28,7 @@ def generate_pir_circuit(database_size, alphas):
     """
     Generate the circuit.
     """
-    filename = CIRCUIT_DIR+"/circuit-pir-"+str(dbsize)
+    filename = CIRCUIT_DIR+"/circuit-pir-"+str(database_size)
     for a in alphas:
         filename += "_"+str(a)
     filename += ".sheep"
@@ -81,7 +82,8 @@ def generate_pir_circuit(database_size, alphas):
     #    print op
 
     write_output(operations, inputs, outputs, filename)
-
+    return filename
+    
 def binary_add_tree(assignment):
     lhs, op, arg_list = assignment
     if len(arg_list) == 2:
@@ -96,6 +98,8 @@ def binary_add_tree(assignment):
         l1 = binary_add_tree((x1, op, arg_list_1))
         l2 = binary_add_tree((x2, op, arg_list_2))
         return ['{} {} {} {}'.format(x1, x2, op, lhs)] + l1 + l2
+
+
     
 def write_output(operations, inputs, outputs, filename):
     """
@@ -129,7 +133,85 @@ def write_output(operations, inputs, outputs, filename):
                 outfile.write('\n')
     outfile.close()
 
-def generate_pir_circuit(dbsize, alphas):
 
-    generate_circuit(outputfile,dbsize,alphas)
-    return outputfile
+def generate_bitonic_sort_circuit(num_inputs):
+    """
+    Generate the circuit.
+    """
+    run_cmd=[]
+    circuit_filename = os.path.join(CIRCUIT_DIR,"circuit-bitonic-sort-"+str(num_inputs)+".sheep")
+    run_cmd.append(os.path.join(EXECUTABLE_DIR,"bitonic-sorting-circuit"))
+    run_cmd.append(str(num_inputs))
+    run_cmd.append(circuit_filename)
+    p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+    job_output = p.communicate()[0]
+    return circuit_filename
+
+def generate_gaussian_inputs(num_inputs,mean,sigma):
+    """
+    randomly generate inputs from a gaussian distribution (rounded to integers).
+    however, these values should not be too large, to avoid integer overflows..
+    """
+    values = {}
+    values["N"] = num_inputs
+    for i in range(num_inputs):
+        values["x_"+str(i)] = (int(random.gauss(mean,sigma)))
+    return values
+
+        
+def generate_variance_circuit(num_inputs):
+    """
+    Generate the circuit.
+    """
+    const_inputs = ["N"]
+    inputs = []
+    outputs = ["Nxbar", "varianceN3"]  ### (mean * N) and (variance * N^3)
+    assignments = []
+    last_output = ""
+    filename = CIRCUIT_DIR+"/circuit-variance-"+str(num_inputs)+".sheep"
+    ## first, add all the inputs, to get the sum N.xbar    
+    for i in range(num_inputs):
+        inputs.append("x_"+str(i))
+        if i == 0:
+            continue
+        elif i == 1:
+            assignments.append("x_0 x_1 ADD y_0")
+        else:
+            assignments.append("y_"+str(i-2)+" x_"+str(i)+" ADD y_"+str(i-1))
+            pass
+        pass
+    last_output = assignments[-1].split()[-1]
+    assignments.append(last_output+" ALIAS Nxbar")
+
+    ## now multiply each of the inputs by N and subtract from Nxbar
+    for i in range(num_inputs):
+        assignments.append("x_"+str(i)+" N  MULTIPLY Nx_"+str(i))
+        assignments.append("Nxbar Nx_"+str(i)+" SUBTRACT v_"+str(i))
+    ## now square each of these outputs by multiplying with an ALIAS of themself
+        assignments.append("v_"+str(i)+" ALIAS vv_"+str(i))
+        assignments.append("v_"+str(i)+" vv_"+str(i)+" MULTIPLY s_"+str(i))
+    ## finally sum these squares
+    for i in range(1,num_inputs):
+        if i == 1:
+            assignments.append("s_0 s_1 ADD ss_0")
+        else:
+            assignments.append("ss_"+str(i-2)+" s_"+str(i)+" ADD ss_"+str(i-1))
+            pass
+        pass
+    last_output = assignments[-1].split()[-1]
+    assignments.append(last_output+" ALIAS varianceN3")
+    outfile = open(filename,"w")
+    outfile.write("INPUTS ")
+    for ci in const_inputs:
+        outfile.write(" "+ci)
+    for i in inputs:
+        outfile.write(" "+i)
+    outfile.write("\n")
+    outfile.write("OUTPUTS ")
+    for o in outputs:
+        outfile.write(" "+o)
+    outfile.write("\n")
+    for a in assignments:
+        outfile.write(a+"\n")
+    outfile.close()
+    return filename 
