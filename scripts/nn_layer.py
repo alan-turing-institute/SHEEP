@@ -1,17 +1,43 @@
 from vector_ops import vec_mono_op_cond
 from interactions import mini_mod, bi_assign
+from functools import partial
+from tqdm import tqdm
 from particles import enc_vec, enc_mat, variables
 from functions import reduce_add
 from reusable_modules import compare_cp
 from op_utils import col2im, im2col
 import numpy as np
 import math
+import multiprocessing as mp
+
+
+def child_initialize(_filter_col, _name, _im_col, _out, _l, _cnv):
+    global filter_col_, name_, im_col_, out_, lock_, cnv_
+    filter_col_ = _filter_col
+    name_ = _name
+    im_col_ = _im_col
+    out_ = _out
+    lock_ = _l
+    cnv_ = _cnv
+
+
+def create_ith_ll(col_idx):
+    temp_lyr = linear_layer(name=name_ + 'ln' + str(col_idx),
+                            weight=filter_col_,
+                            inputs=im_col_[col_idx],
+                            outputs=out_[col_idx], parallel=False)
+    lock_.acquire()
+    cnv_.add(temp_lyr)
+    lock_.release()
+    print(col_idx, filter_col_.shape)
 
 
 class nn_layer(mini_mod):
 
-    def __init__(self, layer_type, weight, name, inputs, outputs):
-        mini_mod.__init__(self, name=name, inputs=inputs, outputs=outputs)
+    def __init__(self, layer_type, weight, name, inputs, outputs,
+                 parallel=False):
+        mini_mod.__init__(self, name=name, inputs=inputs,
+                          outputs=outputs, parallel=parallel)
         self.weight = weight
         isinstance(self.weight, np.ndarray)
         self.check_weight_validity()
@@ -83,10 +109,10 @@ class linear_layer_1d(nn_layer):
 
 
 class linear_layer(nn_layer):
-    def __init__(self, name, weight, inputs, outputs):
+    def __init__(self, name, weight, inputs, outputs, parallel=False):
         nn_layer.__init__(self, name=name, inputs=inputs,
                           outputs=outputs, weight=weight,
-                          layer_type='linear')
+                          layer_type='linear', parallel=parallel)
         self.nb = weight[0].size
         self.create()
 
@@ -124,7 +150,7 @@ class conv_layer(nn_layer):
         self.padding = padding
         self.stride = stride
         nn_layer.__init__(self, name=name, inputs=inputs, outputs=outputs,
-                          weight=weight, layer_type='conv')
+                          weight=weight, layer_type='conv', parallel=False)
         self.nb = reduce(lambda x, y: x * y, self.inputs.size)
         self.create()
 
@@ -168,12 +194,26 @@ class conv_layer(nn_layer):
         im_col = im2col(name=self.name + 'im2col',
                         x=self.inputs, hh=HH, ww=WW, stride=stride)
         filter_col = np.reshape(self.weight, (F, -1))
-        #im_col_t = im_col.transpose((1, 0))
-        for col_idx in range(im_col.size[0]):
-            self.add(linear_layer(name=self.name + 'ln' + str(col_idx),
-                                  weight=filter_col,
-                                  inputs=im_col[col_idx],
-                                  outputs=out[col_idx]))
+        # im_col_t = im_col.transpose((1, 0))
+        cpus = mp.cpu_count()
+        print("LL " + str(cpus) + " " + str(im_col.size[0]))
+
+        lock = mp.Lock()
+        p = mp.Pool(8, initializer=child_initialize,
+                    initargs=(filter_col, self.name, im_col, out, lock, self))
+        #child_initialize(filter_col, self.name, im_col, out, lock, self)
+        linear_layers = p.map(
+            create_ith_ll,
+            range(im_col.size[0]))
+        print("SS")
+
+        for col_idx in tqdm(range(im_col.size[0])):
+            self.add(linear_layers[col_idx])
+            # self.add(linear_layer(name=self.name + 'ln' + str(col_idx),
+            #                       weight=filter_col,
+            #                       inputs=im_col[col_idx],
+            #                       outputs=out[col_idx], parallel=False))
+        print("SS")
         col2im(self, out, H_prime, W_prime, 1, self.outputs)
 
 

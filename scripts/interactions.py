@@ -1,6 +1,9 @@
 from particles import variables
+from multiprocessing import Process, Queue
 import collections
+from tqdm import tqdm
 import sys
+import numpy as np
 
 
 class assignments(object):
@@ -103,13 +106,14 @@ class tri_assign(assignments):
 
 
 class mini_mod(object):
-    def __init__(self, name, inputs, outputs):
+    def __init__(self, name, inputs, outputs, parallel=False):
         self.name = name
         self.inputs = inputs
         self.outputs = outputs
         self.commands = collections.OrderedDict()
         self.zero = variables(name='FALSE')
         self.one = variables(name='TRUE')
+        self.parallel = parallel
 
     def add(self, op):
         try:
@@ -124,8 +128,28 @@ class mini_mod(object):
                    to add. I will just exit!")
 
     def __str__(self):
-        return '\n'.join(map(lambda x: str(x),
-                             self.commands.values()))
+        def local_str(output, idx, curr_module):
+            output.put((idx, str(curr_module)))
+            print "HI"
+        vals = self.commands.values()
+
+        if self.parallel:
+            tgt_list = ['' for s in vals]
+            output = Queue()
+            proc_arr = []
+            num_coms = len(vals)
+            for i in tqdm(range(num_coms)):
+                proc_arr.append(
+                    Process(target=local_str, args=(output, i, vals[i])))
+                proc_arr[i].start()
+            for i in tqdm(range(num_coms)):
+                proc_arr[i].join()
+            results = [output.get() for p in proc_arr]
+            for idx, val in enumerate(results):
+                tgt_list[val[0]] = str(val[1])
+        else:
+            tgt_list = [str(x) for x in vals]
+        return '\n'.join(tgt_list)
 
 
 if __name__ == '__main__':
