@@ -109,12 +109,13 @@ if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
 
     add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
-    add_executable(sheep-server		       
-    		  sheep-server.cpp
+    add_executable(run-sheep-server		       
+    		  run-sheep-server.cpp
+                  ${CMAKE_SOURCE_DIR}/src/sheep-server.cpp		  
                   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 		  )
-    target_link_libraries(sheep-server
-		  		${HElib_LIBRARIES}
+    target_link_libraries(run-sheep-server
+				${HElib_LIBRARIES}
 				${NTL_LIBRARIES}
 				${GMP_LIBRARIES}
 				${TFHE_LIBRARIES}
@@ -125,6 +126,6 @@ if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
 				)
 
 
-    add_test(NAME sheep-server COMMAND $<TARGET_FILE:sheep-server>)
+    add_test(NAME run-sheep-server COMMAND $<TARGET_FILE:run-sheep-server>)
 
 endif(HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
