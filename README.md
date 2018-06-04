@@ -12,8 +12,7 @@ performance of the available Homomorphic Encryption libraries.
 
 After cloning:
 ```
-git submodule init
-git submodule update
+git submodule update --init --recursive
 ```
 This will checkout the HElib and TFHE submodules in the lib/ directory - build TFHE as follows:
 ```
