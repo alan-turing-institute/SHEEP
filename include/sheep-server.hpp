@@ -1,11 +1,35 @@
 #ifndef SHEEP_SERVER_HPP
 #define SHEEP_SERVER_HPP
 
+#include <memory>
+#include <fstream>
+#include <map>
+#include "context-clear.hpp"
+#include "context-helib.hpp"
+#include "context-tfhe.hpp"
+//#include "context-seal.hpp"
+
+
 using namespace web;
 using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
 
+
+struct SheepJobConfig {
+  utility::string_t context;
+  utility::string_t circuit_filename;
+  utility::string_t input_filename;
+
+  void reset() {
+    context = "";
+    circuit_filename = "";
+    input_filename = "";
+  }
+  bool isConfigured() {
+    return ((context.size() > 0) && (circuit_filename.size() > 0) && (input_filename.size() > 0) );
+  }
+};
 
 struct People
 {
@@ -86,14 +110,21 @@ public:
 	pplx::task<void> open() { return m_listener.open(); }
 	pplx::task<void> close() { return m_listener.close(); }
 
+  template <typename PlaintextT>
+  std::unique_ptr<BaseContext<PlaintextT> >
+  make_context(std::string context_type, std::string context_params="");
+
 private:
 
+        void handle_get_job(http_request message);
+        void handle_post_job(http_request message);  
 	void handle_get(http_request message);
 	void handle_put(http_request message);
 	void handle_post(http_request message);
-	void handle_delete(http_request message);
 
 	http_listener m_listener;
+
+        SheepJobConfig m_job_config;
 };
 
 #endif
