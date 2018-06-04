@@ -11,25 +11,14 @@ import math
 import multiprocessing as mp
 
 
-def child_initialize(_filter_col, _name, _im_col, _out, _l, _cnv):
-    global filter_col_, name_, im_col_, out_, lock_, cnv_
-    filter_col_ = _filter_col
-    name_ = _name
-    im_col_ = _im_col
-    out_ = _out
-    lock_ = _l
-    cnv_ = _cnv
-
-
-def create_ith_ll(col_idx):
+def create_ith_ll(name_, filter_col_, im_col_, out_, map_inp):
+    col_idx = map_inp[1]
     temp_lyr = linear_layer(name=name_ + 'ln' + str(col_idx),
                             weight=filter_col_,
                             inputs=im_col_[col_idx],
                             outputs=out_[col_idx], parallel=False)
-    lock_.acquire()
-    cnv_.add(temp_lyr)
-    lock_.release()
-    print(col_idx, filter_col_.shape)
+    map_inp[0].put(temp_lyr)
+    return 1
 
 
 class nn_layer(mini_mod):
@@ -176,7 +165,7 @@ class conv_layer(nn_layer):
         - 'pad': The number of pixels that will be used to zero-pad the input.
 
         Returns a tuple of:
-        - out: Output data, of shape (N, F, H', W') where H' and W' are given by
+        - out: Output data, of shape (N, F, H', W') where H' and W' are
         H' = 1 + (H + 2 * pad - HH) / stride
         W' = 1 + (W + 2 * pad - WW) / stride
         - cache: (x, w, b, conv_param)
@@ -194,26 +183,19 @@ class conv_layer(nn_layer):
         im_col = im2col(name=self.name + 'im2col',
                         x=self.inputs, hh=HH, ww=WW, stride=stride)
         filter_col = np.reshape(self.weight, (F, -1))
-        # im_col_t = im_col.transpose((1, 0))
         cpus = mp.cpu_count()
-        print("LL " + str(cpus) + " " + str(im_col.size[0]))
-
-        lock = mp.Lock()
-        p = mp.Pool(8, initializer=child_initialize,
-                    initargs=(filter_col, self.name, im_col, out, lock, self))
-        #child_initialize(filter_col, self.name, im_col, out, lock, self)
-        linear_layers = p.map(
-            create_ith_ll,
-            range(im_col.size[0]))
-        print("SS")
-
+        p = mp.Pool(cpus)
+        queue = mp.Manager().Queue()
+        p.map(partial(create_ith_ll,
+                      self.name,
+                      filter_col,
+                      im_col,
+                      out),
+              [(queue, x) for x in range(im_col.size[0])])
+        p.close()
+        p.join()
         for col_idx in tqdm(range(im_col.size[0])):
-            self.add(linear_layers[col_idx])
-            # self.add(linear_layer(name=self.name + 'ln' + str(col_idx),
-            #                       weight=filter_col,
-            #                       inputs=im_col[col_idx],
-            #                       outputs=out[col_idx], parallel=False))
-        print("SS")
+            self.add(queue.get())
         col2im(self, out, H_prime, W_prime, 1, self.outputs)
 
 
