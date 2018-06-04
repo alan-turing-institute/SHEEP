@@ -1,0 +1,99 @@
+CONST_INPUTS  N
+INPUTS  x_0 x_1 x_2 x_3 x_4 x_5 x_6 x_7 x_8 x_9 x_10 x_11 x_12 x_13 x_14 x_15
+OUTPUTS  varianceN3
+x_0 x_1 ADD y_0
+y_0 x_2 ADD y_1
+y_1 x_3 ADD y_2
+y_2 x_4 ADD y_3
+y_3 x_5 ADD y_4
+y_4 x_6 ADD y_5
+y_5 x_7 ADD y_6
+y_6 x_8 ADD y_7
+y_7 x_9 ADD y_8
+y_8 x_10 ADD y_9
+y_9 x_11 ADD y_10
+y_10 x_12 ADD y_11
+y_11 x_13 ADD y_12
+y_12 x_14 ADD y_13
+y_13 x_15 ADD y_14
+y_14 ALIAS Nxbar
+x_0 N  MULTBYCONST Nx_0
+Nxbar Nx_0 SUBTRACT v_0
+v_0 ALIAS vv_0
+v_0 vv_0 MULTIPLY s_0
+x_1 N  MULTBYCONST Nx_1
+Nxbar Nx_1 SUBTRACT v_1
+v_1 ALIAS vv_1
+v_1 vv_1 MULTIPLY s_1
+x_2 N  MULTBYCONST Nx_2
+Nxbar Nx_2 SUBTRACT v_2
+v_2 ALIAS vv_2
+v_2 vv_2 MULTIPLY s_2
+x_3 N  MULTBYCONST Nx_3
+Nxbar Nx_3 SUBTRACT v_3
+v_3 ALIAS vv_3
+v_3 vv_3 MULTIPLY s_3
+x_4 N  MULTBYCONST Nx_4
+Nxbar Nx_4 SUBTRACT v_4
+v_4 ALIAS vv_4
+v_4 vv_4 MULTIPLY s_4
+x_5 N  MULTBYCONST Nx_5
+Nxbar Nx_5 SUBTRACT v_5
+v_5 ALIAS vv_5
+v_5 vv_5 MULTIPLY s_5
+x_6 N  MULTBYCONST Nx_6
+Nxbar Nx_6 SUBTRACT v_6
+v_6 ALIAS vv_6
+v_6 vv_6 MULTIPLY s_6
+x_7 N  MULTBYCONST Nx_7
+Nxbar Nx_7 SUBTRACT v_7
+v_7 ALIAS vv_7
+v_7 vv_7 MULTIPLY s_7
+x_8 N  MULTBYCONST Nx_8
+Nxbar Nx_8 SUBTRACT v_8
+v_8 ALIAS vv_8
+v_8 vv_8 MULTIPLY s_8
+x_9 N  MULTBYCONST Nx_9
+Nxbar Nx_9 SUBTRACT v_9
+v_9 ALIAS vv_9
+v_9 vv_9 MULTIPLY s_9
+x_10 N  MULTBYCONST Nx_10
+Nxbar Nx_10 SUBTRACT v_10
+v_10 ALIAS vv_10
+v_10 vv_10 MULTIPLY s_10
+x_11 N  MULTBYCONST Nx_11
+Nxbar Nx_11 SUBTRACT v_11
+v_11 ALIAS vv_11
+v_11 vv_11 MULTIPLY s_11
+x_12 N  MULTBYCONST Nx_12
+Nxbar Nx_12 SUBTRACT v_12
+v_12 ALIAS vv_12
+v_12 vv_12 MULTIPLY s_12
+x_13 N  MULTBYCONST Nx_13
+Nxbar Nx_13 SUBTRACT v_13
+v_13 ALIAS vv_13
+v_13 vv_13 MULTIPLY s_13
+x_14 N  MULTBYCONST Nx_14
+Nxbar Nx_14 SUBTRACT v_14
+v_14 ALIAS vv_14
+v_14 vv_14 MULTIPLY s_14
+x_15 N  MULTBYCONST Nx_15
+Nxbar Nx_15 SUBTRACT v_15
+v_15 ALIAS vv_15
+v_15 vv_15 MULTIPLY s_15
+s_0 s_1 ADD ss_0
+ss_0 s_2 ADD ss_1
+ss_1 s_3 ADD ss_2
+ss_2 s_4 ADD ss_3
+ss_3 s_5 ADD ss_4
+ss_4 s_6 ADD ss_5
+ss_5 s_7 ADD ss_6
+ss_6 s_8 ADD ss_7
+ss_7 s_9 ADD ss_8
+ss_8 s_10 ADD ss_9
+ss_9 s_11 ADD ss_10
+ss_10 s_12 ADD ss_11
+ss_11 s_13 ADD ss_12
+ss_12 s_14 ADD ss_13
+ss_13 s_15 ADD ss_14
+ss_14 ALIAS varianceN3

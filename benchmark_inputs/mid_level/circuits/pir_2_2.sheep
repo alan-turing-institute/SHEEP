@@ -1,0 +1,5 @@
+INPUTS  d_0_0_0 d_0_1_0 s_0_0 s_0_1
+OUTPUTS  e_0_0
+s_0_0 d_0_0_0 MULTIPLY c_0_0_0
+s_0_1 d_0_1_0 MULTIPLY c_0_1_0
+c_0_0_0 c_0_1_0 ADD e_0_0

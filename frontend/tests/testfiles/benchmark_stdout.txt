@@ -1,0 +1,21 @@
+INPUTS input_0 input_1
+OUTPUTS output_0
+ input_0 input_1 ADD output_0
+Benchmark: circuit: ../benchmark_inputs/low_level/circuits/circuit-ADD-1.sheep context TFHE input_type int8_t inputs_file ../benchmark_inputs/low_level/inputs/inputs-2-to-1-int8_t-1.inputs parameter_file 
+Parameter minimum_lambda = 110
+size of publicKey: 48
+size of privateKey: 48
+size of ciphertext: 24
+
+===============
+=== RESULTS ===
+
+== Processing times: ==
+setup: 630855
+encryption: 246.988
+circuit_evaluation: 954305
+decryption: 4.744
+
+== Output values ==
+output_0: -89
+==== END RESULTS ===

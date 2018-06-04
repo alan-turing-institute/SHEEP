@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <title>SHEEP</title>
+ 
+ 
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+ 
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+ 
+
+       
+</head>
+ 
+<body>
+ 
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="/">Home</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Homomorphic Encryption Evaluation</h3>
+        </div>
+ 
+        <div class="jumbotron" id="content">
+          <p class="lead"></p>
+	  <table>
+	    <tr>
+	      {% for context, result in results.items() %}
+	      <td>
+		<table>
+		<tr><td><h2> {{ context }} </h2></td></tr>
+		{% for category, vals in result.items() %}
+		<tr><td><h3> {{ category }} </h3></td></tr>
+		
+		{% for k, v in vals.items() %}
+		<tr><td> {{ k }} :  </td><td> {{ v }} </td> </tr>
+		{% endfor %}
+		
+		{% endfor %}
+		</table>
+	      </td>
+	      {% endfor %}		
+	    </tr>
+	    </table>
+        </div>
+	<div>
+	  <form method="POST" action="" enctype="multipart/form-data">
+	    <p><input type=submit value="Upload to Database"></form></p>
+	</div>
+
+</body>
+</html>
