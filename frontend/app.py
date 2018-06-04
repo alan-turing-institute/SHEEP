@@ -152,13 +152,10 @@ def execute_test():
                                 }
     """
     results = utils.run_test(app.data,app.config)   
-    if request.method == "POST":
-        database.upload_test_result(proc_times,app.data)
+    if request.method == "POST":  ### upload button was pressed
+        utils.upload_test_result(results,app.data)
         return render_template("uploaded_ok.html")
     return render_template("test_results.html",results = results)
-  #proc_time=proc_times,
-  #                         outputs=outputs,context_names=app.data["HE_libraries"])
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

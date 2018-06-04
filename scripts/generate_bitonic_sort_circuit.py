@@ -7,6 +7,7 @@ The outputs will be the input values ordered from high-to-low.
 import os
 import random
 from frontend.utils import get_min_max
+import subprocess
 
 if "SHEEP_HOME" in os.environ.keys():
     BASE_DIR = os.environ["SHEEP_HOME"]
@@ -37,7 +38,7 @@ def generate(num_inputs):
     run_cmd=[]
     circuit_filename = os.path.join(CIRCUIT_DIR_MID,"circuit-bitonic-sort-"+str(num_inputs)+".sheep")
     run_cmd.append(os.path.join(EXECUTABLE_DIR,"bitonic-sorting-circuit"))
-    run_cmd.append(num_inputs)
+    run_cmd.append(str(num_inputs))
     run_cmd.append(circuit_filename)
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
