@@ -254,6 +254,8 @@ protected:
   ////////////////////////////////////////////////////////////////////////////////////
   ///  ContextHElib_F2 -  use p=2, do everything with arrays of Ciphertext,
   ///  and binary operations for add, multiply, compare etc.
+
+
   
 template<typename PlaintextT>
 class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
@@ -262,6 +264,7 @@ public:
 
   typedef PlaintextT Plaintext;
   typedef NTL::Vec<Ctxt> Ciphertext;  
+  
   
   ContextHElib_F2(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
 		  bool bootstrap=true, // bootstrap or not?
@@ -274,6 +277,8 @@ public:
     m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
 			  std::is_same<Plaintext, int16_t>::value ||
 			  std::is_same<Plaintext, int32_t>::value);
+
+    m_bool_plaintext = std::is_same<Plaintext, bool>::value;
 
   }
 
@@ -322,6 +327,21 @@ public:
     Ciphertext one_enc = encrypt((Plaintext)1);
     Ciphertext output_final = Add(output,one_enc);
     return output_final;
+  }
+
+  Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+    /// "Maximum" i.e. "OR" only valid for bool inputs.  If not, call the base-class function
+    /// (which will throw a GateNotImplemented error).
+    if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
+    /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
+    Ctxt a1 = a[0]; 
+    Ctxt a2 = a[0];     
+    a1 += b[0];  // XOR(a,b)
+    a2 *= b[0]; // AND(a,b)
+    a1 += a2; // XOR the previous two lines
+    Ciphertext output;
+    output.append(a1);
+    return output;
   }
 
   
@@ -450,6 +470,7 @@ public:
 private:
 
   bool m_signed_plaintext;
+  bool m_bool_plaintext;  
 
   
 };  /// end of class definition
