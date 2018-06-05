@@ -22,9 +22,17 @@
 
 enum class EvaluationStrategy {serial, parallel};
 
+class BaseBaseContext { 
+ public:
+  virtual void print_parameters() =0;
+  virtual void print_sizes() = 0;  
+
+};
+
+
 /// Base base class
 template <typename PlaintextT>
-class BaseContext {
+class BaseContext : public BaseBaseContext {
 public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
@@ -35,8 +43,7 @@ public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
-        virtual void print_parameters() =0;
-        virtual void print_sizes() = 0;
+
 };
 
 // Base class - abstract interface to each library

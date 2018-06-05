@@ -26,7 +26,7 @@ void on_initialize(const string_t& address)
     // Build our listener's URI from the configured address and the hard-coded path "SheepServer/Action"
 
     uri_builder uri(address);
-    uri.append_path(U("SheepServer/Action/"));
+    uri.append_path(U("SheepServer/"));
 
     auto addr = uri.to_uri().to_string();
 	g_http = std::unique_ptr<SheepServer>(new SheepServer(addr));

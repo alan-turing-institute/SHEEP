@@ -18,6 +18,7 @@ using namespace web;
 using namespace utility;
 using namespace http;
 using namespace web::http::experimental::listener;
+using namespace SHEEP;
 
 SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 {
@@ -30,26 +31,18 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
-SheepServer::make_context(std::string context_type, std::string context_params="") {
+SheepServer::make_context(std::string context_type) {
   if (context_type == "HElib_F2") {
     auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
-    if (context_params.length() > 0)
-      ctx->read_params_from_file(context_params);
     return ctx;
   } else if (context_type == "HElib_Fp") {
     auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
-    if (context_params.length() > 0)
-      ctx->read_params_from_file(context_params);
     return ctx;
   } else if (context_type == "TFHE") {
     auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
-    if (context_params.length() > 0)
-      ctx->read_params_from_file(context_params);
     return ctx;
     //	} else if (context_type == "SEAL") {
     //auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
-    // if (context_params.length() > 0)
-    //  ctx->read_params_from_file(context_params);
     // return ctx;
   } else if (context_type == "Clear") {
     return std::make_unique<ContextClear<PlaintextT> >();
@@ -59,9 +52,33 @@ SheepServer::make_context(std::string context_type, std::string context_params="
 }
 
 
+void SheepServer::handle_get_context(http_request message) {
+  /// list of available contexts?
+  json::value result = json::value::object();
+  json::value context_list = json::value::array();
+  int index = 0;
+  for (auto contextIter = available_contexts.begin();
+       contextIter != available_contexts.end();
+       ++contextIter) {
+    context_list[index] = json::value::string(*contextIter);
+    index++;
+  }
+  result["available_contexts"] = context_list;
+  
+  message.reply(status_codes::OK, result);
+}
+
+
+void SheepServer::handle_post_context(http_request message) {
+  /// create a new context
+  m_job_config = {};
+  message.reply(status_codes::OK);
+}
+
+
 void SheepServer::handle_get_job(http_request message) {
   /// is the sheep job fully configured?
-  bool configured = m_job_config.iConfigured();
+  bool configured = m_job_config.isConfigured();
   message.reply(status_codes::OK);
 }
 
@@ -90,7 +107,8 @@ void SheepServer::handle_put_parameters(http_request message) {
 void SheepServer::handle_get(http_request message)
 {
   auto path = message.relative_uri().path();
-  if (0 != path.compare("parameters")) return handle_get_parameters(message);
+  if (0 != path.compare("context")) return handle_get_context(message);  
+  else if (0 != path.compare("parameters")) return handle_get_parameters(message);
   ucout <<  message.to_string() << endl;
   message.reply(status_codes::OK);
 };
@@ -98,6 +116,7 @@ void SheepServer::handle_get(http_request message)
 void SheepServer::handle_post(http_request message)
 {
   auto path = message.relative_uri().path();
+  if (0 != path.compare("context")) cout<<"PARAMETERS IN PATH"<<std::endl;  
   if (0 != path.compare("parameters")) cout<<"PARAMETERS IN PATH"<<std::endl;
     ucout <<  message.to_string() << endl;
 	message.reply(status_codes::OK);

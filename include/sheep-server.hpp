@@ -4,6 +4,7 @@
 #include <memory>
 #include <fstream>
 #include <map>
+
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
@@ -14,6 +15,8 @@ using namespace web;
 using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
+
+static std::vector<std::string> available_contexts = {"HElib_Fp","HElib_F2","TFHE"};
 
 
 struct SheepJobConfig {
@@ -112,12 +115,16 @@ public:
 
   template <typename PlaintextT>
   std::unique_ptr<BaseContext<PlaintextT> >
-  make_context(std::string context_type, std::string context_params="");
+  make_context(std::string context_type);
 
 private:
 
+        void handle_get_context(http_request message);
+        void handle_post_context(http_request message);
         void handle_get_job(http_request message);
-        void handle_post_job(http_request message);  
+        void handle_post_job(http_request message);
+        void handle_get_parameters(http_request message);
+        void handle_put_parameters(http_request message);  
 	void handle_get(http_request message);
 	void handle_put(http_request message);
 	void handle_post(http_request message);
@@ -125,6 +132,9 @@ private:
 	http_listener m_listener;
 
         SheepJobConfig m_job_config;
+  //        typename T;
+        BaseBaseContext* m_context;
+
 };
 
 #endif
