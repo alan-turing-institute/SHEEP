@@ -1,12 +1,43 @@
-# Sheep
+# SHEEP is a Homomorphic Encryption Evaluation Platform
 
-SHEEP is a Homomorphic Encryption Evaluation Platform.
-Homomorphic Encryption allows mathematical operations
-to be performed on encrypted data, such that the result when
-decrypted is what would have been obtained from addition or
-multiplication of the plaintexts. The goal of the project is to
-provide an accessible platform for testing the features and
-performance of the available Homomorphic Encryption libraries.
+## Summary
+
+The overall aim of the SHEEP project is to provide a platform for practitioners to evaluate the state-of-the-art of (fully) homomorphic encryption technology in the context of their concrete application. SHEEP enables this evaluation to be done across libraries implementing different HE schemes (with in some cases incomparable security). 
+
+<figure>
+<img src="https://i.imgur.com/M9KPfZi.png"/>
+<figcaption> Components of the SHEEP platform. These include an interpreter for the SHEEP language, an abstraction layer to incorporate HE libraries via their corresponding wrappers, and a reporting component. The user can either provide a program written in the high-level SHEEP language, or run a set of predefined benchmarks. Different aspects of the results can be visualized through a web interface.</figcaption>  
+</figure>
+
+
+<!-- ![Components of SHEEP. These include an interpreter for the SHEEP language, an abstraction layer to incorporate HE libraries via their corresponding wrappers, and a reporting component. The user can either provide a program written in the high-level SHEEP language, or run a set of predefined benchmarks. Different aspects of the results can be visualized through a web interface.](https://i.imgur.com/M9KPfZi.png) -->
+
+
+To achieve this goal, the SHEEP platform includes an **library agnostic language** so that computations can be described generically. One can think of it as an *assembly language*.
+
+To incorporate a library into the platform, all that needs to be done is write a wrapper for it, implementing the operations in the **SHEEP instruction set**. These corresponds to common operations in a HE scheme such as encryption, decryption, homomorphic addition, multiplication, comparison, etc.
+
+Besides allowing the user to execute their own programs via either a web interface or programatically, the library incorporates a set of **native benchmarks**. These are classified in three categories according to their complexity, ranging from low-level microbenchmarks of the basic homomorphic arithmetic operations, to data analysis tasks.
+
+Either on a native benchmark or a user-defined input, the platform evaluates the corresponding program on all the HE libraries that support the instructions of the program. The result is checked for correctness, and metrics such as running time (encryption, decryption, and evaluation) and ciphertext size are reported to a web interface and stored in a database. The web interface also allows convenient plotting of the results for easy visualisation.
+
+The platform hence enables two main use cases:
+1. It allows users to evaluate a concrete custom computation across libraries (and thus encryption schemes) by simply describing it in a high-level language. This allows to set up a easily reproducible baseline when trying to optimize a given primitive based on HE, e.g. Private Information Retrieval, secure inner product, etc. For example, addition of two numbers in SHEEP looks like this:
+```
+INPUTS a b res
+OUTPUTS res
+a b ADD res
+```
+2. The set of predefined benchmarks allows performance snapshots of the state-of-the-art of (fully) homomorphic encryption implementations to be continually produced, as new schemes are invented and their implementations are updated and optimized.
+
+In summary, the general problem addressed by SHEEP is that of getting a satisfying answer, from the practitioner's point of view, to the following questions:
+
+> "What is the current state of the implementations of homomorphic encryption?"
+
+> "What homomorphic encryption scheme (and implementation) should I use in my application, given some functional and non-functional, e.g. security, latency or bandwidth constraints?"
+
+In its current state, the SHEEP platform does not provide a complete solution to these problems, as we believe this requires a community effort. This is why SHEEP's code is open source.
+
 
 ## Installation - local
 
