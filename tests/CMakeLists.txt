@@ -1,3 +1,13 @@
+add_executable(test-invalid-circuit
+                 test-invalid-circuit.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
+
+add_executable(test-invalid-circuit-from-file
+                 test-invalid-circuit-from-file.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
+
 add_executable(test-write-read-circuit
                  test-write-read-circuit.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
