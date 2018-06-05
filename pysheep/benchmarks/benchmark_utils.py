@@ -5,8 +5,8 @@ and parameter values to temporary files, and running the benchmark job.
 """
 import subprocess
 import os, uuid
-from frontend.utils import parse_test_output, get_bitwidth
-from frontend.database import BenchmarkMeasurement, session
+from ..common import common_utils
+from ..common.database import BenchmarkMeasurement, session
 import re
 
 if not "SHEEP_HOME" in os.environ.keys():
@@ -24,17 +24,6 @@ if not os.path.exists(TMP_PARAMS_DIR):
     os.system("mkdir "+TMP_PARAMS_DIR)
 
 EXECUTABLE_DIR = BASE_DIR+"/build/bin"
-    
-def get_inputs(circuit_file):
-    """ 
-    print out the inputs that a circuit file expects.
-    """
-    circuit = open(circuit_file)
-    for line in circuit.readlines():
-        if line.startswith("INPUTS"):
-            inputs = line.strip().split()[1:]
-            return inputs
-
 
 def write_inputs_file(value_dict):
     """
@@ -60,36 +49,7 @@ def write_params_file(param_dict):
     params_file.close()
     return filename
 
-def get_circuit_name(circuit_filename):
-    """
-    parse the circuit filename, and, assuming it follows a naming convention,
-    return the name of the circuit and the number of inputs.
-    If it doesn't follow the convention, just return the filename and 0.
-    """
-    filename_without_path = circuit_filename.split("/")[-1]
-    match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
-    if match:
-        return match.groups()[0], int(match.groups()[1])
-### some circuits (e.g. PIR) follow a different convention:
-    match = re.search("circuit-([-_\w]+).sheep",filename_without_path)
-    if match:
-        return match.groups()[0], 0
-### if we got to here, just return the filename
-    return filename_without_path, 0
 
-
-def get_gate_name(circuit_filename):
-    """
-    parse the circuit filename, and, assuming it follows a naming convention,
-    return the name of the gate and the depth.
-    If it doesn't follow the convention, just return None,None
-    """
-    filename_without_path = circuit_filename.split("/")[-1]
-    match = re.search("circuit-([-_\w]+)-([\d]+).sheep",filename_without_path)
-    if match:
-        return match.groups()[0], int(match.groups()[1])
-### Didn't find matching names - return None
-    return None, None
 
     
 def run_circuit(circuit_filepath,inputs_file,input_type,context,eval_strategy="serial",params_file=None,debugfilename=None):
@@ -107,19 +67,19 @@ def run_circuit(circuit_filepath,inputs_file,input_type,context,eval_strategy="s
         run_cmd.append(params_file)
     p=subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     job_output = p.communicate()[0]
-    results = parse_test_output(job_output,debugfilename)
+    results = common_utils.parse_test_output(job_output,debugfilename)
     #### now just add other fields into the "results" dict, to go into the db
     results["context"] = context    
-    input_bitwidth = get_bitwidth(input_type)
+    input_bitwidth = common_utils.get_bitwidth(input_type)
     input_signed = input_type.startswith("i")
     results["input_bitwidth"] = input_bitwidth
     results["input_signed"] = input_signed
     if "low_level" in circuit_filepath:
-        gate_name, depth = get_gate_name(circuit_filepath)
+        gate_name, depth = common_utils.get_gate_name(circuit_filepath)
         results["gate_name"] = gate_name
         results["depth"] = depth
     elif "mid_level" in circuit_filepath:
-        circuit_name, num_inputs = get_circuit_name(circuit_filepath)
+        circuit_name, num_inputs = common_utils.get_circuit_name(circuit_filepath)
         results["circuit_name"] = circuit_name
         results["num_inputs"] = num_inputs
 
@@ -171,3 +131,30 @@ def upload_measurement(results):
 ### commit to the DB        
     session.add(m)
     session.commit()
+
+
+def params_for_level(context,level):
+    """
+    set parameters for a given context for a given level
+    """
+    if context == "HElib_Fp":
+        param_dict = {"Levels": level+2}
+        param_file = write_params_file(param_dict)
+        return param_file
+    elif context == "SEAL":
+        param_dict = {
+            1: {"N": 2048},
+            2: {"N": 4096},
+            3: {"N": 4096},
+            4: {"N": 8192},
+            5: {"N": 8192},
+            6: {"N": 16384},
+            7: {"N": 16384},
+            8: {"N": 16384},
+            9: {"N": 32768},                             
+        }
+        param_file = write_params_file(param_dict[level])
+        return param_file
+    else:
+        return None
+    

@@ -7,62 +7,18 @@ import re
 import uuid
 import subprocess
 
+from ..common.database import session,BenchmarkMeasurement
+from ..common import common_utils
+
 def cleanup_upload_dir(config):
     """
     At the start of a new test, remove all the uploaded circuits, inputs, and parameters
     files from the uploads dir.
     """
     for file_prefix in ["circuit","inputs","param"]:
-        cmd = "rm "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
+        cmd = "rm -fr "+config["UPLOAD_FOLDER"]+"/"+file_prefix+"*"
         os.system(cmd)
-        
-    
-
-
-def get_bitwidth(input_type):
-    """
-    given a string input type e.g. bool, uint32_t, return the number of bits,
-    (i.e. 2 or 32 for the examples above)
-    """
-    bitwidth_match = re.search("[\d]+",input_type)
-    if bitwidth_match:
-        bitwidth = int(bitwidth_match.group())
-    else:
-        bitwidth = 1
-    return bitwidth
-
-
-def get_min_max(input_type):
-    """
-    minimum and maximum values for a given data type
-    Assume we have bools, or signed-or-unsigned 8,16,32,64 bit integers
-    """
-    min_allowed = 0
-    max_allowed = 0
-    if input_type == "bool":
-        min_allowed = 0
-        max_allowed = 1
-    else:
-        bitwidth = re.search("[\d]+",input_type).group()
-        if input_type.startswith("u"):
-            min_allowed = 0
-            max_allowed = pow(2,int(bitwidth)) -1
-        else:
-            min_allowed = -1* pow(2,int(bitwidth)-1)
-            max_allowed = pow(2,int(bitwidth)-1) -1
-    return min_allowed, max_allowed
-
-    
-def check_inputs(input_dict, input_type):
-    """ 
-    check that the supplied inputs are within the ranges for the specified input type.
-    """
-    min_allowed, max_allowed = get_min_max(input_type)
-
-    for val in input_dict.values():
-        if int(val) < min_allowed or int(val) > max_allowed:
-            return False
-    return True  # all inputs were ok
+        os.makedirs(config["UPLOAD_FOLDER"],exist_ok=True)
 
 
 def upload_files(filedict,upload_folder):
@@ -76,31 +32,6 @@ def upload_files(filedict,upload_folder):
         uploaded_filenames[k] = uploaded_filename
     return uploaded_filenames
 
-
-def parse_circuit_file(circuit_filename):
-    """ 
-    read the circuit file and check what the names of the inputs are, so
-    they can be selected in another form.
-    """
-    inputs = []
-    f=open(circuit_filename)
-    for line in f.readlines():
-        if line.startswith("INPUTS"):
-            inputs += line.strip().split()[1:]
-    return inputs
-
-
-def write_inputs_file(inputs,upload_folder):
-    """
-    write the input names and values to a file, 
-    just because that's easier to pass to the executable.
-    """
-    inputs_filename = os.path.join(upload_folder,"inputs_"+str(uuid.uuid4())+".inputs")
-    f = open(inputs_filename,"w")
-    for k,v in inputs.items():
-        f.write(k+" "+str(v)+"\n")
-    f.close()
-    return inputs_filename
 
 def construct_run_cmd(context_name,data,config, eval_strategy="serial", parameter_file=None):
     """
@@ -139,97 +70,6 @@ def construct_get_param_cmd(context_name,input_type,config,parameter_file=None):
     return run_cmd
 
 
-def cleanup_time_string(t):
-    """
-    convert from microseconds to seconds, and only output 3 s.f.
-    """
-    time_in_seconds = float(t)/1e6
-
-    if time_in_seconds < 1:
-        time_in_seconds = round(time_in_seconds,5)
-    else:
-        time_in_seconds = int(time_in_seconds)
-    timestring = str(time_in_seconds)
-    return timestring
-
-def check_outputs(output_list):
-    """
-    take a list of outputs - each should be [test_result,clear_result]
-    and check that in each case, the test and clear results are equal.
-    """
-
-    for output in output_list:
-        if output[0] != output[1]:
-            return False
-    return True
-
-
-def parse_test_output(outputstring,debug_filename=None):
-    """
-    Extract values from the stdout output of the "benchmark" executable.
-    return a dict in the format { "processing times (seconds)" : {}, "outputs" : {}, "sizes" : {}, "params":{}, "sizes"{} }
-    """
-    results = {}
-    processing_times = {}
-    test_outputs = {}
-    params = {}
-    sizes = {}
-    clear_check = {}
-    in_results_section = False
-    in_processing_times = False
-    in_outputs = False
-    if debug_filename:
-        debugfile=open(debug_filename,"w")
-### parse the file, assuming we have processing times then outputs.
-    for line in outputstring.decode("utf-8").splitlines():
-        if debug_filename:
-            debugfile.write(line+"\n")
-#### read lines where parameters are printed out
-        param_search = re.search("Parameter ([\S]+) = ([\d]+)",line)
-        if param_search:
-            params[param_search.groups()[0]] = param_search.groups()[1]
-#### read lines where sizes of keys or ciphertexts are printed out
-        size_search = re.search("size of ([\S]+):[\s]+([\d]+)",line)
-        if size_search:
-            sizes[size_search.groups()[0]] = size_search.groups()[1]
-        if in_results_section:
-#### parse the check against clear context:
-            if line.startswith("Cleartext check"):
-                clear_check["is_correct"] = "passed OK" in line
-
-            if in_processing_times:
-                num_search = re.search("([\w]+)\:[\s]+([\d][\d\.e\+]+)",line)
-                if num_search:
-                    label = num_search.groups()[0]
-                    processing_time = num_search.groups()[1]
-                    processing_time = cleanup_time_string(processing_time) ## and convert to seconds
-                    processing_times[label] = processing_time
-                if "Output values" in line:
-                    in_processing_times = False
-                    in_outputs = True
-            elif in_outputs:
-                output_search = re.search("([\w]+)\:[\s]+([-\d]+)",line)
-                if output_search:
-                    label = output_search.groups()[0]
-                    val = output_search.groups()[1]
-                    test_outputs[label] = val
-                if "END RESULTS" in line:
-                    in_results_section = False
-            elif "Processing times" in line:
-                in_outputs = False
-                in_processing_times = True                
-        elif "=== RESULTS" in line:
-            in_results_section = True
-            pass
-    results["Processing times (s)"] = processing_times
-    results["Outputs"] = test_outputs
-    results["Object sizes (bytes)"] = sizes
-    results["Parameter values"] = params
-    results["Cleartext check"] = clear_check
-    if debug_filename:
-        debugfile.close()
-    return results
-
 def parse_param_output(outputstring):
     """
     read the output of benchmark PARAMS <context_name>
@@ -241,6 +81,7 @@ def parse_param_output(outputstring):
             #### line will be of format "Parameter x = y" - we want x and y
             tokens = line.strip().split()
             params[tokens[1]] = tokens[3]
+    print("PARAM_OUTPUT",params)
     return params
 
 
@@ -252,6 +93,7 @@ def find_param_file(context,config):
     """
     param_filename = config["UPLOAD_FOLDER"]+"/parameters_"+context+".txt"
     if os.path.exists(param_filename):
+        print("Found PARAM FILE ",param_filename)
         return param_filename
     else:
         return None
@@ -281,7 +123,7 @@ def run_test(data,config):
         p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
         output = p.communicate()[0]
         debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
-        results[context] = parse_test_output(output,debug_filename)
+        results[context] = common_utils.parse_test_output(output,debug_filename)
         
     return results
 
@@ -305,6 +147,7 @@ def get_params_single_context(context,input_type,config,params_file=None):
     p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
     output = p.communicate()[0]
     params = parse_param_output(output)
+    print("OUTPUT ",output)
     return params
     
 def update_params(context,param_dict,appdata,appconfig):
@@ -316,14 +159,18 @@ def update_params(context,param_dict,appdata,appconfig):
     the output, write that to a file, and return it.
     """
     old_params = appdata["params"][context]
+    print("OLD_PARAMS",old_params)
     param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
+    print( " param_filename",param_filename)
     param_file = open(param_filename,"w")
+    print("param_dict ", param_dict)
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
             continue
         ### only write to file if the new param is different to the old one
         if v != old_params[k]:
+            print("Writing %s %s to params file" % (k,v))
             param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
@@ -336,3 +183,42 @@ def update_params(context,param_dict,appdata,appconfig):
         param_file.write(k+" "+str(v)+"\n")
     param_file.close()
     return updated_params
+
+
+def upload_test_result(results,app_data):
+    """
+    Save data from a user-specified circuit test.
+    """
+    print("Uploading results to DB")
+    for context in app_data["HE_libraries"]:
+        result = results[context]
+        ### see if it follows naming convention for a low-level benchmark test
+        circuit_path = app_data["uploaded_filenames"]["circuit_file"]
+        circuit_name, num_inputs = common_utils.get_circuit_name(circuit_path)
+        execution_time = result["Processing times (s)"]["circuit_evaluation"]
+        is_correct = result["Cleartext check"]["is_correct"]
+        sizes = result["Object sizes (bytes)"]                    
+        ciphertext_size = sizes["ciphertext"]
+        public_key_size = sizes["publicKey"]
+        private_key_size = sizes["privateKey"]
+        param_dict = result["Parameter values"]    
+        cm = BenchmarkMeasurement(
+            circuit_name = circuit_name,
+##            num_inputs = num_inputs,
+            context_name = context,
+            input_bitwidth = common_utils.get_bitwidth(app_data["input_type"]),
+            input_signed = app_data["input_type"].startswith("i"),
+            execution_time = execution_time,
+            is_correct = is_correct,
+            ciphertext_size = sizes["ciphertext"],
+            private_key_size = sizes["privateKey"],
+            public_key_size = sizes["publicKey"]
+        )
+
+        context_prefix = context.split("_")[0]  ### only have HElib, not HElib_F2 and HElib_Fp
+        for k,v in param_dict.items():
+            column = context_prefix+"_"+k
+            cm.__setattr__(column,v)
+        session.add(cm)
+        session.commit()
+    return

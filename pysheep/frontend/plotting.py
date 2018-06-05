@@ -2,10 +2,10 @@
 generate D3.js plots, using the nvd3 python wrapper, building lists of data using SQL queries.
 """
 
-
 from nvd3 import multiBarChart
-from database import BenchmarkMeasurement, session, build_filter
 import uuid
+
+from ..common.database import BenchmarkMeasurement, session, build_filter
 
 
 def create_plot(xdata_list, ydata_dict, xtitle=""):
@@ -22,7 +22,6 @@ def create_plot(xdata_list, ydata_dict, xtitle=""):
         chart.add_serie(name=k, y=v, x=xdata)
 
     extra_serie = {"tooltip": {"y_start": "", "y_end": " cal"}}
-
     
     chart.buildhtml()
     unique_id = str(uuid.uuid4())
@@ -35,8 +34,6 @@ def create_plot(xdata_list, ydata_dict, xtitle=""):
     return filename
 
     
-
-
 def generate_plots(input_dict):
     """
     convert input_dict into sqlalchemy query,
@@ -57,12 +54,15 @@ def generate_plots(input_dict):
     
     xdata = []    
     ydata = {}
-    
+    seen_combinations = []
     for row in filtered_rows:
         xval = row.__getattribute__(input_dict["x_axis_var"])
+        category = row.__getattribute__(input_dict["category_field"])
+        if (xval, category) in seen_combinations:
+            continue
+        seen_combinations.append((xval, category))
         if not xval in xdata:
             xdata.append(xval)
-        category = row.__getattribute__(input_dict["category_field"])
         if not category in ydata.keys():
             ydata[category] = []
         execution_time = row.__getattribute__("execution_time")

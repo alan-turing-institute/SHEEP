@@ -35,15 +35,22 @@ def test_query_db():
         assert(len(filtered_rows) <= len(all_rows))
         xdata = []
         ydata = {}
+        seen_combinations = []  ## a list of (xval, category) tuples that we've already seen
+        total_yvals = 0
         for row in filtered_rows:
             xval = row.__getattribute__(input_dict["x_axis_var"])
+            category = row.__getattribute__(input_dict["category_field"])
+            if (xval, category) in seen_combinations:
+                continue
+            seen_combinations.append((xval, category))
             if not xval in xdata:
                 xdata.append(xval)
-            category = row.__getattribute__(input_dict["category_field"])
             if not category in ydata.keys():
                 ydata[category] = []
+            ydata[category].append(row.__getattribute__("execution_time"))
+            total_yvals += 1
         num_xvals = len(xdata)
         num_categories = len(ydata.keys())
 ### check we don't have more than one y-value per bin/category combination
 ####   (this could easily happen if we're not careful with the query....)
-        assert(len(filtered_rows) == num_xvals * num_categories)  
+        assert(total_yvals == num_xvals * num_categories)  

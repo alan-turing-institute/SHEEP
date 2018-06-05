@@ -24,12 +24,13 @@ column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 ### this will only require minimal changes, thanks to sqlalchemy).
 
 if "SHEEP_HOME" in os.environ.keys():
-    DB_LOCATION = os.environ["SHEEP_HOME"]+"/frontend/sheep.db"
+    DB_LOCATION = os.environ["SHEEP_HOME"]+"/pysheep/sheep.db"
 else:
-    DB_LOCATION = os.environ["HOME"]+"/SHEEP/frontend/sheep.db"
+    DB_LOCATION = os.environ["HOME"]+"/SHEEP/pysheep/sheep.db"
 
 Base = declarative_base()
 engine = create_engine("sqlite:///"+DB_LOCATION)
+
 
 class BenchmarkMeasurement(Base):
     __tablename__ = "benchmarks"
@@ -40,6 +41,7 @@ class BenchmarkMeasurement(Base):
     gate_name = Column(String(250), nullable=True)
     circuit_name = Column(String(250), nullable=True)
     depth = Column(Integer, nullable=True)
+    num_inputs = Column(Integer, nullable=True)    
     num_slots = Column(Integer, nullable=True)
     tbb_enabled = Column(Boolean, nullable=True)
     setup_time = Column(Float, nullable=True)
@@ -112,27 +114,13 @@ def execute_query_sqlite3(query):
     output = cursor.fetchall()
     return columns, output
 
-def execute_query_sqlalchemy(query):
+def execute_query_sqlalchemy(filt):
     """
     Perform a query on the db
     """
-    session.query(BenchmarkMeasurement).all()
+    session.query(BenchmarkMeasurement).filter(filt).all()
     
-def upload_test_result(timing_data,app_data):
-    """
-    Save data from a user-specified circuit test.
-    """
-    print("Uploading result to DB")
-    cm = CustomMeasurement(
-        circuit_path = app_data["uploaded_filenames"]["circuit_file"],
-        context_name = app_data["HE_library"],
-        input_type = app_data["input_type"],
-        setup_time = timing_data[0],
-        encryption_time = timing_data[1],
-        evaluation_time = timing_data[2],
-        decryption_time = timing_data[3])
-    session.add(cm)
-    session.commit()
+
         
 def build_filter(input_dict):
     """

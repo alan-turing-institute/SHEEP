@@ -92,7 +92,7 @@ FROM sheep_dev as sheep_web
 
 
 
-WORKDIR SHEEP/frontend
+WORKDIR SHEEP/webapp
 ###
 EXPOSE 5000
 ENV FLASK_APP app.py
