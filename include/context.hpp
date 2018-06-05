@@ -22,13 +22,9 @@
 
 enum class EvaluationStrategy {serial, parallel};
 
-class BaseBaseContext { 
- public:
-  virtual void print_parameters() =0;
-  virtual void print_sizes() = 0;  
-
+struct GateNotImplemented : public std::runtime_error {
+	GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
 };
-
 
 /// Base base class
 template <typename PlaintextT>
@@ -43,6 +39,9 @@ public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
+        virtual void print_parameters() = 0 ;
+        virtual std::map<std::string, long> get_parameters = 0;
+        virtual void print_sizes() = 0;  
 
 };
 
@@ -59,10 +58,6 @@ public:
         virtual void       configure()                     { m_configured = true; };
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext  decrypt(Ciphertext) =0;
-
-	struct GateNotImplemented : public std::runtime_error {
-		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
-	};
 
 	virtual Ciphertext Alias(Ciphertext a)             { return a; };
 	virtual Ciphertext Identity(Ciphertext)            { throw GateNotImplemented(); };
