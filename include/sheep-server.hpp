@@ -18,11 +18,16 @@ using namespace http::experimental::listener;
 
 static std::vector<std::string> available_contexts = {"HElib_Fp","HElib_F2","TFHE"};
 
+static std::vector<std::string> available_input_types = {"bool","uint8_t","uint16_t","uint32_t",
+							 "int8_t","int16_t","int32_t"};
+
 
 struct SheepJobConfig {
   utility::string_t context;
+  utility::string_t input_type;
   utility::string_t circuit_filename;
   utility::string_t input_filename;
+  std::map<std::string, long> parameters;
 
   void reset() {
     context = "";
@@ -114,11 +119,13 @@ public:
 	pplx::task<void> close() { return m_listener.close(); }
 
   template <typename PlaintextT>
-  std::unique_ptr<BaseContext<PlaintextT> >
-  make_context(std::string context_type);
+  //void //std::unique_ptr<BaseContext<PlaintextT> >
+  BaseContext<PlaintextT>* make_context(std::string context_type);
 
 private:
 
+        void handle_get_input_type(http_request message);
+        void handle_post_input_type(http_request message);
         void handle_get_context(http_request message);
         void handle_post_context(http_request message);
         void handle_get_job(http_request message);
@@ -132,8 +139,8 @@ private:
 	http_listener m_listener;
 
         SheepJobConfig m_job_config;
-  //        typename T;
-        BaseBaseContext* m_context;
+  //       template <typename T>
+        void* m_context;
 
 };
 

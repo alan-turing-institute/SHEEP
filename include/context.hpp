@@ -28,7 +28,7 @@ struct GateNotImplemented : public std::runtime_error {
 
 /// Base base class
 template <typename PlaintextT>
-class BaseContext : public BaseBaseContext {
+class BaseContext {
 public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
@@ -39,8 +39,8 @@ public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
-        virtual void print_parameters() = 0 ;
-        virtual std::map<std::string, long> get_parameters = 0;
+        virtual void print_parameters() =0;
+        virtual std::map<std::string, long&> get_parameters() = 0;
         virtual void print_sizes() = 0;  
 
 };
@@ -377,7 +377,8 @@ public:
 			   param_name)  != m_param_overrides.end();
 	}
   
-
+        virtual std::map<std::string, long&> get_parameters() { return m_param_name_map; };
+       
         virtual void print_parameters() {
 
 	  for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
