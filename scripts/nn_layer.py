@@ -9,6 +9,7 @@ from op_utils import col2im, im2col
 import numpy as np
 import math
 import multiprocessing as mp
+import time
 
 
 def create_ith_ll(name_, filter_col_, im_col_, out_, map_inp):
@@ -90,6 +91,7 @@ class linear_layer_1d(nn_layer):
                                   outputs=_tmp))
         depth = int(math.floor(math.log(self.nb, 2)))
         _tmp_out = enc_vec(nb=depth + 1, name=self.name + '_mult_out')
+
         self.add(reduce_add(name=self.name + '_ra1_',
                             inputs=_tmp, outputs=_tmp_out))
         self.add(sign_fn(name=self.name + 'sgn',
@@ -180,8 +182,15 @@ class conv_layer(nn_layer):
         out = enc_mat(name=self.name + 'c_i',
                       size=(H_prime * W_prime, F))
 
+        print("Entering im2col....")
+        beg = time.time()
         im_col = im2col(name=self.name + 'im2col',
                         x=self.inputs, hh=HH, ww=WW, stride=stride)
+        end = time.time()
+        print("Exiting im2col after " + str(end - beg) + str("sec."))
+        print()
+        print("Adding linear layers")
+        beg = time.time()
         filter_col = np.reshape(self.weight, (F, -1))
         cpus = mp.cpu_count()
         p = mp.Pool(cpus)
@@ -196,7 +205,16 @@ class conv_layer(nn_layer):
         p.join()
         for col_idx in tqdm(range(im_col.size[0])):
             self.add(queue.get())
+        end = time.time()
+        print("Exiting im2col after " + str(end - beg) + str("sec."))
+        print("Added Linear Layers")
+        print()
+        print("Entering col2im")
+        beg = time.time()
         col2im(self, out, H_prime, W_prime, 1, self.outputs)
+        end = time.time()
+        print("Exiting im2col after " + str(end - beg) + str("sec."))
+        print("Exiting col2im")
 
 
 if __name__ == '__main__':

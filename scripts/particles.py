@@ -223,6 +223,14 @@ class enc_mat(object):
         self._lst[key[0]][key[1]] = value
         self.name_list[key[0]][key[1]] = value.name
 
+    def reorder(self, new_lst_, new_name_list_):
+        '''
+        It is not a safe method.
+        It cannot be checked if they are still ordered
+        '''
+        self._lst = new_lst_
+        self.name_list = new_name_list_
+
     def __add__(self, next_list):
         '''
         Concatenate two mats
@@ -348,6 +356,14 @@ class enc_tensor3(object):
     def __setitem__(self, key, value):
         self._lst[key[0]][key[1]][key[2]] = value
         self.name_list[key[0]][key[1]][key[2]] = value.name
+
+    def reorder(self, new_lst_, new_name_list_):
+        '''
+        It is not a safe method.
+        It cannot be checked if they are still ordered
+        '''
+        self._lst = new_lst_
+        self.name_list = new_name_list_
 
     def __add__(self, next_list):
         '''

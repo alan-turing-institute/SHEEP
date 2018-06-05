@@ -1,7 +1,20 @@
 from interactions import mono_assign
 from particles import enc_mat
 from tqdm import tqdm
-import pathos.multiprocessing as mp
+from functools import partial
+import multiprocessing as mp
+
+
+def nested_assign(x, hh, ww, stride, new_w, new_h, c, ij):
+    out_mat = ['' for t in range(c * hh * ww)]
+    i = ij // new_w
+    j = ij // new_h
+    for cidx in range(c):
+        for a in range(hh):
+            for b in range(ww):
+                out_mat[cidx * hh * ww + a * ww + b] =\
+                    x[cidx][i * stride + a][j * stride + b]
+    return out_mat
 
 
 def im2col(name, x, hh, ww, stride=1):
@@ -22,24 +35,33 @@ def im2col(name, x, hh, ww, stride=1):
     new_w = (w - ww) // stride + 1
     col = enc_mat(name=name + 'i2' + str(c * h * w),
                   size=(new_h * new_w, c * hh * ww))
-    # for i in range(new_h):
-    #     for j in range(new_w):
-    #         for cidx in range(c):
-    #             for a in range(hh):
-    #                 for b in range(ww):
-    #                     col[i * new_w + j,
-    #                         cidx * hh * ww + a * ww + b] =\
-    #                         x[cidx][i * stride + a][j * stride + b]
-    #p = multiprocessing.Pool(7)
-    # def fill_pl(idx)
-    for a in tqdm(range(hh)):
-        for b in range(ww):
-            for cidx in range(c):
-                for i in range(new_h):
-                    for j in range(new_w):
-                        col[i * new_w + j,
-                            cidx * hh * ww + a * ww + b] =\
-                            x[cidx][i * stride + a][j * stride + b]
+    old_lst_ = x._lst
+    old_name_lst_ = x.name_list
+    p = mp.Pool(mp.cpu_count())
+    new_lst_ = p.map(partial(nested_assign,
+                             old_lst_,
+                             hh,
+                             ww,
+                             stride,
+                             new_w,
+                             new_h,
+                             c),
+                     range(new_h * new_w))
+    p.close()
+    p.join()
+    p = mp.Pool(mp.cpu_count())
+    new_name_lst_ = p.map(partial(nested_assign,
+                                  old_name_lst_,
+                                  hh,
+                                  ww,
+                                  stride,
+                                  new_w,
+                                  new_h,
+                                  c),
+                          range(new_h * new_w))
+    col.reorder(new_lst_, new_name_lst_)
+    p.close()
+    p.join()
     return col
 
 
@@ -57,7 +79,6 @@ def col2im(circuit, mul, h_prime, w_prime, C, tgt_out):
       if C == 0: (F,h_prime,w_prime) matrix
       Otherwise: (F,C,h_prime,w_prime) matrix
     """
-    p = mp.Pool(7)
     F = mul.size[1]
     for i in range(0, F):
         map(lambda idx: circuit.add(
@@ -66,12 +87,3 @@ def col2im(circuit, mul, h_prime, w_prime, C, tgt_out):
                         rhs=tgt_out[i][idx
                                        / w_prime][idx % w_prime])),
             range(w_prime * h_prime))
-    # if(C == 1):
-    #     for i in range(0, F):
-    #         for h_idx in range(0, h_prime):
-    #             for w_idx in range(0, w_prime):
-    #                 rhs = tgt_out[i][h_idx][w_idx]
-    #                 lhs = [mul[h_idx * w_prime + w_idx][i]]
-    #                 circuit.add(mono_assign(ass_type='alias',
-    #                                         lhs=lhs,
-    #                                         rhs=rhs))
