@@ -1,5 +1,6 @@
 #include "all_equal.hpp"
 #include "circuit.hpp"
+#include <utility>
 #include <map>
 #include <sstream>
 
@@ -85,11 +86,16 @@ std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
   return stream;
 }
 
-std::istream& operator >>(std::istream& stream, Circuit& c) {
-
-
+std::istream& operator >>(std::istream& stream, Circuit& c)
+{
   /// loop over all lines in the input file 
   std::string line;
+
+  // pairs of the circuit outputs and the line number where they were
+  // found in the input
+  std::vector<std::pair<int, std::string> > circuit_outputs;
+
+  int lineno = 1; 
   while (std::getline(stream, line) ) {
     /// remove comments (lines starting with #) and empty lines
     int found= line.find_first_not_of(" \t");
@@ -113,12 +119,21 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
       } else if (*token_iter == "INPUTS") {
 	token_iter++;
 	for (; token_iter != tokens.end(); ++token_iter) {
-	  c.add_input(*token_iter);
+	  try {
+	    c.add_input(*token_iter);
+	  }
+	  catch (const MultipleAssignmentError& e) {
+	    std::cerr << "Error reading circuit: "
+	              << "line " << lineno << ": in INPUTS: a wire named '" << e.name
+		      << "' has already been used to store a value (it must be unique).\n";
+	    throw e;
+	  };
 	}
       } else if (*token_iter == "OUTPUTS") {
 	token_iter++;
 	for (; token_iter != tokens.end(); ++token_iter) {
-	  c.set_output(*token_iter);
+	  // store outputs, to be set at the end, or an UndefinedVariableError will be thrown.
+	  circuit_outputs.emplace_back(lineno, *token_iter);
 	}
       } else {   /// we are in the assignments block - format is:
 	/// input1 input2 ... inputN GATE output1 [... outputN]
@@ -146,16 +161,42 @@ std::istream& operator >>(std::istream& stream, Circuit& c) {
 	  auto it = gate_name_map.find(gate_name);
 	  if (it != gate_name_map.end()) {
 	    Gate gate = it->second;
-	    const Wire& gateout = c.add_assignment(gate_output_names.front(),
-						   gate,
-						   gate_inputs);
+	    try {
+	      const Wire& gateout = c.add_assignment(gate_output_names.front(),
+						     gate,
+						     gate_inputs);
+	    }
+	    catch (const MultipleAssignmentError& e) {
+	      std::cerr << "Error reading circuit: "
+		        << "line " << lineno << ": the wire named '" << e.name
+			<< "' has already been used to store a value (it must be unique).\n";
+	      throw e;
+	    }
+	    catch (const UndefinedVariableError& e) {
+	      std::cerr << "Error reading circuit: "
+			<< "line " << lineno << ": a wire named '" << e.name
+			<< "' has not yet been defined\n";
+	      throw e;
+	    };
 	  }
 	}	
       }
     }
-    
+    ++lineno;
   } /// end of loop over input lines
-  
+
+  // finally add the outputs to the circuit
+  for (std::pair<int, std::string> line_wire_pair: circuit_outputs) {
+    try {
+      c.set_output(line_wire_pair.second);
+    }
+    catch (const UndefinedVariableError& e) {
+      std::cerr << "Error reading circuit: "
+		<< "line " << line_wire_pair.first << ": in OUTPUTS: cannot set a wire named '" << e.name
+		<< "' to be an output of the circuit as one with this name was not defined.\n";
+      throw e;
+    }
+  }
   return stream;
 }
 

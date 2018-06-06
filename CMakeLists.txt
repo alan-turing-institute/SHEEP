@@ -50,4 +50,4 @@ if (SEAL_FOUND)
 endif()
 
 add_subdirectory(example bin)
-##add_subdirectory(tests testbin)
+add_subdirectory(tests testbin)

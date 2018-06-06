@@ -1,0 +1,8 @@
+# Error: input 'd' declared multiple times
+INPUTS a b c d d e
+OUTPUTS w6
+ a b ADD w2
+ w2 c MULTIPLY w3
+ w3 d SUBTRACT w4
+ e NEGATE w5
+ w4 w5 MAXIMUM w6

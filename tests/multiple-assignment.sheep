@@ -1,0 +1,8 @@
+# Error: 'w3' assigned multiple times
+INPUTS a b c d e
+OUTPUTS w6
+ a b ADD w2
+ w2 c MULTIPLY w3
+ w2 d SUBTRACT w3
+ e NEGATE w5
+ w3 w5 MAXIMUM w6
