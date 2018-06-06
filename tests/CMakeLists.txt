@@ -1,11 +1,17 @@
 add_executable(test-invalid-circuit
-                 test-invalid-circuit.cpp
-		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  test-invalid-circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
 
 add_executable(test-invalid-circuit-from-file
-                 test-invalid-circuit-from-file.cpp
-		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  test-invalid-circuit-from-file.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+configure_file(good.sheep good.sheep)
+configure_file(multiple-input.sheep multiple-input.sheep)
+configure_file(multiple-assignment.sheep multiple-assignment.sheep)
+configure_file(undef-gate-input.sheep undef-gate-input.sheep)
+configure_file(undef-output.sheep undef-output.sheep)
 add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
 
 add_executable(test-write-read-circuit
