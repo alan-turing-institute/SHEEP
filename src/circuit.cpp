@@ -123,7 +123,8 @@ std::istream& operator >>(std::istream& stream, Circuit& c)
 	    c.add_input(*token_iter);
 	  }
 	  catch (const MultipleAssignmentError& e) {
-	    std::cerr << "line " << lineno << ": in INPUTS: wire name '" << *token_iter
+	    std::cerr << "Error reading circuit: "
+	              << "line " << lineno << ": in INPUTS: a wire named '" << e.name
 		      << "' has already been used to store a value (it must be unique).\n";
 	    throw e;
 	  };
@@ -166,12 +167,14 @@ std::istream& operator >>(std::istream& stream, Circuit& c)
 						     gate_inputs);
 	    }
 	    catch (const MultipleAssignmentError& e) {
-	      std::cerr << "line " << lineno << ": the wire name '" << *token_iter
+	      std::cerr << "Error reading circuit: "
+		        << "line " << lineno << ": the wire named '" << e.name
 			<< "' has already been used to store a value (it must be unique).\n";
 	      throw e;
 	    }
 	    catch (const UndefinedVariableError& e) {
-	      std::cerr << "line " << lineno << ": a wire named '" << *token_iter
+	      std::cerr << "Error reading circuit: "
+			<< "line " << lineno << ": a wire named '" << e.name
 			<< "' has not yet been defined\n";
 	      throw e;
 	    };
@@ -188,8 +191,9 @@ std::istream& operator >>(std::istream& stream, Circuit& c)
       c.set_output(line_wire_pair.second);
     }
     catch (const UndefinedVariableError& e) {
-      std::cerr << "line " << line_wire_pair.first << ": in OUTPUTS: cannot set a wire named '" << line_wire_pair.second
-		<< "' to be an output of the circuit as one with this name has not yet been defined.\n";
+      std::cerr << "Error reading circuit: "
+		<< "line " << line_wire_pair.first << ": in OUTPUTS: cannot set a wire named '" << e.name
+		<< "' to be an output of the circuit as one with this name was not defined.\n";
       throw e;
     }
   }

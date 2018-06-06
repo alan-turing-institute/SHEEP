@@ -68,11 +68,19 @@ bool operator!=(const Assignment&, const Assignment&);
 
 
 struct MultipleAssignmentError : public std::runtime_error {
-	MultipleAssignmentError() : std::runtime_error("Multiple assignment to wire named _.") { };
+	const std::string name;
+	MultipleAssignmentError(std::string name_)
+		: name(name_),
+		  std::runtime_error("Multiple assignment to wire named '" + name_ + "'")
+	{ };
 };
 
 struct UndefinedVariableError : public std::runtime_error {
-	UndefinedVariableError() : std::runtime_error("A wire with name _ has not yet been defined.") { };
+	const std::string name;
+	UndefinedVariableError(std::string name_)
+		: name(name_),
+		  std::runtime_error("A wire with name '" + name_ + "' has not yet been defined.")
+	{ };
 };
 
 class Circuit {
@@ -98,7 +106,7 @@ public:
 		std::unordered_set<std::string>::iterator it_ignored;
 		bool inserted;
 		std::tie(it_ignored, inserted) = wire_names.insert(name);
-		if (!inserted) throw MultipleAssignmentError();
+		if (!inserted) throw MultipleAssignmentError(name);
 		
 		inputs.emplace_back(name);
 		return inputs.back();
@@ -114,7 +122,7 @@ public:
 		std::unordered_set<std::string>::iterator it_ignored;
 		bool inserted;
 		std::tie(it_ignored, inserted) = wire_names.insert(name);
-		if (!inserted) throw MultipleAssignmentError();
+		if (!inserted) throw MultipleAssignmentError(name);
 		
 		wires.emplace_back(name);
 		Wire output = wires.back();
@@ -122,7 +130,7 @@ public:
 		Assignment assgn(output, op, ws...);
 		for (auto assgn_in : assgn.get_inputs()) {
 			if (wire_names.count(assgn_in.get_name()) == 0) {
-				throw UndefinedVariableError();
+				throw UndefinedVariableError(assgn_in.get_name());
 			}
 		}
 		assignments.push_back(std::move(assgn));
@@ -132,7 +140,7 @@ public:
 
 	void set_output(Wire w) {
 		if (wire_names.count(w.get_name()) == 0) {
-			throw UndefinedVariableError();
+			throw UndefinedVariableError(w.get_name());
 		}
 		outputs.emplace_back(w);
 	}
