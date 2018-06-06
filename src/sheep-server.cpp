@@ -33,30 +33,19 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)//, m_context(0
 template <typename PlaintextT>
 BaseContext<PlaintextT>*
 SheepServer::make_context(std::string context_type) {
-  auto ctx =  new ContextHElib_F2<PlaintextT>();
-  return ctx;
-  //  m_context = dynamic_cast<ContextHElib_F2<PlaintextT>* >(ctx);
-  /*
   if (context_type == "HElib_F2") {
-    ///    auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
-    auto ctx =  new ContextHElib_F2<PlaintextT>();    
-    return ctx;
+    return  new ContextHElib_F2<PlaintextT>();    
   } else if (context_type == "HElib_Fp") {
-    //    auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
-    auto ctx = new ContextHElib_Fp<PlaintextT>();    
-    return ctx;
+    return new ContextHElib_Fp<PlaintextT>();    
   } else if (context_type == "TFHE") {
-    auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
-    return ctx;
+    return  new ContextTFHE<PlaintextT>();
     //	} else if (context_type == "SEAL") {
-    //auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
-    // return ctx;
+    //    return  new ContextSeal<PlaintextT>();
   } else if (context_type == "Clear") {
-    return std::make_unique<ContextClear<PlaintextT> >();
+    return new ContextClear<PlaintextT>();
   } else {
     throw std::runtime_error("Unknown context requested");
-  }
-  */
+  }  
 }
 
 
@@ -87,8 +76,7 @@ void SheepServer::handle_get_input_type(http_request message) {
     type_list[index] = json::value::string(*typeIter);
     index++;
   }
-  result["available_input_types"] = type_list;
-  
+  result["available_input_types"] = type_list;  
   message.reply(status_codes::OK, result);
 }
 
@@ -149,15 +137,38 @@ void SheepServer::handle_get_parameters(http_request message) {
   /// Otherwise, create a new context, and get the default parameters.
   /// return a dict of parameters
   std::map<std::string, long&> param_map;
-  if (m_job_config.input_type == "bool") {
-    auto context = make_context<bool>(m_job_config.context);
-    param_map = context->get_parameters();
+  if (m_job_config.parameters.size() > 0) 
+    param_map = m_job_config.parameters;
+  else {
+    /// create a context, and get default parameters
+    if (m_job_config.input_type == "bool") {
+      auto context = make_context<bool>(m_job_config.context);
+      param_map = context->get_parameters();
+    } else if (m_job_config.input_type == "uint8_t") {
+      auto context = make_context<uint8_t>(m_job_config.context);
+      param_map = context->get_parameters();
+    } else if (m_job_config.input_type == "uint16_t") {
+      auto context = make_context<uint16_t>(m_job_config.context);
+      param_map = context->get_parameters();
+    } else if (m_job_config.input_type == "uint32_t") {
+      auto context = make_context<uint32_t>(m_job_config.context);
+      param_map = context->get_parameters();
+    } else if (m_job_config.input_type == "int8_t") {
+      auto context = make_context<int8_t>(m_job_config.context);
+      param_map = context->get_parameters();
+    } else if (m_job_config.input_type == "int16_t") {
+      auto context = make_context<int16_t>(m_job_config.context);
+      param_map = context->get_parameters();
+    } else if (m_job_config.input_type == "int32_t") {
+      auto context = make_context<int32_t>(m_job_config.context);
+      param_map = context->get_parameters();
+    }
+    m_job_config.parameters = param_map;
   }
   json::value result = json::value::object();
   json::value param_list = json::value::array();
   int index = 0;
   for ( auto map_iter = param_map.begin(); map_iter != param_map.end(); ++map_iter) {
-    //  std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
     json::value param = json::value::object();
     param[map_iter->first] = json::value::number((int64_t)map_iter->second);
     param_list[index] = param;

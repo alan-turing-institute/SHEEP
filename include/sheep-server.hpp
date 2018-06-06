@@ -16,10 +16,17 @@ using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
 
-static std::vector<std::string> available_contexts = {"HElib_Fp","HElib_F2","TFHE"};
+static std::vector<std::string> available_contexts = {"HElib_Fp",
+						      "HElib_F2",
+						      "TFHE"};
 
-static std::vector<std::string> available_input_types = {"bool","uint8_t","uint16_t","uint32_t",
-							 "int8_t","int16_t","int32_t"};
+static std::vector<std::string> available_input_types = {"bool",
+							 "uint8_t",
+							 "uint16_t",
+							 "uint32_t",
+							 "int8_t",
+							 "int16_t",
+							 "int32_t"};
 
 
 struct SheepJobConfig {
@@ -27,7 +34,7 @@ struct SheepJobConfig {
   utility::string_t input_type;
   utility::string_t circuit_filename;
   utility::string_t input_filename;
-  std::map<std::string, long> parameters;
+  std::map<std::string, long&> parameters;
 
   void reset() {
     context = "";
