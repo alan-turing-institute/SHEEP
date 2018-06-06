@@ -42,7 +42,8 @@ public:
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
         virtual void print_parameters() =0;
         virtual std::map<std::string, long&> get_parameters() = 0;
-        virtual void print_sizes() = 0;  
+        virtual void print_sizes() = 0;
+        virtual void set_parameter(std::string, long) = 0;
 
 };
 

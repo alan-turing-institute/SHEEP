@@ -37,7 +37,7 @@ struct SheepJobConfig {
   utility::string_t circuit_filename;
   EvaluationStrategy eval_strategy;
   Circuit circuit;
-  std::vector<std::string> input_names;
+  std::set<std::string> input_names;
   std::vector<int> input_vals;
   std::map<std::string, long&> parameters;
 
@@ -80,14 +80,12 @@ public:
   template <typename PlaintextT>
   void configure_and_run();
 
-  
 private:
   /// generic methods - will then dispatch to specific ones based on URL
 	void handle_get(http_request message);
 	void handle_put(http_request message);
 	void handle_post(http_request message);
   /// actual endpoints
-
         void handle_get_context(http_request message);
         void handle_get_input_type(http_request message);
         void handle_get_inputs(http_request message);
@@ -95,12 +93,11 @@ private:
         void handle_get_config(http_request message);
         void handle_get_results(http_request message);    
         void handle_get_job(http_request message);
+
         void handle_post_inputs(http_request message);    
         void handle_post_input_type(http_request message);
         void handle_post_circuit(http_request message);
-
         void handle_post_context(http_request message);
-
         void handle_post_job(http_request message);
         void handle_post_run(http_request message);  
 

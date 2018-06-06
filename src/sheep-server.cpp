@@ -70,7 +70,7 @@ SheepServer::configure_and_run() {
   /// we can now assume we have values for context, inputs, circuit, etc
   auto context = make_context<PlaintextT>(m_job_config.context);
   /// set parameters for this context
-  for ( auto map_iter = param_map.begin(); map_iter != param_map.end(); ++map_iter) {
+  for ( auto map_iter = m_job_config.parameters.begin(); map_iter != m_job_config.parameters.end(); ++map_iter) {
     context->set_parameter(map_iter->first, map_iter->second);
   }
   std::vector<PlaintextT> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
@@ -153,7 +153,16 @@ void SheepServer::handle_post_circuit(http_request message) {
 	auto circuit_filename = val["circuit_filename"].as_string();
 	std::cout<<" circuit is "<<circuit_filename<<std::endl;
 	m_job_config.circuit_filename = circuit_filename;
-
+         /// check that the file exists.
+        std::ifstream circuit_file(std::string(m_job_config.circuit_filename));
+        cout<<" is file good? "<<circuit_file.good()<<endl;
+        if (circuit_file.good()) {
+	  /// create the circuit
+	  Circuit C;
+	  circuit_file >> C;
+	  cout << C;
+	  m_job_config.circuit = C;
+	}
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unrecognized circuit_filename request"));
       }      
@@ -162,24 +171,17 @@ void SheepServer::handle_post_circuit(http_request message) {
 }
 
 void SheepServer::handle_get_inputs(http_request message) {
-  /// first check that the file exists.
+  
+  /// check again that the circuitfile exists.
   std::ifstream circuit_file(std::string(m_job_config.circuit_filename));
   cout<<" is file good? "<<circuit_file.good()<<endl;
-  if (! circuit_file.good()) {
-    json::value errmsg = json::value::object();
-    errmsg["message"] = json::value::string("Circuit file not found");
-    message.reply(status_codes::InternalError,errmsg);
-  }
-  /// create the circuit
-  Circuit C;
-  circuit_file >> C;
-  cout << C;
+  if (! circuit_file.good())
+    message.reply(status_codes::InternalError,("Circuit file not found"));
   json::value result = json::value::object();
   json::value inputs = json::value::array();
-  m_job_config.circuit = C;
   int index = 0;
-  for (auto input : C.get_inputs() ) {
-    m_job_config.input_names.push_back(input.get_name());
+  for (auto input : m_job_config.circuit.get_inputs() ) {
+    m_job_config.input_names.insert(input.get_name());
     inputs[index] = json::value::string(input.get_name());
     index++;
   }
