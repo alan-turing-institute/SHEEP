@@ -22,6 +22,10 @@
 
 enum class EvaluationStrategy {serial, parallel};
 
+struct GateNotImplemented : public std::runtime_error {
+	GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
+};
+
 /// Base base class
 template <typename PlaintextT>
 class BaseContext {
@@ -52,10 +56,6 @@ public:
         virtual void       configure()                     { m_configured = true; };
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext  decrypt(Ciphertext) =0;
-
-	struct GateNotImplemented : public std::runtime_error {
-		GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
-	};
 
 	virtual Ciphertext Alias(Ciphertext a)             { return a; };
 	virtual Ciphertext Identity(Ciphertext)            { throw GateNotImplemented(); };
