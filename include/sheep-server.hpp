@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 
+#include "circuit.hpp"
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
@@ -18,7 +19,8 @@ using namespace http::experimental::listener;
 
 static std::vector<std::string> available_contexts = {"HElib_Fp",
 						      "HElib_F2",
-						      "TFHE"};
+						      "TFHE",
+						      "Clear"};
 
 static std::vector<std::string> available_input_types = {"bool",
 							 "uint8_t",
@@ -33,88 +35,32 @@ struct SheepJobConfig {
   utility::string_t context;
   utility::string_t input_type;
   utility::string_t circuit_filename;
-  utility::string_t input_filename;
+  EvaluationStrategy eval_strategy;
+  Circuit circuit;
+  std::vector<std::string> input_names;
+  std::vector<int> input_vals;
   std::map<std::string, long&> parameters;
 
-  void reset() {
-    context = "";
-    circuit_filename = "";
-    input_filename = "";
+  void setDefaults() {
+    eval_strategy = EvaluationStrategy::serial;
   }
   bool isConfigured() {
-    return ((context.size() > 0) && (circuit_filename.size() > 0) && (input_filename.size() > 0) );
+    return ((context.size() > 0) &&
+	    (input_type.size() > 0) &&	    
+    	    (circuit.get_inputs().size() > 0) &&
+	    (input_vals.size() == circuit.get_inputs().size())); 
   }
 };
 
-struct People
-{
-	utility::string_t name;
-	double age;
 
-	static People FromJSON(const web::json::object & object)
-	{
-		People result;
-		result.name = object.at(U("name")).as_string();
-		result.age = object.at(U("age")).as_integer();
-		return result;
-	}
+typedef std::chrono::duration<double, std::micro> DurationT;
 
-	web::json::value AsJSON() const
-	{
-		web::json::value result = web::json::value::object();
-		result[U("name")] = web::json::value::string(name);
-		result[U("age")] = web::json::value::number(age);
-		return result;
-	}
+struct SheepJobResult {
+  std::map<std::string, std::string> outputs;  /// store output values as strings so we don't worry about Plaintext type.
+  std::vector<DurationT> timings;  /// store time values as std::chrono::duration 
 };
 
-struct Data
-{
-	std::vector<People> peoples;
-	utility::string_t job;
 
-	Data() {}
-
-	void Clear() { peoples.clear(); }
-
-	static Data FromJSON(const web::json::object &object)
-	{
-		Data res;
-
-		web::json::value cs = object.at(U("data"));
-
-		for (auto iter = cs.as_array().begin(); iter != cs.as_array().end(); ++iter)
-		{
-			if (!iter->is_null())
-			{
-				People people;
-				people = People::FromJSON(iter->as_object());
-				res.peoples.push_back(people);
-			}
-		}
-
-		auto job = object.find(U("job"));
-		res.job = job->second.as_string();
-		return res;
-	}
-
-	web::json::value AsJSON() const
-	{
-		web::json::value res = web::json::value::object();
-		res[U("job")] = web::json::value::string(job);
-
-		web::json::value jPeoples = web::json::value::array(peoples.size());
-
-		int idx = 0;
-		for (auto iter = peoples.begin(); iter != peoples.end(); iter++)
-		{
-			jPeoples[idx++] = iter->AsJSON();
-		}
-
-		res[U("people")] = jPeoples;
-		return res;
-	}
-};
 
 class SheepServer
 {
@@ -126,28 +72,46 @@ public:
 	pplx::task<void> close() { return m_listener.close(); }
 
   template <typename PlaintextT>
-  //void //std::unique_ptr<BaseContext<PlaintextT> >
   BaseContext<PlaintextT>* make_context(std::string context_type);
 
-private:
+  template<typename PlaintextT>
+  std::vector<PlaintextT> make_plaintext_inputs();
 
-        void handle_get_input_type(http_request message);
-        void handle_post_input_type(http_request message);
-        void handle_get_context(http_request message);
-        void handle_post_context(http_request message);
-        void handle_get_job(http_request message);
-        void handle_post_job(http_request message);
-        void handle_get_parameters(http_request message);
-        void handle_put_parameters(http_request message);  
+  template <typename PlaintextT>
+  void configure_and_run();
+
+  
+private:
+  /// generic methods - will then dispatch to specific ones based on URL
 	void handle_get(http_request message);
 	void handle_put(http_request message);
 	void handle_post(http_request message);
+  /// actual endpoints
 
+        void handle_get_context(http_request message);
+        void handle_get_input_type(http_request message);
+        void handle_get_inputs(http_request message);
+        void handle_get_parameters(http_request message);
+        void handle_get_config(http_request message);
+        void handle_get_results(http_request message);    
+        void handle_get_job(http_request message);
+        void handle_post_inputs(http_request message);    
+        void handle_post_input_type(http_request message);
+        void handle_post_circuit(http_request message);
+
+        void handle_post_context(http_request message);
+
+        void handle_post_job(http_request message);
+        void handle_post_run(http_request message);  
+
+        void handle_put_parameters(http_request message);  
+        void handle_put_eval_strategy(http_request message);  
+  /// listen to http requests
 	http_listener m_listener;
-
+  /// structs to store the configuration and results of a test.
         SheepJobConfig m_job_config;
-  //       template <typename T>
-        void* m_context;
+        SheepJobResult m_job_result;
+        bool m_job_finished;
 
 };
 

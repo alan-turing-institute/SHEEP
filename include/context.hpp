@@ -30,6 +30,7 @@ struct GateNotImplemented : public std::runtime_error {
 template <typename PlaintextT>
 class BaseContext {
 public:
+        virtual ~BaseContext() {};
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
 			     std::vector<std::chrono::duration<double, std::micro> >&,
@@ -54,7 +55,7 @@ public:
 	typedef CiphertextT Ciphertext;
 
 	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
-
+        virtual ~Context() {};
         virtual void       configure()                     { m_configured = true; };
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext  decrypt(Ciphertext) =0;
