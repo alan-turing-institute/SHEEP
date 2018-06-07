@@ -16,20 +16,15 @@ class CircuitForm(Form):
     Standard WTForm
     """
     circuit_file = FileField(validators=[validators.InputRequired()],label="Circuit file")
-    input_type = SelectField(choices=[("bool","bool"),
-                                      ("uint8_t","uint8_t"),
-                                      ("int8_t","int8_t"),
-                                      ("uint16_t","uint16_t"),
-                                      ("int16_t","int16_t"),
-                                      ("uint32_t","uint32_t"),
-                                      ("int32_t","int32_t")]
+
+    input_type = SelectField(choices=[]
                              ,label="Input type")
     HE_library = MultiCheckboxField('Select HE libraries:',
-                                    choices=[("HElib_F2","HElib_F2"),
-                                             ("HElib_Fp","HElib_Fp"),
-                                             ("TFHE","TFHE"),
-                                             ("SEAL","SEAL")])    
+                                    choices=[])
 
+
+ 
+    
 class ResultsForm(Form):
     """
     Let the user choose what results to see
@@ -93,4 +88,7 @@ def build_param_form(params_dict):
     for p,v in params_dict.items():
         field = IntegerField(label=p,default=v)
         setattr(ParamsForm,p,field)
+    eval_strategy = SelectField(choices=[("serial","serial"),("parallel","parallel")]
+                             ,label="Evaluation Strategy")
+    setattr(ParamsForm,"eval_strategy",eval_strategy)
     return ParamsForm

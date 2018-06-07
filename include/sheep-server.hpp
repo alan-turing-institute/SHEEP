@@ -50,14 +50,47 @@ struct SheepJobConfig {
     	    (circuit.get_inputs().size() > 0) &&
 	    (input_vals.size() == circuit.get_inputs().size())); 
   }
+  json::value as_json() {
+    json::value config = json::value::object();
+    json::value j_context = json::value::string(context);
+    config["context"] = j_context;
+    json::value j_circuit_file = json::value::string(circuit_filename);
+    config["circuit_filename"] = j_circuit_file;
+    json::value j_input_type = json::value::string(input_type);
+    config["input_type"] = j_input_type;
+    std::string eval_strat_string;
+    if (eval_strategy == EvaluationStrategy::serial)  eval_strat_string = "serial";
+    else eval_strat_string = "parallel";
+    json::value j_eval_strategy = json::value::string(eval_strat_string);
+    config["eval_strategy"] = j_eval_strategy;
+    json::value params = json::value::object();
+    for (auto map_iter : parameters) {
+      params[map_iter.first] = json::value::number((int64_t)map_iter.second);
+    }
+    config["parameters"] = params;
+    return config;
+  }
 };
 
 
-typedef std::chrono::duration<double, std::micro> DurationT;
-
 struct SheepJobResult {
   std::map<std::string, std::string> outputs;  /// store output values as strings so we don't worry about Plaintext type.
-  std::vector<DurationT> timings;  /// store time values as std::chrono::duration 
+  std::map<std::string, std::string> timings;  /// store time values in microseconds as strings.
+  json::value as_json() {
+    json::value result = json::value::object();
+    json::value j_outputs = json::value::object();
+    for ( auto map_iter = outputs.begin(); map_iter != outputs.end(); ++map_iter) {
+      j_outputs[map_iter->first] = json::value::string(map_iter->second);
+    }
+    result["outputs"] = j_outputs;
+    json::value j_timings = json::value::object();
+    for ( auto map_iter = timings.begin(); map_iter != timings.end(); ++map_iter) {
+      j_timings[map_iter->first] = json::value::string(map_iter->second);
+    }
+    result["timings"] = j_timings;
+    return result;
+    
+  }
 };
 
 
@@ -79,6 +112,9 @@ public:
 
   template <typename PlaintextT>
   void configure_and_run();
+
+  template <typename PlaintextT>
+  void update_parameters(std::string context, std::string param="", long val=0);
 
 private:
   /// generic methods - will then dispatch to specific ones based on URL

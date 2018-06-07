@@ -21,22 +21,29 @@ using namespace http;
 using namespace web::http::experimental::listener;
 using namespace SHEEP;
 
-SheepServer::SheepServer(utility::string_t url) : m_listener(url)//, m_context(0)
+typedef std::chrono::duration<double, std::micro> Duration; /// for storing execution times
+
+
+/// constructor - bind listener to endpoints and create empty structs for config and result
+SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 {
     m_job_config = {};  /// zero all fields
     m_job_config.setDefaults();
     m_job_result = {};
     m_job_finished = false;
-    /// generic methods to listen for any request - the URL will be parsed within these functions.
+    /// bind generic methods to listen for any request - the URL will be parsed within these functions.
     m_listener.support(methods::GET, std::bind(&SheepServer::handle_get, this, std::placeholders::_1));
     m_listener.support(methods::PUT, std::bind(&SheepServer::handle_put, this, std::placeholders::_1));
     m_listener.support(methods::POST, std::bind(&SheepServer::handle_post, this, std::placeholders::_1));
    
 }
 
+/// templated functions to interact with the contexts.
+
 template <typename PlaintextT>
 BaseContext<PlaintextT>*
 SheepServer::make_context(std::string context_type) {
+  cout<<" in make context "<<context_type<<endl;
   if (context_type == "HElib_F2") {
     return  new ContextHElib_F2<PlaintextT>();    
   } else if (context_type == "HElib_Fp") {
@@ -49,7 +56,7 @@ SheepServer::make_context(std::string context_type) {
     return new ContextClear<PlaintextT>();
   } else {
     throw std::runtime_error("Unknown context requested");
-  }  
+  }
 }
 
 template<typename PlaintextT>
@@ -62,6 +69,40 @@ SheepServer::make_plaintext_inputs() {
   return inputs;
 }
 
+template <typename PlaintextT>
+void
+SheepServer::update_parameters(std::string context_type,
+			       std::string param_name,
+			       long param_value) {
+  BaseContext<PlaintextT>* context;
+  if (context_type == "HElib_F2") {
+    context = new ContextHElib_F2<PlaintextT>();
+  } else if (context_type == "HElib_Fp") {
+    context = new ContextHElib_Fp<PlaintextT>();    
+  } else if (context_type == "TFHE") {
+    context = new ContextTFHE<PlaintextT>();
+    //	} else if (context_type == "SEAL") {
+    //    context = new ContextSeal<PlaintextT>();
+  } else if (context_type == "Clear") {
+    context = new ContextClear<PlaintextT>();
+  } else {
+    throw std::runtime_error("Unknown context requested");
+  }
+  /// first set parameters to current values stored in the server (if any)
+  //  for ( auto map_iter = m_job_config.parameters.begin(); map_iter != m_job_config.parameters.end(); ++map_iter) {
+  //  context->set_parameter(map_iter->first, map_iter->second);
+  // }
+  for (auto map_iter : m_job_config.parameters) {
+    cout<<" values in job_config param map are :"<<map_iter.first<<" "<<map_iter.second<<endl;
+    context->set_parameter(map_iter.first, map_iter.second);
+  }
+  /// update a parameter if specified
+  if (param_name.size() > 0) context->set_parameter(param_name, param_value);
+  //update the servers param map.
+  m_job_config.parameters = context->get_parameters();
+  // cleanup
+  delete context;
+}
 
 template <typename PlaintextT>
 void
@@ -70,22 +111,38 @@ SheepServer::configure_and_run() {
   /// we can now assume we have values for context, inputs, circuit, etc
   auto context = make_context<PlaintextT>(m_job_config.context);
   /// set parameters for this context
+  if (context != NULL) cout<<"have a context"<<endl;
+  else cout<<"null context pointer"<<endl;
   for ( auto map_iter = m_job_config.parameters.begin(); map_iter != m_job_config.parameters.end(); ++map_iter) {
     context->set_parameter(map_iter->first, map_iter->second);
   }
   std::vector<PlaintextT> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
+  cout<<"Have "<<plaintext_inputs.size()<<" plaintext inputs"<<endl;
+  std::vector<Duration> timings;
   std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
   								      plaintext_inputs,
-  								      m_job_result.timings,
+  								      timings,
   								      m_job_config.eval_strategy);
   cout<<" finished running job !! "<<endl;
   m_job_finished = true;
-  ///  std::vector<std::string> output_
+  ///  store outputs values as strings, to avoid ambiguity about type.
   for (int i=0; i < output_vals.size(); ++i ) {    
     std::cout<<" output_vals "<<std::to_string(output_vals[0])<<std::endl;
-    m_job_result.outputs.insert(std::make_pair<const std::string,std::string>(m_job_config.circuit.get_outputs()[i].get_name(),
-    									   std::to_string(output_vals[i])));
+    auto output = std::make_pair<const std::string,std::string>(
+								m_job_config.circuit.get_outputs()[i].get_name(),
+								std::to_string(output_vals[i])
+								);
+    m_job_result.outputs.insert(output);
   }
+  cout<<" do i have timings? "<<timings.size()<<endl;
+  if (timings.size() != 3) throw std::runtime_error("Unexpected length of timing vector");
+  auto encryption = std::make_pair<std::string, std::string>("encryption",std::to_string(timings[0].count()));
+  m_job_result.timings.insert(encryption);
+  auto evaluation = std::make_pair<std::string, std::string>("evalation",std::to_string(timings[1].count()));
+  m_job_result.timings.insert(evaluation);
+  auto decryption = std::make_pair<std::string, std::string>("decryption",std::to_string(timings[2].count()));
+  m_job_result.timings.insert(decryption);  
+    
 }
 
 void SheepServer::handle_get(http_request message)
@@ -130,14 +187,14 @@ void SheepServer::handle_post_run(http_request message) {
   
   /// get a context, configure it with the stored
   /// parameters, and run it.
-  cout<<"Will run job!"<<endl;
+  cout<<"Will run job! now"<<endl;
   if (m_job_config.input_type == "bool") configure_and_run<bool>();
   else if (m_job_config.input_type == "uint8_t") configure_and_run<uint8_t>();
   else if (m_job_config.input_type == "uint16_t") configure_and_run<uint16_t>();
   else if (m_job_config.input_type == "uint32_t") configure_and_run<uint32_t>();
-  else if (m_job_config.input_type == "uint8_t") configure_and_run<int8_t>();
-  else if (m_job_config.input_type == "uint16_t") configure_and_run<int16_t>();
-  else if (m_job_config.input_type == "uint32_t") configure_and_run<int32_t>();  
+  else if (m_job_config.input_type == "int8_t") configure_and_run<int8_t>();
+  else if (m_job_config.input_type == "int16_t") configure_and_run<int16_t>();
+  else if (m_job_config.input_type == "int32_t") configure_and_run<int32_t>();  
   message.reply(status_codes::OK);
 }
 
@@ -242,7 +299,7 @@ void SheepServer::handle_get_input_type(http_request message) {
 
 
 void SheepServer::handle_post_context(http_request message) {
-  /// set which context to use
+  /// set which context to use.  If it has changed, reset the list of parameters.
   cout<<" in handle post context" <<endl;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
@@ -323,48 +380,29 @@ void SheepServer::handle_get_parameters(http_request message) {
   
   /// if the job_config has some parameters set, then return them.
   /// Otherwise, create a new context, and get the default parameters.
-  /// return a dict of parameters
+  /// return a dict of parameters.
+  /// input_type needs to be set already otherwise we can't instantiate context.
+  if ((m_job_config.input_type.size() == 0) || (m_job_config.context.size() == 0)) {
+    message.reply(status_codes::InternalError,("Need to set input_type and context before getting parameters"));
+    return;
+  }
   std::map<std::string, long&> param_map;
-  if (m_job_config.parameters.size() > 0) 
-    param_map = m_job_config.parameters;
-  else {
-    /// create a context, and get default parameters
-    if (m_job_config.input_type == "bool") {
-      auto context = make_context<bool>(m_job_config.context);
-      param_map = context->get_parameters();
-      delete context;
-    } else if (m_job_config.input_type == "uint8_t") {
-      auto context = make_context<uint8_t>(m_job_config.context);
-      param_map = context->get_parameters();
-    } else if (m_job_config.input_type == "uint16_t") {
-      auto context = make_context<uint16_t>(m_job_config.context);
-      param_map = context->get_parameters();
-    } else if (m_job_config.input_type == "uint32_t") {
-      auto context = make_context<uint32_t>(m_job_config.context);
-      param_map = context->get_parameters();
-    } else if (m_job_config.input_type == "int8_t") {
-      auto context = make_context<int8_t>(m_job_config.context);
-      param_map = context->get_parameters();
-    } else if (m_job_config.input_type == "int16_t") {
-      auto context = make_context<int16_t>(m_job_config.context);
-      param_map = context->get_parameters();
-    } else if (m_job_config.input_type == "int32_t") {
-      auto context = make_context<int32_t>(m_job_config.context);
-      param_map = context->get_parameters();
-    }
-    m_job_config.parameters = param_map;
+  if (m_job_config.parameters.size() == 0) { 
+    /// call a function that will create a context and set m_job_config.parameters to default values
+    if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context);
+    if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context);
+    if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context);
+    if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context);
+    if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context);
+    if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context);
+    if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);    
+    //m_job_config.parameters = param_map;
   }
+  param_map = m_job_config.parameters;
   json::value result = json::value::object();
-  json::value param_list = json::value::array();
-  int index = 0;
   for ( auto map_iter = param_map.begin(); map_iter != param_map.end(); ++map_iter) {
-    json::value param = json::value::object();
-    param[map_iter->first] = json::value::number((int64_t)map_iter->second);
-    param_list[index] = param;
-    index++;
+    result[map_iter->first] = json::value::number((int64_t)map_iter->second);
   }
-  
-  result["parameters"] = param_list;
   
   message.reply(status_codes::OK, result);  
 }
@@ -372,40 +410,50 @@ void SheepServer::handle_get_parameters(http_request message) {
 
 void SheepServer::handle_get_config(http_request message) {
 
-  json::value result = json::value::object();
-  //  json::value config_list = json::value::array();
-  //int index = 0;
-  json::value circuit_filename = json::value::object();
-  result["circuit_filename"] = json::value::string(m_job_config.circuit_filename);
-  
-  /*  for ( auto map_iter = param_map.begin(); map_iter != param_map.end(); ++map_iter) {
-    json::value param = json::value::object();
-    param[map_iter->first] = json::value::number((int64_t)map_iter->second);
-    param_list[index] = param;
-    index++;
-  }
-*/
-/// result["parameters"] = param_list;
+  json::value result = m_job_config.as_json();
   message.reply(status_codes::OK, result);
 }
 
 void SheepServer::handle_put_parameters(http_request message) {
   /// put parameter name:value into job_config
+  if ((m_job_config.input_type.size() == 0) ||
+      (m_job_config.context.size() == 0)) {
+    message.reply(status_codes::InternalError,("Need to specify input_type and context before setting parameters"));
+    return;
+  }
+  message.extract_json().then([=](pplx::task<json::value> jvalue) {
+      try {
+	json::value val = jvalue.get();
+	auto params = val.as_object();
+	for (auto p : params) {
+
+	  std::string param = p.first;//.as_string();
+	  long value = p.second.as_integer();
+	  std::cout<<"setting parameter "<<p.first<<" to "<<value<<endl;
+	  if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context,param, value);
+	  else if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context,param, value);
+	  else if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context,param, value);
+	  else if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context,param, value);
+	  else if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context,param, value);
+	  else if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context,param, value);
+	  else if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context,param, value);
+	  else message.reply(status_codes::InternalError,("Unknown input type when updating parameters"));
+	  	  
+	}
+      } catch(json::json_exception) {
+	  message.reply(status_codes::InternalError,("Unable to set evaluation strategy"));
+      }      
+    });
+  
   message.reply(status_codes::OK);
 }
 
 void SheepServer::handle_get_results(http_request message) {
 
   cout<<"in get_results"<<endl;
-  //  if (! m_job_finished) message.reply(status_codes::InternalError,("Job not yet finished"));
-  // return;
-  cout<<"creating the results json"<<endl;
-  json::value result = json::value::object();
-  json::value outputs = json::value::object();
-  for ( auto map_iter = m_job_result.outputs.begin(); map_iter != m_job_result.outputs.end(); ++map_iter) {
-    outputs[map_iter->first] = json::value::string(map_iter->second);
-  }
-  result["outputs"] = outputs;
+
+  json::value result = m_job_result.as_json();
+
   message.reply(status_codes::OK, result);
 }
 

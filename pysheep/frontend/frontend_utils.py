@@ -9,6 +9,8 @@ import subprocess
 
 from ..common.database import session,BenchmarkMeasurement
 from ..common import common_utils
+from ..interface import sheep_client
+
 
 def cleanup_upload_dir(config):
     """
@@ -23,7 +25,7 @@ def cleanup_upload_dir(config):
 
 def upload_files(filedict,upload_folder):
     """
-    Upload circuit file to server storage...  and other files?
+    Upload circuit file to server storage.
     """
     uploaded_filenames = {}
     for k,v in filedict.items():
@@ -99,57 +101,92 @@ def find_param_file(context,config):
         return None
 
 
-def run_test(data,config):
+def run_test(data):
     """
-    Run the executable in a subprocess, and capture the stdout output.
-    return a dict of results {"context_name": {"processing_times" : {},
-                                                 "sizes" : {},
-                                                 "outputs" : {} 
-                                                }, ... 
+    run the executable and return the results dict.
     """
-    results = {}
-    contexts_to_run = data["HE_libraries"] 
+    results = {} ## will be a dictionary key-ed by context
+    contexts_to_run = data["HE_libraries"]
 ### always run clear context, for comparison, unless we already have 4 contexts
 ### in which case the outputs page would be too cluttered...
     if len(contexts_to_run) < 4:
         contexts_to_run.append("Clear")
+        pass
     for context in contexts_to_run:
-        param_file = find_param_file(context,config)
-        if not "eval_strategy" in data.keys():
-            eval_strategy = "serial"
-        else:
-            eval_strategy = data["eval_strategy"]
-        run_cmd = construct_run_cmd(context,data,config,eval_strategy,param_file)
-        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
-        output = p.communicate()[0]
-        debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
-        results[context] = common_utils.parse_test_output(output,debug_filename)
-        
+        sheep_client.new_job()
+        sheep_client.set_input_type(data["input_type"])
+        sheep_client.set_context(context)
+        sheep_client.set_circuit_filename(data["uploaded_filenames"]["circuit_file"])
+        sheep_client.set_inputs(data["input_vals"])
+#        sheep_client.set_parameters(data["params"][context])
+        sheep_client.set_eval_strategy(data["eval_strategy"][context])
+        sheep_client.run_job()
+
+        results[context] = sheep_client.get_results()
     return results
+        
+#def run_test(data,config):
+#    """
+#    Run the executable in a subprocess, and capture the stdout output.
+#    return a dict of results {"context_name": {"processing_times" : {},
+#                                                 "sizes" : {},
+#                                                 "outputs" : {} 
+#                                                }, ... 
+#    """
+#    results = {}
+#    contexts_to_run = data["HE_libraries"] 
+#### always run clear context, for comparison, unless we already have 4 contexts
+#### in which case the outputs page would be too cluttered...
+#    if len(contexts_to_run) < 4:
+#        contexts_to_run.append("Clear")
+#    for context in contexts_to_run:
+#        param_file = find_param_file(context,config)
+#        if not "eval_strategy" in data.keys():
+#            eval_strategy = "serial"
+#        else:
+#            eval_strategy = data["eval_strategy"]
+#        run_cmd = construct_run_cmd(context,data,config,eval_strategy,param_file)
+#        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+#        output = p.communicate()[0]
+#        debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
+#        results[context] = common_utils.parse_test_output(output,debug_filename)
+#        
+#    return results
+#
 
-
-def get_params_all_contexts(context_list,input_type,config):
+def get_params_all_contexts(context_list,input_type):
     """
     Return a dict with the key being context_name, and the vals being 
     dicts of param_name:default_val.
     """
     all_params = {}
     for context in context_list:
-        all_params[context] = get_params_single_context(context,input_type,config)
+        all_params[context] = get_params_single_context(context,input_type)
     return all_params
 
-def get_params_single_context(context,input_type,config,params_file=None):
+
+#def get_params_single_context(context,input_type,config,params_file=None):
+#    """
+#    Run the benchmark executable to printout params and default values.
+#    """
+#    run_cmd = construct_get_param_cmd(context,input_type,config,params_file)
+#    print("run_cmd is ",run_cmd)
+#    p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
+#    output = p.communicate()[0]
+#    params = parse_param_output(output)
+#    print("OUTPUT ",output)
+#    return params
+
+def get_params_single_context(context, input_type):
     """
-    Run the benchmark executable to printout params and default values.
+    use sheep_client to get parameters for given context and input type
     """
-    run_cmd = construct_get_param_cmd(context,input_type,config,params_file)
-    print("run_cmd is ",run_cmd)
-    p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
-    output = p.communicate()[0]
-    params = parse_param_output(output)
-    print("OUTPUT ",output)
+    sheep_client.set_context(context)
+    sheep_client.set_input_type(input_type)
+    params = sheep_client.get_parameters()
     return params
-    
+
+
 def update_params(context,param_dict,appdata,appconfig):
     """
     We have received a dict of params for a given context from the web form.  
@@ -168,16 +205,20 @@ def update_params(context,param_dict,appdata,appconfig):
         ### ignore the "apply" button:
         if v=="Apply":
             continue
+        ### treat the evaluation strategy separately
+        if k=="eval_strategy":
+            appdata["eval_strategy"][context] = v
+            continue
         ### only write to file if the new param is different to the old one
         if v != old_params[k]:
             print("Writing %s %s to params file" % (k,v))
             param_file.write(k+" "+str(v)+"\n")
     param_file.close()
-    updated_params = get_params_single_context(context,appdata["input_type"],appconfig,param_filename)
+    updated_params = get_params_single_context(context,appdata["input_type"])
     param_file = open(param_filename,"w")
     if len(updated_params) == 0:  ### something went wrong, e..g.  bad set of parameters
         ### return the default params (i.e. run get_params_single_context with no params file
-        params = get_params_single_context(context, appdata["input_type"],appconfig)
+        params = get_params_single_context(context, appdata["input_type"])
         return params
     for k,v in updated_params.items():
         param_file.write(k+" "+str(v)+"\n")
