@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <unistd.h>
+#include <stdio.h>
 #include <sys/time.h>
 
 #include "sheep-server.hpp"

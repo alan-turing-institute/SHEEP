@@ -32,7 +32,6 @@ public:
         }
 	Ciphertext encrypt(Plaintext p) {
 	  if (! this->m_configured) this->configure();
-	  std::cout<<"encrypting plaintext "<<std::to_string(p)<<std::endl;
 	  this->m_ciphertext_size = sizeof(p);
 	  return p; // plaintext and ciphertext are the same for this context
 	}
