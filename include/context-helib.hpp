@@ -161,10 +161,8 @@ public:
     /// how big are keys?
     this->m_private_key_size = sizeof(*m_secretKey);
     this->m_public_key_size = sizeof(*m_publicKey);    
-
     
     if (m_bootstrap) m_secretKey->genRecryptData();
-
     
     m_ea = new EncryptedArray(*m_helib_context);
     

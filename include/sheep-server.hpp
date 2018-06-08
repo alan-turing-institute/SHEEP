@@ -39,7 +39,7 @@ struct SheepJobConfig {
   Circuit circuit;
   std::set<std::string> input_names;
   std::vector<int> input_vals;
-  std::map<std::string, long&> parameters;
+  std::map<std::string, long> parameters;
 
   void setDefaults() {
     eval_strategy = EvaluationStrategy::serial;

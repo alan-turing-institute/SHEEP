@@ -386,7 +386,7 @@ void SheepServer::handle_get_parameters(http_request message) {
     message.reply(status_codes::InternalError,("Need to set input_type and context before getting parameters"));
     return;
   }
-  std::map<std::string, long&> param_map;
+  std::map<std::string, long> param_map;
   if (m_job_config.parameters.size() == 0) { 
     /// call a function that will create a context and set m_job_config.parameters to default values
     if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context);
