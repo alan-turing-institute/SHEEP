@@ -1,10 +1,18 @@
 #ifndef SHEEP_SERVER_HPP
 #define SHEEP_SERVER_HPP
 
+/// stl includes
 #include <memory>
 #include <fstream>
 #include <map>
 
+/// cpp rest api includes
+#include "cpprest/json.h"
+#include "cpprest/http_listener.h"
+#include "cpprest/uri.h"
+#include "cpprest/asyncrt_utils.h"
+
+/// SHEEP includes
 #include "circuit.hpp"
 #include "context-clear.hpp"
 #include "context-helib.hpp"
@@ -76,6 +84,7 @@ struct SheepJobConfig {
 struct SheepJobResult {
   std::map<std::string, std::string> outputs;  /// store output values as strings so we don't worry about Plaintext type.
   std::map<std::string, std::string> timings;  /// store time values in microseconds as strings.
+  bool is_correct; /// all outputs compared with clear-context results
   json::value as_json() {
     json::value result = json::value::object();
     json::value j_outputs = json::value::object();
@@ -88,6 +97,9 @@ struct SheepJobResult {
       j_timings[map_iter->first] = json::value::string(map_iter->second);
     }
     result["timings"] = j_timings;
+    json::value clear_check = json::value::object();
+    clear_check["is_correct"] = json::value::boolean(is_correct);
+    result["cleartext check"] = clear_check;
     return result;
     
   }
@@ -113,9 +125,17 @@ public:
   template <typename PlaintextT>
   void configure_and_run();
 
+  void get_parameters();
+  
   template <typename PlaintextT>
-  void update_parameters(std::string context, std::string param="", long val=0);
+  void update_parameters(std::string context, json::value params=json::value::object());
 
+  template <typename PlaintextT>
+  bool check_job_outputs(std::vector<PlaintextT> test_outputs,
+			 std::vector<PlaintextT> clear_outputs);
+  //			 std::map<std::string, std::string> test_outputs,
+  //			 std::map<std::string, std::string> clear_outputs);
+  
 private:
   /// generic methods - will then dispatch to specific ones based on URL
 	void handle_get(http_request message);
@@ -126,7 +146,8 @@ private:
         void handle_get_input_type(http_request message);
         void handle_get_inputs(http_request message);
         void handle_get_parameters(http_request message);
-        void handle_get_config(http_request message);
+        void handle_get_eval_strategy(http_request message);
+        void handle_get_config(http_request message);  
         void handle_get_results(http_request message);    
         void handle_get_job(http_request message);
 
@@ -135,6 +156,7 @@ private:
         void handle_post_circuit(http_request message);
         void handle_post_context(http_request message);
         void handle_post_job(http_request message);
+        void handle_post_configure(http_request message);    
         void handle_post_run(http_request message);  
 
         void handle_put_parameters(http_request message);  

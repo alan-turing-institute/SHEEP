@@ -44,7 +44,8 @@ public:
         virtual std::map<std::string, long> get_parameters() = 0;
         virtual void print_sizes() = 0;
         virtual void set_parameter(std::string, long) = 0;
-
+        virtual void configure() = 0;
+  
 };
 
 // Base class - abstract interface to each library
@@ -367,8 +368,6 @@ public:
 	    std::cout<<"Setting parameter "<<map_iter->first<<" to "<<param_value<<std::endl;
 	    map_iter->second = param_value;
 	    m_param_overrides.push_back(map_iter->first);
-	    //// now configure the library
-	    //	    configure();
 	    return;
 	  }
 	}

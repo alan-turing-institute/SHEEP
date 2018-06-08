@@ -127,7 +127,6 @@ def set_parameters(param_dict):
         raise RuntimeError("Error setting parameters", r.content)
     return r
 
-
 def set_eval_strategy(strategy):
     """
     choose between serial and parallel evaluation.
@@ -139,7 +138,19 @@ def set_eval_strategy(strategy):
     if r.status_code != 200:
         raise RuntimeError("Error setting eval strategy",r.content)
     return r
-    
+
+
+def get_eval_strategy():
+    """
+    see whether the job is set to run in serial or parallel
+    """
+    r=requests.get(BASE_URI+"/eval_strategy/")
+    if r.status_code != 200:
+        raise RuntimeError("Error getting eval strategy",r.content)
+    result = json.loads(r.content.decode("utf-8"))
+    return result
+
+
 def new_job():
     """
     reset all the job configuration and results structs on the server.

@@ -7,10 +7,6 @@
 #include <random>
 #include <sys/time.h>
 
-#include "cpprest/json.h"
-#include "cpprest/http_listener.h"
-#include "cpprest/uri.h"
-#include "cpprest/asyncrt_utils.h"
 #include "sheep-server.hpp"
 
 
@@ -68,12 +64,27 @@ SheepServer::make_plaintext_inputs() {
   }
   return inputs;
 }
-
+//// populate the stored m_job_config.parameters map
+void
+SheepServer::get_parameters() {
+  if (m_job_config.parameters.size() == 0) { 
+    /// call a function that will create a context and set m_job_config.parameters to default values
+    if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context);
+    if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context);
+    if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context);
+    if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context);
+    if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context);
+    if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context);
+    if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);    
+  }
+}
 template <typename PlaintextT>
 void
 SheepServer::update_parameters(std::string context_type,
-			       std::string param_name,
-			       long param_value) {
+			       json::value parameters) {
+  //			       std::string param_name,
+  //			       long param_value) {
+
   BaseContext<PlaintextT>* context;
   if (context_type == "HElib_F2") {
     context = new ContextHElib_F2<PlaintextT>();
@@ -89,19 +100,34 @@ SheepServer::update_parameters(std::string context_type,
     throw std::runtime_error("Unknown context requested");
   }
   /// first set parameters to current values stored in the server (if any)
-  //  for ( auto map_iter = m_job_config.parameters.begin(); map_iter != m_job_config.parameters.end(); ++map_iter) {
-  //  context->set_parameter(map_iter->first, map_iter->second);
-  // }
   for (auto map_iter : m_job_config.parameters) {
     cout<<" values in job_config param map are :"<<map_iter.first<<" "<<map_iter.second<<endl;
     context->set_parameter(map_iter.first, map_iter.second);
   }
-  /// update a parameter if specified
-  if (param_name.size() > 0) context->set_parameter(param_name, param_value);
+  /// update parameters if specified
+  auto params = parameters.as_object();
+  for (auto p : params) {
+    std::string param_name = p.first;
+    long param_value = (long)(p.second.as_integer());
+    context->set_parameter(param_name, param_value);
+  }
+  /// apply the new parameters
+  context->configure();
   //update the servers param map.
   m_job_config.parameters = context->get_parameters();
   // cleanup
   delete context;
+}
+
+template <typename PlaintextT>
+bool
+SheepServer::check_job_outputs(std::vector<PlaintextT> test_outputs,
+			       std::vector<PlaintextT> clear_outputs) {
+  if (test_outputs.size() != clear_outputs.size()) return false;
+  for (int i=0; i< test_outputs.size(); i++) {
+    if (test_outputs[i] != clear_outputs[i]) return false;
+  }
+  return true;
 }
 
 template <typename PlaintextT>
@@ -134,15 +160,21 @@ SheepServer::configure_and_run() {
 								);
     m_job_result.outputs.insert(output);
   }
-  cout<<" do i have timings? "<<timings.size()<<endl;
   if (timings.size() != 3) throw std::runtime_error("Unexpected length of timing vector");
   auto encryption = std::make_pair<std::string, std::string>("encryption",std::to_string(timings[0].count()));
   m_job_result.timings.insert(encryption);
   auto evaluation = std::make_pair<std::string, std::string>("evalation",std::to_string(timings[1].count()));
   m_job_result.timings.insert(evaluation);
   auto decryption = std::make_pair<std::string, std::string>("decryption",std::to_string(timings[2].count()));
-  m_job_result.timings.insert(decryption);  
-    
+  m_job_result.timings.insert(decryption);
+
+  //// now do the plaintext evaluation
+  auto clear_context = make_context<PlaintextT>("Clear");
+  std::vector<PlaintextT> clear_output_vals = clear_context->eval_with_plaintexts(m_job_config.circuit,
+										  plaintext_inputs,
+										  timings);
+  bool is_correct = check_job_outputs<PlaintextT>(output_vals, clear_output_vals);
+  m_job_result.is_correct = is_correct;
 }
 
 void SheepServer::handle_get(http_request message)
@@ -154,8 +186,9 @@ void SheepServer::handle_get(http_request message)
   else if (path == "inputs/") return handle_get_inputs(message);  
   else if (path == "job/") return handle_get_job(message);
   else if (path == "config/") return handle_get_config(message);
-  else if (path == "results/") return handle_get_results(message);       
-  message.reply(status_codes::InternalError,("Unrecognized request"));
+  else if (path == "results/") return handle_get_results(message);
+  else if (path == "eval_strategy/") return handle_get_eval_strategy(message);
+  else message.reply(status_codes::InternalError,("Unrecognized request"));
 };
 
 void SheepServer::handle_post(http_request message)
@@ -169,7 +202,7 @@ void SheepServer::handle_post(http_request message)
   else if (path == "job/") return handle_post_job(message);
   else if (path == "circuit/") return handle_post_circuit(message);
   else if (path == "run/") return handle_post_run(message);
-  message.reply(status_codes::InternalError,("Unrecognized request"));  
+  else message.reply(status_codes::InternalError,("Unrecognized request"));  
 };
 
 
@@ -263,6 +296,18 @@ void SheepServer::handle_post_inputs(http_request message) {
       }      
     });
   message.reply(status_codes::OK);
+}
+
+
+void SheepServer::handle_get_eval_strategy(http_request message) {
+  /// get the evaluation strategy
+  json::value result = json::value::object();
+  if (m_job_config.eval_strategy == EvaluationStrategy::parallel) {
+    result["eval_strategy"] = json::value::string("parallel");
+  } else {
+    result["eval_strategy"] = json::value::string("serial");
+  }
+  message.reply(status_codes::OK, result);
 }
 
 
@@ -386,19 +431,10 @@ void SheepServer::handle_get_parameters(http_request message) {
     message.reply(status_codes::InternalError,("Need to set input_type and context before getting parameters"));
     return;
   }
-  std::map<std::string, long> param_map;
-  if (m_job_config.parameters.size() == 0) { 
-    /// call a function that will create a context and set m_job_config.parameters to default values
-    if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context);
-    if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context);
-    if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context);
-    if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context);
-    if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context);
-    if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context);
-    if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);    
-    //m_job_config.parameters = param_map;
-  }
-  param_map = m_job_config.parameters;
+  /// call the function to populate m_job_config.parameters
+  get_parameters();
+  /// build a json object out of it.
+  std::map<std::string, long> param_map = m_job_config.parameters;
   json::value result = json::value::object();
   for ( auto map_iter = param_map.begin(); map_iter != param_map.end(); ++map_iter) {
     result[map_iter->first] = json::value::number((int64_t)map_iter->second);
@@ -409,7 +445,8 @@ void SheepServer::handle_get_parameters(http_request message) {
 
 
 void SheepServer::handle_get_config(http_request message) {
-
+  /// if we haven't already got the parameters, do this now.
+  if (m_job_config.parameters.size() == 0) get_parameters();
   json::value result = m_job_config.as_json();
   message.reply(status_codes::OK, result);
 }
@@ -423,23 +460,20 @@ void SheepServer::handle_put_parameters(http_request message) {
   }
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
-	json::value val = jvalue.get();
-	auto params = val.as_object();
-	for (auto p : params) {
+	json::value params = jvalue.get();
+	/// reset our existing map
+	m_job_config.parameters.clear();
 
-	  std::string param = p.first;//.as_string();
-	  long value = p.second.as_integer();
-	  std::cout<<"setting parameter "<<p.first<<" to "<<value<<endl;
-	  if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context,param, value);
-	  else if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context,param, value);
-	  else if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context,param, value);
-	  else if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context,param, value);
-	  else if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context,param, value);
-	  else if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context,param, value);
-	  else if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context,param, value);
-	  else message.reply(status_codes::InternalError,("Unknown input type when updating parameters"));
+	if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context,params);
+	else if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context,params);
+	else if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context,params);
+	else if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context,params);
+	else if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context,params);
+	else if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context,params);
+	else if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context,params);
+	else message.reply(status_codes::InternalError,("Unknown input type when updating parameters"));
 	  	  
-	}
+	
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unable to set evaluation strategy"));
       }      

@@ -68,7 +68,7 @@ def new_test():
         app.data["input_type"] = cform.input_type.data
         app.data["HE_libraries"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
-        app.data["eval_strategy"] = {}
+        app.data["eval_strategy"] = frontend_utils.set_default_eval_strategy(app.data)
         app.data["params"] = frontend_utils.get_params_all_contexts(app.data["HE_libraries"],
                                                                     app.data["input_type"])
         return redirect(url_for("enter_parameters"))

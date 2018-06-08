@@ -100,6 +100,15 @@ def find_param_file(context,config):
     else:
         return None
 
+def set_default_eval_strategy(data):
+    """
+    for each context, set eval_strategy to 'serial' (can override later)
+    """
+    es_dict = {}
+    for context in data["HE_libraries"]:
+        es_dict[context] = "serial"    # default value
+    return es_dict
+
 
 def run_test(data):
     """
@@ -107,11 +116,7 @@ def run_test(data):
     """
     results = {} ## will be a dictionary key-ed by context
     contexts_to_run = data["HE_libraries"]
-### always run clear context, for comparison, unless we already have 4 contexts
-### in which case the outputs page would be too cluttered...
-    if len(contexts_to_run) < 4:
-        contexts_to_run.append("Clear")
-        pass
+
     for context in contexts_to_run:
         sheep_client.new_job()
         sheep_client.set_input_type(data["input_type"])
@@ -121,7 +126,6 @@ def run_test(data):
 #        sheep_client.set_parameters(data["params"][context])
         sheep_client.set_eval_strategy(data["eval_strategy"][context])
         sheep_client.run_job()
-
         results[context] = sheep_client.get_results()
     return results
         
