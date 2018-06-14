@@ -23,7 +23,7 @@ std::unique_ptr<SheepServer> g_http;
 
 void on_initialize(const string_t& address)
 {
-    // Build our listener's URI from the configured address and the hard-coded path "SheepServer/Action"
+    // Build our listener's URI from the configured address and the hard-coded path "SheepServer/"
 
     uri_builder uri(address);
     uri.append_path(U("SheepServer/"));
@@ -51,7 +51,7 @@ int main(int argc, const char** argv)
         port = argv[1];
     }
 
-    utility::string_t address = U("http://localhost:");
+    utility::string_t address = U("http://0.0.0.0:");
     address.append(port);
 
     on_initialize(address);
