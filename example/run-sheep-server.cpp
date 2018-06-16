@@ -14,7 +14,7 @@
 #include "sheep-server.hpp"
 
 using namespace std;
-using namespace web; 
+using namespace web;
 using namespace utility;
 using namespace http;
 using namespace web::http::experimental::listener;
@@ -31,7 +31,7 @@ void on_initialize(const string_t& address)
     auto addr = uri.to_uri().to_string();
 	g_http = std::unique_ptr<SheepServer>(new SheepServer(addr));
 	g_http->open().wait();
-    
+
     ucout << utility::string_t(U("Listening for requests at: ")) << addr << std::endl;
 
     return;
@@ -45,21 +45,21 @@ void on_shutdown()
 
 int main(int argc, const char** argv)
 {
-    utility::string_t port = U("34568");
+    utility::string_t port = ("34568");
     if(argc == 2)
     {
         port = argv[1];
     }
 
-    utility::string_t address = U("http://0.0.0.0:");
+    utility::string_t address = ("http://0.0.0.0:");
     address.append(port);
 
     on_initialize(address);
-    std::cout << "Press ENTER to exit." << std::endl;
 
-    std::string line;
-    std::getline(std::cin, line);
+    std::cout << "Press Ctrl+C to exit." << std::endl;
 
+    while(true) {
+    }
     on_shutdown();
     return 0;
 }
