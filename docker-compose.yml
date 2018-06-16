@@ -8,7 +8,6 @@ services:
      - "34568:34568"
     networks:
      - sheep_nw
-    command: bin/run-sheep-server
   sheep-frontend:
     build:
       context: pysheep
@@ -17,6 +16,7 @@ services:
     - "5000:5000"
     environment:
     - FLASK_CONFIGURATION=default
+    - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
     depends_on:
     - sheep-server
     networks:
@@ -29,6 +29,7 @@ services:
     - "8888:8888"
     environment:
     - SHEEP_HOME=/pysheep
+    - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
     networks:
     - sheep_nw
 

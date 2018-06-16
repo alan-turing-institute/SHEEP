@@ -97,7 +97,7 @@ RUN cd SHEEP/build; cmake ../ ; make all
 WORKDIR SHEEP/build
 EXPOSE 34568
 #CMD ["bash"]
-#CMD ["bin/run-sheep-server"]
+CMD ["bin/run-sheep-server"]
 
 #FROM sheep_dev as sheep_web
 #
