@@ -9,7 +9,6 @@ RUN apt-get -y install python-pip
 RUN apt-get -y install cmake
 RUN apt-get -y install wget
 
-
 ###### get fftw3 (needed for TFHE)
 
 RUN apt-get install -y libfftw3-dev
@@ -31,9 +30,17 @@ RUN wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
 RUN tar -xvzf ntl-10.5.0.tar.gz
 RUN cd ntl-10.5.0/src; ./configure NTL_GMP_LIP=on; make; make install
 
+###### get cpprestsdk (for the REST API)
+RUN apt-get update
+RUN apt-get -y install libssl-dev
+RUN apt-get -y install libboost-all-dev
+RUN git clone https://github.com/Microsoft/cpprestsdk.git casablanca
+RUN cd casablanca/Release; mkdir build.debug; cd build.debug; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install
+
+
 ####### install python packages for the frontend
 RUN apt-get install -y python3
-RUN apt-get install -y python3-pip 
+RUN apt-get install -y python3-pip
 
 RUN pip3 install  flask
 RUN pip3 install  wtforms
@@ -61,7 +68,7 @@ FROM sheep_base as sheep_dev
 
 ADD . SHEEP
 
-RUN cd SHEEP; git submodule init; git submodule update 
+RUN cd SHEEP; git submodule init; git submodule update
 
 
 ## build TFHE
@@ -78,33 +85,39 @@ RUN cd SHEEP/lib/tfhe/build; make; make install;
 RUN cd SHEEP/lib/HElib/src ; make clean; make;
 
 
+FROM sheep_dev as sheep
+
 #### now build SHEEP
 
 RUN rm -fr SHEEP/build
 RUN mkdir SHEEP/build
-RUN cd SHEEP/build; cmake ../ ; make all 
+RUN cd SHEEP/build; cmake ../ ; make all
 
 
+WORKDIR SHEEP/build
+EXPOSE 34568
+#CMD ["bash"]
+#CMD ["bin/run-sheep-server"]
 
-FROM sheep_dev as sheep_web
-
-### run the flask app
-
-
-
-WORKDIR SHEEP/webapp
-###
-EXPOSE 5000
-ENV FLASK_APP app.py
-ENV SHEEP_HOME /SHEEP
-###
-CMD ["python3","app.py"]
-
-FROM sheep_dev as sheep_notebook
-
-##### OR run the jupyter notebook
-
-EXPOSE 8888
-ENV SHEEP_HOME /SHEEP
-WORKDIR SHEEP/
-CMD ["jupyter", "notebook", "--allow-root","--ip", "0.0.0.0"]
+#FROM sheep_dev as sheep_web
+#
+#### run the flask app
+#
+#
+#
+#WORKDIR SHEEP/webapp
+####
+#EXPOSE 5000
+#ENV FLASK_APP app.py
+#ENV SHEEP_HOME /SHEEP
+####
+#CMD ["python3","app.py"]
+#
+#FROM sheep_dev as sheep_notebook
+#
+###### OR run the jupyter notebook
+#
+#EXPOSE 8888
+#ENV SHEEP_HOME /SHEEP
+#WORKDIR SHEEP/
+#CMD ["jupyter", "notebook", "--allow-root","--ip", "0.0.0.0"]
