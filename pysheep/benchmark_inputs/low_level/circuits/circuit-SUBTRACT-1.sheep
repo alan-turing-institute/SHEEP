@@ -1,0 +1,3 @@
+INPUTS input_0 input_1
+OUTPUTS output_0
+ input_0 input_1 SUBTRACT output_0

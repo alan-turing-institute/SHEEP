@@ -1,0 +1,6 @@
+INPUTS input_0 input_1 input_2 input_3 input_4
+OUTPUTS output_3
+ input_0 input_1 MULTIPLY output_0
+ output_0 input_2 MULTIPLY output_1
+ output_1 input_3 MULTIPLY output_2
+ output_2 input_4 MULTIPLY output_3
