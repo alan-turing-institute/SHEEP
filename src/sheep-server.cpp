@@ -13,7 +13,7 @@
 
 
 using namespace std;
-using namespace web; 
+using namespace web;
 using namespace utility;
 using namespace http;
 using namespace web::http::experimental::listener;
@@ -33,7 +33,7 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
     m_listener.support(methods::GET, std::bind(&SheepServer::handle_get, this, std::placeholders::_1));
     m_listener.support(methods::PUT, std::bind(&SheepServer::handle_put, this, std::placeholders::_1));
     m_listener.support(methods::POST, std::bind(&SheepServer::handle_post, this, std::placeholders::_1));
-   
+
 }
 
 /// templated functions to interact with the contexts.
@@ -43,9 +43,9 @@ BaseContext<PlaintextT>*
 SheepServer::make_context(std::string context_type) {
   cout<<" in make context "<<context_type<<endl;
   if (context_type == "HElib_F2") {
-    return  new ContextHElib_F2<PlaintextT>();    
+    return  new ContextHElib_F2<PlaintextT>();
   } else if (context_type == "HElib_Fp") {
-    return new ContextHElib_Fp<PlaintextT>();    
+    return new ContextHElib_Fp<PlaintextT>();
   } else if (context_type == "TFHE") {
     return  new ContextTFHE<PlaintextT>();
     //	} else if (context_type == "SEAL") {
@@ -69,7 +69,7 @@ SheepServer::make_plaintext_inputs() {
 //// populate the stored m_job_config.parameters map
 void
 SheepServer::get_parameters() {
-  if (m_job_config.parameters.size() == 0) { 
+  if (m_job_config.parameters.size() == 0) {
     /// call a function that will create a context and set m_job_config.parameters to default values
     if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context);
     if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context);
@@ -77,7 +77,7 @@ SheepServer::get_parameters() {
     if (m_job_config.input_type == "uint32_t") update_parameters<uint32_t>(m_job_config.context);
     if (m_job_config.input_type == "int8_t") update_parameters<int8_t>(m_job_config.context);
     if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context);
-    if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);    
+    if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);
   }
 }
 template <typename PlaintextT>
@@ -91,7 +91,7 @@ SheepServer::update_parameters(std::string context_type,
   if (context_type == "HElib_F2") {
     context = new ContextHElib_F2<PlaintextT>();
   } else if (context_type == "HElib_Fp") {
-    context = new ContextHElib_Fp<PlaintextT>();    
+    context = new ContextHElib_Fp<PlaintextT>();
   } else if (context_type == "TFHE") {
     context = new ContextTFHE<PlaintextT>();
     //	} else if (context_type == "SEAL") {
@@ -154,7 +154,7 @@ SheepServer::configure_and_run() {
   cout<<" finished running job !! "<<endl;
   m_job_finished = true;
   ///  store outputs values as strings, to avoid ambiguity about type.
-  for (int i=0; i < output_vals.size(); ++i ) {    
+  for (int i=0; i < output_vals.size(); ++i ) {
     std::cout<<" output_vals "<<std::to_string(output_vals[0])<<std::endl;
     auto output = std::make_pair<const std::string,std::string>(
 								m_job_config.circuit.get_outputs()[i].get_name(),
@@ -182,10 +182,10 @@ SheepServer::configure_and_run() {
 void SheepServer::handle_get(http_request message)
 {
   auto path = message.relative_uri().path();
-  if (path == "context/") return handle_get_context(message);  
+  if (path == "context/") return handle_get_context(message);
   else if (path == "parameters/") return handle_get_parameters(message);
   else if (path == "input_type/") return handle_get_input_type(message);
-  else if (path == "inputs/") return handle_get_inputs(message);  
+  else if (path == "inputs/") return handle_get_inputs(message);
   else if (path == "job/") return handle_get_job(message);
   else if (path == "config/") return handle_get_config(message);
   else if (path == "results/") return handle_get_results(message);
@@ -198,13 +198,14 @@ void SheepServer::handle_post(http_request message)
   cout<<" in handle post " <<endl;
   auto path = message.relative_uri().path();
   cout<<" path is "<<path<<endl;
-  if (path == "context/") return handle_post_context(message);  
+  if (path == "context/") return handle_post_context(message);
   else if (path == "input_type/") return handle_post_input_type(message);
-  else if (path == "inputs/") return handle_post_inputs(message);  
+  else if (path == "inputs/") return handle_post_inputs(message);
   else if (path == "job/") return handle_post_job(message);
+  else if (path == "circuitfile/") return handle_post_circuitfile(message);
   else if (path == "circuit/") return handle_post_circuit(message);
   else if (path == "run/") return handle_post_run(message);
-  else message.reply(status_codes::InternalError,("Unrecognized request"));  
+  else message.reply(status_codes::InternalError,("Unrecognized request"));
 };
 
 
@@ -212,14 +213,14 @@ void SheepServer::handle_put(http_request message)
 {
   auto path = message.relative_uri().path();
   if (path == "parameters/") return handle_put_parameters(message);
-  else if (path == "eval_strategy/") return handle_put_eval_strategy(message); 
+  else if (path == "eval_strategy/") return handle_put_eval_strategy(message);
   message.reply(status_codes::OK);
 };
 
 /////////////////////////////////////////////////////////////////////
 
 void SheepServer::handle_post_run(http_request message) {
-  
+
   /// get a context, configure it with the stored
   /// parameters, and run it.
   cout<<"Will run job! now"<<endl;
@@ -229,21 +230,41 @@ void SheepServer::handle_post_run(http_request message) {
   else if (m_job_config.input_type == "uint32_t") configure_and_run<uint32_t>();
   else if (m_job_config.input_type == "int8_t") configure_and_run<int8_t>();
   else if (m_job_config.input_type == "int16_t") configure_and_run<int16_t>();
-  else if (m_job_config.input_type == "int32_t") configure_and_run<int32_t>();  
+  else if (m_job_config.input_type == "int32_t") configure_and_run<int32_t>();
   message.reply(status_codes::OK);
 }
 
 
-
 void SheepServer::handle_post_circuit(http_request message) {
+  ///
+  cout<<"in handle circuit" <<endl;
+  message.extract_json().then([=](pplx::task<json::value> jvalue) {
+      try {
+	json::value val = jvalue.get();
+	auto circuit = val["circuit"].as_string();
+        std::stringstream circuit_stream((std::string)circuit);
+	  /// create the circuit
+	Circuit C;
+	circuit_stream >> C;
+	cout << C;
+	m_job_config.circuit = C;
+
+      } catch(json::json_exception) {
+	  message.reply(status_codes::InternalError,("Unrecognized circuit request"));
+      }
+    });
+  message.reply(status_codes::OK);
+}
+
+
+void SheepServer::handle_post_circuitfile(http_request message) {
   /// set circuit filename to use
-  cout<<" in handle post circuit" <<endl;
+  cout<<" in handle post circuitfile" <<endl;
   bool found_circuit = false;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
 	json::value val = jvalue.get();
 	auto circuit_filename = val["circuit_filename"].as_string();
-	std::cout<<" circuit is "<<circuit_filename<<std::endl;
 	m_job_config.circuit_filename = circuit_filename;
          /// check that the file exists.
         std::ifstream circuit_file(std::string(m_job_config.circuit_filename));
@@ -257,18 +278,16 @@ void SheepServer::handle_post_circuit(http_request message) {
 	}
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unrecognized circuit_filename request"));
-      }      
+      }
     });
   message.reply(status_codes::OK);
 }
 
 void SheepServer::handle_get_inputs(http_request message) {
-  
-  /// check again that the circuitfile exists.
-  std::ifstream circuit_file(std::string(m_job_config.circuit_filename));
-  cout<<" is file good? "<<circuit_file.good()<<endl;
-  if (! circuit_file.good())
-    message.reply(status_codes::InternalError,("Circuit file not found"));
+
+  /// check again that the circuit exists.
+  //  if (! circuit_file.good())
+  //   message.reply(status_codes::InternalError,("Circuit file not found"));
   json::value result = json::value::object();
   json::value inputs = json::value::array();
   int index = 0;
@@ -295,7 +314,7 @@ void SheepServer::handle_post_inputs(http_request message) {
 	}
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unrecognized inputs"));
-      }      
+      }
     });
   message.reply(status_codes::OK);
 }
@@ -325,7 +344,7 @@ void SheepServer::handle_get_context(http_request message) {
     index++;
   }
   result["contexts"] = context_list;
-  
+
   message.reply(status_codes::OK, result);
 }
 
@@ -340,7 +359,7 @@ void SheepServer::handle_get_input_type(http_request message) {
     type_list[index] = json::value::string(*typeIter);
     index++;
   }
-  result["input_types"] = type_list;  
+  result["input_types"] = type_list;
   message.reply(status_codes::OK, result);
 }
 
@@ -359,7 +378,7 @@ void SheepServer::handle_post_context(http_request message) {
 	}
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unrecognized context request"));
-      }      
+      }
     });
   message.reply(status_codes::OK);
 }
@@ -375,7 +394,7 @@ void SheepServer::handle_post_input_type(http_request message) {
 	m_job_config.input_type = input_type;
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unrecognized context request"));
-      }      
+      }
     });
   message.reply(status_codes::OK);
 }
@@ -388,14 +407,14 @@ void SheepServer::handle_put_eval_strategy(http_request message) {
 	json::value val = jvalue.get();
 	auto eval_strategy = val["eval_strategy"].as_string();
 	std::cout<<" eval_strategy is "<<eval_strategy<<std::endl;
-	if (eval_strategy == "parallel") 
+	if (eval_strategy == "parallel")
 	  m_job_config.eval_strategy = EvaluationStrategy::parallel;
 	else
-	  m_job_config.eval_strategy = EvaluationStrategy::serial;	  
-	
+	  m_job_config.eval_strategy = EvaluationStrategy::serial;
+
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unable to set evaluation strategy"));
-      }      
+      }
     });
   message.reply(status_codes::OK);
 }
@@ -424,7 +443,7 @@ void SheepServer::handle_post_job(http_request message) {
 
 
 void SheepServer::handle_get_parameters(http_request message) {
-  
+
   /// if the job_config has some parameters set, then return them.
   /// Otherwise, create a new context, and get the default parameters.
   /// return a dict of parameters.
@@ -441,8 +460,8 @@ void SheepServer::handle_get_parameters(http_request message) {
   for ( auto map_iter = param_map.begin(); map_iter != param_map.end(); ++map_iter) {
     result[map_iter->first] = json::value::number((int64_t)map_iter->second);
   }
-  
-  message.reply(status_codes::OK, result);  
+
+  message.reply(status_codes::OK, result);
 }
 
 
@@ -474,13 +493,13 @@ void SheepServer::handle_put_parameters(http_request message) {
 	else if (m_job_config.input_type == "int16_t") update_parameters<int16_t>(m_job_config.context,params);
 	else if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context,params);
 	else message.reply(status_codes::InternalError,("Unknown input type when updating parameters"));
-	  	  
-	
+
+
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unable to set evaluation strategy"));
-      }      
+      }
     });
-  
+
   message.reply(status_codes::OK);
 }
 
@@ -492,6 +511,3 @@ void SheepServer::handle_get_results(http_request message) {
 
   message.reply(status_codes::OK, result);
 }
-
-
-

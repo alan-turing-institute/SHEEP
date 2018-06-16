@@ -9,26 +9,19 @@ import os
 import sys
 import time
 
-if "SHEEP_HOME" in os.environ.keys():
-    SHEEP_HOME = os.environ["SHEEP_HOME"]
-else:
-    SHEEP_HOME = os.environ["HOME"]+"/SHEEP"
-    
-EXECUTABLE_DIR = os.path.join(SHEEP_HOME, "build", "bin")
-UPLOAD_FOLDER = os.path.join(SHEEP_HOME, "webapp", "uploads")
-sys.path.append(SHEEP_HOME)
+import config
+
+app = Flask(__name__)
+app.config.from_object(config.SheepConfig)
+sys.path.append(app.config["SHEEP_HOME"])
 
 from pysheep.frontend.forms import CircuitForm, ResultsForm, PlotsForm, \
     build_inputs_form, build_param_form
 from pysheep.frontend import frontend_utils
 from pysheep.interface import sheep_client
-
-
 from pysheep.common import common_utils, database
 
-app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["EXECUTABLE_DIR"] = EXECUTABLE_DIR
+
 # how do we keep information throughout the lifetime of the app?  Give the app a data dict.
 app.data = {}
 
@@ -61,7 +54,7 @@ def new_test():
     cform.HE_library.choices=[(l,l) for l in libraries]    
     if request.method == "POST":
         uploaded_filenames = frontend_utils.upload_files(request.files, app.config["UPLOAD_FOLDER"])
-        sheep_client.set_circuit_filename(uploaded_filenames["circuit_file"])
+        sheep_client.set_circuit(uploaded_filenames["circuit_file"])
         time.sleep(0.1)
         inputs = sheep_client.get_inputs()
         app.data["inputs"] = inputs

@@ -54,9 +54,9 @@ struct SheepJobConfig {
   }
   bool isConfigured() {
     return ((context.size() > 0) &&
-	    (input_type.size() > 0) &&	    
+	    (input_type.size() > 0) &&
     	    (circuit.get_inputs().size() > 0) &&
-	    (input_vals.size() == circuit.get_inputs().size())); 
+	    (input_vals.size() == circuit.get_inputs().size()));
   }
   json::value as_json() {
     json::value config = json::value::object();
@@ -101,7 +101,7 @@ struct SheepJobResult {
     clear_check["is_correct"] = json::value::boolean(is_correct);
     result["cleartext check"] = clear_check;
     return result;
-    
+
   }
 };
 
@@ -126,7 +126,7 @@ public:
   void configure_and_run();
 
   void get_parameters();
-  
+
   template <typename PlaintextT>
   void update_parameters(std::string context, json::value params=json::value::object());
 
@@ -135,7 +135,7 @@ public:
 			 std::vector<PlaintextT> clear_outputs);
   //			 std::map<std::string, std::string> test_outputs,
   //			 std::map<std::string, std::string> clear_outputs);
-  
+
 private:
   /// generic methods - will then dispatch to specific ones based on URL
 	void handle_get(http_request message);
@@ -147,20 +147,21 @@ private:
         void handle_get_inputs(http_request message);
         void handle_get_parameters(http_request message);
         void handle_get_eval_strategy(http_request message);
-        void handle_get_config(http_request message);  
-        void handle_get_results(http_request message);    
+        void handle_get_config(http_request message);
+        void handle_get_results(http_request message);
         void handle_get_job(http_request message);
 
-        void handle_post_inputs(http_request message);    
+        void handle_post_inputs(http_request message);
         void handle_post_input_type(http_request message);
         void handle_post_circuit(http_request message);
+        void handle_post_circuitfile(http_request message);
         void handle_post_context(http_request message);
         void handle_post_job(http_request message);
-        void handle_post_configure(http_request message);    
-        void handle_post_run(http_request message);  
+        void handle_post_configure(http_request message);
+        void handle_post_run(http_request message);
 
-        void handle_put_parameters(http_request message);  
-        void handle_put_eval_strategy(http_request message);  
+        void handle_put_parameters(http_request message);
+        void handle_put_eval_strategy(http_request message);
   /// listen to http requests
 	http_listener m_listener;
   /// structs to store the configuration and results of a test.

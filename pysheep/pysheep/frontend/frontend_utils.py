@@ -121,7 +121,7 @@ def run_test(data):
         sheep_client.new_job()
         sheep_client.set_input_type(data["input_type"])
         sheep_client.set_context(context)
-        sheep_client.set_circuit_filename(data["uploaded_filenames"]["circuit_file"])
+        sheep_client.set_circuit(data["uploaded_filenames"]["circuit_file"])
         sheep_client.set_inputs(data["input_vals"])
 #        sheep_client.set_parameters(data["params"][context])
         sheep_client.set_eval_strategy(data["eval_strategy"][context])
@@ -240,12 +240,12 @@ def upload_test_result(results,app_data):
         ### see if it follows naming convention for a low-level benchmark test
         circuit_path = app_data["uploaded_filenames"]["circuit_file"]
         circuit_name, num_inputs = common_utils.get_circuit_name(circuit_path)
-        execution_time = result["Processing times (s)"]["circuit_evaluation"]
+        execution_time = result["timings"]["evaluation"]
         is_correct = result["Cleartext check"]["is_correct"]
-        sizes = result["Object sizes (bytes)"]                    
-        ciphertext_size = sizes["ciphertext"]
-        public_key_size = sizes["publicKey"]
-        private_key_size = sizes["privateKey"]
+#        sizes = result["Object sizes (bytes)"]                    
+#        ciphertext_size = sizes["ciphertext"]
+#        public_key_size = sizes["publicKey"]
+#        private_key_size = sizes["privateKey"]
         param_dict = result["Parameter values"]    
         cm = BenchmarkMeasurement(
             circuit_name = circuit_name,
