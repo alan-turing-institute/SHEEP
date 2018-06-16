@@ -1,7 +1,0 @@
-INPUTS input_0 select_0 input_1 select_1 input_2 select_2 input_3 select_3 input_4 select_4 input_5
-OUTPUTS output_4
- select_0 input_0 input_1 SELECT output_0
- select_1 output_0 input_2 SELECT output_1
- select_2 output_1 input_3 SELECT output_2
- select_3 output_2 input_4 SELECT output_3
- select_4 output_3 input_5 SELECT output_4

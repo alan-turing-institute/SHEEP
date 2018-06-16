@@ -1,6 +1,0 @@
-INPUTS input_0
-OUTPUTS output_3
- input_0 NEGATE output_0
- output_0 NEGATE output_1
- output_1 NEGATE output_2
- output_2 NEGATE output_3
