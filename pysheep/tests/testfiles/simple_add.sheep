@@ -1,3 +1,0 @@
-INPUTS a b
-OUTPUTS c
-a b ADD c
