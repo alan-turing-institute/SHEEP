@@ -1,0 +1,37 @@
+version: '3'
+services:
+  sheep-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+     - "34568:34568"
+    networks:
+     - sheep_nw
+    command: bin/run-sheep-server
+  sheep-frontend:
+    build:
+      context: pysheep
+      dockerfile: Dockerfile.frontend
+    ports:
+    - "5000:5000"
+    environment:
+    - FLASK_CONFIGURATION=default
+    depends_on:
+    - sheep-server
+    networks:
+    - sheep_nw
+  sheep-notebook:
+    build:
+      context: pysheep
+      dockerfile: Dockerfile.notebook
+    ports:
+    - "8888:8888"
+    environment:
+    - SHEEP_HOME=/pysheep
+    networks:
+    - sheep_nw
+
+networks:
+  sheep_nw:
+    driver: bridge
