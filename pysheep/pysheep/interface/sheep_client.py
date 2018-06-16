@@ -4,10 +4,14 @@
 python functions to communicate with the Sheep server (C++ REST API)
 """
 
+import os
 import requests
 import json
 
-BASE_URI = "http://localhost:34568/SheepServer"
+if "SERVER_URL_BASE" in os.environ.keys():
+    BASE_URI = os.environ["SERVER_URL_BASE"]
+else:
+    BASE_URI = "http://localhost:34568/SheepServer"
 
 def is_configured():
     """
@@ -102,10 +106,23 @@ def set_circuit_filename(circuit_filename):
     """
     Specify full path to circuit filename.
     """
-    r = requests.post(BASE_URI+"/circuit/",
+    r = requests.post(BASE_URI+"/circuitfile/",
                       json={"circuit_filename": circuit_filename})
     if r.status_code != 200:
         raise RuntimeError("Error setting circuit_Filename to {}".format(circuit_filename))
+    return r
+
+
+def set_circuit(circuit_filename):
+    """
+    Read the circuit and pass it to the server as a string.
+    """
+    if not os.path.exists(circuit_filename):
+        raise RuntimeError("Circuit file not found")
+    r = requests.post(BASE_URI+"/circuit/",
+                      json={"circuit": open(circuit_filename).read()})
+    if r.status_code != 200:
+        raise RuntimeError("Error setting circuit {}".format(circuit_filename))
     return r
 
 
