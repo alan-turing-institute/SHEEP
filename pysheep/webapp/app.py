@@ -1,5 +1,5 @@
 """
-Flask app for SHEEP.   Allow user to view table of results, or upload a new circuit file and run a test 
+Flask app for SHEEP.   Allow user to view table of results, or upload a new circuit file and run a test
 """
 
 from flask import Flask, render_template, request, redirect, url_for
@@ -37,8 +37,8 @@ def homepage():
 @app.route("/new_test",methods=["POST","GET"])
 def new_test():
     """
-    Get the user to upload a circuit file and parameter, 
-    and select input type, and 
+    Get the user to upload a circuit file and parameter,
+    and select input type, and
     which HE libs to use.
     """
     ###
@@ -51,7 +51,7 @@ def new_test():
     ## create the form to choose circuit file, input_type, and which HE libraries to test
     cform = CircuitForm(request.form)#, libraries, input_types)
     cform.input_type.choices=[(t,t) for t in input_types]
-    cform.HE_library.choices=[(l,l) for l in libraries]    
+    cform.HE_library.choices=[(l,l) for l in libraries]
     if request.method == "POST":
         uploaded_filenames = frontend_utils.upload_files(request.files, app.config["UPLOAD_FOLDER"])
         sheep_client.set_circuit(uploaded_filenames["circuit_file"])
@@ -90,7 +90,7 @@ def enter_parameters():
                                              app.data,app.config)
                 app.data["params"][context] = params
                 return redirect(url_for("enter_parameters"))
-                
+
         param_sets = {}
         for k,v in pforms.items():
             param_sets[k] = v.data
@@ -99,37 +99,11 @@ def enter_parameters():
             return redirect(url_for("enter_input_vals"))
     return render_template("enter_parameters.html",forms=pforms)
 
-#@app.route("/enter_eval_strategy",methods=["POST","GET"])
-#def enter_eval_strategy():
-#    """
-#    set whether to run the evaluation in serial or parallel (with TBB)
-#    """
-#    
-#    esforms = {}
-#    for context in app.data["HE_libraries"].keys():
-#        esform = build_param_form(params[context])(request.form)
-#        esforms[context] = pform
-#    if request.method == "POST":
-#        for context in esforms.keys():
-#            if context in request.form.keys():
-#                params = frontend_utils.update_params(context,request.form,
-#                                             app.data,app.config)
-#                app.data["params"][context] = params
-#                return redirect(url_for("enter_parameters"))
-#                
-#        param_sets = {}
-#        for k,v in pforms.items():
-#            param_sets[k] = v.data
-#            pass
-#        if request.form["next"] == "Next":
-#            return redirect(url_for("enter_input_vals"))
-#    return render_template("enter_parameters.html",forms=pforms)
-
 
 @app.route("/enter_input_vals",methods=["POST","GET"])
 def enter_input_vals():
     """
-    based on the input identifiers parsed from the circuit file, prompt the 
+    based on the input identifiers parsed from the circuit file, prompt the
     user for the input values.
     """
     iform = build_inputs_form(app.data["inputs"])(request.form)
@@ -138,26 +112,10 @@ def enter_input_vals():
         input_vals = iform.data
         if common_utils.check_inputs(input_vals, app.data["input_type"]):
             app.data["input_vals"] = input_vals
-#            app.data["uploaded_filenames"]["inputs_file"] = \
-#                    common_utils.write_inputs_file(input_vals,
-#                                                     app.config["UPLOAD_FOLDER"])
             return redirect(url_for("execute_test"))
     return render_template("enter_input_vals.html",
                            form=iform,
                            circuit=circuit_text)
-
-
-#@app.route("/view_results_plots",methods=["POST","GET"])
-#def results_plots():
-#    """
-#    plots, using nvd3 (i.e. D3.js with a Python wrapper)
-#    """
-#    pform = PlotsForm(request.form)
-#    if request.method == "POST":
-#        inputs = pform.data
-#        filename = plotting.generate_plots(inputs)
-#        return render_template(filename)
-#    return render_template("result_plots_query.html",form=pform)
 
 
 @app.route("/execute_test",methods=["POST","GET"])
@@ -166,11 +124,11 @@ def execute_test():
     actually run the executable, passing it all the filenames, options etc as arguments.
     Get back a dict of results {"context_name": {"processing_times" : {},
                                                  "sizes" : {},
-                                                 "outputs" : {} 
+                                                 "outputs" : {}
                                                 }, ...
                                 }
     """
-    results = frontend_utils.run_test(app.data)   
+    results = frontend_utils.run_test(app.data)
     if request.method == "POST":  ### upload button was pressed
         frontend_utils.upload_test_result(results,app.data)
         return render_template("uploaded_ok.html")
