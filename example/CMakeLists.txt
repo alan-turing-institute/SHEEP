@@ -11,7 +11,7 @@ add_executable(simple-circuit-maker
                  simple-circuit-maker.cpp
 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-add_executable(bitonic-sorting-circuit		
+add_executable(bitonic-sorting-circuit
     		   bitonic-sorting-circuit.cpp
   		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
   		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
@@ -35,7 +35,7 @@ if (HELIB_FOUND)
     target_link_libraries(helib-context-example
                             ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 
-    add_executable(bitonic-sort-helib	       
+    add_executable(bitonic-sort-helib
     		   bitonic-sort-helib.cpp
   		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
   		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
@@ -73,25 +73,25 @@ if (TFHE_FOUND)
 
 endif(TFHE_FOUND)
 
-#if (SEAL_FOUND)
-#    add_executable(seal-example
-#                     seal-example.cpp
-#		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#    add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
-#    target_link_libraries(seal-example
-#                            ${SEAL_LIBRARIES})
-#
-#    add_executable(seal-param-selector
-#                     seal-param-selector.cpp)
-#    target_link_libraries(seal-param-selector
-#                            ${SEAL_LIBRARIES})
-#
-#endif(SEAL_FOUND)
+if (SEAL_FOUND)
+    add_executable(seal-example
+                     seal-example.cpp
+		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
+    target_link_libraries(seal-example
+                            ${SEAL_LIBRARIES})
+
+    add_executable(seal-param-selector
+                     seal-param-selector.cpp)
+    target_link_libraries(seal-param-selector
+                            ${SEAL_LIBRARIES})
+
+endif(SEAL_FOUND)
 
 
 
-if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
-    add_executable(benchmark		       
+if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
+    add_executable(benchmark
     		  benchmark.cpp
                   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 		  )
@@ -100,7 +100,7 @@ if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
 				${NTL_LIBRARIES}
 				${GMP_LIBRARIES}
 				${TFHE_LIBRARIES}
-				# ${SEAL_LIBRARIES}
+				${SEAL_LIBRARIES}
 		  		cpprestsdk::cpprest
 		  		${CMAKE_THREAD_LIBS_INIT}
 		  		${Boost_LIBRARIES}
@@ -109,9 +109,9 @@ if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
 
     add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
-    add_executable(run-sheep-server		       
+    add_executable(run-sheep-server
     		  run-sheep-server.cpp
-                  ${CMAKE_SOURCE_DIR}/src/sheep-server.cpp		  
+                  ${CMAKE_SOURCE_DIR}/src/sheep-server.cpp
                   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 		  )
     target_link_libraries(run-sheep-server
@@ -119,7 +119,7 @@ if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
 				${NTL_LIBRARIES}
 				${GMP_LIBRARIES}
 				${TFHE_LIBRARIES}
-				# ${SEAL_LIBRARIES}
+				${SEAL_LIBRARIES}
 		  		cpprestsdk::cpprest
 		  		${CMAKE_THREAD_LIBS_INIT}
 		  		${Boost_LIBRARIES}
@@ -128,4 +128,4 @@ if (HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
 
     add_test(NAME run-sheep-server COMMAND $<TARGET_FILE:run-sheep-server>)
 
-endif(HELIB_FOUND AND TFHE_FOUND) # AND SEAL_FOUND)
+endif(HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)

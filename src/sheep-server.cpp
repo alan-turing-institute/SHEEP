@@ -48,8 +48,8 @@ SheepServer::make_context(std::string context_type) {
     return new ContextHElib_Fp<PlaintextT>();
   } else if (context_type == "TFHE") {
     return  new ContextTFHE<PlaintextT>();
-    //	} else if (context_type == "SEAL") {
-    //    return  new ContextSeal<PlaintextT>();
+  } else if (context_type == "SEAL") {
+    return  new ContextSeal<PlaintextT>();
   } else if (context_type == "Clear") {
     return new ContextClear<PlaintextT>();
   } else {
@@ -94,8 +94,8 @@ SheepServer::update_parameters(std::string context_type,
     context = new ContextHElib_Fp<PlaintextT>();
   } else if (context_type == "TFHE") {
     context = new ContextTFHE<PlaintextT>();
-    //	} else if (context_type == "SEAL") {
-    //    context = new ContextSeal<PlaintextT>();
+  } else if (context_type == "SEAL") {
+    context = new ContextSeal<PlaintextT>();
   } else if (context_type == "Clear") {
     context = new ContextClear<PlaintextT>();
   } else {

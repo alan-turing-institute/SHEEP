@@ -17,7 +17,7 @@
 #include "context-clear.hpp"
 #include "context-helib.hpp"
 #include "context-tfhe.hpp"
-//#include "context-seal.hpp"
+#include "context-seal.hpp"
 
 
 using namespace web;
@@ -28,6 +28,7 @@ using namespace http::experimental::listener;
 static std::vector<std::string> available_contexts = {"HElib_Fp",
 						      "HElib_F2",
 						      "TFHE",
+						      "SEAL",
 						      "Clear"};
 
 static std::vector<std::string> available_input_types = {"bool",
