@@ -25,6 +25,8 @@ services:
     build:
       context: pysheep
       dockerfile: Dockerfile.notebook
+    depends_on:
+    - sheep-server
     ports:
     - "8888:8888"
     environment:
