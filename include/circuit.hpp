@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <map>
+#include <unordered_set>
 
 enum class Gate {Alias, Identity, Multiply, Maximum, Add, Subtract, Negate, Compare, Select, MultByConstant, AddConstant};
 
@@ -66,19 +67,47 @@ bool operator==(const Assignment&, const Assignment&);
 bool operator!=(const Assignment&, const Assignment&);
 
 
+struct MultipleAssignmentError : public std::runtime_error {
+	const std::string name;
+	MultipleAssignmentError(std::string name_)
+		: name(name_),
+		  std::runtime_error("Multiple assignment to wire named '" + name_ + "'")
+	{ };
+};
+
+struct UndefinedVariableError : public std::runtime_error {
+	const std::string name;
+	UndefinedVariableError(std::string name_)
+		: name(name_),
+		  std::runtime_error("A wire with name '" + name_ + "' has not yet been defined.")
+	{ };
+};
+
 class Circuit {
 public:
 	typedef Assignment::WireList WireList;
 	typedef std::vector<Assignment> AssignmentList;
 private:
+	// The unordered_sets of their names allow efficient lookup
+	// for validation of the circuit.  Contains names found in
+	// 'inputs' and 'wires'.
+	std::unordered_set<std::string> wire_names;
+
 	WireList inputs;
 	WireList wires;
+
 	WireList outputs;
+
         WireList const_inputs;
 	AssignmentList assignments;
 public:
 
 	Wire add_input(std::string name) {
+		std::unordered_set<std::string>::iterator it_ignored;
+		bool inserted;
+		std::tie(it_ignored, inserted) = wire_names.insert(name);
+		if (!inserted) throw MultipleAssignmentError(name);
+		
 		inputs.emplace_back(name);
 		return inputs.back();
 	}
@@ -90,13 +119,29 @@ public:
 
 	template <typename... Wires>
 	Wire add_assignment(std::string name, Gate op, Wires... ws) {
+		std::unordered_set<std::string>::iterator it_ignored;
+		bool inserted;
+		std::tie(it_ignored, inserted) = wire_names.insert(name);
+		if (!inserted) throw MultipleAssignmentError(name);
+		
 		wires.emplace_back(name);
 		Wire output = wires.back();
-		assignments.emplace_back(output, op, ws...);
+
+		Assignment assgn(output, op, ws...);
+		for (auto assgn_in : assgn.get_inputs()) {
+			if (wire_names.count(assgn_in.get_name()) == 0) {
+				throw UndefinedVariableError(assgn_in.get_name());
+			}
+		}
+		assignments.push_back(std::move(assgn));
+		
 	        return output;
 	}
 
 	void set_output(Wire w) {
+		if (wire_names.count(w.get_name()) == 0) {
+			throw UndefinedVariableError(w.get_name());
+		}
 		outputs.emplace_back(w);
 	}
 
