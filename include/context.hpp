@@ -16,6 +16,7 @@
 #ifdef HAVE_TBB
 #include "tbb/concurrent_unordered_map.h"
 #include "tbb/flow_graph.h"
+#include "tbb/atomic.h"
 #endif // HAVE_TBB
 
 #include "circuit.hpp"
@@ -203,7 +204,8 @@ public:
 	template <typename InputContainer, typename OutputContainer>
 	microsecond parallel_eval(const Circuit& circ,
 				  const InputContainer& input_vals,
-				  OutputContainer& output_vals)
+				  OutputContainer& output_vals,
+				  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 #ifdef HAVE_TBB
 		using namespace tbb::flow;
@@ -240,9 +242,19 @@ public:
 		// required name into eval_map.
 
 		decltype((high_res_clock::now())) start_time;
-		
+
+		tbb::atomic<bool> circuit_timed_out = false;
+		// the following two variables are only to be written
+		// to from a single thread.  This is enforced by a
+		// check of circuit_timed_out, which is written to
+		// exactly once.
+		std::string timeout_gate_name;
+		microsecond timeout_wall_time;
+
 		for (const Assignment assn : circ.get_assignments()) {
-			auto current_eval = [=,&eval_map](const continue_msg&) {
+			auto current_eval = [=,&eval_map,&circuit_timed_out,
+					     &timeout_gate_name,&timeout_wall_time,&start_time
+				](const continue_msg&) {
 				std::vector<Ciphertext> inputs;
 				std::transform(assn.get_inputs().begin(),
 					       assn.get_inputs().end(),
@@ -251,9 +263,21 @@ public:
 						       // throws out_of_range if not present in the map
 						       return eval_map.at(w.get_name());
 					       });
-				
+
 				Ciphertext output = dispatch(assn.get_op(), inputs);
 				eval_map.insert({assn.get_output().get_name(), output});
+
+				microsecond wall_time = high_res_clock::now() - start_time;
+				if (timeout.count() > 0.0
+				    && wall_time > timeout
+				    && !circuit_timed_out.fetch_and_store(true))
+					// last condition ensures the body of the conditional is
+					// only entered from one thread.
+				{
+					timeout_gate_name = assn.get_output().get_name();
+					timeout_wall_time = wall_time;
+					tbb::task::self().group()->cancel_group_execution();
+				}
 			};
 			node_map.insert({assn.get_output().get_name(),
 						continue_node<continue_msg>(DAG, current_eval)});
@@ -273,9 +297,11 @@ public:
 		{
 			node_map.at(input_wires_it->get_name()).try_put(continue_msg());
 		}
-		
+
 		DAG.wait_for_all();
-	       
+
+		if (circuit_timed_out) throw TimeoutException(timeout_gate_name, timeout_wall_time);
+
 		auto end_time = high_res_clock::now();
 		microsecond duration = microsecond(end_time - start_time);
 
@@ -291,7 +317,7 @@ public:
 		throw std::runtime_error("SHEEP was not compiled with TBB, so parallel evaluation is not available.");
 #endif // HAVE_TBB
 	}
-	
+
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
 		using std::placeholders::_2;
@@ -317,7 +343,7 @@ public:
 		auto enc_end_time = high_res_clock::now();
 		durations.push_back(microsecond(enc_end_time - enc_start_time));
 
-		//// evaluate the circuit	  
+		//// evaluate the circuit
 		std::vector<Ciphertext> ciphertext_outputs;
 		microsecond eval_duration;
 		switch (eval_strategy) {
@@ -325,7 +351,7 @@ public:
 			eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
 			break;
 		case EvaluationStrategy::parallel:
-			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs);
+			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
 			break;
 		default:
 			std::runtime_error("eval_with_plaintexts: Unknown evaluation strategy");
@@ -337,7 +363,7 @@ public:
 		std::vector<Plaintext> plaintext_outputs;
 		for (auto ct : ciphertext_outputs) plaintext_outputs.push_back(decrypt(ct));
 		auto dec_end_time = high_res_clock::now();
-		durations.push_back(microsecond(dec_end_time - dec_start_time));	  
+		durations.push_back(microsecond(dec_end_time - dec_start_time));
 
 		return plaintext_outputs;
 	}
@@ -353,17 +379,17 @@ public:
 
 	virtual void read_params_from_file(std::string filename) {
 	  std::ifstream inputstream(filename);
-	  
+
 	  if (inputstream.bad()) {
 	    std::cout<<"Empty or non-existent input file"<<std::endl;
 	  }
-	  
-	  /// loop over all lines in the input file 
+
+	  /// loop over all lines in the input file
 	  std::string line;
 	  while (std::getline(inputstream, line) ) {
 	    /// remove comments (lines starting with #) and empty lines
 	    int found= line.find_first_not_of(" \t");
-	    if( found != std::string::npos) {   
+	    if( found != std::string::npos) {
 	      if ( line[found] == '#') 
 		continue;
 	      
