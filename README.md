@@ -41,16 +41,11 @@ In its current state, the SHEEP platform does not provide a complete solution to
 
 ## Installation - docker
 
-Assuming you have docker installed, clone this repo and then do
-```
-git submodule init
-git submodule update
-```
-Then (assuming you have Docker):
+Assuming you have docker installed, from this directory, do:
 ```
 docker-compose build
 ```
-This will build three docker images: one for the "server", one for a web-based frontend, and one for some Jupyter notebooks containing examples
+This will build three Docker images: one for the "server", one for a web-based frontend, and one for some Jupyter notebooks containing examples
 of SHEEP usage.
 
 To run the web frontend, do:

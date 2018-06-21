@@ -42,16 +42,22 @@ template <typename PlaintextT>
 BaseContext<PlaintextT>*
 SheepServer::make_context(std::string context_type) {
   cout<<" in make context "<<context_type<<endl;
-  if (context_type == "HElib_F2") {
+  if (context_type == "Clear") {
+    return new ContextClear<PlaintextT>();
+#ifdef HAVE_HElib
+  } else if (context_type == "HElib_F2") {
     return  new ContextHElib_F2<PlaintextT>();
   } else if (context_type == "HElib_Fp") {
     return new ContextHElib_Fp<PlaintextT>();
+#endif
+#ifdef HAVE_TFHE
   } else if (context_type == "TFHE") {
     return  new ContextTFHE<PlaintextT>();
+#endif
+#ifdef HAVE_SEAL
   } else if (context_type == "SEAL") {
     return  new ContextSeal<PlaintextT>();
-  } else if (context_type == "Clear") {
-    return new ContextClear<PlaintextT>();
+#endif
   } else {
     throw std::runtime_error("Unknown context requested");
   }
@@ -88,16 +94,22 @@ SheepServer::update_parameters(std::string context_type,
   //			       long param_value) {
 
   BaseContext<PlaintextT>* context;
-  if (context_type == "HElib_F2") {
-    context = new ContextHElib_F2<PlaintextT>();
+  if (context_type == "Clear") {
+    context = new ContextClear<PlaintextT>();
+#ifdef HAVE_HElib
   } else if (context_type == "HElib_Fp") {
     context = new ContextHElib_Fp<PlaintextT>();
+  } else if (context_type == "HElib_F2") {
+    context = new ContextHElib_F2<PlaintextT>();
+#endif
+#ifdef HAVE_TFHE
   } else if (context_type == "TFHE") {
     context = new ContextTFHE<PlaintextT>();
+#endif
+#ifdef HAVE_SEAL
   } else if (context_type == "SEAL") {
     context = new ContextSeal<PlaintextT>();
-  } else if (context_type == "Clear") {
-    context = new ContextClear<PlaintextT>();
+#endif
   } else {
     throw std::runtime_error("Unknown context requested");
   }
@@ -337,8 +349,8 @@ void SheepServer::handle_get_context(http_request message) {
   json::value result = json::value::object();
   json::value context_list = json::value::array();
   int index = 0;
-  for (auto contextIter = available_contexts.begin();
-       contextIter != available_contexts.end();
+  for (auto contextIter = m_available_contexts.begin();
+       contextIter != m_available_contexts.end();
        ++contextIter) {
     context_list[index] = json::value::string(*contextIter);
     index++;
@@ -353,8 +365,8 @@ void SheepServer::handle_get_input_type(http_request message) {
   json::value result = json::value::object();
   json::value type_list = json::value::array();
   int index = 0;
-  for (auto typeIter = available_input_types.begin();
-       typeIter != available_input_types.end();
+  for (auto typeIter = m_available_input_types.begin();
+       typeIter != m_available_input_types.end();
        ++typeIter) {
     type_list[index] = json::value::string(*typeIter);
     index++;

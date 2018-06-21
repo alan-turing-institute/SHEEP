@@ -7,6 +7,8 @@
 #include <random>
 #include <sys/time.h>
 
+#define _TURN_OFF_PLATFORM_STRING
+
 #include "cpprest/json.h"
 #include "cpprest/http_listener.h"
 #include "cpprest/uri.h"
@@ -26,13 +28,13 @@ void on_initialize(const string_t& address)
     // Build our listener's URI from the configured address and the hard-coded path "SheepServer/"
 
     uri_builder uri(address);
-    uri.append_path(U("SheepServer/"));
+    uri.append_path("SheepServer/");
 
     auto addr = uri.to_uri().to_string();
 	g_http = std::unique_ptr<SheepServer>(new SheepServer(addr));
 	g_http->open().wait();
 
-    ucout << utility::string_t(U("Listening for requests at: ")) << addr << std::endl;
+    cout << utility::string_t("Listening for requests at: ") << addr << std::endl;
 
     return;
 }

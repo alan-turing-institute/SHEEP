@@ -1,6 +1,9 @@
 #ifndef SHEEP_SERVER_HPP
 #define SHEEP_SERVER_HPP
 
+#define _TURN_OFF_PLATFORM_STRING
+
+
 /// stl includes
 #include <memory>
 #include <fstream>
@@ -15,17 +18,23 @@
 /// SHEEP includes
 #include "circuit.hpp"
 #include "context-clear.hpp"
-#include "context-helib.hpp"
-#include "context-tfhe.hpp"
-#include "context-seal.hpp"
-
+#ifdef HAVE_HElib
+   #include "context-helib.hpp"
+#endif
+#ifdef HAVE_TFHE
+   #include "context-tfhe.hpp"
+#endif
+#ifdef HAVE_SEAL
+   #include "context-seal.hpp"
+#endif
 
 using namespace web;
 using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
 
-static std::vector<std::string> available_contexts = {"HElib_Fp",
+/*
+static std::vector<std::string> available_contexts = {"ClearHElib_Fp",
 						      "HElib_F2",
 						      "TFHE",
 						      "SEAL",
@@ -39,7 +48,7 @@ static std::vector<std::string> available_input_types = {"bool",
 							 "int16_t",
 							 "int32_t"};
 
-
+*/
 struct SheepJobConfig {
   utility::string_t context;
   utility::string_t input_type;
@@ -111,7 +120,26 @@ struct SheepJobResult {
 class SheepServer
 {
 public:
-	SheepServer() {}
+	SheepServer() {
+	  m_available_contexts.push_back("Clear");
+#ifdef HAVE_HElib
+	  m_available_contexts.push_back("HElib_F2");
+	  m_available_contexts.push_back("HElib_Fp");
+#endif
+#ifdef HAVE_TFHE
+	  m_available_contexts.push_back("TFHE");
+#endif
+#ifdef HAVE_SEAL
+	  m_available_contexts.push_back("SEAL");
+#endif
+	  m_available_input_types = {"bool",
+				     "uint8_t",
+				     "uint16_t",
+				     "uint32_t",
+				     "int8_t",
+				     "int16_t",
+				     "int32_t"};
+	}
 	SheepServer(utility::string_t url);
 
 	pplx::task<void> open() { return m_listener.open(); }
@@ -169,7 +197,8 @@ private:
         SheepJobConfig m_job_config;
         SheepJobResult m_job_result;
         bool m_job_finished;
-
+        std::vector<std::string> m_available_contexts;
+        std::vector<std::string> m_available_input_types;
 };
 
 #endif

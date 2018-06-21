@@ -14,10 +14,16 @@
 #include <map>
 
 #include "context-clear.hpp"
-#include "context-helib.hpp"
-#include "context-tfhe.hpp"
-#include "context-seal.hpp"
-
+#ifdef HAVE_HElib
+   #include "context-helib.hpp"
+#endif
+#ifdef HAVE_TFHE
+   #include "context-tfhe.hpp"
+#endif
+#ifdef HAVE_SEAL
+   #include "context-seal.hpp"
+   #include "adghakshda"
+#endif
 
 using namespace SHEEP;
 
@@ -27,7 +33,10 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
-    	if (context_type == "HElib_F2") {
+  	if (context_type == "Clear") {
+	  return std::make_unique<ContextClear<PlaintextT> >();
+#ifdef HAVE_HElib
+	} else if (context_type == "HElib_F2") {
   	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
   	  if (context_params.length() > 0)
    	    ctx->read_params_from_file(context_params);
@@ -37,18 +46,21 @@ make_context(std::string context_type, std::string context_params="") {
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
+#endif
+#ifdef HAVE_TFHE
     	} else if (context_type == "TFHE") {
   	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
+#endif
+#ifdef HAVE_SEAL
 	} else if (context_type == "SEAL") {
 	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
-	} else if (context_type == "Clear") {
-	  return std::make_unique<ContextClear<PlaintextT> >();
+#endif
 	} else {
 	  throw std::runtime_error("Unknown context requested");
 	}
@@ -138,7 +150,7 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
   bool matches = check_correct<PlaintextT>(test_results, cleartext_results);
   if (matches) std::cout<<"Cleartext check passed OK"<<std::endl;
   else std::cout<<"Cleartext check failed"<<std::endl;
-  std::cout<<endl<<"==== END RESULTS ==="<<std::endl;
+  std::cout<<std::endl<<"==== END RESULTS ==="<<std::endl;
 
 }
 

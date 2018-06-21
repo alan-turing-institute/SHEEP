@@ -26,9 +26,9 @@ RUN cd gmp-6.1.2; ./configure; make; make install
 
 ###### get ntl (needed for HElib)
 
-RUN wget http://www.shoup.net/ntl/ntl-10.5.0.tar.gz
-RUN tar -xvzf ntl-10.5.0.tar.gz
-RUN cd ntl-10.5.0/src; ./configure NTL_GMP_LIP=on; make; make install
+RUN wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
+RUN tar -xvzf ntl-11.1.0.tar.gz
+RUN cd ntl-11.1.0/src; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
 
 ###### get cpprestsdk (for the REST API)
 RUN apt-get update

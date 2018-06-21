@@ -25,7 +25,7 @@ add_executable(clear-context-example
 add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
 
 
-if (HELIB_FOUND)
+if (HElib_FOUND)
     add_executable(helib-context-example
                      helib-context-example.cpp
                      ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -48,7 +48,7 @@ if (HELIB_FOUND)
 
 
 
-endif(HELIB_FOUND)
+endif(HElib_FOUND)
 
 if (TFHE_FOUND)
     add_executable(tfhe-example
@@ -89,43 +89,44 @@ if (SEAL_FOUND)
 endif(SEAL_FOUND)
 
 
+### The "benchmark" executable, to run a specified HElib on a given circuit.
 
-if (HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
-    add_executable(benchmark
-    		  benchmark.cpp
-                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-		  )
-    target_link_libraries(benchmark
-		  		${HElib_LIBRARIES}
-				${NTL_LIBRARIES}
-				${GMP_LIBRARIES}
-				${TFHE_LIBRARIES}
-				${SEAL_LIBRARIES}
-		  		cpprestsdk::cpprest
-		  		${CMAKE_THREAD_LIBS_INIT}
-		  		${Boost_LIBRARIES}
-				)
+add_executable(benchmark
+	    	benchmark.cpp
+                ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+	      )
+if (HElib_FOUND)
+target_link_libraries(benchmark ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+endif(HElib_FOUND)
 
+if (TFHE_FOUND)
+target_link_libraries(benchmark ${TFHE_LIBRARIES})
+endif(TFHE_FOUND)
 
-    add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
+if (SEAL_FOUND)
+target_link_libraries(benchmark ${SEAL_LIBRARIES})
+endif(SEAL_FOUND)
 
-    add_executable(run-sheep-server
-    		  run-sheep-server.cpp
-                  ${CMAKE_SOURCE_DIR}/src/sheep-server.cpp
-                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-		  )
-    target_link_libraries(run-sheep-server
-				${HElib_LIBRARIES}
-				${NTL_LIBRARIES}
-				${GMP_LIBRARIES}
-				${TFHE_LIBRARIES}
-				${SEAL_LIBRARIES}
-		  		cpprestsdk::cpprest
-		  		${CMAKE_THREAD_LIBS_INIT}
-		  		${Boost_LIBRARIES}
-				)
+add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
+### The "run-sheep-server" executable, a REST API with endpoints to specify circuits, HE libraries etc and run tests.
 
-    add_test(NAME run-sheep-server COMMAND $<TARGET_FILE:run-sheep-server>)
+add_executable(run-sheep-server
+    	       run-sheep-server.cpp
+               ${CMAKE_SOURCE_DIR}/src/sheep-server.cpp
+               ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+target_link_libraries(run-sheep-server cpprestsdk::cpprest ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
-endif(HELIB_FOUND AND TFHE_FOUND AND SEAL_FOUND)
+if (HElib_FOUND)
+target_link_libraries(run-sheep-server ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+endif(HElib_FOUND)
+
+if (TFHE_FOUND)
+target_link_libraries(run-sheep-server ${TFHE_LIBRARIES})
+endif(TFHE_FOUND)
+
+if (SEAL_FOUND)
+target_link_libraries(run-sheep-server ${SEAL_LIBRARIES})
+endif(SEAL_FOUND)
+
+add_test(NAME run-sheep-server COMMAND $<TARGET_FILE:run-sheep-server>)
