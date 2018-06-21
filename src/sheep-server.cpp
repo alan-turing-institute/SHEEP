@@ -34,6 +34,27 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
     m_listener.support(methods::PUT, std::bind(&SheepServer::handle_put, this, std::placeholders::_1));
     m_listener.support(methods::POST, std::bind(&SheepServer::handle_post, this, std::placeholders::_1));
 
+    //// what contexts are supported?
+    m_available_contexts.push_back("Clear");
+#ifdef HAVE_HElib
+      m_available_contexts.push_back("HElib_F2");
+      m_available_contexts.push_back("HElib_Fp");
+#endif
+#ifdef HAVE_TFHE
+      m_available_contexts.push_back("TFHE");
+#endif
+#ifdef HAVE_SEAL
+      m_available_contexts.push_back("SEAL");
+#endif
+      //// what input_types are supported?
+   m_available_input_types = {"bool",
+			      "uint8_t",
+			      "uint16_t",
+			      "uint32_t",
+			      "int8_t",
+			      "int16_t",
+			      "int32_t"};
+
 }
 
 /// templated functions to interact with the contexts.
@@ -41,7 +62,6 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 template <typename PlaintextT>
 BaseContext<PlaintextT>*
 SheepServer::make_context(std::string context_type) {
-  cout<<" in make context "<<context_type<<endl;
   if (context_type == "Clear") {
     return new ContextClear<PlaintextT>();
 #ifdef HAVE_HElib
@@ -115,7 +135,6 @@ SheepServer::update_parameters(std::string context_type,
   }
   /// first set parameters to current values stored in the server (if any)
   for (auto map_iter : m_job_config.parameters) {
-    cout<<" values in job_config param map are :"<<map_iter.first<<" "<<map_iter.second<<endl;
     context->set_parameter(map_iter.first, map_iter.second);
   }
   /// update parameters if specified
@@ -151,23 +170,19 @@ SheepServer::configure_and_run() {
   /// we can now assume we have values for context, inputs, circuit, etc
   auto context = make_context<PlaintextT>(m_job_config.context);
   /// set parameters for this context
-  if (context != NULL) cout<<"have a context"<<endl;
-  else cout<<"null context pointer"<<endl;
+
   for ( auto map_iter = m_job_config.parameters.begin(); map_iter != m_job_config.parameters.end(); ++map_iter) {
     context->set_parameter(map_iter->first, map_iter->second);
   }
   std::vector<PlaintextT> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
-  cout<<"Have "<<plaintext_inputs.size()<<" plaintext inputs"<<endl;
   std::vector<Duration> timings;
   std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
   								      plaintext_inputs,
   								      timings,
   								      m_job_config.eval_strategy);
-  cout<<" finished running job !! "<<endl;
   m_job_finished = true;
   ///  store outputs values as strings, to avoid ambiguity about type.
   for (int i=0; i < output_vals.size(); ++i ) {
-    std::cout<<" output_vals "<<std::to_string(output_vals[0])<<std::endl;
     auto output = std::make_pair<const std::string,std::string>(
 								m_job_config.circuit.get_outputs()[i].get_name(),
 								std::to_string(output_vals[i])
@@ -177,7 +192,7 @@ SheepServer::configure_and_run() {
   if (timings.size() != 3) throw std::runtime_error("Unexpected length of timing vector");
   auto encryption = std::make_pair<std::string, std::string>("encryption",std::to_string(timings[0].count()));
   m_job_result.timings.insert(encryption);
-  auto evaluation = std::make_pair<std::string, std::string>("evalation",std::to_string(timings[1].count()));
+  auto evaluation = std::make_pair<std::string, std::string>("evaluation",std::to_string(timings[1].count()));
   m_job_result.timings.insert(evaluation);
   auto decryption = std::make_pair<std::string, std::string>("decryption",std::to_string(timings[2].count()));
   m_job_result.timings.insert(decryption);
@@ -207,9 +222,7 @@ void SheepServer::handle_get(http_request message)
 
 void SheepServer::handle_post(http_request message)
 {
-  cout<<" in handle post " <<endl;
   auto path = message.relative_uri().path();
-  cout<<" path is "<<path<<endl;
   if (path == "context/") return handle_post_context(message);
   else if (path == "input_type/") return handle_post_input_type(message);
   else if (path == "inputs/") return handle_post_inputs(message);
@@ -235,7 +248,6 @@ void SheepServer::handle_post_run(http_request message) {
 
   /// get a context, configure it with the stored
   /// parameters, and run it.
-  cout<<"Will run job! now"<<endl;
   if (m_job_config.input_type == "bool") configure_and_run<bool>();
   else if (m_job_config.input_type == "uint8_t") configure_and_run<uint8_t>();
   else if (m_job_config.input_type == "uint16_t") configure_and_run<uint16_t>();
@@ -249,7 +261,6 @@ void SheepServer::handle_post_run(http_request message) {
 
 void SheepServer::handle_post_circuit(http_request message) {
   ///
-  cout<<"in handle circuit" <<endl;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
 	json::value val = jvalue.get();
@@ -258,7 +269,6 @@ void SheepServer::handle_post_circuit(http_request message) {
 	  /// create the circuit
 	Circuit C;
 	circuit_stream >> C;
-	cout << C;
 	m_job_config.circuit = C;
 
       } catch(json::json_exception) {
@@ -271,7 +281,6 @@ void SheepServer::handle_post_circuit(http_request message) {
 
 void SheepServer::handle_post_circuitfile(http_request message) {
   /// set circuit filename to use
-  cout<<" in handle post circuitfile" <<endl;
   bool found_circuit = false;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
@@ -280,12 +289,10 @@ void SheepServer::handle_post_circuitfile(http_request message) {
 	m_job_config.circuit_filename = circuit_filename;
          /// check that the file exists.
         std::ifstream circuit_file(std::string(m_job_config.circuit_filename));
-        cout<<" is file good? "<<circuit_file.good()<<endl;
         if (circuit_file.good()) {
 	  /// create the circuit
 	  Circuit C;
 	  circuit_file >> C;
-	  cout << C;
 	  m_job_config.circuit = C;
 	}
       } catch(json::json_exception) {
@@ -314,14 +321,11 @@ void SheepServer::handle_get_inputs(http_request message) {
 
 void SheepServer::handle_post_inputs(http_request message) {
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
-      cout<<"in post inputs"<<endl;
       try {
 	json::value input_dict = jvalue.get();
 	//	auto input_dict = val["input_dict"].as_object();
 	for (auto input_name : m_job_config.input_names) {
-	  cout<<" looking for "<<input_name<<endl;
 	  int input_val = input_dict[input_name].as_integer();
-	  cout<<" input val is "<<input_val<<endl;
 	  m_job_config.input_vals.push_back(input_val);
 	}
       } catch(json::json_exception) {
@@ -378,12 +382,10 @@ void SheepServer::handle_get_input_type(http_request message) {
 
 void SheepServer::handle_post_context(http_request message) {
   /// set which context to use.  If it has changed, reset the list of parameters.
-  cout<<" in handle post context" <<endl;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
 	json::value val = jvalue.get();
 	auto context = val["context_name"].as_string();
-	std::cout<<" context is "<<context<<std::endl;
 	if (context != m_job_config.context) {
 	  m_job_config.context = context;
 	  m_job_config.parameters.clear();
@@ -397,12 +399,10 @@ void SheepServer::handle_post_context(http_request message) {
 
 void SheepServer::handle_post_input_type(http_request message) {
   /// set which input_type to use
-  cout<<" in handle post input type" <<endl;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
 	json::value val = jvalue.get();
 	auto input_type = val["input_type"].as_string();
-	std::cout<<" input_type is "<<input_type<<std::endl;
 	m_job_config.input_type = input_type;
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unrecognized context request"));
@@ -413,12 +413,10 @@ void SheepServer::handle_post_input_type(http_request message) {
 
 void SheepServer::handle_put_eval_strategy(http_request message) {
   /// set which eval_strategy to use
-  cout<<" in handle put eval_strategy" <<endl;
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
       try {
 	json::value val = jvalue.get();
 	auto eval_strategy = val["eval_strategy"].as_string();
-	std::cout<<" eval_strategy is "<<eval_strategy<<std::endl;
 	if (eval_strategy == "parallel")
 	  m_job_config.eval_strategy = EvaluationStrategy::parallel;
 	else
@@ -436,7 +434,6 @@ void SheepServer::handle_put_eval_strategy(http_request message) {
 void SheepServer::handle_get_job(http_request message) {
   /// is the sheep job fully configured?
   bool configured = m_job_config.isConfigured();
-  cout<<" in handle_get_job"<<endl;
   json::value result = json::value::object();
   result["job_configured"] = json::value::boolean(configured);
   message.reply(status_codes::OK, result);
@@ -445,7 +442,6 @@ void SheepServer::handle_get_job(http_request message) {
 
 void SheepServer::handle_post_job(http_request message) {
   // reset the job config and job result structs, we have a new job.
-  cout<<"resetting config and results"<<endl;
   m_job_config = {};
   m_job_config.setDefaults();
   m_job_result = {};
@@ -516,8 +512,6 @@ void SheepServer::handle_put_parameters(http_request message) {
 }
 
 void SheepServer::handle_get_results(http_request message) {
-
-  cout<<"in get_results"<<endl;
 
   json::value result = m_job_result.as_json();
 
