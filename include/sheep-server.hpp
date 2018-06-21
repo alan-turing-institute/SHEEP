@@ -120,26 +120,7 @@ struct SheepJobResult {
 class SheepServer
 {
 public:
-	SheepServer() {
-	  m_available_contexts.push_back("Clear");
-#ifdef HAVE_HElib
-	  m_available_contexts.push_back("HElib_F2");
-	  m_available_contexts.push_back("HElib_Fp");
-#endif
-#ifdef HAVE_TFHE
-	  m_available_contexts.push_back("TFHE");
-#endif
-#ifdef HAVE_SEAL
-	  m_available_contexts.push_back("SEAL");
-#endif
-	  m_available_input_types = {"bool",
-				     "uint8_t",
-				     "uint16_t",
-				     "uint32_t",
-				     "int8_t",
-				     "int16_t",
-				     "int32_t"};
-	}
+        SheepServer() {};
 	SheepServer(utility::string_t url);
 
 	pplx::task<void> open() { return m_listener.open(); }
