@@ -16,6 +16,7 @@
 #ifdef HAVE_TBB
 #include "tbb/concurrent_unordered_map.h"
 #include "tbb/flow_graph.h"
+#include "tbb/atomic.h"
 #endif // HAVE_TBB
 
 #include "circuit.hpp"
@@ -26,6 +27,25 @@ struct GateNotImplemented : public std::runtime_error {
 	GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
 };
 
+struct TimeoutException : public std::exception {
+	std::chrono::duration<double, std::micro> execution_time;
+	std::string what_str;
+	const char *what() const noexcept
+	{
+		return what_str.c_str();
+	}
+	TimeoutException(
+		// name of the output we were evaluating at the time
+		const std::string& on_output,
+		// total wall-clock time when the exception was thrown
+		std::chrono::duration<double, std::micro> execution_time_)
+		:
+		execution_time(execution_time_),
+		what_str("Evaluation timed out (wall-clock time: " + std::to_string(execution_time_.count())
+			 + " microseconds) while evaluating circuit wire named " + on_output)
+	{ }
+};
+
 /// Base base class
 template <typename PlaintextT>
 class BaseContext {
@@ -33,12 +53,14 @@ public:
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
 			     std::vector<std::chrono::duration<double, std::micro> >&,
-			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;	
+			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
+			     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) =0;
 
 	// overloaded version for when we don't care about the timings
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
-			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial) =0;
+			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
+			     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) =0;
         virtual void print_parameters() =0;
         virtual void print_sizes() = 0;
 };
@@ -123,9 +145,10 @@ public:
 	template <typename InputContainer, typename OutputContainer>
 	microsecond eval(const Circuit& circ,
 			 const InputContainer& input_vals,
-			 OutputContainer& output_vals) {
+			 OutputContainer& output_vals,
+			 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
 		std::unordered_map<std::string, Ciphertext> eval_map;
-		
+
 		// add Circuit::inputs and inputs into the map
 		auto input_vals_it = input_vals.begin();
 		auto input_wires_it = circ.get_inputs().begin();
@@ -161,13 +184,15 @@ public:
 				       });
 			Ciphertext output = dispatch(assn.get_op(), inputs);
 			eval_map.insert({assn.get_output().get_name(), output});
+			microsecond wall_time = high_res_clock::now() - start_time;
+			if (timeout.count() > 0.0 && wall_time > timeout)
+				throw TimeoutException(assn.get_output().get_name(), wall_time);
 		}
 
 		auto end_time = high_res_clock::now();
 		microsecond duration = microsecond(end_time - start_time);
 
-		// Look up the required outputs in the eval_map and
-		// push them onto output_vals.
+		// Look up the required outputs in the eval_map and push them onto output_vals.
 		auto output_wires_it = circ.get_outputs().begin();
 		auto output_wires_end = circ.get_outputs().end();
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
@@ -179,14 +204,19 @@ public:
 	template <typename InputContainer, typename OutputContainer>
 	microsecond parallel_eval(const Circuit& circ,
 				  const InputContainer& input_vals,
-				  OutputContainer& output_vals) {
+				  OutputContainer& output_vals,
+				  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
+	{
 #ifdef HAVE_TBB
 		using namespace tbb::flow;
+
+		typedef std::chrono::duration<double, std::micro> microsecond;
+		typedef std::chrono::high_resolution_clock high_res_clock;
+
 		tbb::concurrent_unordered_map<std::string, Ciphertext> eval_map;
 		tbb::concurrent_unordered_map<std::string, continue_node<continue_msg> > node_map;
 
 		tbb::flow::graph DAG;
-		//tbb::flow::broadcast_node<tbb::flow::continue_msg> start_node(DAG);
 
 		// insert the inputs into the map
 		auto input_vals_it = input_vals.begin();
@@ -210,9 +240,21 @@ public:
 		// each assignment, look up the input Wires in the
 		// map, insert the output wire (of the gate) with the
 		// required name into eval_map.
-		
+
+		decltype((high_res_clock::now())) start_time;
+
+		tbb::atomic<bool> circuit_timed_out = false;
+		// the following two variables are only to be written
+		// to from a single thread.  This is enforced by a
+		// check of circuit_timed_out, which is written to
+		// exactly once.
+		std::string timeout_gate_name;
+		microsecond timeout_wall_time;
+
 		for (const Assignment assn : circ.get_assignments()) {
-			auto current_eval = [=,&eval_map](const continue_msg&) {
+			auto current_eval = [=,&eval_map,&circuit_timed_out,
+					     &timeout_gate_name,&timeout_wall_time,&start_time
+				](const continue_msg&) {
 				std::vector<Ciphertext> inputs;
 				std::transform(assn.get_inputs().begin(),
 					       assn.get_inputs().end(),
@@ -221,9 +263,21 @@ public:
 						       // throws out_of_range if not present in the map
 						       return eval_map.at(w.get_name());
 					       });
-				
+
 				Ciphertext output = dispatch(assn.get_op(), inputs);
-				eval_map.insert({assn.get_output().get_name(), output});		
+				eval_map.insert({assn.get_output().get_name(), output});
+
+				microsecond wall_time = high_res_clock::now() - start_time;
+				if (timeout.count() > 0.0
+				    && wall_time > timeout
+				    && !circuit_timed_out.fetch_and_store(true))
+					// last condition ensures the body of the conditional is
+					// only entered from one thread.
+				{
+					timeout_gate_name = assn.get_output().get_name();
+					timeout_wall_time = wall_time;
+					tbb::task::self().group()->cancel_group_execution();
+				}
 			};
 			node_map.insert({assn.get_output().get_name(),
 						continue_node<continue_msg>(DAG, current_eval)});
@@ -233,10 +287,7 @@ public:
 					  node_map.at(assn.get_output().get_name()));
 			}
 		}
-
-		typedef std::chrono::duration<double, std::micro> microsecond;
-		typedef std::chrono::high_resolution_clock high_res_clock;
-		auto start_time = high_res_clock::now();
+		start_time = high_res_clock::now();
 
 		// for each input, send a continue message to start
 		// the evaluation
@@ -246,9 +297,11 @@ public:
 		{
 			node_map.at(input_wires_it->get_name()).try_put(continue_msg());
 		}
-		
+
 		DAG.wait_for_all();
-	       
+
+		if (circuit_timed_out) throw TimeoutException(timeout_gate_name, timeout_wall_time);
+
 		auto end_time = high_res_clock::now();
 		microsecond duration = microsecond(end_time - start_time);
 
@@ -264,11 +317,12 @@ public:
 		throw std::runtime_error("SHEEP was not compiled with TBB, so parallel evaluation is not available.");
 #endif // HAVE_TBB
 	}
-	
+
 	virtual CircuitEvaluator compile(const Circuit& circ) {
 		using std::placeholders::_1;
 		using std::placeholders::_2;
-		auto run = std::bind(&Context::eval<std::list<Ciphertext>, std::list<Ciphertext> >, this, circ, _1, _2);
+		auto run = std::bind(&Context::eval<std::list<Ciphertext>, std::list<Ciphertext> >, this, circ, _1, _2,
+				     std::chrono::duration<double, std::micro>(0.0));
 		return CircuitEvaluator(run);
 	}
 
@@ -276,7 +330,8 @@ public:
 		const Circuit& C,
 		std::vector<Plaintext> plaintext_inputs,
 		std::vector<std::chrono::duration<double, std::micro> >& durations,
-		EvaluationStrategy eval_strategy = EvaluationStrategy::serial)
+		EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
+		std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 		typedef std::chrono::duration<double, std::micro> microsecond;
 		typedef std::chrono::high_resolution_clock high_res_clock;
@@ -288,15 +343,15 @@ public:
 		auto enc_end_time = high_res_clock::now();
 		durations.push_back(microsecond(enc_end_time - enc_start_time));
 
-		//// evaluate the circuit	  
+		//// evaluate the circuit
 		std::vector<Ciphertext> ciphertext_outputs;
 		microsecond eval_duration;
 		switch (eval_strategy) {
 		case EvaluationStrategy::serial:
-			eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs);
+			eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
 			break;
 		case EvaluationStrategy::parallel:
-			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs);
+			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
 			break;
 		default:
 			std::runtime_error("eval_with_plaintexts: Unknown evaluation strategy");
@@ -308,32 +363,33 @@ public:
 		std::vector<Plaintext> plaintext_outputs;
 		for (auto ct : ciphertext_outputs) plaintext_outputs.push_back(decrypt(ct));
 		auto dec_end_time = high_res_clock::now();
-		durations.push_back(microsecond(dec_end_time - dec_start_time));	  
+		durations.push_back(microsecond(dec_end_time - dec_start_time));
 
 		return plaintext_outputs;
 	}
 
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
-			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial)
+			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
+			     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 		std::vector<std::chrono::duration<double, std::micro> > ignored;
-		return eval_with_plaintexts(c, ptxts, ignored, eval_strategy);
+		return eval_with_plaintexts(c, ptxts, ignored, eval_strategy, timeout);
 	}
 
 	virtual void read_params_from_file(std::string filename) {
 	  std::ifstream inputstream(filename);
-	  
+
 	  if (inputstream.bad()) {
 	    std::cout<<"Empty or non-existent input file"<<std::endl;
 	  }
-	  
-	  /// loop over all lines in the input file 
+
+	  /// loop over all lines in the input file
 	  std::string line;
 	  while (std::getline(inputstream, line) ) {
 	    /// remove comments (lines starting with #) and empty lines
 	    int found= line.find_first_not_of(" \t");
-	    if( found != std::string::npos) {   
+	    if( found != std::string::npos) {
 	      if ( line[found] == '#') 
 		continue;
 	      
