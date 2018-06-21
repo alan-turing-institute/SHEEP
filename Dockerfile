@@ -5,24 +5,27 @@ FROM ubuntu:16.04 as sheep_base
 
 RUN apt-get update
 RUN apt-get -y install git
-RUN apt-get -y install python-pip
-RUN apt-get -y install cmake
+RUN apt-get update
 RUN apt-get -y install wget
 
 ###### get fftw3 (needed for TFHE)
 
 RUN apt-get install -y libfftw3-dev
 
+###### build cmake from source (to get a new enough version for SEAL)
+
+RUN wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
+RUN tar -xvzf cmake-3.11.4.tar.gz
+RUN cd cmake-3.11.4; ./bootstrap; make -j4; make install
 
 ####### install intel-tbb for parallelisation
 RUN apt-get -y install libtbb-dev
 
-
 ###### get gmp (needed for HElib)
 RUN apt-get -y install m4
-RUN wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
-RUN tar -xvf gmp-6.1.2.tar.xz
-RUN cd gmp-6.1.2; ./configure; make; make install
+RUN wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
+RUN tar -xvf gmp-6.1.0.tar.xz
+RUN cd gmp-6.1.0; ./configure; make; make install
 
 ###### get ntl (needed for HElib)
 
@@ -38,26 +41,14 @@ RUN git clone https://github.com/Microsoft/cpprestsdk.git casablanca
 RUN cd casablanca/Release; mkdir build.debug; cd build.debug; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install
 
 
-####### install python packages for the frontend
-RUN apt-get install -y python3
-RUN apt-get install -y python3-pip
-
-RUN pip3 install  flask
-RUN pip3 install  wtforms
-RUN pip3 install  pytest
-RUN pip3 install  sqlalchemy
-RUN pip3 install  python-nvd3
-
-####### python packages for jupyter
-RUN pip3 install jupyter
-RUN pip3 install matplotlib
-RUN pip3 install pandas
-
-## build SEAL
-
-RUN wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_v2.3.0-4_Linux.tar.gz
-RUN tar xf SEAL_v2.3.0-4_Linux.tar.gz
-RUN cd SEAL/SEAL; export CC=gcc; export CXX=g++; ./configure; sed -i.bak 's/-march=native//g' Makefile Makefile.in; make; make install;
+###### build SEAL
+RUN apt-get -y install software-properties-common
+RUN add-apt-repository -y  ppa:ubuntu-toolchain-r/test
+RUN apt-get update
+RUN apt-get -y install gcc-7 g++-7
+RUN wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
+RUN tar xf SEAL_2.3.1.tar.gz
+RUN cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install;
 
 
 #############################################################################################################
@@ -91,33 +82,9 @@ FROM sheep_dev as sheep
 
 RUN rm -fr SHEEP/build
 RUN mkdir SHEEP/build
-RUN cd SHEEP/build; cmake ../ ; make all
+RUN cd SHEEP/build; export CC=gcc-7; export CXX=g++-7; cmake ../ ; make run-sheep-server
 
 
 WORKDIR SHEEP/build
 EXPOSE 34568
-#CMD ["bash"]
 CMD ["bin/run-sheep-server"]
-
-#FROM sheep_dev as sheep_web
-#
-#### run the flask app
-#
-#
-#
-#WORKDIR SHEEP/webapp
-####
-#EXPOSE 5000
-#ENV FLASK_APP app.py
-#ENV SHEEP_HOME /SHEEP
-####
-#CMD ["python3","app.py"]
-#
-#FROM sheep_dev as sheep_notebook
-#
-###### OR run the jupyter notebook
-#
-#EXPOSE 8888
-#ENV SHEEP_HOME /SHEEP
-#WORKDIR SHEEP/
-#CMD ["jupyter", "notebook", "--allow-root","--ip", "0.0.0.0"]
