@@ -22,7 +22,6 @@
 #endif
 #ifdef HAVE_SEAL
    #include "context-seal.hpp"
-   #include "adghakshda"
 #endif
 
 using namespace SHEEP;
