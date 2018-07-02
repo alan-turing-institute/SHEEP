@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>SHEEP</title>
+
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <div id="content" class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="/">Home</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div>
+            <h1>There was a problem running SHEEP</h1>
+        </div>
+	<br>
+
+	<div>
+	  <table>
+	    <tr>
+	      <td>
+		{{ errordict["code"] }}
+	      </td>
+	      <td>
+		{{ errordict["message"] }}
+	      </td>
+	    </tr>
+	  </table>
+</div>
+
+
+ <div id="loading">
+    <img src="/static/sheep_error.gif" alt="error">
+  </div>
+
+</body>
+
+</html>
