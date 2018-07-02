@@ -59,5 +59,7 @@ if (SEAL_FOUND)
   add_definitions(-DHAVE_SEAL)
 endif()
 
+link_libraries(pthread)
+
 add_subdirectory(example bin)
 add_subdirectory(tests testbin)

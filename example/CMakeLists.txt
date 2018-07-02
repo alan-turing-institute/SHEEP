@@ -84,8 +84,8 @@ if (SEAL_FOUND)
     add_executable(seal-param-selector
                      seal-param-selector.cpp)
     target_link_libraries(seal-param-selector
-                            ${SEAL_LIBRARIES})
-
+                            ${SEAL_LIBRARIES}
+			    pthread)
 endif(SEAL_FOUND)
 
 
@@ -128,5 +128,3 @@ endif(TFHE_FOUND)
 if (SEAL_FOUND)
 target_link_libraries(run-sheep-server ${SEAL_LIBRARIES})
 endif(SEAL_FOUND)
-
-add_test(NAME run-sheep-server COMMAND $<TARGET_FILE:run-sheep-server>)
