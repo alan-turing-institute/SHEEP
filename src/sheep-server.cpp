@@ -189,7 +189,8 @@ SheepServer::configure_and_run(http_request message) {
 					      MAP_ANONYMOUS | MAP_SHARED, 0, 0);
   
   if (timings_shared == MAP_FAILED) {
-    message.reply(status_codes::InternalError,("Could not run evaluation"));    
+    message.reply(status_codes::InternalError,("Could not run evaluation"));
+    return;
   }
 
   PlaintextT *outputs_shared = (PlaintextT *)mmap(NULL, n_outputs * sizeof(PlaintextT),
@@ -197,6 +198,7 @@ SheepServer::configure_and_run(http_request message) {
 						  MAP_ANONYMOUS | MAP_SHARED, 0, 0);
 
   if (outputs_shared == MAP_FAILED) {
+    message.reply(status_codes::InternalError,("Could not run evaluation"));
     munmap(timings_shared, n_timings);
     return;
   }
