@@ -133,7 +133,7 @@ public:
   std::vector<PlaintextT> make_plaintext_inputs();
 
   template <typename PlaintextT>
-  void configure_and_run();
+  void configure_and_run(http_request message);
 
   void get_parameters();
 
