@@ -6,6 +6,8 @@
 #include <fstream>
 #include <random>
 #include <sys/time.h>
+#include <unistd.h>
+#include <signal.h>
 
 #define _TURN_OFF_PLATFORM_STRING
 
@@ -45,8 +47,14 @@ void on_shutdown()
     return;
 }
 
+// handle SIGCHLD but do nothing: serves to interrupt sleep when
+// evaluation completes.
+static void do_nothing(int) { }
+
 int main(int argc, const char** argv)
 {
+    signal(SIGCHLD, do_nothing);
+	
     utility::string_t port = ("34568");
     if(argc == 2)
     {
