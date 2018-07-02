@@ -41,11 +41,17 @@ def new_test():
     and select input type, and
     which HE libs to use.
     """
+    ### reset the app's data dict
+    app.data = {}
     ###
     ## first cleanup the files created by previous tests.
     frontend_utils.cleanup_upload_dir(app.config)
     # get available choices of input_type and context
-    sheep_client.new_job()
+    response = sheep_client.new_job()
+    if response["status_code"] != 200:
+        return redirect(url_for("sheep_error",
+                                status = response["status_code"],
+                                message = response["message"]))
     input_types = sheep_client.get_available_input_types()
     libraries = sheep_client.get_available_contexts()
     ## create the form to choose circuit file, input_type, and which HE libraries to test
@@ -133,6 +139,17 @@ def execute_test():
         frontend_utils.upload_test_result(results,app.data)
         return render_template("uploaded_ok.html")
     return render_template("test_results.html",results = results)
+
+
+@app.route("/error/<status>/<message>",methods=["GET"])
+def sheep_error(status, message):
+    """
+    Display an error message (hopefully descriptive enough to be useful).
+    """
+    return render_template("sheep_error.html",
+                           errordict={"code": status,
+                                      "message": message})
+
 
 
 if __name__ == "__main__":

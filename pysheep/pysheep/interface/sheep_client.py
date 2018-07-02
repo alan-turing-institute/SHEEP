@@ -91,7 +91,7 @@ def set_inputs(input_dict):
     input_names = get_inputs()
     unset_inputs = [i for i in input_names if not i in input_dict.keys()]
     if len(unset_inputs) > 0:
-        raise RuntimeError("Inputs {} not set".format(unset_inputs))    
+        raise RuntimeError("Inputs {} not set".format(unset_inputs))
     unused_inputs = [i for i in input_dict.keys() if not i in input_names]
     if len(unused_inputs) > 0:
         raise RuntimeError("Inputs {} are not inputs to the circuit".format(unused_inputs))
@@ -172,10 +172,15 @@ def new_job():
     """
     reset all the job configuration and results structs on the server.
     """
-    r=requests.post(BASE_URI+"/job/")
-    if r.status_code != 200:
-        raise RuntimeError("Error resetting job", r.content)
-    return r
+    response_dict = {}
+    try:
+        r=requests.post(BASE_URI+"/job/")
+        response_dict["status_code"] = r.status_code
+        response_dict["message"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["message"] = "Unable to connect to SHEEP server"
+    return response_dict
 
 
 def run_job():
