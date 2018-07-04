@@ -1,8 +1,19 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5)
 project (Sheep)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+# C++ REST API for interaction with web app - also needs openSSL, Boost, Threads
+set(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR} /usr/local/opt/openssl)
+find_package(OpenSSL)
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+find_package(cpprestsdk REQUIRED)
+find_package(Boost COMPONENTS system filesystem thread date_time program_options REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+find_package(Threads REQUIRED)
 
 # Default include and library dirs
 # TFHE
@@ -14,7 +25,6 @@ set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src"
 # SEAL
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/include/SEAL")
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/usr/local/lib/SEAL")
-
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
@@ -48,6 +58,8 @@ if (SEAL_FOUND)
   include_directories(SYSTEM ${SEAL_INCLUDE_DIRS})
   add_definitions(-DHAVE_SEAL)
 endif()
+
+link_libraries(pthread)
 
 add_subdirectory(example bin)
 add_subdirectory(tests testbin)

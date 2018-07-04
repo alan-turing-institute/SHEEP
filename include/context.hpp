@@ -50,6 +50,7 @@ struct TimeoutException : public std::exception {
 template <typename PlaintextT>
 class BaseContext {
 public:
+        virtual ~BaseContext() {};
 	virtual std::vector<PlaintextT>
 	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
 			     std::vector<std::chrono::duration<double, std::micro> >&,
@@ -62,7 +63,11 @@ public:
 			     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 			     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) =0;
         virtual void print_parameters() =0;
+        virtual std::map<std::string, long> get_parameters() = 0;
         virtual void print_sizes() = 0;
+        virtual void set_parameter(std::string, long) = 0;
+        virtual void configure() = 0;
+  
 };
 
 // Base class - abstract interface to each library
@@ -74,7 +79,7 @@ public:
 	typedef CiphertextT Ciphertext;
 
 	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
-
+        virtual ~Context() {};
         virtual void       configure()                     { m_configured = true; };
         virtual Ciphertext encrypt(Plaintext) =0;
 	virtual Plaintext  decrypt(Ciphertext) =0;
@@ -410,7 +415,6 @@ public:
 	}
   
   
-  
         virtual void set_parameter(std::string param_name, long param_value) {
 	  auto map_iter = m_param_name_map.find(param_name);
 	  if ( map_iter == m_param_name_map.end() ) {
@@ -430,10 +434,18 @@ public:
 			   m_param_overrides.end(),
 			   param_name)  != m_param_overrides.end();
 	}
-  
 
+        virtual std::map<std::string, long> get_parameters() {
+	  std::map<std::string, long> param_map;
+	  for (auto map_iter = m_param_name_map.begin();
+	       map_iter != m_param_name_map.end();
+	       ++map_iter) {
+	    param_map[map_iter->first] = map_iter->second;
+	  }
+	  return param_map;
+	};
+       
         virtual void print_parameters() {
-
 	  for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
 	    std::cout<<"Parameter "<<map_iter->first<<" = "<<map_iter->second<<std::endl;
 	  }
@@ -447,7 +459,7 @@ public:
   
 protected:
 
-        std::map<std::string, long& > m_param_name_map;
+        std::map<std::string, long&> m_param_name_map;
         std::vector<std::string> m_param_overrides;
         bool m_configured;
 

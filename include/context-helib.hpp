@@ -129,7 +129,7 @@ public:
     if (abs(m_ord3)>1) ords.push_back(m_ord3);
 
     /// number of levels  (copied from HElib's Test_binaryCompare)
-    if ( ! this->override_param("levels")) {
+    if ( ! this->override_param("Levels")) {
       if (m_bootstrap) m_L = 30; 
       else m_L = 3 + NTL::NumBits(m_bitwidth+2);
     }
@@ -161,10 +161,8 @@ public:
     /// how big are keys?
     this->m_private_key_size = sizeof(*m_secretKey);
     this->m_public_key_size = sizeof(*m_publicKey);    
-
     
     if (m_bootstrap) m_secretKey->genRecryptData();
-
     
     m_ea = new EncryptedArray(*m_helib_context);
     

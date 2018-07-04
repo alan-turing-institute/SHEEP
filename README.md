@@ -2,11 +2,11 @@
 
 ## Summary
 
-The overall aim of the SHEEP project is to provide a platform for practitioners to evaluate the state-of-the-art of (fully) homomorphic encryption technology in the context of their concrete application. SHEEP enables this evaluation to be done across libraries implementing different HE schemes (with in some cases incomparable security). 
+The overall aim of the SHEEP project is to provide a platform for practitioners to evaluate the state-of-the-art of (fully) homomorphic encryption technology in the context of their concrete application. SHEEP enables this evaluation to be done across libraries implementing different HE schemes (with in some cases incomparable security).
 
 <figure>
 <img src="https://i.imgur.com/M9KPfZi.png"/>
-<figcaption> Components of the SHEEP platform. These include an interpreter for the SHEEP language, an abstraction layer to incorporate HE libraries via their corresponding wrappers, and a reporting component. The user can either provide a program written in the high-level SHEEP language, or run a set of predefined benchmarks. Different aspects of the results can be visualized through a web interface.</figcaption>  
+<figcaption> Components of the SHEEP platform. These include an interpreter for the SHEEP language, an abstraction layer to incorporate HE libraries via their corresponding wrappers, and a reporting component. The user can either provide a program written in the high-level SHEEP language, or run a set of predefined benchmarks. Different aspects of the results can be visualized through a web interface.</figcaption>
 </figure>
 
 
@@ -37,6 +37,30 @@ In summary, the general problem addressed by SHEEP is that of getting a satisfyi
 > "What homomorphic encryption scheme (and implementation) should I use in my application, given some functional and non-functional, e.g. security, latency or bandwidth constraints?"
 
 In its current state, the SHEEP platform does not provide a complete solution to these problems, as we believe this requires a community effort. This is why SHEEP's code is open source.
+
+
+## Installation - docker
+
+Assuming you have docker installed, from this directory, do:
+```
+docker-compose build
+```
+This will build three Docker images: one for the "server", one for a web-based frontend, and one for some Jupyter notebooks containing examples
+of SHEEP usage.
+
+To run the web frontend, do:
+```
+docker-compose run -p 5000:5000 sheep-frontend
+```
+If you point your browser to `0.0.0.0:5000` you should get the SHEEP frontend.
+
+To run the notebooks, do:
+```
+docker-compose run -p 8888:8888 sheep-notebook
+```
+Now if you paste the URL given in the terminal for "sheep-notebook_1"
+into your browser, but with `localhost` instead of the hex string immediately after the "http://", you can access the Jupyter notebook examples.
+
 
 
 ## Installation - local
@@ -78,19 +102,7 @@ Run the tests with:
 make test
 ```
 
-## Installation - docker
 
-As above, clone this repo and then do
-```
-git submodule init
-git submodule update
-```
-Then (assuming you have Docker):
-```
-docker build -t sheep ./
-docker run -p 5000:5000 sheep
-```
-If you point your browser to `0.0.0.0:5000` you should get the SHEEP frontend.
 
 ## Circuit language and input files
 

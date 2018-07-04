@@ -14,10 +14,15 @@
 #include <map>
 
 #include "context-clear.hpp"
-#include "context-helib.hpp"
-#include "context-tfhe.hpp"
-#include "context-seal.hpp"
-
+#ifdef HAVE_HElib
+   #include "context-helib.hpp"
+#endif
+#ifdef HAVE_TFHE
+   #include "context-tfhe.hpp"
+#endif
+#ifdef HAVE_SEAL
+   #include "context-seal.hpp"
+#endif
 
 using namespace SHEEP;
 
@@ -27,7 +32,10 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 template <typename PlaintextT>
 std::unique_ptr<BaseContext<PlaintextT> >
 make_context(std::string context_type, std::string context_params="") {
-    	if (context_type == "HElib_F2") {
+  	if (context_type == "Clear") {
+	  return std::make_unique<ContextClear<PlaintextT> >();
+#ifdef HAVE_HElib
+	} else if (context_type == "HElib_F2") {
   	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
   	  if (context_params.length() > 0)
    	    ctx->read_params_from_file(context_params);
@@ -37,18 +45,21 @@ make_context(std::string context_type, std::string context_params="") {
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
+#endif
+#ifdef HAVE_TFHE
     	} else if (context_type == "TFHE") {
   	  auto ctx =  std::make_unique<ContextTFHE<PlaintextT> >();
   	  if (context_params.length() > 0)
   	    ctx->read_params_from_file(context_params);
   	  return ctx;
+#endif
+#ifdef HAVE_SEAL
 	} else if (context_type == "SEAL") {
 	  auto ctx =  std::make_unique<ContextSeal<PlaintextT> >();
 	  if (context_params.length() > 0)
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
-	} else if (context_type == "Clear") {
-	  return std::make_unique<ContextClear<PlaintextT> >();
+#endif
 	} else {
 	  throw std::runtime_error("Unknown context requested");
 	}
@@ -60,34 +71,34 @@ template<typename T>
 std::map<std::string, T> read_inputs_file(std::string filename) {
   std::vector<T> inputs_list;
   std::map<std::string, T> inputs_map;
-  std::ifstream inputstream(filename);	  
+  std::ifstream inputstream(filename);
   if (inputstream.bad()) {
     std::cout<<"Empty or non-existent input file"<<std::endl;
   }
-  
-  /// loop over all lines in the input file 
+
+  /// loop over all lines in the input file
   std::string line;
   while (std::getline(inputstream, line) ) {
     /// remove comments (lines starting with #) and empty lines
     int found= line.find_first_not_of(" \t");
-    if( found != std::string::npos) {   
-      if ( line[found] == '#') 
+    if( found != std::string::npos) {
+      if ( line[found] == '#')
 	continue;
-      
+
       /// split up by whitespace
       std::string buffer;
       std::vector<std::string> tokens;
       std::stringstream ss(line);
       while (ss >> buffer) tokens.push_back(buffer);
-      
+
       if (tokens.size() == 2) {   /// assume we have param_name param_value
 	std::string input_name = (std::string)(tokens[0]);
 	long input_val_long = stol(tokens[1]);
 	T input_val = (T)(input_val_long);
 	inputs_map.insert({input_name, input_val});
 	inputs_list.push_back(input_val);
-      }	      
-    }    
+      }
+    }
   } // end of loop over lines
   return inputs_map;
 }
@@ -97,7 +108,7 @@ bool check_correct(std::vector<PlaintextT> test_results, std::vector<PlaintextT>
   if (test_results.size() != plaintext_results.size())
     throw std::runtime_error("outputs have different sizes");
   if (test_results.size() == 0)
-    throw std::runtime_error("zero length output");    
+    throw std::runtime_error("zero length output");
   bool all_correct = true;
   auto test_iter = test_results.begin();
   auto plaintext_iter = plaintext_results.begin();
@@ -117,10 +128,10 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
   std::cout<<"== Processing times: =="<<std::endl;
   std::cout<<"setup: "<<durations[0].count()<<std::endl;
   std::cout<<"encryption: "<<durations[1].count()<<std::endl;
-  std::cout<<"circuit_evaluation: "<<durations[2].count()<<std::endl;  
-  std::cout<<"decryption: "<<durations[3].count()<<std::endl;    
+  std::cout<<"circuit_evaluation: "<<durations[2].count()<<std::endl;
+  std::cout<<"decryption: "<<durations[3].count()<<std::endl;
   std::cout<<std::endl;
-  
+
   std::vector<Wire> circuit_outputs = C.get_outputs();
   if (circuit_outputs.size() != test_results.size())
     throw std::runtime_error("outputs have different sizes");
@@ -138,8 +149,8 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
   bool matches = check_correct<PlaintextT>(test_results, cleartext_results);
   if (matches) std::cout<<"Cleartext check passed OK"<<std::endl;
   else std::cout<<"Cleartext check failed"<<std::endl;
-  std::cout<<endl<<"==== END RESULTS ==="<<std::endl;
-  
+  std::cout<<std::endl<<"==== END RESULTS ==="<<std::endl;
+
 }
 
 template <typename T>
@@ -172,15 +183,15 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	typedef std::chrono::duration<double, std::micro> microsecond;
 	typedef std::chrono::high_resolution_clock high_res_clock;
 	auto setup_start_time = high_res_clock::now();
-	
+
 	std::unique_ptr<BaseContext<PlaintextT> > test_ctx =
 	  make_context<PlaintextT>(context_name, parameter_file);
 	std::cout<<" === Made context "<<context_name<<std::endl;
-	auto setup_end_time = high_res_clock::now();	
-	durations.push_back(microsecond(setup_end_time - setup_start_time));	
+	auto setup_end_time = high_res_clock::now();
+	durations.push_back(microsecond(setup_end_time - setup_start_time));
 
 	std::unique_ptr<BaseContext<PlaintextT> > clear_ctx = make_context<PlaintextT>("Clear");
-	
+
 	// read in inputs from input_filename
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
 	std::cout<<" === Read inputs file - found "<<inputs.size()<<" values."<<std::endl;
@@ -192,7 +203,7 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	test_ctx->print_sizes();
 	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
 	print_outputs(C,result_bench, result_clear, durations);
-	
+
 	return true;
 }
 
@@ -203,11 +214,11 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 int
 main(int argc, const char** argv) {
 
-  
+
   if (argc < 3) {
 
     std::cout<<"Usage: \n ./benchmark  <circuit_file> <context_name> <input_type> <inputs_file> <eval_strategy> [<params_file>]"<<std::endl;
-    std::cout<<"OR: \n ./benchmark PARAMS  <context_name> <input_type> [<params_file>]"<<std::endl;    
+    std::cout<<"OR: \n ./benchmark PARAMS  <context_name> <input_type> [<params_file>]"<<std::endl;
     return 0;
   }
 
@@ -222,11 +233,11 @@ main(int argc, const char** argv) {
     else if (input_type == "int16_t") param_print<int16_t>(context_name, param_file);
     else if (input_type == "uint16_t") param_print<uint16_t>(context_name, param_file);
     else if (input_type == "int32_t") param_print<int32_t>(context_name, param_file);
-    else if (input_type == "uint32_t") param_print<uint32_t>(context_name, param_file);  
+    else if (input_type == "uint32_t") param_print<uint32_t>(context_name, param_file);
     return 0;
   }
 
-  
+
   /// read the circuit
   std::ifstream input_circuit(argv[1]);
   Circuit C;
@@ -235,7 +246,7 @@ main(int argc, const char** argv) {
 
 
   /// read the other input args
-  std::string context_name = argv[2];  
+  std::string context_name = argv[2];
   std::string input_type = argv[3];
   std::string inputs_file = argv[4];
   std::string eval_strategy_string = argv[5];
@@ -252,7 +263,7 @@ main(int argc, const char** argv) {
 	  eval_strategy = EvaluationStrategy::serial;
 	  eval_strategy_used = "serial";
   }
- 
+
   std::cout<<"======  Running benchmark test with:  ======="<<std::endl
 	   <<"Circuit file: " <<argv[1]<<std::endl<<"Context: "<<context_name<<std::endl
 	   <<"Input type: "<<input_type<<std::endl<<"Inputs_file "<<inputs_file<<std::endl
@@ -264,7 +275,7 @@ main(int argc, const char** argv) {
   if (input_type == "bool") {
     isOK = benchmark_run<bool>(context_name, parameter_file, C, inputs_file, eval_strategy);
   } else if (input_type == "uint8_t") {
-    isOK = benchmark_run<uint8_t>(context_name, parameter_file,C, inputs_file, eval_strategy);    
+    isOK = benchmark_run<uint8_t>(context_name, parameter_file,C, inputs_file, eval_strategy);
   } else if (input_type == "int8_t") {
     isOK = benchmark_run<int8_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   }  else if (input_type == "uint16_t") {
@@ -276,6 +287,6 @@ main(int argc, const char** argv) {
   } else if (input_type == "int32_t") {
     isOK = benchmark_run<int32_t>(context_name, parameter_file, C, inputs_file, eval_strategy);
   }
-    
+
   return isOK;
 }
