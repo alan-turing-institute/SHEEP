@@ -51,25 +51,50 @@ def new_test():
     if response["status_code"] != 200:
         return redirect(url_for("sheep_error",
                                 status = response["status_code"],
-                                message = response["message"]))
-    input_types = sheep_client.get_available_input_types()
-    libraries = sheep_client.get_available_contexts()
+                                message = response["content"]))
+    input_type_request = sheep_client.get_available_input_types()
+    if input_type_request["status_code"] != 200:
+        return redirect(url_for("sheep_error",
+                                status = input_type_request["status_code"],
+                                message = input_type_request["content"]))
+    input_types = input_type_request["content"]
+    context_request = sheep_client.get_available_contexts()
+    if context_request["status_code"] != 200:
+        return redirect(url_for("sheep_error",
+                                status = context_request["status_code"],
+                                message = context_request["content"]))
+    libraries = context_request["content"]
     ## create the form to choose circuit file, input_type, and which HE libraries to test
     cform = CircuitForm(request.form)#, libraries, input_types)
     cform.input_type.choices=[(t,t) for t in input_types]
     cform.HE_library.choices=[(l,l) for l in libraries]
     if request.method == "POST":
+        print("REQUEST FILES", request.files)
         uploaded_filenames = frontend_utils.upload_files(request.files, app.config["UPLOAD_FOLDER"])
-        sheep_client.set_circuit(uploaded_filenames["circuit_file"])
+        r = sheep_client.set_circuit(uploaded_filenames["circuit_file"])
+        if r["status_code"] != 200:
+            return redirect(url_for("sheep_error",
+                                    status = r["status_code"],
+                                    message = r["content"]))
         time.sleep(0.1)
-        inputs = sheep_client.get_inputs()
+        inputs_request = sheep_client.get_inputs()
+        if inputs_request["status_code"] != 200:
+            return redirect(url_for("sheep_error",
+                                    status = inputs_request["status_code"],
+                                    message = inputs_request["content"]))
+        inputs = inputs_request["content"]
         app.data["inputs"] = inputs
         app.data["input_type"] = cform.input_type.data
         app.data["HE_libraries"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
         app.data["eval_strategy"] = frontend_utils.set_default_eval_strategy(app.data)
-        app.data["params"] = frontend_utils.get_params_all_contexts(app.data["HE_libraries"],
-                                                                    app.data["input_type"])
+        param_request = frontend_utils.get_params_all_contexts(app.data["HE_libraries"],
+                                                               app.data["input_type"])
+        if param_request["status_code"] != 200:
+            return redirect(url_for("sheep_error",
+                                    status = param_request["status_code"],
+                                    message = param_request["content"]))
+        app.data["params"] = param_request["content"]
         return redirect(url_for("enter_parameters"))
     else:
         result = None
@@ -134,7 +159,12 @@ def execute_test():
                                                 }, ...
                                 }
     """
-    results = frontend_utils.run_test(app.data)
+    run_request = frontend_utils.run_test(app.data)
+    if run_request["status_code"] != 200:
+        return redirect(url_for("sheep_error",
+                                status = run_request["status_code"],
+                                message = run_request["content"]))
+    results = run_request["content"]
     if request.method == "POST":  ### upload button was pressed
         frontend_utils.upload_test_result(results,app.data)
         return render_template("uploaded_ok.html")

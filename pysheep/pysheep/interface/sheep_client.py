@@ -108,7 +108,7 @@ def set_input_type(input_type):
     if type_request["status_code"] != 200:
         return type_request
     response_dict = {}
-    available_types = response_dict["content"]
+    available_types = type_request["content"]
     if not input_type in available_types:
         response_dict["status_code"] = 552
         response_dict["content"] = "input_type {} not in {}".format(input_type,
@@ -153,7 +153,7 @@ def set_inputs(input_dict):
     input_request = get_inputs()
     if input_request["status_code"] != 200:
         return input_request
-    input_names = input_request["inputs"]
+    input_names = input_request["content"]
     response_dict = {}
     unset_inputs = [i for i in input_names if not i in input_dict.keys()]
     if len(unset_inputs) > 0:
