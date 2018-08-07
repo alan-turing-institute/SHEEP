@@ -47,8 +47,8 @@ def construct_run_cmd(context_name,data,config, eval_strategy="serial", paramete
     # run_cmd is a list of arguments to be passed to subprocess.run()
     run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
     run_cmd.append(circuit_file)
-    run_cmd.append(context_name)    
-    run_cmd.append(input_type) 
+    run_cmd.append(context_name)
+    run_cmd.append(input_type)
     run_cmd.append(inputs_file)
     run_cmd.append(eval_strategy)
     if parameter_file:
@@ -65,8 +65,8 @@ def construct_get_param_cmd(context_name,input_type,config,parameter_file=None):
     # run_cmd is a list of arguments to be passed to subprocess.run()
     run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
     run_cmd.append("PARAMS")
-    run_cmd.append(context_name)    
-    run_cmd.append(input_type) 
+    run_cmd.append(context_name)
+    run_cmd.append(input_type)
     if parameter_file:
         run_cmd.append(parameter_file)
     return run_cmd
@@ -125,65 +125,35 @@ def run_test(data):
         sheep_client.set_inputs(data["input_vals"])
 #        sheep_client.set_parameters(data["params"][context])
         sheep_client.set_eval_strategy(data["eval_strategy"][context])
-        sheep_client.run_job()
-        results[context] = sheep_client.get_results()
-    return results
-        
-#def run_test(data,config):
-#    """
-#    Run the executable in a subprocess, and capture the stdout output.
-#    return a dict of results {"context_name": {"processing_times" : {},
-#                                                 "sizes" : {},
-#                                                 "outputs" : {} 
-#                                                }, ... 
-#    """
-#    results = {}
-#    contexts_to_run = data["HE_libraries"] 
-#### always run clear context, for comparison, unless we already have 4 contexts
-#### in which case the outputs page would be too cluttered...
-#    if len(contexts_to_run) < 4:
-#        contexts_to_run.append("Clear")
-#    for context in contexts_to_run:
-#        param_file = find_param_file(context,config)
-#        if not "eval_strategy" in data.keys():
-#            eval_strategy = "serial"
-#        else:
-#            eval_strategy = data["eval_strategy"]
-#        run_cmd = construct_run_cmd(context,data,config,eval_strategy,param_file)
-#        p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
-#        output = p.communicate()[0]
-#        debug_filename = config["UPLOAD_FOLDER"]+"/debug_"+context+".txt"
-#        results[context] = common_utils.parse_test_output(output,debug_filename)
-#        
-#    return results
-#
+        run_request = sheep_client.run_job()
+        if run_request["status_code"] != 200:
+            return run_request
+        results_request = sheep_client.get_results()
+        if results_request["status_code"] != 200:
+            return results_request
+        results[context] = results_request["content"]
+    return {"status_code": 200, "content": results}
+
 
 def get_params_all_contexts(context_list,input_type):
     """
-    Return a dict with the key being context_name, and the vals being 
+    Return a dict with the key being context_name, and the vals being
     dicts of param_name:default_val.
     """
     all_params = {}
     for context in context_list:
-        all_params[context] = get_params_single_context(context,input_type)
-    return all_params
+        param_request = get_params_single_context(context,input_type)
+        if param_request["status_code"] != 200:
+            return param_request
+        all_params[context] = param_request["content"]
+    return {"status_code": 200, "content": all_params}
 
-
-#def get_params_single_context(context,input_type,config,params_file=None):
-#    """
-#    Run the benchmark executable to printout params and default values.
-#    """
-#    run_cmd = construct_get_param_cmd(context,input_type,config,params_file)
-#    print("run_cmd is ",run_cmd)
-#    p = subprocess.Popen(args=run_cmd,stdout=subprocess.PIPE)
-#    output = p.communicate()[0]
-#    params = parse_param_output(output)
-#    print("OUTPUT ",output)
-#    return params
 
 def get_params_single_context(context, input_type):
     """
     use sheep_client to get parameters for given context and input type
+    Just directly pass through what we get back from sheep_client, which
+    will be a dict with keys "status_code" and "content"
     """
     sheep_client.set_context(context)
     sheep_client.set_input_type(input_type)
@@ -193,10 +163,10 @@ def get_params_single_context(context, input_type):
 
 def update_params(context,param_dict,appdata,appconfig):
     """
-    We have received a dict of params for a given context from the web form.  
-    However, we need to get the benchmark executable to calculate params, if e.g. A_predefined_param_set 
-    was changed for HElib.  
-    So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse 
+    We have received a dict of params for a given context from the web form.
+    However, we need to get the benchmark executable to calculate params, if e.g. A_predefined_param_set
+    was changed for HElib.
+    So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse
     the output, write that to a file, and return it.
     """
     old_params = appdata["params"][context]
@@ -241,23 +211,18 @@ def upload_test_result(results,app_data):
         circuit_path = app_data["uploaded_filenames"]["circuit_file"]
         circuit_name, num_inputs = common_utils.get_circuit_name(circuit_path)
         execution_time = result["timings"]["evaluation"]
-        is_correct = result["Cleartext check"]["is_correct"]
-#        sizes = result["Object sizes (bytes)"]                    
-#        ciphertext_size = sizes["ciphertext"]
-#        public_key_size = sizes["publicKey"]
-#        private_key_size = sizes["privateKey"]
-        param_dict = result["Parameter values"]    
+        is_correct = result["cleartext check"]["is_correct"]
+#        param_dict = result["parameter values"]
         cm = BenchmarkMeasurement(
             circuit_name = circuit_name,
-##            num_inputs = num_inputs,
             context_name = context,
             input_bitwidth = common_utils.get_bitwidth(app_data["input_type"]),
             input_signed = app_data["input_type"].startswith("i"),
             execution_time = execution_time,
             is_correct = is_correct,
-            ciphertext_size = sizes["ciphertext"],
-            private_key_size = sizes["privateKey"],
-            public_key_size = sizes["publicKey"]
+#            ciphertext_size = sizes["ciphertext"],
+#            private_key_size = sizes["privateKey"],
+#            public_key_size = sizes["publicKey"]
         )
 
         context_prefix = context.split("_")[0]  ### only have HElib, not HElib_F2 and HElib_Fp
