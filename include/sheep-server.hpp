@@ -8,6 +8,7 @@
 #include <memory>
 #include <fstream>
 #include <map>
+#include <set>
 
 /// cpp rest api includes
 #include "cpprest/json.h"
