@@ -9,8 +9,6 @@ services:
      - "34568:34568"
     networks:
      - sheep_nw
-    volumes:
-     - /Users/ostrickson/projects/sheep:/mnt
   sheep-frontend:
     build:
       context: pysheep
