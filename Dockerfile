@@ -89,4 +89,4 @@ RUN cd SHEEP/build; export CC=gcc-7; export CXX=g++-7; cmake ../ ; make run-shee
 
 WORKDIR SHEEP/build
 EXPOSE 34568
-#CMD ["bin/run-sheep-server"]
+CMD ["bin/run-sheep-server"]
