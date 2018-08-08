@@ -8,6 +8,7 @@
 #include <memory>
 #include <fstream>
 #include <map>
+#include <set>
 
 /// cpp rest api includes
 #include "cpprest/json.h"
@@ -133,7 +134,7 @@ public:
   std::vector<PlaintextT> make_plaintext_inputs();
 
   template <typename PlaintextT>
-  void configure_and_run();
+  void configure_and_run(http_request message);
 
   void get_parameters();
 

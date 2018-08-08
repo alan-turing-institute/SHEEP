@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: bin/run-sheep-server
     ports:
      - "34568:34568"
     networks:

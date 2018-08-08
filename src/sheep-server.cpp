@@ -7,7 +7,11 @@
 #include <random>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #include "sheep-server.hpp"
 
@@ -165,7 +169,7 @@ SheepServer::check_job_outputs(std::vector<PlaintextT> test_outputs,
 
 template <typename PlaintextT>
 void
-SheepServer::configure_and_run() {
+SheepServer::configure_and_run(http_request message) {
   if (! m_job_config.isConfigured()) throw std::runtime_error("Job incompletely configured");
   /// we can now assume we have values for context, inputs, circuit, etc
   auto context = make_context<PlaintextT>(m_job_config.context);
@@ -175,37 +179,133 @@ SheepServer::configure_and_run() {
     context->set_parameter(map_iter->first, map_iter->second);
   }
   std::vector<PlaintextT> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
-  std::vector<Duration> timings;
-  std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
-  								      plaintext_inputs,
-  								      timings,
-  								      m_job_config.eval_strategy);
-  m_job_finished = true;
-  ///  store outputs values as strings, to avoid ambiguity about type.
-  for (int i=0; i < output_vals.size(); ++i ) {
-    auto output = std::make_pair<const std::string,std::string>(
-								m_job_config.circuit.get_outputs()[i].get_name(),
-								std::to_string(output_vals[i])
-								);
-    m_job_result.outputs.insert(output);
+  
+  // shared memory region for returning the results
+  size_t n_outputs = m_job_config.circuit.get_outputs().size();
+  size_t n_timings = 3;
+
+  Duration *timings_shared = (Duration *)mmap(NULL, n_timings * sizeof(Duration),
+					      PROT_READ | PROT_WRITE,
+					      MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+  
+  if (timings_shared == MAP_FAILED) {
+    message.reply(status_codes::InternalError,("Could not run evaluation"));
+    return;
   }
-  if (timings.size() != 3) throw std::runtime_error("Unexpected length of timing vector");
-  auto encryption = std::make_pair<std::string, std::string>("encryption",std::to_string(timings[0].count()));
-  m_job_result.timings.insert(encryption);
-  auto evaluation = std::make_pair<std::string, std::string>("evaluation",std::to_string(timings[1].count()));
-  m_job_result.timings.insert(evaluation);
-  auto decryption = std::make_pair<std::string, std::string>("decryption",std::to_string(timings[2].count()));
-  m_job_result.timings.insert(decryption);
 
-  //// now do the plaintext evaluation
-  auto clear_context = make_context<PlaintextT>("Clear");
-  std::vector<PlaintextT> clear_output_vals = clear_context->eval_with_plaintexts(m_job_config.circuit,
-										  plaintext_inputs,
-										  timings);
-  bool is_correct = check_job_outputs<PlaintextT>(output_vals, clear_output_vals);
-  m_job_result.is_correct = is_correct;
+  PlaintextT *outputs_shared = (PlaintextT *)mmap(NULL, n_outputs * sizeof(PlaintextT),
+						  PROT_READ | PROT_WRITE,
+						  MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+
+  if (outputs_shared == MAP_FAILED) {
+    message.reply(status_codes::InternalError,("Could not run evaluation"));
+    munmap(timings_shared, n_timings);
+    return;
+  }
+  
+  pid_t child_pid = fork();
+  if (child_pid == -1) {
+    // fork did not succeed
+    message.reply(status_codes::InternalError,("Could not run evaluation"));
+    m_job_finished = false;
+  }
+  else if (!child_pid) {
+    // child process: perform the evaluation
+    
+    std::vector<Duration> timings;
+    std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
+									plaintext_inputs,
+									timings,
+									m_job_config.eval_strategy);
+    std::cerr << timings.size() << std::endl;
+    if (timings.size() != 3) {
+      // signal an error to the server
+      std::cerr << "Child exiting: more than three timings reported!\n";
+      _exit(1);
+    }
+
+    // insert the various things in the shared memory buffer  
+    for (int i=0; i < 3; i++) {
+      timings_shared[i] = timings[i];
+    }
+
+    for (int i=0; i < n_outputs; i++) {
+      outputs_shared[i] = output_vals[i];
+    }
+
+    std::cerr << "successful evaluation: exiting...\n";
+
+    // if we get here, evaluation finished successfully: child can exit
+    _exit(0);
+  }
+  else {
+    // parent process: wait for child or kill after timeout
+
+    // timeout hardcoded as 10 s for now
+    // POSIX: can assume this is an integer type
+    time_t timeout_us = 10000000L;
+
+    // go to sleep for the length of the timeout and a grace period
+    struct timespec req, rem;
+    req.tv_nsec = (timeout_us % 1000000) * 1000;
+    // allow one second grace (since the timeout above refers to the evaluation only
+    req.tv_sec = (timeout_us / 1000000) + 1;
+    nanosleep(&req, &rem);
+
+    // on waking up, is the child still alive?
+    int status;
+    if (!waitpid(child_pid, &status, WNOHANG)) {
+      // this is an error (eval's own timeout should have stopped it)
+      kill(child_pid, SIGKILL);
+      message.reply(status_codes::InternalError,("Evaluation timed out"));
+      m_job_finished = false;
+    }
+    else if (status) {
+      // other abnormal termination (nonzero return or killed by signal)
+      message.reply(status_codes::InternalError,("Evaluation terminated abnormally"));
+      m_job_finished = false;
+    }
+    else {
+      // child exited normally => evaluation completed
+      m_job_finished = true;
+
+      std::vector<PlaintextT> output_vals(outputs_shared, outputs_shared+n_outputs);
+
+      ///  store outputs values as strings, to avoid ambiguity about type.
+      for (int i=0; i < n_outputs; ++i ) {
+	auto output = std::make_pair<const std::string,std::string>(
+	  m_job_config.circuit.get_outputs()[i].get_name(),
+	  std::to_string(output_vals[i])
+	  );
+	m_job_result.outputs.insert(output);
+      }
+  
+      auto encryption = std::make_pair<std::string, std::string>("encryption",std::to_string(timings_shared[0].count()));
+      m_job_result.timings.insert(encryption);
+      auto evaluation = std::make_pair<std::string, std::string>("evaluation",std::to_string(timings_shared[1].count()));
+      m_job_result.timings.insert(evaluation);
+      auto decryption = std::make_pair<std::string, std::string>("decryption",std::to_string(timings_shared[2].count()));
+      m_job_result.timings.insert(decryption);
+
+      //// now do the plaintext evaluation
+      auto clear_context = make_context<PlaintextT>("Clear");
+      std::vector<Duration> timings_clear;
+      std::vector<PlaintextT> clear_output_vals = clear_context->eval_with_plaintexts(m_job_config.circuit,
+										      plaintext_inputs,
+										      timings_clear);
+
+      bool is_correct = check_job_outputs<PlaintextT>(output_vals, clear_output_vals);
+      m_job_result.is_correct = is_correct;
+
+      message.reply(status_codes::OK);
+    }
+  }
+
+  // clean up shared memory buffers
+  munmap(timings_shared, n_timings * sizeof(Duration));
+  munmap(outputs_shared, n_outputs * sizeof(PlaintextT));
 }
-
+  
 void SheepServer::handle_get(http_request message)
 {
   auto path = message.relative_uri().path();
@@ -248,14 +348,13 @@ void SheepServer::handle_post_run(http_request message) {
 
   /// get a context, configure it with the stored
   /// parameters, and run it.
-  if (m_job_config.input_type == "bool") configure_and_run<bool>();
-  else if (m_job_config.input_type == "uint8_t") configure_and_run<uint8_t>();
-  else if (m_job_config.input_type == "uint16_t") configure_and_run<uint16_t>();
-  else if (m_job_config.input_type == "uint32_t") configure_and_run<uint32_t>();
-  else if (m_job_config.input_type == "int8_t") configure_and_run<int8_t>();
-  else if (m_job_config.input_type == "int16_t") configure_and_run<int16_t>();
-  else if (m_job_config.input_type == "int32_t") configure_and_run<int32_t>();
-  message.reply(status_codes::OK);
+  if (m_job_config.input_type == "bool") configure_and_run<bool>(message);
+  else if (m_job_config.input_type == "uint8_t") configure_and_run<uint8_t>(message);
+  else if (m_job_config.input_type == "uint16_t") configure_and_run<uint16_t>(message);
+  else if (m_job_config.input_type == "uint32_t") configure_and_run<uint32_t>(message);
+  else if (m_job_config.input_type == "int8_t") configure_and_run<int8_t>(message);
+  else if (m_job_config.input_type == "int16_t") configure_and_run<int16_t>(message);
+  else if (m_job_config.input_type == "int32_t") configure_and_run<int32_t>(message);
 }
 
 
