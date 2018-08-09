@@ -132,6 +132,11 @@ def run_test(data):
         if results_request["status_code"] != 200:
             return results_request
         results[context] = results_request["content"]
+        params_request = get_params_single_context(context, data["input_type"])
+        if params_request["status_code"] != 200:
+            return params_request
+        results[context]['parameter values'] = params_request["content"]
+
     return {"status_code": 200, "content": results}
 
 
@@ -212,7 +217,7 @@ def upload_test_result(results,app_data):
         circuit_name, num_inputs = common_utils.get_circuit_name(circuit_path)
         execution_time = result["timings"]["evaluation"]
         is_correct = result["cleartext check"]["is_correct"]
-#        param_dict = result["parameter values"]
+        param_dict = result["parameter values"]
         cm = BenchmarkMeasurement(
             circuit_name = circuit_name,
             context_name = context,
