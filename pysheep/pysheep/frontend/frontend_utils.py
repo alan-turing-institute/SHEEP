@@ -35,71 +35,6 @@ def upload_files(filedict,upload_folder):
     return uploaded_filenames
 
 
-def construct_run_cmd(context_name,data,config, eval_strategy="serial", parameter_file=None):
-    """
-    Build up the list of arguments to be sent to subprocess.Popen in order to run
-    the benchmark test.
-    """
-    circuit_file = data["uploaded_filenames"]["circuit_file"]
-    inputs_file = data["uploaded_filenames"]["inputs_file"]
-    input_type = data["input_type"]
-
-    # run_cmd is a list of arguments to be passed to subprocess.run()
-    run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
-    run_cmd.append(circuit_file)
-    run_cmd.append(context_name)
-    run_cmd.append(input_type)
-    run_cmd.append(inputs_file)
-    run_cmd.append(eval_strategy)
-    if parameter_file:
-        run_cmd.append(parameter_file)
-    return run_cmd
-
-
-def construct_get_param_cmd(context_name,input_type,config,parameter_file=None):
-    """
-    Build up the list of arguments to be sent to subprocess.Popen in order to run
-    the benchmark test to get the params for chosen context.
-    """
-
-    # run_cmd is a list of arguments to be passed to subprocess.run()
-    run_cmd = [config["EXECUTABLE_DIR"]+"/benchmark"]
-    run_cmd.append("PARAMS")
-    run_cmd.append(context_name)
-    run_cmd.append(input_type)
-    if parameter_file:
-        run_cmd.append(parameter_file)
-    return run_cmd
-
-
-def parse_param_output(outputstring):
-    """
-    read the output of benchmark PARAMS <context_name>
-    and return a dict {param_name: val , ... }
-    """
-    params = {}
-    for line in outputstring.decode("utf-8").splitlines():
-        if line.startswith("Parameter"):
-            #### line will be of format "Parameter x = y" - we want x and y
-            tokens = line.strip().split()
-            params[tokens[1]] = tokens[3]
-    print("PARAM_OUTPUT",params)
-    return params
-
-
-def find_param_file(context,config):
-    """
-    If parameters have been set by hand via the frontend, they will
-    be in UPLOAD_FOLDER / params_[context].txt.
-    return this path if it exists, or None if it doesn't.
-    """
-    param_filename = config["UPLOAD_FOLDER"]+"/parameters_"+context+".txt"
-    if os.path.exists(param_filename):
-        print("Found PARAM FILE ",param_filename)
-        return param_filename
-    else:
-        return None
-
 def set_default_eval_strategy(data):
     """
     for each context, set eval_strategy to 'serial' (can override later)
@@ -123,7 +58,7 @@ def run_test(data):
         sheep_client.set_context(context)
         sheep_client.set_circuit(data["uploaded_filenames"]["circuit_file"])
         sheep_client.set_inputs(data["input_vals"])
-#        sheep_client.set_parameters(data["params"][context])
+        sheep_client.set_parameters(data["params"][context])
         sheep_client.set_eval_strategy(data["eval_strategy"][context])
         run_request = sheep_client.run_job()
         if run_request["status_code"] != 200:
@@ -171,15 +106,19 @@ def update_params(context,param_dict,appdata,appconfig):
     We have received a dict of params for a given context from the web form.
     However, we need to get the benchmark executable to calculate params, if e.g. A_predefined_param_set
     was changed for HElib.
-    So, we write all the params from the form out to a file, run benchmark PARAMS .... , then parse
-    the output, write that to a file, and return it.
+    So, we first get the default params, then see if any of the values in the form are different
     """
-    old_params = appdata["params"][context]
-    print("OLD_PARAMS",old_params)
-    param_filename = os.path.join(appconfig["UPLOAD_FOLDER"],"parameters_"+context+".txt")
-    print( " param_filename",param_filename)
-    param_file = open(param_filename,"w")
-    print("param_dict ", param_dict)
+    # first "set" an empty set of parameters
+    default_param_request = sheep_client.set_parameters({})
+    if default_param_request["status_code"] != 200:
+        return param_update_request
+    # now retrieve the parameters
+    default_param_request = get_params_single_context(context,appdata["input_type"])
+    if default_param_request["status_code"] != 200:
+        return param_update_request
+    default_params = default_param_request["content"]
+    # now compare to the parameters in the form.
+    params_to_update = {}
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
@@ -189,19 +128,14 @@ def update_params(context,param_dict,appdata,appconfig):
             appdata["eval_strategy"][context] = v
             continue
         ### only write to file if the new param is different to the old one
-        if v != old_params[k]:
-            print("Writing %s %s to params file" % (k,v))
-            param_file.write(k+" "+str(v)+"\n")
-    param_file.close()
+        if str(v) != str(default_params[k]):
+            params_to_update[k] = int(v)
+    param_update_request = sheep_client.set_parameters(params_to_update)
+    if param_update_request["status_code"] != 200:
+        return param_update_request
+
     updated_params = get_params_single_context(context,appdata["input_type"])
-    param_file = open(param_filename,"w")
-    if len(updated_params) == 0:  ### something went wrong, e..g.  bad set of parameters
-        ### return the default params (i.e. run get_params_single_context with no params file
-        params = get_params_single_context(context, appdata["input_type"])
-        return params
-    for k,v in updated_params.items():
-        param_file.write(k+" "+str(v)+"\n")
-    param_file.close()
+
     return updated_params
 
 

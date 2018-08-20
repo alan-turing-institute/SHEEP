@@ -69,7 +69,6 @@ def new_test():
     cform.input_type.choices=[(t,t) for t in input_types]
     cform.HE_library.choices=[(l,l) for l in libraries]
     if request.method == "POST":
-        print("REQUEST FILES", request.files)
         uploaded_filenames = frontend_utils.upload_files(request.files, app.config["UPLOAD_FOLDER"])
         r = sheep_client.set_circuit(uploaded_filenames["circuit_file"])
         if r["status_code"] != 200:
@@ -117,8 +116,14 @@ def enter_parameters():
     if request.method == "POST":
         for context in pforms.keys():
             if context in request.form.keys():
-                params = frontend_utils.update_params(context,request.form,
-                                             app.data,app.config)
+                update_params_request = frontend_utils.update_params(context,
+                                                                     request.form,
+                                                                     app.data,app.config)
+                if update_params_request["status_code"] != 200:
+                    return redirect(url_for("sheep_error",
+                                            status = update_params_request["status_code"],
+                                            message = update_params_request["content"]))
+                params = update_params_request["content"]
                 app.data["params"][context] = params
                 return redirect(url_for("enter_parameters"))
 

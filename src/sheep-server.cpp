@@ -110,6 +110,7 @@ SheepServer::get_parameters() {
     if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);
   }
 }
+
 template <typename PlaintextT>
 void
 SheepServer::update_parameters(std::string context_type,
@@ -143,6 +144,7 @@ SheepServer::update_parameters(std::string context_type,
   }
   /// update parameters if specified
   auto params = parameters.as_object();
+
   for (auto p : params) {
     std::string param_name = p.first;
     long param_value = (long)(p.second.as_integer());
@@ -154,6 +156,7 @@ SheepServer::update_parameters(std::string context_type,
   m_job_config.parameters = context->get_parameters();
   // cleanup
   delete context;
+  return;
 }
 
 template <typename PlaintextT>
@@ -179,7 +182,7 @@ SheepServer::configure_and_run(http_request message) {
     context->set_parameter(map_iter->first, map_iter->second);
   }
   std::vector<PlaintextT> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
-  
+
   // shared memory region for returning the results
   size_t n_outputs = m_job_config.circuit.get_outputs().size();
   size_t n_timings = 3;
@@ -187,7 +190,7 @@ SheepServer::configure_and_run(http_request message) {
   Duration *timings_shared = (Duration *)mmap(NULL, n_timings * sizeof(Duration),
 					      PROT_READ | PROT_WRITE,
 					      MAP_ANONYMOUS | MAP_SHARED, 0, 0);
-  
+
   if (timings_shared == MAP_FAILED) {
     message.reply(status_codes::InternalError,("Could not run evaluation"));
     return;
@@ -202,7 +205,7 @@ SheepServer::configure_and_run(http_request message) {
     munmap(timings_shared, n_timings);
     return;
   }
-  
+
   pid_t child_pid = fork();
   if (child_pid == -1) {
     // fork did not succeed
@@ -211,7 +214,7 @@ SheepServer::configure_and_run(http_request message) {
   }
   else if (!child_pid) {
     // child process: perform the evaluation
-    
+
     std::vector<Duration> timings;
     std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
 									plaintext_inputs,
@@ -224,7 +227,7 @@ SheepServer::configure_and_run(http_request message) {
       _exit(1);
     }
 
-    // insert the various things in the shared memory buffer  
+    // insert the various things in the shared memory buffer
     for (int i=0; i < 3; i++) {
       timings_shared[i] = timings[i];
     }
@@ -279,7 +282,7 @@ SheepServer::configure_and_run(http_request message) {
 	  );
 	m_job_result.outputs.insert(output);
       }
-  
+
       auto encryption = std::make_pair<std::string, std::string>("encryption",std::to_string(timings_shared[0].count()));
       m_job_result.timings.insert(encryption);
       auto evaluation = std::make_pair<std::string, std::string>("evaluation",std::to_string(timings_shared[1].count()));
@@ -305,7 +308,7 @@ SheepServer::configure_and_run(http_request message) {
   munmap(timings_shared, n_timings * sizeof(Duration));
   munmap(outputs_shared, n_outputs * sizeof(PlaintextT));
 }
-  
+
 void SheepServer::handle_get(http_request message)
 {
   auto path = message.relative_uri().path();
@@ -601,13 +604,14 @@ void SheepServer::handle_put_parameters(http_request message) {
 	else if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context,params);
 	else message.reply(status_codes::InternalError,("Unknown input type when updating parameters"));
 
+	message.reply(status_codes::OK);
 
       } catch(json::json_exception) {
 	  message.reply(status_codes::InternalError,("Unable to set evaluation strategy"));
       }
     });
 
-  message.reply(status_codes::OK);
+  //message.reply(status_codes::InternalError,("Problem setting parameters"));
 }
 
 void SheepServer::handle_get_results(http_request message) {
