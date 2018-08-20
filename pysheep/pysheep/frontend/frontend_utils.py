@@ -35,13 +35,13 @@ def upload_files(filedict,upload_folder):
     return uploaded_filenames
 
 
-def set_default_eval_strategy(data):
+def set_eval_strategy(data, strategy="serial"):
     """
     for each context, set eval_strategy to 'serial' (can override later)
     """
     es_dict = {}
     for context in data["HE_libraries"]:
-        es_dict[context] = "serial"    # default value
+        es_dict[context] = strategy    # default is serial
     return es_dict
 
 
@@ -119,15 +119,17 @@ def update_params(context,param_dict,appdata,appconfig):
     default_params = default_param_request["content"]
     # now compare to the parameters in the form.
     params_to_update = {}
+    eval_strat = "serial"
     for k,v in param_dict.items():
         ### ignore the "apply" button:
         if v=="Apply":
             continue
         ### treat the evaluation strategy separately
         if k=="eval_strategy":
+            eval_strat = v
             appdata["eval_strategy"][context] = v
             continue
-        ### only write to file if the new param is different to the old one
+        ### only modify if the new param is different to the old one
         if str(v) != str(default_params[k]):
             params_to_update[k] = int(v)
     param_update_request = sheep_client.set_parameters(params_to_update)
@@ -136,7 +138,7 @@ def update_params(context,param_dict,appdata,appconfig):
 
     updated_params = get_params_single_context(context,appdata["input_type"])
 
-    return updated_params
+    return updated_params, eval_strat
 
 
 def upload_test_result(results,app_data):

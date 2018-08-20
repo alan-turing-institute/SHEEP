@@ -86,7 +86,7 @@ def new_test():
         app.data["input_type"] = cform.input_type.data
         app.data["HE_libraries"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
-        app.data["eval_strategy"] = frontend_utils.set_default_eval_strategy(app.data)
+        app.data["eval_strategy"] = frontend_utils.set_eval_strategy(app.data)
         param_request = frontend_utils.get_params_all_contexts(app.data["HE_libraries"],
                                                                app.data["input_type"])
         if param_request["status_code"] != 200:
@@ -111,20 +111,21 @@ def enter_parameters():
 
     pforms = {}
     for context in params.keys():
-        pform = build_param_form(params[context])(request.form)
+        pform = build_param_form(params[context],app.data["eval_strategy"][context])(request.form)
         pforms[context] = pform
     if request.method == "POST":
         for context in pforms.keys():
             if context in request.form.keys():
-                update_params_request = frontend_utils.update_params(context,
-                                                                     request.form,
-                                                                     app.data,app.config)
+                update_params_request, eval_strat = frontend_utils.update_params(context,
+                                                                                 request.form,
+                                                                                 app.data,app.config)
                 if update_params_request["status_code"] != 200:
                     return redirect(url_for("sheep_error",
                                             status = update_params_request["status_code"],
                                             message = update_params_request["content"]))
                 params = update_params_request["content"]
                 app.data["params"][context] = params
+                app.data["eval_strategy"][context] = eval_strat
                 return redirect(url_for("enter_parameters"))
 
         param_sets = {}
