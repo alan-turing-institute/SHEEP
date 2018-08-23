@@ -89,6 +89,34 @@ if (SEAL_FOUND)
 endif(SEAL_FOUND)
 
 
+if (LP_FOUND)
+
+     add_executable(lp-context-example
+                     lp-context-example.cpp
+                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+    add_test(NAME lp-context-example COMMAND $<TARGET_FILE:lp-context-example>)
+
+    target_link_libraries(lp-context-example
+                            ${LP_LIBRARIES} ${GMP_LIBRARIES})
+
+    add_executable(lp-example
+                     lpplain.cpp
+                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+    add_test(NAME lp-example COMMAND $<TARGET_FILE:lp-example>)
+
+    target_link_libraries(lp-example
+                            ${LP_LIBRARIES} ${GMP_LIBRARIES})
+
+
+
+  
+
+endif(LP_FOUND)
+
+
+
 ### The "benchmark" executable, to run a specified HElib on a given circuit.
 
 add_executable(benchmark
@@ -106,6 +134,9 @@ endif(TFHE_FOUND)
 if (SEAL_FOUND)
 target_link_libraries(benchmark ${SEAL_LIBRARIES})
 endif(SEAL_FOUND)
+if (LP_FOUND)
+target_link_libraries(benchmark ${LP_LIBRARIES} ${GMP_LIBRARIES})
+endif(LP_FOUND)
 
 add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
@@ -128,3 +159,7 @@ endif(TFHE_FOUND)
 if (SEAL_FOUND)
 target_link_libraries(run-sheep-server ${SEAL_LIBRARIES})
 endif(SEAL_FOUND)
+
+if (LP_FOUND)
+target_link_libraries(run-sheep-server ${LP_LIBRARIES} ${GMP_LIBRARIES})
+endif(LP_FOUND)

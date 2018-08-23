@@ -98,7 +98,7 @@ private:
 
 	WireList outputs;
 
-        WireList const_inputs;
+     WireList const_inputs;
 	AssignmentList assignments;
 public:
 
@@ -113,6 +113,10 @@ public:
 	}
 
   	Wire add_const_input(std::string name) {
+  		std::unordered_set<std::string>::iterator it_ignored;
+		bool inserted;
+		std::tie(it_ignored, inserted) = wire_names.insert(name);
+		if (!inserted) throw MultipleAssignmentError(name);
 		const_inputs.emplace_back(name);
 		return const_inputs.back();
 	}

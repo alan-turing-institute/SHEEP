@@ -23,6 +23,9 @@
 #ifdef HAVE_SEAL
    #include "context-seal.hpp"
 #endif
+#ifdef HAVE_LP
+   #include "context-lp.hpp"
+#endif
 
 using namespace SHEEP;
 
@@ -60,7 +63,19 @@ make_context(std::string context_type, std::string context_params="") {
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
 #endif
-	} else {
+#ifdef HAVE_LP
+	} else if (context_type == "LP") {
+	  auto ctx =  std::make_unique<ContextLP<PlaintextT> >();
+	  if (context_params.length() > 0)
+	    ctx->read_params_from_file(context_params);
+	  return ctx;
+#endif	    
+    
+    
+    } 
+    
+    
+    else {
 	  throw std::runtime_error("Unknown context requested");
 	}
 }
