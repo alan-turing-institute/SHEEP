@@ -89,7 +89,7 @@ make all
 ```
 And finally build SHEEP:
 ```
-cd ../../../
+cd ../../lib/
 mkdir build
 cd build
 cmake ../

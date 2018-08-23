@@ -53,7 +53,8 @@ class PlotsForm(Form):
                                             choices=[("HElib_F2","HElib_F2"),
                                                      ("HElib_Fp","HElib_Fp"),
                                                      ("TFHE","TFHE"),
-                                                     ("SEAL","SEAL")])
+                                                     ("SEAL","SEAL"),
+                                                    ("LP","LP")])
     gate_selections = MultiCheckboxField('Select gate(s)',
                                          choices=[("ADD","ADD"),
                                                   ("SUBTRACT","SUBTRACT"),

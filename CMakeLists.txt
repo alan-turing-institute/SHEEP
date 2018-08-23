@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
+
 project (Sheep)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -26,11 +27,24 @@ set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src"
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/include/SEAL")
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/usr/local/lib/SEAL")
 
+# LP
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/lib/libpaillier-0.8")  
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/libpaillier-0.8") 
+
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 enable_testing()
 
 include_directories(include)
+
+
+find_package(LP)
+if (LP_FOUND)
+  include_directories(SYSTEM ${LP_INCLUDE_DIRS})
+  find_library(GMP_LIBRARIES NAMES gmp)
+  add_definitions(-DHAVE_LP)  
+endif (LP_FOUND)
 
 find_package(TFHE)
 if (TFHE_FOUND)
@@ -61,5 +75,5 @@ endif()
 
 link_libraries(pthread)
 
-add_subdirectory(example bin)
-add_subdirectory(tests testbin)
+ add_subdirectory(example bin)
+ add_subdirectory(tests testbin)
