@@ -82,8 +82,15 @@ def new_test():
             return redirect(url_for("sheep_error",
                                     status = inputs_request["status_code"],
                                     message = inputs_request["content"]))
+        const_inputs_request = sheep_client.get_const_inputs()
         inputs = inputs_request["content"]
+        if const_inputs_request["status_code"] != 200:
+            return redirect(url_for("sheep_error",
+                                    status = const_inputs_request["status_code"],
+                                    message = const_inputs_request["content"]))
+        const_inputs = const_inputs_request["content"]
         app.data["inputs"] = inputs
+        app.data["inputs"] += [ ci+" (C)" for ci in const_inputs]
         app.data["input_type"] = cform.input_type.data
         app.data["HE_libraries"] = cform.HE_library.data
         app.data["uploaded_filenames"] = uploaded_filenames
