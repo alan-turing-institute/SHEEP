@@ -52,6 +52,11 @@ RUN wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-7
 RUN tar xf SEAL_2.3.1.tar.gz
 RUN cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install;
 
+###### get and build libpaillier
+RUN wget http://hms.isi.jhu.edu/acsc/libpaillier/libpaillier-0.8.tar.gz
+RUN tar -xvzf libpaillier-0.8.tar.gz
+RUN cd libpaillier-0.8 ; ./configure; make; make install
+
 
 #############################################################################################################
 #####  Everything before this can be run to give a base docker image, to avoid having to recompile everything.
@@ -62,6 +67,12 @@ FROM sheep_base as sheep_dev
 ADD . SHEEP
 
 RUN cd SHEEP; git submodule init; git submodule update
+
+## build libpaillier
+##RUN cd SHEEP/lib/libpaillier-0.8; git submodule init
+##RUN cd SHEEP/lib/libpaillier-0.8; git submodule update
+##RUN cd SHEEP/lib/libpaillier-0.8; for f in `ls *.cpp`; do sed 's/<paillier.h>/"paillier.h"/g' $f > ${f}.tmp; mv ${f}.tmp $f; done;
+##RUN cd SHEEP/lib/libpaillier-0.8; make
 
 
 ## build TFHE
