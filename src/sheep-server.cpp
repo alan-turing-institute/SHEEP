@@ -140,6 +140,7 @@ SheepServer::get_parameters() {
 		if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context);
 	}
 }
+
 template <typename PlaintextT>
 void
 SheepServer::update_parameters(std::string context_type,
@@ -170,7 +171,6 @@ SheepServer::update_parameters(std::string context_type,
 		context = new ContextLP<PlaintextT>();
 #endif
 
-
 	} else {
 		throw std::runtime_error("Unknown context requested");
 	}
@@ -191,6 +191,7 @@ SheepServer::update_parameters(std::string context_type,
 	m_job_config.parameters = context->get_parameters();
 	// cleanup
 	delete context;
+
 }
 
 template <typename PlaintextT>
@@ -207,6 +208,7 @@ SheepServer::check_job_outputs(std::vector<PlaintextT> test_outputs,
 template <typename PlaintextT>
 void
 SheepServer::configure_and_run(http_request message) {
+
 	if (! m_job_config.isConfigured()) throw std::runtime_error("Job incompletely configured");
 	/// we can now assume we have values for context, inputs, circuit, etc
 	auto context = make_context<PlaintextT>(m_job_config.context);
@@ -287,9 +289,9 @@ SheepServer::configure_and_run(http_request message) {
 
 		// parent process: wait for child or kill after timeout
 
-		// timeout hardcoded as 10 s for now
+		// timeout hardcoded as 30 s for now
 		// POSIX: can assume this is an integer type
-		time_t timeout_us = 10000000L;
+		time_t timeout_us = 30000000L;
 
 		// go to sleep for the length of the timeout and a grace period
 		struct timespec req, rem;
@@ -351,6 +353,7 @@ SheepServer::configure_and_run(http_request message) {
 	// clean up shared memory buffers
 	munmap(timings_shared, n_timings * sizeof(Duration));
 	munmap(outputs_shared, n_outputs * sizeof(PlaintextT));
+
 }
 
 void SheepServer::handle_get(http_request message)
@@ -672,7 +675,7 @@ void SheepServer::handle_get_config(http_request message) {
 }
 
 void SheepServer::handle_put_parameters(http_request message) {
-	/// put parameter name:value into job_config
+        /// put parameter name:value into job_config
 	if ((m_job_config.input_type.size() == 0) ||
 	    (m_job_config.context.size() == 0)) {
 		message.reply(status_codes::InternalError, ("Need to specify input_type and context before setting parameters"));
@@ -693,13 +696,14 @@ void SheepServer::handle_put_parameters(http_request message) {
 			else if (m_job_config.input_type == "int32_t") update_parameters<int32_t>(m_job_config.context, params);
 			else message.reply(status_codes::InternalError, ("Unknown input type when updating parameters"));
 
+			message.reply(status_codes::OK);
 
 		} catch (json::json_exception) {
 			message.reply(status_codes::InternalError, ("Unable to set evaluation strategy"));
 		}
 	});
 
-	message.reply(status_codes::OK);
+
 }
 
 void SheepServer::handle_get_results(http_request message) {
