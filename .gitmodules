@@ -4,6 +4,3 @@
 [submodule "lib/tfhe"]
 	path = lib/tfhe
 	url = https://github.com/tfhe/tfhe.git
-[submodule "lib/libpaillier-0.8"]
-	path = lib/libpaillier-0.8
-	url = https://github.com/mshcruz/PaillierLibrarySamples.git
