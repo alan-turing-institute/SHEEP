@@ -5,8 +5,9 @@
 #include<gmp.h>
 #include "circuit.hpp"
 #include "context.hpp"
-#include "paillier.h"
-
+extern "C" {
+  #include "paillier.h"
+}
 
 #include <cmath>
 #include <sstream>
@@ -110,4 +111,3 @@ protected:
 }  // Leaving Sheep namespace
 
 #endif // CONTEXT_SEAL_HPP
-
