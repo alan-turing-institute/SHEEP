@@ -186,7 +186,6 @@ def set_inputs(input_dict):
         response_dict["content"] = "Inputs {} are not inputs to the circuit".format(unused_inputs)
         return response_dict
     try:
-        print(input_dict)
         r = requests.post(BASE_URI+"/inputs/",
                           json=input_dict)
         response_dict["status_code"] = r.status_code
