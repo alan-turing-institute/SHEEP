@@ -68,12 +68,6 @@ ADD . SHEEP
 
 RUN cd SHEEP; git submodule init; git submodule update
 
-## build libpaillier
-##RUN cd SHEEP/lib/libpaillier-0.8; git submodule init
-##RUN cd SHEEP/lib/libpaillier-0.8; git submodule update
-##RUN cd SHEEP/lib/libpaillier-0.8; for f in `ls *.cpp`; do sed 's/<paillier.h>/"paillier.h"/g' $f > ${f}.tmp; mv ${f}.tmp $f; done;
-##RUN cd SHEEP/lib/libpaillier-0.8; make
-
 
 ## build TFHE
 
