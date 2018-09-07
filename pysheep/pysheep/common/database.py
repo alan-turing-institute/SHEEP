@@ -24,9 +24,12 @@ column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 ### this will only require minimal changes, thanks to sqlalchemy).
 
 if "SHEEP_HOME" in os.environ.keys():
-    DB_LOCATION = os.environ["SHEEP_HOME"]+"/pysheep/sheep.db"
+    if "pysheep" in os.environ["SHEEP_HOME"]:
+        DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"sheep.db")
+    else:
+        DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"pysheep","/sheep.db")
 else:
-    DB_LOCATION = os.environ["HOME"]+"/SHEEP/pysheep/sheep.db"
+    DB_LOCATION = os.path.join(os.environ["HOME"],"SHEEP","sheep.db")
 
 Base = declarative_base()
 engine = create_engine("sqlite:///"+DB_LOCATION)
@@ -37,20 +40,20 @@ class BenchmarkMeasurement(Base):
     id = Column(Integer, primary_key=True, autoincrement=True,nullable=False)
     context_name = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
-    input_signed = Column(Boolean, nullable=False)    
+    input_signed = Column(Boolean, nullable=False)
     gate_name = Column(String(250), nullable=True)
     circuit_name = Column(String(250), nullable=True)
     depth = Column(Integer, nullable=True)
-    num_inputs = Column(Integer, nullable=True)    
+    num_inputs = Column(Integer, nullable=True)
     num_slots = Column(Integer, nullable=True)
     tbb_enabled = Column(Boolean, nullable=True)
     setup_time = Column(Float, nullable=True)
-    encryption_time = Column(Float, nullable=True)    
+    encryption_time = Column(Float, nullable=True)
     execution_time = Column(Float, nullable=False)
     is_correct = Column(Boolean, nullable=False)
     ciphertext_size = Column(Integer, nullable=True)
     private_key_size = Column(Integer, nullable=True)
-    public_key_size = Column(Integer, nullable=True)        
+    public_key_size = Column(Integer, nullable=True)
 ##### add all the parameters for all the contexts
     HElib_BaseParamSet = Column(Integer, nullable=True)
     HElib_BitsPerLevel = Column(Integer, nullable=True)
@@ -69,14 +72,14 @@ class BenchmarkMeasurement(Base):
     HElib_ord1 = Column(Integer, nullable=True)
     HElib_ord2 = Column(Integer, nullable=True)
     HElib_ord3 = Column(Integer, nullable=True)
-    HElib_phim = Column(Integer, nullable=True)    
+    HElib_phim = Column(Integer, nullable=True)
     TFHE_MinimumLambda = Column(Integer, nullable=True)
     SEAL_PlaintextModulus = Column(Integer, nullable=True)
-    SEAL_N = Column(Integer, nullable=True)    
+    SEAL_N = Column(Integer, nullable=True)
     SEAL_Security = Column(Integer, nullable=True)
 
 
-    
+
 Base.metadata.create_all(engine)
 
 Base.metadata.bind = engine
@@ -94,7 +97,7 @@ def get_table_and_columns(query):
     if column_regex.search(query):
         columns = column_regex.search(query).groups()[1].split(",")
     return table_name, columns
-        
+
 def execute_query_sqlite3(query):
     """
     raw sql query
@@ -109,7 +112,7 @@ def execute_query_sqlite3(query):
         columns = []
         for c in columns_raw:
             columns.append(c[1])
-    ### now execute the query    
+    ### now execute the query
     cursor.execute(query)
     output = cursor.fetchall()
     return columns, output
@@ -119,9 +122,9 @@ def execute_query_sqlalchemy(filt):
     Perform a query on the db
     """
     session.query(BenchmarkMeasurement).filter(filt).all()
-    
 
-        
+
+
 def build_filter(input_dict):
     """
     convert dict of inputs from web form PlotsForm into SQLAlchemy filter.

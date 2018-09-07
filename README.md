@@ -39,7 +39,7 @@ In summary, the general problem addressed by SHEEP is that of getting a satisfyi
 In its current state, the SHEEP platform does not provide a complete solution to these problems, as we believe this requires a community effort. This is why SHEEP's code is open source.
 
 
-## Installation - docker
+## Installation - docker (recommended)
 
 Assuming you have docker installed, from this directory, do:
 ```
@@ -65,11 +65,54 @@ into your browser, but with `localhost` instead of the hex string immediately af
 
 ## Installation - local
 
-After cloning:
+Clone this repository onto your local machine.  There are a few packages which the SHEEP platform itself uses, and then there are the HE libraries
+that we want to evaluate.  Instructions for both follow:
+
+### Core SHEEP dependencies
+
+SHEEP uses the ***cpprestsdk*** library to provide a RESTful API for the sheep server.
+On OSX, this can be installed with homebrew:
+```
+brew install cpprestsdk
+```
+For Linux (Ubuntu 16.04), see the relevant section of ```Dockerfile``` for a working recipe.
+
+For parallel evaluation of circuits, SHEEP uses Intel's ***tbb*** library.  This can be installed on OSX using homebrew:
+```
+brew install tbb
+```
+or for apt-based Linux installations:
+```
+apt-get -y install libtbb-dev
+```
+
+There are a few Python packages that are needed for the web front-end and/or the Jupyter notebooks.  Install these with:
+```
+pip install  flask
+pip install  wtforms
+pip install  pytest
+pip install  sqlalchemy
+pip install  python-nvd3
+pip install  requests
+pip install  jupyter
+pip install  matplotlib
+pip install  pandas
+```
+
+
+### Example HE libraries
+
+After cloning the SHEEP repo, change to the SHEEP directory then do:
 ```
 git submodule update --init --recursive
 ```
-This will checkout the HElib and TFHE submodules in the lib/ directory - build TFHE as follows:
+This will checkout the HElib and TFHE submodules in the lib/ directory.
+
+#### TFHE
+
+To build TFHE, first install the fftw library (download source from http://www.fftw.org/download.html then follow the instructions on that page)
+
+Then build TFHE as follows:
 ```
 cd lib/tfhe
 mkdir build
@@ -78,6 +121,19 @@ cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABL
 make
 sudo make install
 ```
+
+#### HElib
+
+HElib depends on the ***GMP*** and ***NTL*** libraries.  To install gmp on OSX do:
+```
+brew install gmp
+```
+(this will install into ```/usr/local/Cellar/gmp``` - this location is needed when building ntl.)
+For Linux, gmp can be installed from source - see the relevant section of ```Dockerfile```.
+
+For ntl, download and follow instructions from [here](http://sid.ethz.ch/debian/ntl/ntl-5.5.2/doc/tour-unix.html).  At the ```./configure``` step, add the argument
+```GMP_PREFIX=/usr/local/Cellar/gmp``` if you installed gmp using homebrew, or the relevant location if you used another method.
+
 Then build HElib as follows:
 ```
 cd ../../HElib/src
@@ -87,9 +143,27 @@ cd build
 cmake ..
 make all
 ```
+
+#### SEAL
+
+Download and follow the instructions [here](https://www.microsoft.com/en-us/download/details.aspx?id=56202).
+
+#### libpaillier
+
+Download the ```tar.gz``` file from [here](http://hms.isi.jhu.edu/acsc/libpaillier/), unpack the archive, cd to the directory, then do
+```
+./configure
+make
+make install
+```
+Note that libpaillier depends on gmp - follow the instructions for installing this from the "HElib" section if you haven't already.
+
+
+## Building SHEEP
+
 And finally build SHEEP:
 ```
-cd ../../lib/
+cd <base SHEEP dir>
 mkdir build
 cd build
 cmake ../
