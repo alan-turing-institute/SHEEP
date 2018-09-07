@@ -21,7 +21,7 @@ static const std::map<std::string, Gate> gate_name_map = {
   {"COMPARE", Gate::Compare },
   {"SELECT", Gate::Select },
   {"MULTBYCONST", Gate::MultByConstant },
-  {"ADDCONST", Gate::AddConstant }  
+  {"ADDCONST", Gate::AddConstant }
 };
 
 
@@ -43,14 +43,14 @@ private:
 	Wire output;
 	Gate op;
 	WireList inputs;
-        WireList const_inputs;
+	WireList const_inputs;
 public:
 	template <typename... Ts>
 	Assignment(Wire output_, Gate op_, Ts... inputs_);
 
 	size_t input_count() const { return inputs.size();  }
 	const WireList& get_inputs() const { return inputs; }
-        const WireList& get_const_inputs() const { return const_inputs; }
+	const WireList& get_const_inputs() const { return const_inputs; }
 	Wire get_output() const { return output; }
 	Gate get_op() const { return op; }
 };
@@ -107,16 +107,17 @@ public:
 		bool inserted;
 		std::tie(it_ignored, inserted) = wire_names.insert(name);
 		if (!inserted) throw MultipleAssignmentError(name);
-		
+
 		inputs.emplace_back(name);
 		return inputs.back();
 	}
 
-  	Wire add_const_input(std::string name) {
-  		std::unordered_set<std::string>::iterator it_ignored;
+	Wire add_const_input(std::string name) {
+		std::unordered_set<std::string>::iterator it_ignored;
 		bool inserted;
 		std::tie(it_ignored, inserted) = wire_names.insert(name);
 		if (!inserted) throw MultipleAssignmentError(name);
+
 		const_inputs.emplace_back(name);
 		return const_inputs.back();
 	}
