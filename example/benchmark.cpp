@@ -70,13 +70,8 @@ make_context(std::string context_type, std::string context_params="") {
 	    ctx->read_params_from_file(context_params);
 	  return ctx;
 #endif	    
-    
-    
-    } 
-    
-    
-    else {
-	  throw std::runtime_error("Unknown context requested");
+	} else {
+		throw std::runtime_error("Unknown context requested");
 	}
 }
 
