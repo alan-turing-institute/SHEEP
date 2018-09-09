@@ -151,18 +151,13 @@ public:
 	}
 
 	Ciphertext MultByConstant(Ciphertext a, long b) {
+		return Multiply(a,b);
+	}
 
-  	return Multiply(a,b);
-  }
-  
-  
-    Ciphertext AddConstant(Ciphertext a, long b) {
-
-  	return Add(a,b);
-  }
-
+	Ciphertext AddConstant(Ciphertext a, long b) {
+		return Add(a,b);
+	}
 };
-
 
 }  // Leaving Sheep namespace
   
