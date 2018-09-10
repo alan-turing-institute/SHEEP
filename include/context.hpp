@@ -35,14 +35,14 @@ struct TimeoutException : public std::exception {
 		return what_str.c_str();
 	}
 	TimeoutException(
-	  // name of the output we were evaluating at the time
-	  const std::string& on_output,
-	  // total wall-clock time when the exception was thrown
-	  std::chrono::duration<double, std::micro> execution_time_)
+		// name of the output we were evaluating at the time
+		const std::string& on_output,
+		// total wall-clock time when the exception was thrown
+		std::chrono::duration<double, std::micro> execution_time_)
 		:
 		execution_time(execution_time_),
 		what_str("Evaluation timed out (wall-clock time: " + std::to_string(execution_time_.count())
-		        + " microseconds) while evaluating circuit wire named " + on_output)
+			 + " microseconds) while evaluating circuit wire named " + on_output)
 	{ }
 };
 
@@ -51,41 +51,45 @@ template <typename PlaintextT>
 class BaseContext {
 public:
 	virtual ~BaseContext() {};
+
+	// Four overloads of eval_with_plaintexts to allow calls with
+	// and without providing constant plaintexts, and with and
+	// without providing an array in which to store the timing
+	// information.
+
+	// overload taking both durations and const_plaintext_inputs
 	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
-	                     std::vector<PlaintextT>,
-	                     std::vector<std::chrono::duration<double, std::micro> >&,
+	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
+	                     std::vector<PlaintextT> const_plaintext_inputs,
+	                     std::vector<std::chrono::duration<double, std::micro> >& durations,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
-	// overloaded version for when we don't care about the timings
+	// overload omitting durations only
 	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
-	                     std::vector<PlaintextT> cptxts,
+	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
+	                     std::vector<PlaintextT> const_plaintext_inputs,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
-
-
-
+	// overload omitting const_plaintext_inputs only
 	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit&, std::vector<PlaintextT>,
-	                     std::vector<std::chrono::duration<double, std::micro> >&,
+	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
+	                     std::vector<std::chrono::duration<double, std::micro> >& durations,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
-	// overloaded version for when we don't care about the timings
+	// overload omitting both durations and const_plaintext_inputs
 	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
+	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
+
 	virtual void print_parameters() = 0;
 	virtual std::map<std::string, long> get_parameters() = 0;
 	virtual void print_sizes() = 0;
 	virtual void set_parameter(std::string, long) = 0;
 	virtual void configure() = 0;
-
-
 };
 
 // Base class - abstract interface to each library
@@ -116,94 +120,39 @@ public:
 	virtual Ciphertext AddConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
 	virtual Ciphertext MultByConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
 
-	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs) {
+	virtual Ciphertext dispatch(Gate g,
+				    std::vector<Ciphertext> inputs,
+				    std::vector<Plaintext> const_inputs)
+	{
 		using namespace std::placeholders;
 		switch (g) {
 		case (Gate::Alias):
 			return Alias(inputs.at(0));
 			break;
-
 		case (Gate::Identity):
 			return Identity(inputs.at(0));
 			break;
-
 		case (Gate::Multiply):
 			return Multiply(inputs.at(0), inputs.at(1));
 			break;
-
 		case (Gate::Maximum):
 			return Maximum(inputs.at(0), inputs.at(1));
 			break;
-
 		case (Gate::Add):
 			return Add(inputs.at(0), inputs.at(1));
 			break;
-
 		case (Gate::Subtract):
 			return Subtract(inputs.at(0), inputs.at(1));
 			break;
-
 		case (Gate::Negate):
 			return Negate(inputs.at(0));
 			break;
-
 		case (Gate::Compare):
 			return Compare(inputs.at(0), inputs.at(1));
 			break;
-
 		case (Gate::Select):
 			return Select(inputs.at(0), inputs.at(1), inputs.at(2));
 			break;
-
-		case (Gate::AddConstant):
-			return AddConstant( inputs.at(0), 0L);
-			break;
-		case (Gate::MultByConstant):
-			return MultByConstant( inputs.at(0), 0L);
-			break;
-		}
-		throw std::runtime_error("Unknown op");
-	}
-
-	virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs, std::vector<Plaintext> const_inputs) {
-		using namespace std::placeholders;
-		switch (g) {
-		case (Gate::Alias):
-			return Alias(inputs.at(0));
-			break;
-
-		case (Gate::Identity):
-			return Identity(inputs.at(0));
-			break;
-
-		case (Gate::Multiply):
-			return Multiply(inputs.at(0), inputs.at(1));
-			break;
-
-		case (Gate::Maximum):
-			return Maximum(inputs.at(0), inputs.at(1));
-			break;
-
-		case (Gate::Add):
-			return Add(inputs.at(0), inputs.at(1));
-			break;
-
-		case (Gate::Subtract):
-			return Subtract(inputs.at(0), inputs.at(1));
-			break;
-
-		case (Gate::Negate):
-			return Negate(inputs.at(0));
-			break;
-
-		case (Gate::Compare):
-			return Compare(inputs.at(0), inputs.at(1));
-			break;
-
-		case (Gate::Select):
-			return Select(inputs.at(0), inputs.at(1), inputs.at(2));
-			break;
-
 		case (Gate::AddConstant):
 			return AddConstant( inputs.at(0), const_inputs.at(0));
 			break;
@@ -214,79 +163,16 @@ public:
 		throw std::runtime_error("Unknown op");
 	}
 
-	template <typename InputContainer, typename OutputContainer>
-	microsecond eval(const Circuit& circ,
-	                 const InputContainer& input_vals,
-	                 OutputContainer& output_vals,
-	                 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
-		std::unordered_map<std::string, Ciphertext> eval_map;
-
-		// add Circuit::inputs and inputs into the map
-		auto input_vals_it = input_vals.begin();
-		auto input_wires_it = circ.get_inputs().begin();
-		const auto input_wires_end = circ.get_inputs().end();
-
-		for (; input_vals_it != input_vals.end() || input_wires_it != input_wires_end;
-		     ++input_vals_it, ++input_wires_it)
-		{
-			eval_map.insert({input_wires_it->get_name(), *input_vals_it});
-		}
-		// error check: both iterators should be at the end
-		if (input_vals_it != input_vals.end() || input_wires_it != input_wires_end)
-			throw std::runtime_error("Number of inputs doesn't match");
-
-
-		// This is where the actual evaluation occurs.  For
-		// each assignment, look up the input Wires in the
-		// map, insert the output wire (of the gate) with the
-		// required name into eval_map.
-
-		typedef std::chrono::duration<double, std::micro> microsecond;
-		typedef std::chrono::high_resolution_clock high_res_clock;
-		auto start_time = high_res_clock::now();
-
-		for (const Assignment assn : circ.get_assignments()) {
-			std::vector<Ciphertext> inputs;
-			std::transform(assn.get_inputs().begin(),
-			               assn.get_inputs().end(),
-			               std::back_inserter(inputs),
-			[&eval_map](Wire w) {
-				// throws out_of_range if not present in the map
-				return eval_map.at(w.get_name());
-			});
-			Ciphertext output = dispatch(assn.get_op(), inputs);
-			eval_map.insert({assn.get_output().get_name(), output});
-			microsecond wall_time = high_res_clock::now() - start_time;
-			if (timeout.count() > 0.0 && wall_time > timeout)
-				throw TimeoutException(assn.get_output().get_name(), wall_time);
-		}
-
-		auto end_time = high_res_clock::now();
-		microsecond duration = microsecond(end_time - start_time);
-
-		// Look up the required outputs in the eval_map and push them onto output_vals.
-		auto output_wires_it = circ.get_outputs().begin();
-		auto output_wires_end = circ.get_outputs().end();
-		for (; output_wires_it != output_wires_end; ++output_wires_it) {
-			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
-		}
-		return duration;
-	}
-
 	template <typename InputContainer, typename ConstInputContainer, typename OutputContainer>
 	microsecond eval(const Circuit& circ,
 	                 const InputContainer& input_vals,
-	                 const ConstInputContainer& const_input_vals,
+	                 const ConstInputContainer& const_input_vals = ConstInputContainer(),
 	                 OutputContainer& output_vals,
 	                 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
-
 		std::unordered_map<std::string, Ciphertext> eval_map;
-
 		std::unordered_map<std::string, Plaintext> const_eval_map;
 
 		// add Circuit::inputs and inputs into the map
-
-
 		auto input_vals_it = input_vals.begin();
 		auto input_wires_it = circ.get_inputs().begin();
 		const auto input_wires_end = circ.get_inputs().end();
@@ -296,35 +182,33 @@ public:
 			eval_map.insert({input_wires_it->get_name(), *input_vals_it});
 		}
 
-
-
-		// add Circuit::const inputs and const inputs into the map
-
-
-
+		// add Circuit::const_inputs and const inputs into the map
 		auto const_input_vals_it = const_input_vals.begin();
 		auto const_input_wires_it = circ.get_const_inputs().begin();
 		const auto const_input_wires_end = circ.get_const_inputs().end();
-
 		for (; const_input_vals_it != const_input_vals.end() || const_input_wires_it != const_input_wires_end;
 		     ++const_input_vals_it, ++const_input_wires_it)
 		{
 			const_eval_map.insert({const_input_wires_it->get_name(), *const_input_vals_it});
 		}
 
-
+		// error check: all iterators should be at the end
+		if (input_vals_it != input_vals.end()
+		    || input_wires_it != input_wires_end
+		    || const_input_vals_it != const_input_vals.end()
+		    || const_input_wires_it != const_input_wires_end)
+		{
+			throw std::runtime_error("Number of inputs or const_inputs does not match");
+		}
 
 		// This is where the actual evaluation occurs.  For
 		// each assignment, look up the input Wires in the
 		// map, insert the output wire (of the gate) with the
 		// required name into eval_map.
 
-
 		typedef std::chrono::duration<double, std::micro> microsecond;
 		typedef std::chrono::high_resolution_clock high_res_clock;
 		auto start_time = high_res_clock::now();
-
-
 
 		for (const Assignment assn : circ.get_assignments()) {
 			std::vector<Ciphertext> inputs;
@@ -332,15 +216,12 @@ public:
 			for (Wire w : assn.get_inputs())
 			{
 				try {
-
 					const_inputs.push_back(const_eval_map.at(w.get_name()));
 				}
 				catch (const std::out_of_range& oor) {
-
 					inputs.push_back(eval_map.at(w.get_name()));
 				}
 			}
-
 			Ciphertext output = dispatch(assn.get_op(), inputs, const_inputs);
 			eval_map.insert({assn.get_output().get_name(), output});
 			microsecond wall_time = high_res_clock::now() - start_time;
@@ -362,11 +243,11 @@ public:
 
 	template <typename InputContainer, typename OutputContainer>
 	microsecond parallel_eval(const Circuit& circ,
-	                          const InputContainer& input_vals,
-	                          OutputContainer& output_vals,
-	                          std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
+				  const InputContainer& input_vals,
+				  const ConstInputContainer& const_input_vals = ConstInputContainer(),
+				  OutputContainer& output_vals,
+				  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
-
 #ifdef HAVE_TBB
 		using namespace tbb::flow;
 
@@ -386,12 +267,11 @@ public:
 		for (; input_vals_it != input_vals.end() || input_wires_it != input_wires_end;
 		     ++input_vals_it, ++input_wires_it)
 		{
-			auto inserter = [ =, &eval_map](const continue_msg&) {
+			auto inserter = [=, &eval_map](const continue_msg&) {
 				eval_map.insert({input_wires_it->get_name(), *input_vals_it});
 			};
 			node_map.insert({input_wires_it->get_name(),
-			                 continue_node<continue_msg>(DAG, inserter)
-			                });
+						continue_node<continue_msg>(DAG, inserter)});
 		}
 		// error check: both iterators should be at the end
 		if (input_vals_it != input_vals.end() || input_wires_it != input_wires_end)
@@ -413,17 +293,17 @@ public:
 		microsecond timeout_wall_time;
 
 		for (const Assignment assn : circ.get_assignments()) {
-			auto current_eval = [ =, &eval_map, &circuit_timed_out,
-			                      &timeout_gate_name, &timeout_wall_time, &start_time
-			](const continue_msg&) {
+			auto current_eval = [=,&eval_map,&circuit_timed_out,
+					     &timeout_gate_name,&timeout_wall_time,&start_time
+				](const continue_msg&) {
 				std::vector<Ciphertext> inputs;
 				std::transform(assn.get_inputs().begin(),
-				               assn.get_inputs().end(),
-				               std::back_inserter(inputs),
-				[&eval_map](Wire w) {
-					// throws out_of_range if not present in the map
-					return eval_map.at(w.get_name());
-				});
+					       assn.get_inputs().end(),
+					       std::back_inserter(inputs),
+					       [&eval_map](Wire w) {
+						       // throws out_of_range if not present in the map
+						       return eval_map.at(w.get_name());
+					       });
 
 				Ciphertext output = dispatch(assn.get_op(), inputs);
 				eval_map.insert({assn.get_output().get_name(), output});
@@ -441,12 +321,11 @@ public:
 				}
 			};
 			node_map.insert({assn.get_output().get_name(),
-			                 continue_node<continue_msg>(DAG, current_eval)
-			                });
+						continue_node<continue_msg>(DAG, current_eval)});
 
 			for (const Wire input_wire : assn.get_inputs()) {
 				make_edge(node_map.at(input_wire.get_name()),
-				          node_map.at(assn.get_output().get_name()));
+					  node_map.at(assn.get_output().get_name()));
 			}
 		}
 		start_time = high_res_clock::now();
@@ -474,9 +353,7 @@ public:
 		for (; output_wires_it != output_wires_end; ++output_wires_it) {
 			output_vals.push_back(eval_map.at(output_wires_it->get_name()));
 		}
-
 		return duration;
-
 #else
 		throw std::runtime_error("SHEEP was not compiled with TBB, so parallel evaluation is not available.");
 #endif // HAVE_TBB
@@ -491,51 +368,7 @@ public:
 		return CircuitEvaluator(run);
 	}
 
-	//Definition w/o constant plaintexts
-	virtual std::vector<Plaintext> eval_with_plaintexts(
-	  const Circuit& C,
-	  std::vector<Plaintext> plaintext_inputs,
-	  std::vector<std::chrono::duration<double, std::micro> >& durations,
-	  EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
-	  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
-	{
-		typedef std::chrono::duration<double, std::micro> microsecond;
-		typedef std::chrono::high_resolution_clock high_res_clock;
-		auto enc_start_time = high_res_clock::now();
-
-		/// encrypt the inputs
-		std::vector<Ciphertext> ciphertext_inputs;
-		for (auto pt : plaintext_inputs) ciphertext_inputs.push_back(encrypt(pt));
-		auto enc_end_time = high_res_clock::now();
-		durations.push_back(microsecond(enc_end_time - enc_start_time));
-
-		//// evaluate the circuit
-		std::vector<Ciphertext> ciphertext_outputs;
-		microsecond eval_duration;
-		switch (eval_strategy) {
-		case EvaluationStrategy::serial:
-			eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
-			break;
-		case EvaluationStrategy::parallel:
-			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
-			break;
-		default:
-			std::runtime_error("eval_with_plaintexts: Unknown evaluation strategy");
-		}
-		durations.push_back(eval_duration);
-
-		//// decrypt the outputs again
-		auto dec_start_time = high_res_clock::now();
-		std::vector<Plaintext> plaintext_outputs;
-		for (auto ct : ciphertext_outputs) plaintext_outputs.push_back(decrypt(ct));
-		auto dec_end_time = high_res_clock::now();
-		durations.push_back(microsecond(dec_end_time - dec_start_time));
-
-		return plaintext_outputs;
-	}
-
-
-	//Definition w. constant plaintexts
+	// overload taking both durations and const_plaintext_inputs
 	virtual std::vector<Plaintext> eval_with_plaintexts(
 	  const Circuit& C,
 	  std::vector<Plaintext> plaintext_inputs,
@@ -564,10 +397,12 @@ public:
 
 		switch (eval_strategy) {
 		case EvaluationStrategy::serial:
-			eval_duration = eval(C, ciphertext_inputs, const_inputs, ciphertext_outputs, timeout);
+			eval_duration = eval(C, ciphertext_inputs, const_inputs,
+			                     ciphertext_outputs, timeout);
 			break;
 		case EvaluationStrategy::parallel:
-			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs, timeout);
+			eval_duration = parallel_eval(C, ciphertext_inputs, const_inputs,
+			                              ciphertext_outputs, timeout);
 			break;
 		default:
 			std::runtime_error("eval_with_plaintexts: Unknown evaluation strategy");
@@ -584,24 +419,38 @@ public:
 		return plaintext_outputs;
 	}
 
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
-	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
-	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
+	// overload omitting const_plaintext_inputs only
+	virtual std::vector<Plaintext> eval_with_plaintexts(
+	  const Circuit& C,
+	  std::vector<Plaintext> plaintext_inputs,
+	  std::vector<std::chrono::duration<double, std::micro> >& durations,
+	  EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
+	  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
-		std::vector<std::chrono::duration<double, std::micro> > ignored;
-		return eval_with_plaintexts(c, ptxts, ignored, eval_strategy, timeout);
+		std::vector<Plaintext> cptxts_empty;
+		return eval_with_plaintexts(c, ptxts, cptxts_empty, durations, eval_strategy, timeout);
 	}
 
-
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& c, std::vector<PlaintextT> ptxts,
-	                     std::vector<PlaintextT> cptxts,
+	// overload omitting durations only
+	virtual std::vector<Plaintext>
+	eval_with_plaintexts(const Circuit& c, std::vector<Plaintext> ptxts,
+	                     std::vector<Plaintext> cptxts,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 		std::vector<std::chrono::duration<double, std::micro> > ignored;
 		return eval_with_plaintexts(c, ptxts, cptxts, ignored, eval_strategy, timeout);
+	}
+
+	// overload omitting both durations and const_plaintext_inputs
+	virtual std::vector<Plaintext>
+	eval_with_plaintexts(const Circuit& c, std::vector<Plaintext> ptxts,
+	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
+	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
+	{
+		std::vector<std::chrono::duration<double, std::micro> > ignored;
+		std::vector<Plaintext> cptxts_empty;
+		return eval_with_plaintexts(c, ptxts, cptxts_empty, ignored, eval_strategy, timeout);
 	}
 
 	virtual void read_params_from_file(std::string filename) {
@@ -635,7 +484,6 @@ public:
 		//// now configure the library
 		configure();
 	}
-
 
 	virtual void set_parameter(std::string param_name, long param_value) {
 		auto map_iter = m_param_name_map.find(param_name);
@@ -700,9 +548,9 @@ void encrypt(ContextT& context,
              CiphertextIterator ciphertext_begin)
 {
 	std::transform(plaintext_begin, plaintext_end, ciphertext_begin,
-	[&context](typename ContextT::Plaintext pt) {
-		return context.encrypt(pt);
-	});
+		       [&context](typename ContextT::Plaintext pt) {
+			       return context.encrypt(pt);
+		       });
 }
 
 template <typename ContextT,
@@ -714,9 +562,9 @@ void decrypt(ContextT& context,
              PlaintextIterator plaintext_begin)
 {
 	std::transform(ciphertext_begin, ciphertext_end, plaintext_begin,
-	[&context](typename ContextT::Ciphertext ct) {
-		return context.decrypt(ct);
-	});
+		       [&context](typename ContextT::Ciphertext ct) {
+			       return context.decrypt(ct);
+		       });
 }
 
 #endif // CONTEXT_HPP
