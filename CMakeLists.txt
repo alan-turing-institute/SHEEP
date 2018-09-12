@@ -1,5 +1,4 @@
 cmake_minimum_required (VERSION 3.5)
-
 project (Sheep)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -26,11 +25,6 @@ set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src"
 # SEAL
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/include/SEAL")
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/usr/local/lib/SEAL")
-
-# LP
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/lib/libpaillier-0.8")  
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/libpaillier-0.8") 
-
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
@@ -75,5 +69,5 @@ endif()
 
 link_libraries(pthread)
 
- add_subdirectory(example bin)
- add_subdirectory(tests testbin)
+add_subdirectory(example bin)
+add_subdirectory(tests testbin)

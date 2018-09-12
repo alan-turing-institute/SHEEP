@@ -1,8 +1,7 @@
 #ifndef CONTEXT_LP_HPP
 #define CONTEXT_LP_HPP
 
-
-#include<gmp.h>
+#include <gmp.h>
 #include "circuit.hpp"
 #include "context.hpp"
 extern "C" {
@@ -21,11 +20,8 @@ public:
 	typedef PlaintextT Plaintext;
 	typedef paillier_ciphertext_t Ciphertext;
 
-	// constructor
-
-	ContextLP(const long n = 256):
-
-
+	ContextLP(const long n = 256)
+		:
 		m_n(n)
 	{
 		this->m_param_name_map.insert({"n", m_n});
@@ -33,7 +29,6 @@ public:
 		this->m_public_key_size = 0;
 		this->m_ciphertext_size = 0;
 		configure();
-
 	}
 
 	void configure() {
@@ -42,13 +37,9 @@ public:
 		this->m_public_key_size = sizeof(pubKey);
 		this->m_private_key_size = sizeof(secKey);
 		this->m_configured = true;
-
-
 	}
 
 	Ciphertext encrypt(Plaintext p) {
-
-
 
 		paillier_plaintext_t* m;
 		m = paillier_plaintext_from_ui(p);
@@ -56,7 +47,6 @@ public:
 		paillier_ciphertext_t *ctxt;
 		ctxt = paillier_enc(NULL, pubKey, m, paillier_get_rand_devurandom);
 		return *ctxt;
-
 	}
 
 	Plaintext decrypt(Ciphertext ct) {
@@ -81,31 +71,20 @@ public:
 		return MultByConstant(a, -1);
 	}
 
-
-
 	Ciphertext MultByConstant(Ciphertext a, long b) {
-
 
 		paillier_ciphertext_t* product = paillier_create_enc_zero();
 		paillier_plaintext_t* pt = paillier_plaintext_from_ui(b);
 		paillier_exp( this->pubKey, product, &a, pt);
 		return *product;
-
 	}
 
-
-	// destructor
-	virtual ~ContextLP() {
-
-
-	};
+	virtual ~ContextLP() { 	};
 
 protected:
 	paillier_pubkey_t* pubKey;
 	paillier_prvkey_t* secKey;
 	long m_n;
-
-
 };
 
 }  // Leaving Sheep namespace
