@@ -217,11 +217,11 @@ public:
 			std::vector<Plaintext> const_inputs;
 			for (Wire w : assn.get_inputs())
 			{
-				try {
+				typename decltype(eval_map)::iterator it;
+				if ((it = eval_map.find(w.get_name())) != eval_map.end()) {
+					inputs.push_back(it->second);
+				} else {
 					const_inputs.push_back(const_eval_map.at(w.get_name()));
-				}
-				catch (const std::out_of_range& oor) {
-					inputs.push_back(eval_map.at(w.get_name()));
 				}
 			}
 			Ciphertext output = dispatch(assn.get_op(), inputs, const_inputs);
