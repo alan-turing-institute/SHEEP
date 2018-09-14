@@ -33,8 +33,8 @@ int main(void) {
   //ctx.print_parameters();
   
     
-  ContextLP<uint8_t>::CircuitEvaluator run_circuit;
-  run_circuit = ctx.compile(c2);
+  //ContextLP<uint8_t>::CircuitEvaluator run_circuit;
+  //run_circuit = ctx.compile(c2);
         
   std::list<ContextLP<uint8_t>::Plaintext> plaintext_inputs = {6, 9, 25, 67};
   std::list<ContextLP<uint8_t>::Ciphertext> ciphertext_inputs;
@@ -44,7 +44,7 @@ int main(void) {
   
   std::list<ContextLP<uint8_t>::Ciphertext> ciphertext_outputs;
   using microsecond = std::chrono::duration<double, std::micro>;
-  microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
+  microsecond time = ctx.eval(c2, ciphertext_inputs, ciphertext_outputs);
   
   std::list<ContextLP<uint8_t>::Plaintext> plaintext_outputs;
   for (ContextLP<uint8_t>::Ciphertext ct: ciphertext_outputs) {

@@ -163,11 +163,13 @@ public:
 		throw std::runtime_error("Unknown op");
 	}
 
-	template <typename InputContainer, typename ConstInputContainer, typename OutputContainer>
+	template <typename InputContainer,
+		  typename ConstInputContainer = std::vector<Plaintext>,
+		  typename OutputContainer>
 	microsecond eval(const Circuit& circ,
 	                 const InputContainer& input_vals,
-	                 const ConstInputContainer& const_input_vals = ConstInputContainer(),
 	                 OutputContainer& output_vals,
+	                 const ConstInputContainer& const_input_vals = ConstInputContainer(),
 	                 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
 		std::unordered_map<std::string, Ciphertext> eval_map;
 		std::unordered_map<std::string, Plaintext> const_eval_map;
@@ -241,11 +243,13 @@ public:
 		return duration;
 	}
 
-	template <typename InputContainer, typename OutputContainer>
+	template <typename InputContainer,
+		  typename ConstInputContainer = std::vector<PlaintextT>,
+		  typename OutputContainer>
 	microsecond parallel_eval(const Circuit& circ,
 				  const InputContainer& input_vals,
-				  const ConstInputContainer& const_input_vals = ConstInputContainer(),
 				  OutputContainer& output_vals,
+				  const ConstInputContainer& const_input_vals = ConstInputContainer(),
 				  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 #ifdef HAVE_TBB
@@ -255,6 +259,7 @@ public:
 		typedef std::chrono::high_resolution_clock high_res_clock;
 
 		tbb::concurrent_unordered_map<std::string, Ciphertext> eval_map;
+		tbb::concurrent_unordered_map<std::string, Plaintext> const_eval_map;
 		tbb::concurrent_unordered_map<std::string, continue_node<continue_msg> > node_map;
 
 		tbb::flow::graph DAG;
@@ -273,9 +278,28 @@ public:
 			node_map.insert({input_wires_it->get_name(),
 						continue_node<continue_msg>(DAG, inserter)});
 		}
+
+		auto const_input_vals_it = const_input_vals.begin();
+		auto const_input_wires_it = circ.get_const_inputs().begin();
+		const auto const_input_wires_end = circ.get_const_inputs().end();
+		for (; const_input_vals_it != const_input_vals.end() || const_input_wires_it != const_input_wires_end;
+		     ++const_input_vals_it, ++const_input_wires_it)
+		{
+			auto inserter = [=, &const_eval_map](const continue_msg&) {
+				const_eval_map.insert({const_input_wires_it->get_name(), *const_input_vals_it});
+			};
+			node_map.insert({const_input_wires_it->get_name(),
+						continue_node<continue_msg>(DAG, inserter)});
+		}
+
 		// error check: both iterators should be at the end
-		if (input_vals_it != input_vals.end() || input_wires_it != input_wires_end)
+		if (input_vals_it != input_vals.end()
+		    || input_wires_it != input_wires_end
+		    || const_input_vals_it != const_input_vals.end()
+		    || const_input_wires_it != const_input_wires_end)
+		{
 			throw std::runtime_error("Number of inputs doesn't match");
+		}
 
 		// This is where the actual evaluation occurs.  For
 		// each assignment, look up the input Wires in the
@@ -297,15 +321,17 @@ public:
 					     &timeout_gate_name,&timeout_wall_time,&start_time
 				](const continue_msg&) {
 				std::vector<Ciphertext> inputs;
-				std::transform(assn.get_inputs().begin(),
-					       assn.get_inputs().end(),
-					       std::back_inserter(inputs),
-					       [&eval_map](Wire w) {
-						       // throws out_of_range if not present in the map
-						       return eval_map.at(w.get_name());
-					       });
+				std::vector<Plaintext> const_inputs;
 
-				Ciphertext output = dispatch(assn.get_op(), inputs);
+				for (Wire w : assn.get_inputs()) {
+					typename decltype(eval_map)::iterator it;
+					if ((it = eval_map.find(w.get_name())) != eval_map.end()) {
+						inputs.push_back(it->second);
+					} else {
+						const_inputs.push_back(const_eval_map.at(w.get_name()));
+					}
+				}
+				Ciphertext output = dispatch(assn.get_op(), inputs, const_inputs);
 				eval_map.insert({assn.get_output().get_name(), output});
 
 				microsecond wall_time = high_res_clock::now() - start_time;
@@ -359,14 +385,14 @@ public:
 #endif // HAVE_TBB
 	}
 
-	virtual CircuitEvaluator compile(const Circuit& circ) {
-		using std::placeholders::_1;
-		using std::placeholders::_2;
-		using std::placeholders::_3;
-		auto run = std::bind(&Context::eval<std::list<Ciphertext>, std::list<Ciphertext> >, this, circ, _1, _2,
-		                     std::chrono::duration<double, std::micro>(0.0));
-		return CircuitEvaluator(run);
-	}
+	// virtual CircuitEvaluator compile(const Circuit& circ) {
+	// 	using std::placeholders::_1;
+	// 	using std::placeholders::_2;
+	// 	using std::placeholders::_3;
+	// 	auto run = std::bind(&Context::eval<std::list<Ciphertext>, std::list<Ciphertext> >, this, circ, _1, _2,
+	// 	                     std::chrono::duration<double, std::micro>(0.0));
+	// 	return CircuitEvaluator(run);
+	// }
 
 	// overload taking both durations and const_plaintext_inputs
 	virtual std::vector<Plaintext> eval_with_plaintexts(
@@ -397,12 +423,12 @@ public:
 
 		switch (eval_strategy) {
 		case EvaluationStrategy::serial:
-			eval_duration = eval(C, ciphertext_inputs, const_inputs,
-			                     ciphertext_outputs, timeout);
+			eval_duration = eval(C, ciphertext_inputs, ciphertext_outputs,
+					     const_inputs, timeout);
 			break;
 		case EvaluationStrategy::parallel:
-			eval_duration = parallel_eval(C, ciphertext_inputs, const_inputs,
-			                              ciphertext_outputs, timeout);
+			eval_duration = parallel_eval(C, ciphertext_inputs, ciphertext_outputs,
+						       const_inputs, timeout);
 			break;
 		default:
 			std::runtime_error("eval_with_plaintexts: Unknown evaluation strategy");
@@ -428,7 +454,8 @@ public:
 	  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 		std::vector<Plaintext> cptxts_empty;
-		return eval_with_plaintexts(c, ptxts, cptxts_empty, durations, eval_strategy, timeout);
+		return eval_with_plaintexts(C, plaintext_inputs, cptxts_empty,
+					    durations, eval_strategy, timeout);
 	}
 
 	// overload omitting durations only

@@ -19,8 +19,8 @@ int main(void) {
 	
 	ContextTFHE<bool> ctx;
 	
-	ContextTFHE<bool>::CircuitEvaluator run_circuit;
-	run_circuit = ctx.compile(C);
+	//ContextTFHE<bool>::CircuitEvaluator run_circuit;
+	//run_circuit = ctx.compile(C);
 	
 	std::list<ContextTFHE<bool>::Plaintext> plaintext_inputs = {false, true, true, true};
 	std::list<ContextTFHE<bool>::Ciphertext> ciphertext_inputs;
@@ -30,7 +30,7 @@ int main(void) {
 	
 	std::list<ContextTFHE<bool>::Ciphertext> ciphertext_outputs;
 	using microsecond = std::chrono::duration<double, std::micro>;
-	microsecond time = run_circuit(ciphertext_inputs, ciphertext_outputs);
+	microsecond time = ctx.eval(C, ciphertext_inputs, ciphertext_outputs);
 
 	std::list<ContextTFHE<bool>::Plaintext> plaintext_outputs;
 	for (ContextTFHE<bool>::Ciphertext ct: ciphertext_outputs) {

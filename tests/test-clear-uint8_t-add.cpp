@@ -20,8 +20,8 @@ int main(void) {
 	std::vector<DurationT> durations;
 	ContextClear<uint8_t> ctx;
 
-	ContextClear<uint8_t>::CircuitEvaluator run_circuit;
-	run_circuit = ctx.compile(circ);
+	//ContextClear<uint8_t>::CircuitEvaluator run_circuit;
+	//run_circuit = ctx.compile(circ);
 
 /// test small postitive numbers
         std::vector<uint8_t> inputs = {5, 22};
