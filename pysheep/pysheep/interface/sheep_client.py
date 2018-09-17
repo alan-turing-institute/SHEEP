@@ -25,6 +25,7 @@ def is_configured():
     response_dict = {}
     try:
         r = requests.get(BASE_URI+"/job/")
+        print(BASE_URI+"/job/")
         response_dict["status_code"] = r.status_code
         response_dict["content"] = json.loads(r.content.decode("utf-8"))
     except(requests.exceptions.ConnectionError):
@@ -76,14 +77,14 @@ def set_context(context_name):
     set a context.  First check it is in the list of available ones.
     """
     if not isinstance(context_name, str):
-        return {"status_code": 550, "content": "incorrect input type for set_context"}
+        return {"status_code": 500, "content": "incorrect input type for set_context"}
     context_request = get_available_contexts()
     if context_request["status_code"] != 200:
         return context_request
     response_dict = {}
     available_contexts = context_request["content"]
     if not context_name in available_contexts:
-        response_dict["status_code"] = 551
+        response_dict["status_code"] = 500
         response_dict["content"] = "context {} is not in {}".format(context_name,
                                                                     available_contexts)
         return response_dict
@@ -110,7 +111,7 @@ def set_input_type(input_type):
     response_dict = {}
     available_types = type_request["content"]
     if not input_type in available_types:
-        response_dict["status_code"] = 552
+        response_dict["status_code"] = 500
         response_dict["content"] = "input_type {} not in {}".format(input_type,
                                                                     available_types)
         return response_dict
@@ -144,6 +145,25 @@ def get_inputs():
     return response_dict
 
 
+def get_const_inputs():
+    """
+    parse the circuit and get the list of inputs.
+    """
+    response_dict = {}
+    try:
+        r = requests.get(BASE_URI+"/const_inputs/")
+        response_dict["status_code"] = r.status_code
+        result = json.loads(r.content.decode("utf-8"))
+        if r.status_code == 200:
+            response_dict["content"] = result["const_inputs"]
+        else:
+            response_dict["content"] = "Error getting inputs - do we have a circuit?"
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to get inputs"
+    return response_dict
+
+
 def set_inputs(input_dict):
     """
     set input values.
@@ -157,16 +177,48 @@ def set_inputs(input_dict):
     response_dict = {}
     unset_inputs = [i for i in input_names if not i in input_dict.keys()]
     if len(unset_inputs) > 0:
-        response_dict["status_code"] = 553
+        response_dict["status_code"] = 500
         response_dict["content"] = "Inputs {} not set".format(unset_inputs)
         return response_dict
     unused_inputs = [i for i in input_dict.keys() if not i in input_names]
     if len(unused_inputs) > 0:
-        response_dict["status_code"] = 553
+        response_dict["status_code"] = 500
         response_dict["content"] = "Inputs {} are not inputs to the circuit".format(unused_inputs)
         return response_dict
     try:
         r = requests.post(BASE_URI+"/inputs/",
+                          json=input_dict)
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set inputs"
+    return response_dict
+
+def set_const_inputs(input_dict):
+    """
+    set input values.
+    """
+    if not isinstance(input_dict, dict):
+        return {"status_code": 550, "content": "incorrect input type for set_inputs"}
+    input_request = get_const_inputs()
+    if input_request["status_code"] != 200:
+        return input_request
+    input_names = input_request["content"]
+    response_dict = {}
+    unset_inputs = [i for i in input_names if not i in input_dict.keys()]
+    if len(unset_inputs) > 0:
+        response_dict["status_code"] = 500
+        response_dict["content"] = "Inputs {} not set".format(unset_inputs)
+        return response_dict
+    unused_inputs = [i for i in input_dict.keys() if not i in input_names]
+    if len(unused_inputs) > 0:
+        response_dict["status_code"] = 500
+        response_dict["content"] = "Inputs {} are not inputs to the circuit".format(unused_inputs)
+        return response_dict
+    try:
+        print(input_dict)
+        r = requests.post(BASE_URI+"/const_inputs/",
                           json=input_dict)
         response_dict["status_code"] = r.status_code
         response_dict["content"] = r.content.decode("utf-8")
@@ -202,7 +254,7 @@ def set_circuit(circuit_filename):
         return {"status_code": 550, "content": "incorrect input type for set_circuit"}
     response_dict = {}
     if not os.path.exists(circuit_filename):
-        response_dict["status_code"] = 554
+        response_dict["status_code"] = 500
         response_dict["content"] = "Circuit file not found"
         return response_dict
     try:
@@ -257,7 +309,7 @@ def set_eval_strategy(strategy):
         return {"status_code": 550, "content": "incorrect input type for set_strategy"}
     response_dict = {}
     if not strategy in ["serial","parallel"]:
-        response_dict["status_code"] = 556
+        response_dict["status_code"] = 500
         response_dict["content"] = "Eval strategy must be 'serial' or 'parallel'"
         return response_dict
     try:
@@ -307,10 +359,11 @@ def run_job():
     """
     response_dict = {}
     config_request = is_configured()
+    print(config_request["status_code"])
     if config_request["status_code"] != 200:
         return config_request
     if not config_request["content"]["job_configured"]:
-        response_dict["status_code"] = 557
+        response_dict["status_code"] = 500
         response_dict["content"] = "Job not fully configured"
         return response_dict
     try:

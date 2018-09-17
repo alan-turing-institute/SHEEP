@@ -52,6 +52,11 @@ RUN wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-7
 RUN tar xf SEAL_2.3.1.tar.gz
 RUN cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install;
 
+###### get and build libpaillier
+RUN wget http://hms.isi.jhu.edu/acsc/libpaillier/libpaillier-0.8.tar.gz
+RUN tar -xvzf libpaillier-0.8.tar.gz
+RUN cd libpaillier-0.8 ; ./configure; make; make install
+
 
 #############################################################################################################
 #####  Everything before this can be run to give a base docker image, to avoid having to recompile everything.

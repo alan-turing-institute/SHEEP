@@ -20,8 +20,8 @@ int main(void) {
 	std::vector<DurationT> durations;
 	ContextHElib_F2<uint8_t> ctx;
 
-	ContextHElib_F2<uint8_t>::CircuitEvaluator run_circuit;
-	run_circuit = ctx.compile(circ);
+	//ContextHElib_F2<uint8_t>::CircuitEvaluator run_circuit;
+	//run_circuit = ctx.compile(circ);
 
 /// test small postitive numbers
         std::vector<uint8_t> inputs = {5, 22};

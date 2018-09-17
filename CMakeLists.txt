@@ -32,6 +32,14 @@ enable_testing()
 
 include_directories(include)
 
+
+find_package(LP)
+if (LP_FOUND)
+  include_directories(SYSTEM ${LP_INCLUDE_DIRS})
+  find_library(GMP_LIBRARIES NAMES gmp)
+  add_definitions(-DHAVE_LP)  
+endif (LP_FOUND)
+
 find_package(TFHE)
 if (TFHE_FOUND)
     include_directories(SYSTEM ${TFHE_INCLUDE_DIRS})

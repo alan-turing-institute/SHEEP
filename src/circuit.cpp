@@ -51,6 +51,8 @@ std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
   stream<<"INPUTS";
   for (auto input : c.get_inputs() ) {
     stream<<" "<<input.get_name();
+              std::cout<<input.get_name();
+
   }
   stream<<std::endl;
   stream<<"OUTPUTS";
@@ -75,6 +77,7 @@ std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
     for (auto map_it = gate_name_map.begin(); map_it != gate_name_map.end(); ++map_it ) {
       if (map_it->second == assignment.get_op()) {
 	gate_name = map_it->first;
+        
 	break;
       }
     }
@@ -115,9 +118,11 @@ std::istream& operator >>(std::istream& stream, Circuit& c)
 	token_iter++;
 	for (; token_iter != tokens.end(); ++token_iter) {
 	  c.add_const_input(*token_iter);
+      
 	}
       } else if (*token_iter == "INPUTS") {
 	token_iter++;
+                 
 	for (; token_iter != tokens.end(); ++token_iter) {
 	  try {
 	    c.add_input(*token_iter);

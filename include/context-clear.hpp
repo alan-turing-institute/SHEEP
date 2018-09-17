@@ -149,8 +149,15 @@ public:
 	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
 		return (s % 2)?a:b;
 	}
-};
 
+	Ciphertext MultByConstant(Ciphertext a, long b) {
+		return Multiply(a,b);
+	}
+
+	Ciphertext AddConstant(Ciphertext a, long b) {
+		return Add(a,b);
+	}
+};
 
 }  // Leaving Sheep namespace
   
