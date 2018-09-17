@@ -216,10 +216,17 @@ SheepServer::configure_and_run(http_request message) {
     // child process: perform the evaluation
 
     std::vector<Duration> timings;
-    std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
-									plaintext_inputs,
-									timings,
-									m_job_config.eval_strategy);
+    std::vector<PlaintextT> output_vals;
+
+    try {
+      output_vals = context->eval_with_plaintexts(m_job_config.circuit,
+        plaintext_inputs, timings, m_job_config.eval_strategy,
+        std::chrono::duration<double,std::micro>(0.0));
+
+    } catch (...) {
+      _exit(2);
+    }
+
     std::cerr << timings.size() << std::endl;
     if (timings.size() != 3) {
       // signal an error to the server
@@ -257,9 +264,13 @@ SheepServer::configure_and_run(http_request message) {
 
     // on waking up, is the child still alive?
     int status;
-    if (!waitpid(child_pid, &status, WNOHANG)) {
+    int finished = waitpid(child_pid, &status, WNOHANG);
+
+    if (!finished) {
       // this is an error (eval's own timeout should have stopped it)
       kill(child_pid, SIGKILL);
+      status = waitpid(child_pid, &status, 0);
+      
       message.reply(status_codes::InternalError,("Evaluation timed out"));
       m_job_finished = false;
     }
