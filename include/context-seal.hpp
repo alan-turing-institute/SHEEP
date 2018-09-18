@@ -17,9 +17,9 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
 public:
 	typedef PlaintextT Plaintext;
   	typedef seal::Ciphertext Ciphertext;
-  
+
   // constructors
-  
+
   ContextSeal(long plaintext_modulus = (1 << 8),
     long security = 128,  /* This is the security level (either 128 or 192).
                 We limit ourselves to 2 predefined choices,
@@ -28,21 +28,21 @@ public:
   m_N(N),
 	m_security(security),
 	m_plaintext_modulus(plaintext_modulus) {
-    this->m_param_name_map.insert({"N",m_N});    
+    this->m_param_name_map.insert({"N",m_N});
     this->m_param_name_map.insert({"PlaintextModulus",m_plaintext_modulus});
     this->m_param_name_map.insert({"Security",m_security});
 
     this->m_private_key_size = 0;
     this->m_public_key_size = 0;
     this->m_ciphertext_size = 0;
-    
+
     configure();
   }
 
   void configure() {
-    
+
   std::stringstream x;
-  x << "1x^" << m_N << " + 1"; 
+  x << "1x^" << m_N << " + 1";
   this->m_poly_modulus = x.str();
 	seal::EncryptionParameters parms;
 	parms.set_poly_modulus(m_poly_modulus);
@@ -53,7 +53,7 @@ public:
 	} else {
 		throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 129");
 	}
-	
+
 	parms.set_plain_modulus(m_plaintext_modulus);
 	m_context = new seal::SEALContext(parms);
 	m_encoder = new seal::IntegerEncoder(m_context->plain_modulus()); // We default to an IntegerEncoder with base b=2. TODO: include CRT and fractional encoder
@@ -64,14 +64,14 @@ public:
 
 	//// sizes of objects, in bytes
 	this->m_public_key_size = sizeof(m_public_key);
-	this->m_private_key_size = sizeof(m_secret_key);	
-	
+	this->m_private_key_size = sizeof(m_secret_key);
+
 	m_encryptor = new seal::Encryptor(*m_context, m_public_key);
 	m_evaluator = new seal::Evaluator(*m_context);
 	m_decryptor = new seal::Decryptor(*m_context, m_secret_key);
   }
 
-  Ciphertext encrypt(Plaintext p) {
+  Ciphertext encrypt(std::vector<Plaintext> p) {
 	seal::Plaintext pt = m_encoder->encode(p);
 	seal::Ciphertext ct;
 	m_encryptor->encrypt(pt, ct);
@@ -85,7 +85,7 @@ public:
     Plaintext p = m_encoder->decode_int32(pt);
     return p;
   }
-  
+
   Ciphertext Add(Ciphertext a, Ciphertext b) {
   	m_evaluator->add(a, b);
   	return a;
@@ -101,12 +101,12 @@ public:
   	m_evaluator->sub(a, b);
   	return a;
   }
-  
+
   Ciphertext Negate(Ciphertext a) {
   	m_evaluator->negate(a);
   	return a;
   }
-  
+
   Ciphertext MultByConstant(Ciphertext a, long b) {
     seal::Plaintext pt = m_encoder->encode((int64_t)b);
   	m_evaluator->multiply_plain(a, pt);

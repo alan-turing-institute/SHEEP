@@ -46,9 +46,19 @@ struct TimeoutException : public std::exception {
 	{ }
 };
 
-/// Base base class
+/*
+    One may wonder whether the two following classes
+    can be merged into one. We decided not to do so,
+    because ...
+*/
+
 template <typename PlaintextT>
 class BaseContext {
+    /*
+         Abstract class representing a limited interface with libraries,
+         where inputs are provided before encryption, and results
+         are received after decryption
+    */
 public:
 	virtual ~BaseContext() {};
 
@@ -58,30 +68,30 @@ public:
 	// information.
 
 	// overload taking both durations and const_plaintext_inputs
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
+	virtual std::vector<std::vector<PlaintextT> >
+	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT> > plaintext_inputs,
 	                     std::vector<PlaintextT> const_plaintext_inputs,
 	                     std::vector<std::chrono::duration<double, std::micro> >& durations,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
 	// overload omitting durations only
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
-	                     std::vector<PlaintextT> const_plaintext_inputs,
+	virtual std::vector<std::vector<PlaintextT> >
+	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT> > plaintext_inputs,
+	                     std::vector<std::vector<PlaintextT> > const_plaintext_inputs,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
 	// overload omitting const_plaintext_inputs only
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
+	virtual std::vector<std::vector<PlaintextT> >
+	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT> > plaintext_inputs,
 	                     std::vector<std::chrono::duration<double, std::micro> >& durations,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
 	// overload omitting both durations and const_plaintext_inputs
-	virtual std::vector<PlaintextT>
-	eval_with_plaintexts(const Circuit& C, std::vector<PlaintextT> plaintext_inputs,
+	virtual std::vector<std::vector<PlaintextT> >
+	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT> > plaintext_inputs,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
@@ -92,37 +102,42 @@ public:
 	virtual void configure() = 0;
 };
 
-// Base class - abstract interface to each library
 template <typename PlaintextT, typename CiphertextT>
 class Context : public BaseContext<PlaintextT> {
+    /*
+        Abstract class representing a library. Circuit evaluations are
+        done in terms of this class (see function "eval"),
+        and library wrappers extend from it.
+    */
 	typedef std::chrono::duration<double, std::micro> microsecond;
 public:
-	typedef PlaintextT Plaintext;
-	typedef CiphertextT Ciphertext;
+    typedef PlaintextT Plaintext;
+    typedef CiphertextT Ciphertext;
 
-	typedef std::function<microsecond(const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
-	virtual ~Context() {};
-	virtual void       configure()                     { m_configured = true; };
-	virtual Ciphertext encrypt(Plaintext) = 0;
-	virtual Plaintext  decrypt(Ciphertext) = 0;
+    typedef std::function<microsecond(
+        const std::list<Ciphertext>&, std::list<Ciphertext>&)> CircuitEvaluator;
+    virtual ~Context() {}
+    virtual void       configure()                     { m_configured = true; }
+    virtual Ciphertext encrypt(std::vector<Plaintext>) = 0;
+    virtual std::vector<Plaintext>  decrypt(Ciphertext) = 0;
 
-	virtual Ciphertext Alias(Ciphertext a)             { return a; };
-	virtual Ciphertext Identity(Ciphertext)            { throw GateNotImplemented(); };
-	virtual Ciphertext Multiply(Ciphertext, Ciphertext) { throw GateNotImplemented(); };
-	virtual Ciphertext Maximum(Ciphertext, Ciphertext)  { throw GateNotImplemented(); };
-	virtual Ciphertext Add(Ciphertext, Ciphertext)      { throw GateNotImplemented(); };
-	virtual Ciphertext Subtract(Ciphertext, Ciphertext) { throw GateNotImplemented(); };
-	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
-	// if a > b, returns a Ciphertext representation of 1, and a Ciphertext 0 otherwise.
-	virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
-	// Select(s,a,b) := lsb(s)?a:b
-	virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
-	virtual Ciphertext AddConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
-	virtual Ciphertext MultByConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
+    virtual Ciphertext Alias(Ciphertext a)             { return a; };
+    virtual Ciphertext Identity(Ciphertext)            { throw GateNotImplemented(); };
+    virtual Ciphertext Multiply(Ciphertext, Ciphertext) { throw GateNotImplemented(); };
+    virtual Ciphertext Maximum(Ciphertext, Ciphertext)  { throw GateNotImplemented(); };
+    virtual Ciphertext Add(Ciphertext, Ciphertext)      { throw GateNotImplemented(); };
+    virtual Ciphertext Subtract(Ciphertext, Ciphertext) { throw GateNotImplemented(); };
+    virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
+    // if a > b, returns a Ciphertext representation of 1, and a Ciphertext 0 otherwise.
+    virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
+    // Select(s,a,b) := lsb(s)?a:b
+    virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
+    virtual Ciphertext AddConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
+    virtual Ciphertext MultByConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g,
 				    std::vector<Ciphertext> inputs,
-				    std::vector<Plaintext> const_inputs)
+				    std::vector<std::vector<Plaintext> > const_inputs)
 	{
 		using namespace std::placeholders;
 		switch (g) {
@@ -164,7 +179,7 @@ public:
 	}
 
 	template <typename InputContainer,
-		  typename ConstInputContainer = std::vector<Plaintext>,
+		  typename ConstInputContainer = std::vector<std::vector<Plaintext> >,
 		  typename OutputContainer>
 	microsecond eval(const Circuit& circ,
 	                 const InputContainer& input_vals,
@@ -172,7 +187,7 @@ public:
 	                 const ConstInputContainer& const_input_vals = ConstInputContainer(),
 	                 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
 		std::unordered_map<std::string, Ciphertext> eval_map;
-		std::unordered_map<std::string, Plaintext> const_eval_map;
+		std::unordered_map<std::string, std::vector<Plaintext> > const_eval_map;
 
 		// add Circuit::inputs and inputs into the map
 		auto input_vals_it = input_vals.begin();
@@ -214,7 +229,7 @@ public:
 
 		for (const Assignment assn : circ.get_assignments()) {
 			std::vector<Ciphertext> inputs;
-			std::vector<Plaintext> const_inputs;
+			std::vector<std::vector<PlaintextT> > const_inputs;
 			for (Wire w : assn.get_inputs())
 			{
 				typename decltype(eval_map)::iterator it;
