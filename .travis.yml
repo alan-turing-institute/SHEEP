@@ -18,9 +18,9 @@ addons:
 cache:
   bundler: true
   apt: true
-  directories:
-    - cmake-3.11.4
-    - gmp-6.1.0
+  #directories:
+  #  - cmake-3.11.4
+  #  - gmp-6.1.0
 
 
 before_install:
