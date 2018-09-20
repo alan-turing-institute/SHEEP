@@ -33,11 +33,11 @@ before_install:
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
-#    - cd $TRAVIS_BUILD_DIR/thirdparty
-#    - wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
-#    - tar -xzf cmake-3.11.4.tar.gz
-#    - export CC=gcc-7; export CXX=g++-7;
-#    - cd cmake-3.11.4; sudo ./bootstrap; make -j4; make install
+    - cd $TRAVIS_BUILD_DIR/thirdparty
+    - wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
+    - tar -xzf cmake-3.11.4.tar.gz
+    - export CC=gcc-7; export CXX=g++-7;
+    - cd cmake-3.11.4; sudo ./bootstrap; make -j4; make install
 
     # get gmp (needed for HElib)
 #    - cd $TRAVIS_BUILD_DIR/thirdparty
@@ -66,7 +66,7 @@ before_install:
 #    - ls
 
 before_script:
-  
+
   # TFHE
   - cd $TRAVIS_BUILD_DIR
   - rm -fr $TRAVIS_BUILD_DIR/lib/tfhe/build
@@ -86,6 +86,7 @@ before_script:
 
 
 script:
+
   # build SHEEP
   - rm -fr $TRAVIS_BUILD_DIR/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/build
