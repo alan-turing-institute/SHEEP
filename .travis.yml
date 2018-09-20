@@ -73,17 +73,17 @@ before_script:
 
   # TFHE
   - cd $TRAVIS_BUILD_DIR
-  - rm -fr $TRAVIS_BUILD_DIRS/lib/tfhe/build
-  - sudo mkdir -p $TRAVIS_BUILD_DIRS/lib/tfhe/build
-  - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build
+  - rm -fr $TRAVIS_BUILD_DIR/lib/tfhe/build
+  - sudo mkdir -p $TRAVIS_BUILD_DIR/lib/tfhe/build
+  - cd $TRAVIS_BUILD_DIR/lib/tfhe/build
   - export CC=gcc-7; export CXX=g++-7;
 
-  - ls $TRAVIS_BUILD_DIRS/lib/tfhe
+  - ls $TRAVIS_BUILD_DIR/lib/tfhe
   - pwd
   - ls /home/travis/build/alan-turing-institute/SHEEP/lib/tfhe
 
   - cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
-  - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; make; make install;
+  - cd $TRAVIS_BUILD_DIR/lib/tfhe/build; make; make install;
 
   # HElib
   - cd $TRAVIS_BUILD_DIR/lib/HElib/src
