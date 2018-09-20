@@ -1,7 +1,12 @@
 language: cpp
 
 before_install:
+    # get wget git etc
     - sudo apt-get update -qq
+    - sudo apt-get -y install git
+    - sudo apt-get update -qq
+    - sudo apt-get -y install wget
+    # 
     - sudo apt-get install libfftw3-dev
     - git clone https://github.com/tfhe/tfhe.git
     - cd tfhe
@@ -9,7 +14,7 @@ before_install:
     - git submodule update
     - mkdir build
     - cd build
-    - cmake ../src -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=debug 
+    - cmake ../src -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=debug
     - make
     - make test
     - sudo make install
@@ -27,8 +32,8 @@ before_install:
     - ./configure NTL_GMP_LIP=on
     - make
     - sudo make install
-    - cd 
-    - git clone https://github.com/shaih/HElib.git	
+    - cd
+    - git clone https://github.com/shaih/HElib.git
     - cd HElib/src
     - make
     - make check
