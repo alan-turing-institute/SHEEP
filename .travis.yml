@@ -2,12 +2,12 @@ language: cpp
 
 cache:
   apt: true
-  directories:
-    - $HOME/cmake-3.11.4
-    - $HOME/gmp-6.1.0
-    - $HOME/ntl-11.1.0
-    - $HOME/casablanca
-    - $HOME/SEAL_2.3.1
+#  directories:
+#    - $HOME/cmake-3.11.4
+#    - $HOME/gmp-6.1.0
+#    - $HOME/ntl-11.1.0
+#    - $HOME/casablanca
+#    - $HOME/SEAL_2.3.1
 
 addons:
   apt:
@@ -29,30 +29,38 @@ addons:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 before_install:
+    - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
-    - wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
-    - tar -xzf cmake-3.11.4.tar.gz
-    - export CC=gcc-7; export CXX=g++-7;
-    - cd cmake-3.11.4; sudo ./bootstrap; make -j4; make install; cd ..
+#    - cd $TRAVIS_BUILD_DIR/thirdparty
+#    - wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
+#    - tar -xzf cmake-3.11.4.tar.gz
+#    - export CC=gcc-7; export CXX=g++-7;
+#    - cd cmake-3.11.4; sudo ./bootstrap; make -j4; make install
 
     # get gmp (needed for HElib)
-    - wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
-    - sudo tar -xf gmp-6.1.0.tar.xz
-    - cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7; ./configure; make; make install; cd ..
+#    - cd $TRAVIS_BUILD_DIR/thirdparty
+#    - wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
+#    - sudo tar -xf gmp-6.1.0.tar.xz
+#    - cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7; ./configure; make; make install
 
     # get ntl (needed for HElib)
-    - wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
-    - tar -xzf ntl-11.1.0.tar.gz
-    - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install; cd ..
+#    - cd $TRAVIS_BUILD_DIR/thirdparty
+#    - wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
+#    - tar -xzf ntl-11.1.0.tar.gz
+#    - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
 
     # get cpprestsdk (for the REST API)
-    - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
-    - cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; export CXX=g++-7; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install; cd ..
+#    - cd $TRAVIS_BUILD_DIR/thirdparty
+#    - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
+#    - cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; export CXX=g++-7; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install
 
     # build SEAL
-    - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
-    - tar xf SEAL_2.3.1.tar.gz
-    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install; cd ..
+#    - cd $TRAVIS_BUILD_DIR/thirdparty
+#    - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
+#    - tar xf SEAL_2.3.1.tar.gz
+#    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install; cd ..
 
+    - cd $TRAVIS_BUILD_DIR
+    - ls
 script: true
