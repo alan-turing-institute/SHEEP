@@ -28,8 +28,9 @@ addons:
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
-before_install:
-
+install:
+    - cmake --version
+    
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
@@ -38,6 +39,8 @@ before_install:
     - tar -xzf cmake-3.11.4.tar.gz
     - export CC=gcc-7; export CXX=g++-7;
     - cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
+
+    - cmake --version
 
     # get gmp (needed for HElib)
 #    - cd $TRAVIS_BUILD_DIR/thirdparty
@@ -66,9 +69,9 @@ before_install:
 #    - ls
 
 before_script:
-  # build cmake from source (to get a new enough version for SEAL)
-  - cd $TRAVIS_BUILD_DIR/thirdparty/cmake-3.11.4 
-  - sudo ./bootstrap; sudo make -j4; sudo make install
+
+  - cmake --version
+
   # TFHE
   - cd $TRAVIS_BUILD_DIR
   - rm -fr $TRAVIS_BUILD_DIR/lib/tfhe/build
