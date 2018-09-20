@@ -37,7 +37,7 @@ before_install:
     - wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
     - tar -xzf cmake-3.11.4.tar.gz
     - export CC=gcc-7; export CXX=g++-7;
-    - cd cmake-3.11.4; sudo ./bootstrap; make -j4; make install
+    - cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
 
     # get gmp (needed for HElib)
 #    - cd $TRAVIS_BUILD_DIR/thirdparty
