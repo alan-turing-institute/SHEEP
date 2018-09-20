@@ -30,8 +30,6 @@ addons:
 
 before_install:
 
-    - echo $CC
-
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
@@ -68,21 +66,13 @@ before_install:
 #    - ls
 
 before_script:
-
-  - echo $CC
-
+  
   # TFHE
   - cd $TRAVIS_BUILD_DIR
   - rm -fr $TRAVIS_BUILD_DIR/lib/tfhe/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/lib/tfhe/build
   - cd $TRAVIS_BUILD_DIR/lib/tfhe/build
-  - export CC=gcc-7; export CXX=g++-7;
-
-  - ls $TRAVIS_BUILD_DIR/lib/tfhe
-  - pwd
-  - ls /home/travis/build/alan-turing-institute/SHEEP/lib/tfhe
-
-  - cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
+  - export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
   - cd $TRAVIS_BUILD_DIR/lib/tfhe/build; make; make install;
 
   # HElib
@@ -96,9 +86,6 @@ before_script:
 
 
 script:
-
-  - echo $CC
-
   # build SHEEP
   - rm -fr $TRAVIS_BUILD_DIR/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/build
