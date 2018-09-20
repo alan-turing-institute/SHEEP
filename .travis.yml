@@ -8,19 +8,34 @@ cache:
   #  - cmake-3.11.4
   #  - gmp-6.1.0
 
+addons:
+  apt:
+    update: true
+    packages:
+      - git
+      - wget
+      - software-properties-common
+      - gcc-7
+      - g++-7
+      - build-essential
+      - libfftw3-dev
+      - libtbb-dev
+      - libssl-dev
+      - libboost-all-dev
+    sources:
+      - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 before_install:
 
     # get wget git etc
-    - sudo apt-get update -qq; sudo apt-get -y install git
-    - sudo apt-get update -qq; sudo apt-get -y install wget
+    - sudo apt-get update -qq; sudo apt-get install -y git
+    - sudo apt-get update -qq; sudo apt-get install -y wget
 
     # (gcc >=6 needed for SEAL).
-    - sudo apt-get update -qq
-    - sudo apt-get -y install software-properties-common
+    - sudo apt-get update -qq; sudo apt-get install -y software-properties-common
     - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    - sudo apt-get update -qq; sudo apt-get -y install gcc-7 g++-7
-    - sudo apt-get update -qq; sudo apt-get -y install build-essential
+    - sudo apt-get update -qq; sudo apt-get install -y gcc-7 g++-7
+    - sudo apt-get update -qq; sudo apt-get install -y build-essential
 
     # get fftw3 (needed for TFHE)
     - sudo apt-get update -qq; sudo apt-get install -y libfftw3-dev
@@ -43,18 +58,18 @@ before_install:
     # get ntl (needed for HElib)
     - wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
     - tar -xzf ntl-11.1.0.tar.gz
-    - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
+    - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install; cd ..
 
     # get cpprestsdk (for the REST API)
     - sudo apt-get update -qq; sudo apt-get -y install libssl-dev
     - sudo apt-get update -qq; sudo apt-get -y install libboost-all-dev
     - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
-    - cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; export CXX=g++-7; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install
+    - cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; export CXX=g++-7; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install; cd ..
 
     # build SEAL
     - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
     - tar xf SEAL_2.3.1.tar.gz
-    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install;
+    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install; cd ..
 
 script:
     - cd $TRAVIS_BUILD_DIR
