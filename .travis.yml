@@ -79,6 +79,8 @@ before_script:
   - export CC=gcc-7; export CXX=g++-7;
 
   - ls $TRAVIS_BUILD_DIRS/lib/tfhe
+  - pwd
+  - ls /home/travis/build/alan-turing-institute/SHEEP/lib/tfhe
 
   - cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
   - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; make; make install;
@@ -88,7 +90,10 @@ before_script:
   - export CC=gcc-7; export CXX=g++-7; make clean; make;
 
   # SEAL
+
+
   # libpaillier
+
 
 script:
 
