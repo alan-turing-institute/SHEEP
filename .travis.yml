@@ -30,7 +30,7 @@ addons:
 
 install:
     - cmake --version
-    
+
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
@@ -41,6 +41,8 @@ install:
     - cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
 
     - cmake --version
+
+    - export PATH=$TRAVIS_BUILD_DIR/thirdparty/cmake-3.11.4/bin:${PATH}
 
     # get gmp (needed for HElib)
 #    - cd $TRAVIS_BUILD_DIR/thirdparty
