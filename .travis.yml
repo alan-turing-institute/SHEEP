@@ -63,4 +63,20 @@ before_install:
 
     - cd $TRAVIS_BUILD_DIR
     - ls
-script: true
+
+before_script:
+  # TFHE
+  - cd $TRAVIS_BUILD_DIR
+  - rm -fr $TRAVIS_BUILD_DIRS/lib/tfhe/build
+  - mkdir -p SHEEP/lib/tfhe/build
+  - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
+  - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; make; make install;
+
+  # HElib
+  # SEAL
+  # libpaillier
+
+
+script:
+
+  true
