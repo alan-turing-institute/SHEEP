@@ -61,14 +61,14 @@ before_install:
 #    - tar xf SEAL_2.3.1.tar.gz
 #    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install; cd ..
 
-    - cd $TRAVIS_BUILD_DIR
-    - ls
+#    - cd $TRAVIS_BUILD_DIR
+#    - ls
 
 before_script:
   # TFHE
   - cd $TRAVIS_BUILD_DIR
   - rm -fr $TRAVIS_BUILD_DIRS/lib/tfhe/build
-  - mkdir -p SHEEP/lib/tfhe/build
+  - mkdir -p $TRAVIS_BUILD_DIRS/lib/tfhe/build
   - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
   - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; make; make install;
 
