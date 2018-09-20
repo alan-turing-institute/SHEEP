@@ -84,4 +84,5 @@ script:
   - rm -fr $TRAVIS_BUILD_DIR/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/build
   - cd $TRAVIS_BUILD_DIR/build;
-  - export CC=gcc-7; export CXX=g++-7; cmake ../ ; make run-sheep-server
+  - export CC=gcc-7; export CXX=g++-7; cmake ../ ; make all
+  - make test
