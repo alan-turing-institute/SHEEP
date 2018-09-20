@@ -1,7 +1,7 @@
 language: cpp
 
-cache:
-  apt: true
+#cache:
+#  apt: true
 #  directories:
 #    - $HOME/cmake-3.11.4
 #    - $HOME/gmp-6.1.0
@@ -29,6 +29,9 @@ addons:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 before_install:
+
+    - echo $CC
+
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
@@ -66,11 +69,18 @@ before_install:
 
 before_script:
 
+  - echo $CC
+
   # TFHE
   - cd $TRAVIS_BUILD_DIR
   - rm -fr $TRAVIS_BUILD_DIRS/lib/tfhe/build
   - sudo mkdir -p $TRAVIS_BUILD_DIRS/lib/tfhe/build
-  - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
+  - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build
+  - export CC=gcc-7; export CXX=g++-7;
+
+  - ls $TRAVIS_BUILD_DIRS/lib/tfhe
+
+  - cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
   - cd $TRAVIS_BUILD_DIRS/lib/tfhe/build; make; make install;
 
   # HElib
@@ -81,8 +91,14 @@ before_script:
   # libpaillier
 
 script:
+
+  - echo $CC
+
+  # build SHEEP
   - rm -fr $TRAVIS_BUILD_DIR/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/build
   - cd $TRAVIS_BUILD_DIR/build;
   - export CC=gcc-7; export CXX=g++-7; cmake ../ ; make all
+
+  # test SHEEP
   - make test
