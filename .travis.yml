@@ -58,7 +58,11 @@ install:
     - sudo make install
 
     # exporting gmp path
-    - export LDFLAGS="-R$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/gmp/lib -L$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/gmp/lib"
+    - export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/gmp/6.1.2/lib64:$LD_LIBRARY_PATH
+    - export LIBRARY_PATH=$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/gmp/6.1.2/lib64:$LIBRARY_PATH
+    - export CPATH=$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/gmp/6.1.2/include:$CPATH
+
+
 
     # get ntl (needed for HElib)
     - cd $TRAVIS_BUILD_DIR/thirdparty
