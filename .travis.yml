@@ -31,7 +31,7 @@ addons:
 install:
     # cmake complains that it does not have permissions to write files
     # it is not an elegenet solution but it will do for now.
-    #- chmod -R 777 *
+    - chmod -R 777 *
     - cmake --version
 
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
@@ -43,7 +43,7 @@ install:
     - export CC=gcc-7; export CXX=g++-7;
     - cd cmake-3.12.0;
     - sudo ./bootstrap;
-    - sudo make -j4; 
+    - sudo make -j4;
     - sudo make install
 
     - cmake --version
