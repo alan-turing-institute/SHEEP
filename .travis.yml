@@ -29,6 +29,7 @@ addons:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 install:
+    - chmod 777 *
     - cmake --version
 
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
