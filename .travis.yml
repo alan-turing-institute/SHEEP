@@ -2,8 +2,8 @@ language: cpp
 
 cache:
   apt: true
-  directories:
-    - $TRAVIS_BUILD_DIR/thirdparty/cmake-3.11.4
+#  directories:
+#    - $TRAVIS_BUILD_DIR/thirdparty/cmake-3.11.4
 #    - $TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.0
 #    - $TRAVIS_BUILD_DIR/thirdparty/ntl-11.1.0
 #    - $TRAVIS_BUILD_DIR/thirdparty/casablanca
@@ -24,26 +24,29 @@ addons:
       - m4
       - libssl-dev
       - libboost-all-dev
+      - cmake
 
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 install:
-    - chmod -R 777 *
+    # cmake complains that it does not have permissions to write files
+    # it is not an elegenet solution but it will do for now.
+    #- chmod -R 777 *
     - cmake --version
 
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
-    - cd $TRAVIS_BUILD_DIR/thirdparty
-    - wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
-    - tar -xzf cmake-3.11.4.tar.gz
-    - export CC=gcc-7; export CXX=g++-7;
-    - cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
-
-    - cmake --version
-
-    - export PATH=$TRAVIS_BUILD_DIR/thirdparty/cmake-3.11.4/bin:${PATH}
+    #- cd $TRAVIS_BUILD_DIR/thirdparty
+    #- wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
+    #- tar -xzf cmake-3.11.4.tar.gz
+    #- export CC=gcc-7; export CXX=g++-7;
+    #- cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
+    #
+    #- cmake --version
+    # exporting new cmake path
+    #- export PATH=$TRAVIS_BUILD_DIR/thirdparty/cmake-3.11.4/bin:${PATH}
 
     # get gmp (needed for HElib)
 #    - cd $TRAVIS_BUILD_DIR/thirdparty
