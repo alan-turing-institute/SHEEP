@@ -50,7 +50,7 @@ install:
 
     # get gmp (needed for HElib)
     - cd $TRAVIS_BUILD_DIR/thirdparty
-    - wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
+    - wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
     - tar -xf gmp-6.1.2.tar.xz
     - cd gmp-6.1.2; export CC=gcc-7; export CXX=g++-7;
     - sudo ./configure
