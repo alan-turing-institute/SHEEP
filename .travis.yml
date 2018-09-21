@@ -60,7 +60,6 @@ install:
     # exporting gmp path
     $ export LDFLAGS="-R$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/lib -L$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/lib"
 
-
     # get ntl (needed for HElib)
     - cd $TRAVIS_BUILD_DIR/thirdparty
     - wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
