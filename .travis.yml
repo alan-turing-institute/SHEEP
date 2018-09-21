@@ -32,7 +32,6 @@ install:
     # cmake complains that it does not have permissions to write files
     # it is not an elegenet solution but it will do for now.
     - chmod -R 777 *
-    - cmake --version
 
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
@@ -46,35 +45,31 @@ install:
     - sudo make -j4;
     - sudo make install
 
-    - cmake --version
     # exporting new cmake path
     - export PATH=$TRAVIS_BUILD_DIR/thirdparty/cmake-3.12.0/bin:${PATH}
 
     # get gmp (needed for HElib)
-#    - cd $TRAVIS_BUILD_DIR/thirdparty
-#    - wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
-#    - sudo tar -xf gmp-6.1.0.tar.xz
-#    - cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7; ./configure; make; make install
+    - cd $TRAVIS_BUILD_DIR/thirdparty
+    - wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
+    - sudo tar -xf gmp-6.1.0.tar.xz
+    - cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7; ./configure; make; make install
 
     # get ntl (needed for HElib)
-#    - cd $TRAVIS_BUILD_DIR/thirdparty
-#    - wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
-#    - tar -xzf ntl-11.1.0.tar.gz
-#    - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
+    - cd $TRAVIS_BUILD_DIR/thirdparty
+    - wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
+    - tar -xzf ntl-11.1.0.tar.gz
+    - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
 
     # get cpprestsdk (for the REST API)
-#    - cd $TRAVIS_BUILD_DIR/thirdparty
-#    - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
-#    - cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; export CXX=g++-7; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install
+    - cd $TRAVIS_BUILD_DIR/thirdparty
+    - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
+    - cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; export CXX=g++-7; cmake .. -DCMAKE_BUILD_TYPE=Debug; make install
 
     # build SEAL
-#    - cd $TRAVIS_BUILD_DIR/thirdparty
-#    - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
-#    - tar xf SEAL_2.3.1.tar.gz
-#    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install; cd ..
-
-#    - cd $TRAVIS_BUILD_DIR
-#    - ls
+    - cd $TRAVIS_BUILD_DIR/thirdparty
+    - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
+    - tar xf SEAL_2.3.1.tar.gz
+    - cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install; cd ..
 
 before_script:
 
@@ -85,11 +80,11 @@ before_script:
   - rm -fr $TRAVIS_BUILD_DIR/lib/tfhe/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/lib/tfhe/build
   - cd $TRAVIS_BUILD_DIR/lib/tfhe/build
-  - export CC=gcc-7; export CXX=g++-7;
+  - export CC=gcc-7; export CXX=g++-7
   - sudo cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
-  - cd $TRAVIS_BUILD_DIR/lib/tfhe/build;
-  - sudo make;
-  - sudo make install;
+  - cd $TRAVIS_BUILD_DIR/lib/tfhe/build
+  - sudo make
+  - sudo make install
 
   # HElib
   - cd $TRAVIS_BUILD_DIR/lib/HElib/src
