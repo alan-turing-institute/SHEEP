@@ -116,7 +116,9 @@ script:
   - rm -fr $TRAVIS_BUILD_DIR/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/build
   - cd $TRAVIS_BUILD_DIR/build;
-  - export CC=gcc-7; export CXX=g++-7; cmake ../ ; make all
+  - export CC=gcc-7; export CXX=g++-7;
+  - sudo cmake ../
+  - sudo make all
 
   # test SHEEP
   - make test
