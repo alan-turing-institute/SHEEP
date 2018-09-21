@@ -88,7 +88,7 @@ before_script:
   - export CC=gcc-7; export CXX=g++-7;
   - sudo cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
   - cd $TRAVIS_BUILD_DIR/lib/tfhe/build;
-  - make;
+  - sudo make;
   - sudo make install;
 
   # HElib
