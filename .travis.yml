@@ -85,8 +85,11 @@ before_script:
   - rm -fr $TRAVIS_BUILD_DIR/lib/tfhe/build
   - sudo mkdir -p $TRAVIS_BUILD_DIR/lib/tfhe/build
   - cd $TRAVIS_BUILD_DIR/lib/tfhe/build
-  - export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
-  - cd $TRAVIS_BUILD_DIR/lib/tfhe/build; make; make install;
+  - export CC=gcc-7; export CXX=g++-7;
+  - sudo cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
+  - cd $TRAVIS_BUILD_DIR/lib/tfhe/build;
+  - make;
+  - sudo make install;
 
   # HElib
   - cd $TRAVIS_BUILD_DIR/lib/HElib/src
