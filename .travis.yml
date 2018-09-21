@@ -51,9 +51,9 @@ install:
     # get gmp (needed for HElib)
     - cd $TRAVIS_BUILD_DIR/thirdparty
     - wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
-    - sudo tar -xf gmp-6.1.0.tar.xz
+    - tar -xf gmp-6.1.0.tar.xz
     - cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7;
-    - ./configure
+    - sudo ./configure
     - sudo make
     - sudo make install
 
@@ -62,7 +62,7 @@ install:
     - wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
     - tar -xzf ntl-11.1.0.tar.gz
     - cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7
-    - ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on;
+    - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on;
     - sudo make
     - sudo make install
 
