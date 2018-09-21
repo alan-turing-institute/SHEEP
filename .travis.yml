@@ -58,7 +58,7 @@ install:
     - sudo make install
 
     # exporting gmp path
-    $ export LDFLAGS="-R/thirdparty/gmp-6.1.2/lib -L/thirdparty/gmp-6.1.2/lib"
+    $ export LDFLAGS="-R$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/lib -L$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2/lib"
 
 
     # get ntl (needed for HElib)
