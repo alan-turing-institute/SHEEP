@@ -55,6 +55,7 @@ install:
     - cd gmp-6.1.2; export CC=gcc-7; export CXX=g++-7;
     - sudo ./configure
     - sudo make
+    - sudo make check	
     - sudo make install
 
     # exporting gmp paths
