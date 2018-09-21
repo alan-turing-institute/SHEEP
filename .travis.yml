@@ -70,7 +70,7 @@ install:
     - wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
     - tar -xzf ntl-11.3.0.tar.gz
     - cd ntl-11.3.0/src; export CC=gcc-7; export CXX=g++-7
-    - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=$TRAVIS_BUILD_DIR/thirdparty/gmp-6.1.2;
+    - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local/;
     - sudo make
     - sudo make install
 
