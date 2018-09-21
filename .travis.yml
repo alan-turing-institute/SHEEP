@@ -24,7 +24,6 @@ addons:
       - m4
       - libssl-dev
       - libboost-all-dev
-      - cmake
 
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
@@ -38,11 +37,11 @@ install:
     - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
     # build cmake from source (to get a new enough version for SEAL)
-    #- cd $TRAVIS_BUILD_DIR/thirdparty
-    #- wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
-    #- tar -xzf cmake-3.11.4.tar.gz
-    #- export CC=gcc-7; export CXX=g++-7;
-    #- cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
+    - cd $TRAVIS_BUILD_DIR/thirdparty
+    - wget https://cmake.org/files/v3.12/cmake-3.12.0.tar.gz
+    - tar -xzf cmake-3.11.4.tar.gz
+    - export CC=gcc-7; export CXX=g++-7;
+    - cd cmake-3.11.4; sudo ./bootstrap; sudo make -j4; sudo make install
     #
     #- cmake --version
     # exporting new cmake path
