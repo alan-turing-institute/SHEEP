@@ -57,8 +57,8 @@ install:
   - sudo make install
 
   # exporting gmp paths
-  - export LD_LIBRARY_PATH=/usr/local:$LD_LIBRARY_PATH
-  - export LIBRARY_PATH=/usr/local:$LIBRARY_PATH
+  - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+  - export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
   - export CPATH=/usr/local/include:$CPATH
 
   - ls /usr/local
