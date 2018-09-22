@@ -25,10 +25,11 @@ addons:
       - libssl-dev
       - libboost-all-dev
 
-    sources:
-      - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    #sources:
+    #  - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 install:
+    - sudo apt-get update -qq
     # cmake complains that it does not have permissions to write files
     # it is not an elegenet solution but it will do for now.
     - chmod -R 777 *
@@ -84,6 +85,8 @@ install:
     - sudo make install
 
     # build SEAL
+    - sudo apt-get update -qq
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     - cd $TRAVIS_BUILD_DIR/thirdparty
     - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
     - tar xf SEAL_2.3.1.tar.gz
