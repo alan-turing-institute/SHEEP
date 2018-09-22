@@ -9,97 +9,83 @@ addons:
 
 
 install:
-    # get wget git etc
-    - sudo apt-get update -qq; sudo apt-get -y install git
-    - sudo apt-get update -qq; sudo apt-get -y install wget
+  # get wget git etc
+  - sudo apt-get update -qq; sudo apt-get -y install git
+  - sudo apt-get update -qq; sudo apt-get -y install wget
 
-    # (gcc >=6 needed for SEAL).
-    - sudo apt-get update -qq
-    - sudo apt-get -y install software-properties-common
-    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    - sudo apt-get update -qq; sudo apt-get -y install gcc-7 g++-7
-    - sudo apt-get update -qq; sudo apt-get -y install build-essential
+  # (gcc >=6 needed for SEAL).
+  - sudo apt-get update -qq
+  - sudo apt-get -y install software-properties-common
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq; sudo apt-get -y install gcc-7 g++-7
+  - sudo apt-get update -qq; sudo apt-get -y install build-essential
 
-    # get fftw3 (needed for TFHE)
-    - sudo apt-get update -qq; sudo apt-get install -y libfftw3-dev
+  # get fftw3 (needed for TFHE)
+  - sudo apt-get update -qq; sudo apt-get install -y libfftw3-dev
 
-    # cmake complains that it does not have permissions to write files
-    # it is not an elegenet solution but it will do for now.
-    - chmod -R 777 *
-    - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
+  # cmake complains that it does not have permissions to write files
+  # it is not an elegenet solution but it will do for now.
+  - chmod -R 777 *
+  - mkdir -p $TRAVIS_BUILD_DIR/thirdparty
 
-    # build cmake from source (to get a new enough version for SEAL)
-    - cd $TRAVIS_BUILD_DIR/thirdparty
-    - wget https://cmake.org/files/v3.12/cmake-3.12.0.tar.gz
-    - tar -xzf cmake-3.12.0.tar.gz
-    - export CC=gcc-7; export CXX=g++-7
-    - cd cmake-3.12.0
-    - sudo ./bootstrap
-    - sudo make -j4
-    - sudo make install
+  # build cmake from source (to get a new enough version for SEAL)
+  - cd $TRAVIS_BUILD_DIR/thirdparty
+  - wget https://cmake.org/files/v3.12/cmake-3.12.0.tar.gz
+  - tar -xzf cmake-3.12.0.tar.gz
+  - export CC=gcc-7; export CXX=g++-7
+  - cd cmake-3.12.0
+  - sudo ./bootstrap
+  - sudo make -j4
+  - sudo make install
 
-    # exporting new cmake path
-    - export PATH=$TRAVIS_BUILD_DIR/thirdparty/cmake-3.12.0/bin:${PATH}
+  # exporting new cmake path
+  - export PATH=$TRAVIS_BUILD_DIR/thirdparty/cmake-3.12.0/bin:${PATH}
 
-    # install intel-tbb for parallelisation
-    - sudo apt-get update -qq; sudo apt-get -y install libtbb-dev
+  # install intel-tbb for parallelisation
+  - sudo apt-get update -qq; sudo apt-get -y install libtbb-dev
 
-    - sudo apt-get update -qq; sudo apt-get -y install m4
+  - sudo apt-get update -qq; sudo apt-get -y install m4
 
-    # get gmp (needed for HElib)
-    - cd $TRAVIS_BUILD_DIR/thirdparty
-    - wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
-    - tar -xf gmp-6.1.2.tar.xz
-    - cd gmp-6.1.2; export CC=gcc-7; export CXX=g++-7;
-    - sudo ./configure
-    - sudo make
-    - sudo make check
-    - sudo make install
+  # get gmp (needed for HElib)
+  - cd $TRAVIS_BUILD_DIR/thirdparty
+  - wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  - tar -xf gmp-6.1.2.tar.xz
+  - cd gmp-6.1.2; export CC=gcc-7; export CXX=g++-7;
+  - sudo ./configure
+  - sudo make
+  - sudo make check
+  - sudo make install
 
-    # exporting gmp paths
-    - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-    - export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
-    - export CPATH=/usr/local/lib:$CPATH
+  # exporting gmp paths
+  - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+  - export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+  - export CPATH=/usr/local/lib:$CPATH
 
-    - ls /usr/local/lib/
+  - ls /usr/local/lib/
 
-    # get ntl (needed for HElib)
-    #- cd $TRAVIS_BUILD_DIR/thirdparty
-    #- wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
-    #- tar -xzf ntl-11.3.0.tar.gz
-    #- cd ntl-11.3.0/src; export CC=gcc-7; export CXX=g++-7
-    #- sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local/;
-    #- sudo make
-    #- sudo make install
+  # get ntl (needed for HElib)
+  - cd $TRAVIS_BUILD_DIR/thirdparty
+  - wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
+  - tar -xzf ntl-11.3.0.tar.gz
+  - cd ntl-11.3.0/src; export CC=gcc-7; export CXX=g++-7
+  - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local/lib;
+  - sudo make
+  - sudo make install
 
-    - sudo apt-get update -qq; sudo apt-get -y install libntl-dev
+  #- sudo apt-get update -qq; sudo apt-get -y install libntl-dev
 
-    # get cpprestsdk (for the REST API)
-    - sudo apt-get update -qq; sudo apt-get -y install libssl-dev
-    - sudo apt-get update -qq; sudo apt-get -y install libboost-all-dev
-    - cd $TRAVIS_BUILD_DIR/thirdparty
-    - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
-    - cd casablanca/Release;
-    - mkdir build.debug;
-    - cd build.debug; export CC=gcc-7; export CXX=g++-7;
-    - sudo cmake .. -DCMAKE_BUILD_TYPE=Debug
-    - sudo make install
-
-    # build SEAL
-    - sudo apt-get update -qq
-    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    - cd $TRAVIS_BUILD_DIR/thirdparty
-    - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
-    - tar xf SEAL_2.3.1.tar.gz
-    - cd SEAL_2.3.1/SEAL
-    - mkdir build; cd build; export CC=gcc-7; export CXX=g++-7
-    - sudo cmake ..
-    - sudo make
-    - sudo make install
+  # get cpprestsdk (for the REST API)
+  - sudo apt-get update -qq; sudo apt-get -y install libssl-dev
+  - sudo apt-get update -qq; sudo apt-get -y install libboost-all-dev
+  - cd $TRAVIS_BUILD_DIR/thirdparty
+  - git clone https://github.com/Microsoft/cpprestsdk.git casablanca
+  - cd casablanca/Release;
+  - mkdir build.debug;
+  - cd build.debug; export CC=gcc-7; export CXX=g++-7;
+  - sudo cmake .. -DCMAKE_BUILD_TYPE=Debug
+  - sudo make install
 
 before_script:
-
-  - cmake --version
 
   # TFHE
   - cd $TRAVIS_BUILD_DIR
@@ -117,7 +103,16 @@ before_script:
   - export CC=gcc-7; export CXX=g++-7; make clean; make;
 
   # SEAL
-
+  - sudo apt-get update -qq
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - cd $TRAVIS_BUILD_DIR/thirdparty
+  - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
+  - tar xf SEAL_2.3.1.tar.gz
+  - cd SEAL_2.3.1/SEAL
+  - mkdir build; cd build; export CC=gcc-7; export CXX=g++-7
+  - sudo cmake ..
+  - sudo make
+  - sudo make install
 
   # libpaillier
 
