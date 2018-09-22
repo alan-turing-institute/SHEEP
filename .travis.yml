@@ -57,18 +57,21 @@ install:
   - sudo make install
 
   # exporting gmp paths
-  - export LD_LIBRARY_PATH=/usr/local/include:$LD_LIBRARY_PATH
-  - export LIBRARY_PATH=/usr/local/include:$LIBRARY_PATH
+  - export LD_LIBRARY_PATH=/usr/local:$LD_LIBRARY_PATH
+  - export LIBRARY_PATH=/usr/local:$LIBRARY_PATH
   - export CPATH=/usr/local/include:$CPATH
 
+  - ls /usr/local
   - ls /usr/local/lib/
+  - ls /usr/local/include/
+  - ls /usr/local/bin/
 
   # get ntl (needed for HElib)
   - cd $TRAVIS_BUILD_DIR/thirdparty
   - wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
   - tar -xzf ntl-11.3.0.tar.gz
   - cd ntl-11.3.0/src; export CC=gcc-7; export CXX=g++-7
-  - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local/include;
+  - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local;
   - sudo make
   - sudo make install
 
