@@ -60,6 +60,7 @@ install:
   - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
   - export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
   - export CPATH=/usr/local/include:$CPATH
+  - export LD_RUN_PATH=/usr/local/lib:$LD_RUN_PATH
 
   - ls /usr/local
   - ls /usr/local/lib/
