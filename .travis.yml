@@ -47,28 +47,28 @@ install:
   - sudo apt-get update -qq; sudo apt-get -y install m4
 
   # get gmp (needed for HElib)
-  - cd $TRAVIS_BUILD_DIR/thirdparty
-  - wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
-  - tar -xf gmp-6.1.2.tar.xz
-  - cd gmp-6.1.2; export CC=gcc-7; export CXX=g++-7;
-  - sudo ./configure
-  - sudo make
-  - sudo make check
-  - sudo make install
-
+  #- cd $TRAVIS_BUILD_DIR/thirdparty
+  #- wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  #- tar -xf gmp-6.1.2.tar.xz
+  #- cd gmp-6.1.2; export CC=gcc-7; export CXX=g++-7;
+  #- sudo ./configure
+  #- sudo make
+  #- sudo make check
+  #- sudo make install
+  #
   # exporting gmp paths
-  - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-  - export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
-  - export CPATH=/usr/local/include:$CPATH
-  - export LD_RUN_PATH=/usr/local/lib:$LD_RUN_PATH
-
-  - ls /usr/local
-  - ls /usr/local/lib/
-  - ls /usr/local/include/
-  - ls /usr/local/bin/
-  - export CPFLAGS="-I/usr/local/include/gmp.h"
-  - export CFLAGS="-I/usr/local/include/gmp.h"
-  - export CXXFLAGS="-I/usr/local/include/gmp.h"
+  #- export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+  #- export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+  #- export CPATH=/usr/local/include:$CPATH
+  #- export LD_RUN_PATH=/usr/local/lib:$LD_RUN_PATH
+  #
+  #- ls /usr/local
+  #- ls /usr/local/lib/
+  #- ls /usr/local/include/
+  #- ls /usr/local/bin/
+  #- export CPFLAGS="-I/usr/local/include/gmp.h"
+  #- export CFLAGS="-I/usr/local/include/gmp.h"
+  #- export CXXFLAGS="-I/usr/local/include/gmp.h"
 
   - sudo apt-get update -qq;
 
