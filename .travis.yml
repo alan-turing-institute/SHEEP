@@ -27,7 +27,6 @@ addons:
 
     #sources:
     #  - sourceline: 'ppa:ubuntu-toolchain-r/test'
-
 install:
     - sudo apt-get update -qq
     # cmake complains that it does not have permissions to write files
