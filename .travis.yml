@@ -65,6 +65,11 @@ install:
   - ls /usr/local/lib/
   - ls /usr/local/include/
   - ls /usr/local/bin/
+  - export CPFLAGS="-I/usr/local/include/gmp.h"
+  - export CFLAGS="-I/usr/local/include/gmp.h"
+  - export CXXFLAGS="-I/usr/local/include/gmp.h"
+
+  - sudo apt-get update -qq;
 
   # get ntl (needed for HElib)
   - cd $TRAVIS_BUILD_DIR/thirdparty
@@ -107,7 +112,7 @@ before_script:
 
   # SEAL
   - sudo apt-get update -qq
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  #- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - cd $TRAVIS_BUILD_DIR/thirdparty
   - wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
   - tar xf SEAL_2.3.1.tar.gz
