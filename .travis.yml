@@ -57,20 +57,22 @@ install:
     - sudo make install
 
     # exporting gmp paths
-    - export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
-    - export LIBRARY_PATH=/usr/local/lib/:$LIBRARY_PATH
-    - export CPATH=/usr/local/lib/:$CPATH
+    - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    - export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+    - export CPATH=/usr/local/lib:$CPATH
 
     - ls /usr/local/lib/
 
     # get ntl (needed for HElib)
-    - cd $TRAVIS_BUILD_DIR/thirdparty
-    - wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
-    - tar -xzf ntl-11.3.0.tar.gz
-    - cd ntl-11.3.0/src; export CC=gcc-7; export CXX=g++-7
-    - sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local/;
-    - sudo make
-    - sudo make install
+    #- cd $TRAVIS_BUILD_DIR/thirdparty
+    #- wget http://www.shoup.net/ntl/ntl-11.3.0.tar.gz
+    #- tar -xzf ntl-11.3.0.tar.gz
+    #- cd ntl-11.3.0/src; export CC=gcc-7; export CXX=g++-7
+    #- sudo ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on GMP_PREFIX=/usr/local/;
+    #- sudo make
+    #- sudo make install
+
+    -  sudo apt-get update -qq; sudo apt-get -y installlibntl-dev
 
     # get cpprestsdk (for the REST API)
     - sudo apt-get update -qq; sudo apt-get -y install libssl-dev
