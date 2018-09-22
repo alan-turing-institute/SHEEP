@@ -8,10 +8,9 @@ cache:
 #    - $TRAVIS_BUILD_DIR/thirdparty/ntl-11.1.0
 #    - $TRAVIS_BUILD_DIR/thirdparty/casablanca
 #    - $TRAVIS_BUILD_DIR/thirdparty/SEAL_2.3.1
-
 addons:
   apt:
-    #update: true
+    update: true
     packages:
       - git
       - wget
@@ -24,7 +23,6 @@ addons:
       - m4
       - libssl-dev
       - libboost-all-dev
-
     #sources:
     #  - sourceline: 'ppa:ubuntu-toolchain-r/test'
 install:
