@@ -137,4 +137,4 @@ script:
   - sudo make all
 
   # test SHEEP
-  - make test
+  - sudo make test
