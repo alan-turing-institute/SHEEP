@@ -144,3 +144,19 @@ def build_filter(input_dict):
             or_expr += field_to_attribute_dict[field] == val
         and_expr &= or_expr
     return and_expr
+
+
+def upload_benchmark_result(results_dict):
+    """
+    upload a benchmark result, either from web frontend or notebook.
+    """
+    bm = BenchmarkMeasurement()
+    bm.context_name = results_dict['context_name']
+    bm.input_bitwidth = results_dict['input_bitwidth']
+    bm.input_signed = results_dict['input_signed']
+    bm.circuit_name = results_dict['circuit_name']
+    bm.execution_time = results_dict['execution_time']
+    bm.is_correct = results_dict['is_correct']
+    session.add(bm)
+    session.commit()
+    return True
