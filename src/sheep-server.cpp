@@ -71,29 +71,31 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 /// templated functions to interact with the contexts.
 
 template <typename PlaintextT>
-BaseContext<PlaintextT>*
-SheepServer::make_context(std::string context_type) {
+BaseContext<PlaintextT>* SheepServer::make_context(std::string context_type) {
 	if (context_type == "Clear") {
 		return new ContextClear<PlaintextT>();
-#ifdef HAVE_HElib
-	} else if (context_type == "HElib_F2") {
-		return  new ContextHElib_F2<PlaintextT>();
-	} else if (context_type == "HElib_Fp") {
-		return new ContextHElib_Fp<PlaintextT>();
-#endif
-#ifdef HAVE_TFHE
-	} else if (context_type == "TFHE") {
-		return  new ContextTFHE<PlaintextT>();
-#endif
-#ifdef HAVE_SEAL
-	} else if (context_type == "SEAL") {
-		return  new ContextSeal<PlaintextT>();
-#endif
-#ifdef HAVE_LP
-	} else if (context_type == "LP") {
-		return  new ContextLP<PlaintextT>();
-#endif
 
+	#ifdef HAVE_HElib
+		} else if (context_type == "HElib_F2") {
+			return  new ContextHElib_F2<PlaintextT>();
+		} else if (context_type == "HElib_Fp") {
+			return new ContextHElib_Fp<PlaintextT>();
+	#endif
+
+	#ifdef HAVE_TFHE
+		} else if (context_type == "TFHE") {
+			return  new ContextTFHE<PlaintextT>();
+	#endif
+
+	#ifdef HAVE_SEAL
+		} else if (context_type == "SEAL") {
+			return  new ContextSeal<PlaintextT>();
+	#endif
+
+	#ifdef HAVE_LP
+		} else if (context_type == "LP") {
+			return  new ContextLP<PlaintextT>();
+	#endif
 
 	} else {
 		throw std::runtime_error("Unknown context requested");

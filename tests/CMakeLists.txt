@@ -1,43 +1,45 @@
-add_executable(test-invalid-circuit
-  test-invalid-circuit.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
+#add_executable(test-invalid-circuit
+#  test-invalid-circuit.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
 
-add_executable(test-invalid-circuit-from-file
-  test-invalid-circuit-from-file.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#add_executable(test-invalid-circuit-from-file
+#  test-invalid-circuit-from-file.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
 configure_file(good.sheep good.sheep)
 configure_file(multiple-input.sheep multiple-input.sheep)
 configure_file(multiple-assignment.sheep multiple-assignment.sheep)
 configure_file(undef-gate-input.sheep undef-gate-input.sheep)
 configure_file(undef-output.sheep undef-output.sheep)
-add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
+#add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
 
-add_executable(test-write-read-circuit
-                 test-write-read-circuit.cpp
-		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
+#add_executable(test-write-read-circuit
+#                 test-write-read-circuit.cpp
+#		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
 
-add_executable(test-circuit-copy
-  test-circuit-copy.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
+# add_executable(test-circuit-copy
+#  test-circuit-copy.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
 
-add_executable(test-circuit-par
-  test-circuit-par.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-add_test(NAME test-circuit-par COMMAND test-circuit-par)
+#add_executable(test-circuit-par
+#  test-circuit-par.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+#add_test(NAME test-circuit-par COMMAND test-circuit-par)
 
-add_executable(test-circuit-seq
-  test-circuit-seq.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
+#add_executable(test-circuit-seq
+#  test-circuit-seq.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+#add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
-foreach(type IN ITEMS bool int8_t uint8_t)		
-	     foreach(op IN ITEMS add multiply subtract compare select)
+# bool int8_t uint8_t
+foreach(type IN ITEMS uint8_t)		
+         # multiply subtract compare select
+	     foreach(op IN ITEMS add)
 	  	       add_executable(test-clear-${type}-${op}	
                        test-clear-${type}-${op}.cpp
 		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -48,20 +50,20 @@ foreach(type IN ITEMS bool int8_t uint8_t)
 endforeach(type)
 
 
-foreach(type IN ITEMS int8_t uint8_t)		
-	  foreach(op IN ITEMS ripple-carry-add)
-	  	       add_executable(test-clear-${type}-${op}	
-                       test-clear-${type}-${op}.cpp
-		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
-		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
-	  endforeach(op)
-endforeach(type)
+#foreach(type IN ITEMS int8_t uint8_t)		
+#	  foreach(op IN ITEMS ripple-carry-add)
+#	  	       add_executable(test-clear-${type}-${op}	
+#                       test-clear-${type}-${op}.cpp
+#		       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#		       ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+#		       ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+#		       add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
+#	  endforeach(op)
+#endforeach(type)
 
 
-add_executable(test-bit-get-set test-bit-get-set.cpp)
-add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
+#add_executable(test-bit-get-set test-bit-get-set.cpp)
+#add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
 if (TFHE_FOUND)
     add_executable(test-tfhe-bool-encrypt-decrypt
@@ -151,18 +153,18 @@ endif (HELIB_FOUND)
 #
 #endif (SEAL_FOUND)
 
-add_executable(test-parallel-eval test-parallel-eval.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-if (HELIB_FOUND AND TFHE_FOUND)
-   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-elseif (HELIB_FOUND)
-   target_link_libraries(test-parallel-eval ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-elseif (TFHE_FOUND)
-   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} )
-else(HELIB_FOUND_AND_TFHE_FOUND)
-   target_link_libraries(test-parallel-eval)
-endif(HELIB_FOUND AND TFHE_FOUND)  
+#add_executable(test-parallel-eval test-parallel-eval.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#  ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+#if (HELIB_FOUND AND TFHE_FOUND)
+#   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+#elseif (HELIB_FOUND)
+#   target_link_libraries(test-parallel-eval ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+#elseif (TFHE_FOUND)
+#   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} )
+#else(HELIB_FOUND_AND_TFHE_FOUND)
+#   target_link_libraries(test-parallel-eval)
+#endif(HELIB_FOUND AND TFHE_FOUND)  
 
-add_test(NAME test-parallel-eval COMMAND test-parallel-eval)
+# add_test(NAME test-parallel-eval COMMAND test-parallel-eval)

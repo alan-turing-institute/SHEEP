@@ -17,26 +17,27 @@ struct CiphertextWrapper<bool> { typedef int type; };
   
 
 template<typename PlaintextT>
-class ContextClear : public Context<PlaintextT, PlaintextT> {   //plaintext and ciphertext are the same type
+class ContextClear : public Context<PlaintextT, std::vector<PlaintextT>> {   //plaintext and ciphertext are the same type
 public:
-        typedef PlaintextT Plaintext;
-        typedef PlaintextT Ciphertext;  
+
+  typedef PlaintextT Plaintext;
+  typedef std::vector<PlaintextT> Ciphertext;  
+	typedef PlaintextT CiphertextEl;
 
   /// constructor
-
-        ContextClear() {
+  ContextClear() {
 	  this->m_public_key_size = 0;
 	  this->m_private_key_size = 0;
 	  this->m_ciphertext_size = 0;
-	  
-        }
-	Ciphertext encrypt(Plaintext p) {
+	}
+
+	Ciphertext encrypt(std::vector<Plaintext> p) {
 	  if (! this->m_configured) this->configure();
 	  this->m_ciphertext_size = sizeof(p);
 	  return p; // plaintext and ciphertext are the same for this context
 	}
 
-	Plaintext decrypt(Ciphertext c) {
+	std::vector<Plaintext> decrypt(Ciphertext c) {
 		return c; // plaintext and ciphertext are the same for this context
 	}
 
@@ -78,26 +79,59 @@ public:
 	// Work in the corresponding unsigned type and cast
 	// back, so overflow is well-defined.
   
-	Ciphertext Add(Ciphertext a, Ciphertext b) {
-	  if (std::is_same<Ciphertext, bool>::value) {
-	    return a != b;
+	Ciphertext Add(Ciphertext a, Ciphertext b) {	
+	
+		Ciphertext c;
+
+		if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+	  if (std::is_same<Ciphertext, std::vector<bool>>::value) {
+	    for (int i = 0; i < a.size(); i++) {
+				c.push_back(a[i] != b[i]);
+			}
+
+	    return c;
+
 	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    
-	    uC au = static_cast<uC>(a);
-	    uC bu = static_cast<uC>(b);
-	    return static_cast<Ciphertext>(au + bu);
+			for (int i = 0; i < a.size(); i++) {
+				typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextEl>::type >::type uC;
+
+				uC au = static_cast<uC>(a[i]);
+				uC bu = static_cast<uC>(b[i]);
+
+				c.push_back(static_cast<CiphertextEl>(au + bu));
+			}
+
+	    return c;
 	  }
 	}
 
 	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	  if (std::is_same<Ciphertext, bool>::value) {
-	    return a & b;
-	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    uC au = static_cast<uC>(a);
-	    uC bu = static_cast<uC>(b);
-	    return static_cast<Ciphertext>(au * bu);
+		Ciphertext c;
+
+		if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+	  if (std::is_same<Ciphertext, std::vector<bool>>::value) {
+			for (int i = 0; i < a.size(); i++) {
+				c.push_back(a[i] & b[i]);
+			}
+
+	    return c;
+
+		} else {
+			for (int i = 0; i < a.size(); i++) {
+				typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextEl>::type >::type uC;
+
+				uC au = static_cast<uC>(a[i]);
+				uC bu = static_cast<uC>(b[i]);
+				c.push_back(static_cast<CiphertextEl>(au * bu));
+			}
+
+	    return c;
 	  }
 	}
 
@@ -108,54 +142,127 @@ public:
 		return FullAdder(sum_in, product_bit, carry_in);
 	}
   
-  
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	  if (std::is_same<Ciphertext, bool>::value) {
-	    return Add(a,b);
-	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    
-	    uC au = static_cast<uC>(a);
-	    uC bu = static_cast<uC>(b);
-	    return static_cast<Ciphertext>(au - bu);
+		Ciphertext c;
+
+		if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+		if (std::is_same<Ciphertext, std::vector<bool>>::value) {
+			for (int i = 0; i < a.size(); i++) {
+				c.push_back(a[i] != b[i]);
+			}
+
+	    return c;
+
+		} else {
+			for (int i = 0; i < a.size(); i++) {
+				typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextEl>::type >::type uC;
+
+				uC au = static_cast<uC>(a[i]);
+				uC bu = static_cast<uC>(b[i]);
+
+				c.push_back(static_cast<CiphertextEl>(au - bu));
+			}
+
+	    return c;
 	  }
 	}
 
 	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-		return (a>=b)?a:b;
+		
+		Ciphertext c;
+
+		if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+		for (int i = 0; i < a.size(); i++) {
+			c.push_back((a[i]>=b[i])?a[i]:b[i]);
+		}
+
+		return c;
 	}
   
 	Ciphertext Not(Ciphertext a) {
-		return !a;
+		Ciphertext c;
+
+		for (int i = 0; i < a.size(); i++) {
+				c.push_back(!a[i]);
+		}
+
+		return c;
 	}
   
 	Ciphertext Negate(Ciphertext a) {
-
-	  if (std::is_same<Ciphertext, bool>::value) {
+		
+	  if (std::is_same<Ciphertext, std::vector<bool>>::value) {
 	    return Not(a);
+
 	  } else {
-	    typedef typename std::make_unsigned<typename CiphertextWrapper<Ciphertext>::type >::type uC;
-	    uC au = static_cast<uC>(a);
-	    return static_cast<Ciphertext>(-au);
+			Ciphertext c;
+
+			for (int i = 0; i < a.size(); i++) {
+				typedef typename std::make_unsigned<typename CiphertextWrapper<CiphertextEl>::type >::type uC;
+
+				uC au = static_cast<uC>(a[i]);
+
+				c.push_back(static_cast<CiphertextEl>(-au));
+			}
+
+	    return c;
 	  }
-	  
 	}
   
-  
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
-		return (a > b);
+
+		Ciphertext c;
+
+		if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+		for (int i = 0; i < a.size(); i++) {
+			c.push_back(a[i] > b[i]);
+		}
+
+		return c;
 	}
 
 	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-		return (s % 2)?a:b;
+
+		Ciphertext c;
+
+		if ((s.size() != a.size()) || (s.size() != b.size())) {
+			throw std::runtime_error("Ciphertext s, Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+		for (int i = 0; i < a.size(); i++) {
+			c.push_back((s[i] % 2)?a[i]:b[i]);
+		}
+		
+		return c;
 	}
 
 	Ciphertext MultByConstant(Ciphertext a, long b) {
-		return Multiply(a,b);
+
+		Ciphertext c;
+		for (int i = 0; i < a.size(); i++) {
+			c.push_back(b);
+		}
+
+		return Multiply(a, c);
 	}
 
 	Ciphertext AddConstant(Ciphertext a, long b) {
-		return Add(a,b);
+
+		Ciphertext c;
+		for (int i = 0; i < a.size(); i++) {
+			c.push_back(b);
+		}
+
+		return Add(a, c);
 	}
 };
 
