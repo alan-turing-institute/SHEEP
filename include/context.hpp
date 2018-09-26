@@ -154,10 +154,10 @@ public:
 			return Select(inputs.at(0), inputs.at(1), inputs.at(2));
 			break;
 		case (Gate::AddConstant):
-			return AddConstant( inputs, const_inputs.at(0));
+			return AddConstant( inputs, (const_inputs.at(0)).at(0));
 			break;
 		case (Gate::MultByConstant):
-			return MultByConstant( inputs.at(0), const_inputs.at(0));
+			return MultByConstant( inputs, (const_inputs.at(0)).at(0));
 			break;
 		}
 		throw std::runtime_error("Unknown op");
