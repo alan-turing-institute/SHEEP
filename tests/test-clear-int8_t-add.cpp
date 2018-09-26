@@ -22,25 +22,26 @@ int main(void) {
   //ContextClear<int8_t>::CircuitEvaluator run_circuit;
   //run_circuit = ctx.compile(C);
 	
-  std::list<ContextClear<int8_t>::Plaintext> plaintext_inputs = {6, 9, 25, 67};
-  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_inputs;
+  std::vector<ContextClear<int8_t>::Plaintext> plaintext_inputs = {6, 9, 25, 67};
   
-  for (ContextClear<int8_t>::Plaintext pt: plaintext_inputs)
-    ciphertext_inputs.push_back(ctx.encrypt(pt));
+  // std::list<ContextClear<int8_t>::Ciphertext> ciphertext_inputs;
   
-  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_outputs;
-  using microsecond = std::chrono::duration<double, std::micro>;
-  microsecond time = ctx.eval(C, ciphertext_inputs, ciphertext_outputs);
+  // for (ContextClear<int8_t>::Plaintext pt: plaintext_inputs)
+  //   ciphertext_inputs.push_back(ctx.encrypt(pt));
   
-  std::list<ContextClear<int8_t>::Plaintext> plaintext_outputs;
-  for (ContextClear<int8_t>::Ciphertext ct: ciphertext_outputs) {
-    ContextClear<int8_t>::Plaintext pt = ctx.decrypt(ct);
-    plaintext_outputs.push_back(pt);
-    std::cout << "output: "<<std::to_string(pt) << std::endl;
-  }
-  std::cout << "time was " << time.count() << " microseconds\n";
+  // std::list<ContextClear<int8_t>::Ciphertext> ciphertext_outputs;
+  // using microsecond = std::chrono::duration<double, std::micro>;
+  // microsecond time = ctx.eval(C, ciphertext_inputs, ciphertext_outputs);
+  
+  // std::list<ContextClear<int8_t>::Plaintext> plaintext_outputs;
+  // for (ContextClear<int8_t>::Ciphertext ct: ciphertext_outputs) {
+  //   ContextClear<int8_t>::Plaintext pt = ctx.decrypt(ct);
+  //   plaintext_outputs.push_back(pt);
+  //   std::cout << "output: "<<std::to_string(pt) << std::endl;
+  // }
+  // std::cout << "time was " << time.count() << " microseconds\n";
 
-  if ( plaintext_outputs.front() == 107) return 0;
-  return -1;
+  // if ( plaintext_outputs.front() == 107) return 0;
+  // return -1;
   
 }

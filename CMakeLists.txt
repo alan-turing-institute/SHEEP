@@ -4,7 +4,6 @@ project (Sheep)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # C++ REST API for interaction with web app - also needs openSSL, Boost, Threads
 set(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR} /usr/local/opt/openssl)
 find_package(OpenSSL)

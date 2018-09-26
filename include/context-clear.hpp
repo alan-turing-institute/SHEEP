@@ -58,16 +58,29 @@ public:
 
 	Ciphertext RippleCarryAdd(Ciphertext a, Ciphertext b) {
 		Ciphertext result;
+		CiphertextEl result_el;
 		bool sum, carry;
-		std::tie(sum, carry) = HalfAdder(bit(0,a), bit(0,b));
-		set_bit(0, result, sum);
-		// Note that the loop starts at ONE, since we have
-		// already computed the zeroth bit above
-		for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
-			std::tie(sum, carry) = FullAdder(bit(i,a), bit(i,b), carry);
-			set_bit(i, result, sum);
-		}
-		return result;
+
+		if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+		for (int j = 0; j < a.size(); j++) {
+			
+			std::tie(sum, carry) = HalfAdder(bit(0, a[j]), bit(0, b[j]));
+			set_bit(0, result_el, sum);
+
+			// Note that the loop starts at ONE, since we have
+			// already computed the zeroth bit above
+			for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
+				std::tie(sum, carry) = FullAdder(bit(i, a[j]), bit(i, b[j]), carry);
+				set_bit(i, result_el, sum);
+			}
+
+			result.push_back(result_el);
+		}	
+
+		return result;	
 	}
 
 	// In Add, Multiply, Subtract and Negate, we assume that

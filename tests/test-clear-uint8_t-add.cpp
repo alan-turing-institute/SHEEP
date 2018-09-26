@@ -24,18 +24,24 @@ int main(void) {
     ContextClear<uint8_t> ctx;
 
     // test small postitive numbers
-    // All inputs must be of teh same length
-    std::vector<std::vector<uint8_t>> inputs = {{41}, {40}};
+    std::vector<std::vector<uint8_t>> inputs = {{1}, {2}};
+    std::vector<uint8_t> exp_values = {3};
+
     std::vector<std::vector<uint8_t>> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 
-    // Output is a vector of vectors of length the length of the inputs
-    std::cout << " {41}, {40} = " << std::to_string(result[0][0]) << std::endl;
-    assert(result.front()[0] == 81);
+    for (int i = 0; i < exp_values.size(); i++) {
+      std::cout << std::to_string(inputs[0][i]) << " + " <<  std::to_string(inputs[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+      assert(result.front()[i] == exp_values[i]);
+    }
 
-    /// test result going out of range positive
-    // inputs = {{200}, {127}};
-    // result = ctx.eval_with_plaintexts(circ, inputs, durations);
-    // std::cout<<" {200}, {127} = "<<std::to_string(result.front())<<std::endl;
-    // assert(result.front() == 71);
+    // test positive number arrays
+    inputs = {{41, 5, 100}, {40, 4, 111}};
+    exp_values = {81, 9, 211};
 
+    result = ctx.eval_with_plaintexts(circ, inputs, durations);
+
+    for (int i = 0; i < exp_values.size(); i++) {
+      std::cout << std::to_string(inputs[0][i]) << " + " <<  std::to_string(inputs[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+      assert(result.front()[i] == exp_values[i]);
+    }
 }

@@ -21,24 +21,26 @@ int main(void) {
 	ContextClear<uint8_t> ctx;
 
 	/// test small postitive numbers
-	std::vector<uint8_t> inputs = {22, 15};
-	std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 7);
-	std::cout<<" 22 - 15 = "<<std::to_string(result.front())<<std::endl;	
-	/// test small 'negative' numbers (should give 2^BITWIDTH - x)
-	inputs = {10, 12};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 254);
-	std::cout<<" 10 - 12 = "<<std::to_string(result.front())<<std::endl;
-	/// give zero?
-	inputs = {255, 255};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 255 - 255 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == 0);
-	/// max negative
-	inputs = {0, 255};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 0 - 255 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == 1);
+	std::vector<std::vector<uint8_t>> inputs = {{22}, {15}};
+	std::vector<uint8_t> exp_values = {7};
 
+	std::vector<std::vector<uint8_t>> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+
+	for (int i = 0; i < exp_values.size(); i++) {
+		std::cout << std::to_string(inputs[0][i]) << " - " <<  std::to_string(inputs[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+		assert(result.front()[i] == exp_values[i]);
+	}
+
+	/// test small 'negative' numbers (should give 2^BITWIDTH - x)
+	/// give zero?
+	/// max negative
+	inputs = {{10, 255, 0}, {12, 255, 255}};
+	exp_values = {254, 0, 1};
+
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+
+	for (int i = 0; i < exp_values.size(); i++) {
+		std::cout << std::to_string(inputs[0][i]) << " - " <<  std::to_string(inputs[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+		assert(result.front()[i] == exp_values[i]);
+	}
 }
