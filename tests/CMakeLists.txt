@@ -38,10 +38,9 @@ configure_file(undef-output.sheep undef-output.sheep)
 #  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
 #add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
-# bool bool int8_t uint8_t
-foreach(type IN ITEMS int8_t)
-    # add compare subtract multiply select
-    foreach(op IN ITEMS add)
+foreach(type IN ITEMS bool int8_t uint8_t)
+    # add compare multiply select subtract
+    foreach(op IN ITEMS add compare multiply select subtract)
         add_executable(test-clear-${type}-${op}	
                 test-clear-${type}-${op}.cpp
         ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -51,8 +50,7 @@ foreach(type IN ITEMS int8_t)
     endforeach(op)
 endforeach(type)
 
-# int8_t
-foreach(type IN ITEMS uint8_t )		
+foreach(type IN ITEMS int8_t uint8_t )		
     foreach(op IN ITEMS ripple-carry-add)
         add_executable(test-clear-${type}-${op}	
                 test-clear-${type}-${op}.cpp

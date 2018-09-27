@@ -12,7 +12,7 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 int main(void) {
 	using namespace SHEEP;
 
-    //// instantiate the Circuit Repository
+  //// instantiate the Circuit Repository
 	CircuitRepo cr;
 
 	Circuit circ = cr.create_circuit(Gate::Subtract, 1);
