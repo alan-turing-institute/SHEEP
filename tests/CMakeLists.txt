@@ -38,14 +38,19 @@ configure_file(undef-output.sheep undef-output.sheep)
 #  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
 #add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
+##################################################################################################
+### clear
+##################################################################################################
+
 foreach(type IN ITEMS bool int8_t uint8_t)
     # add compare multiply select subtract
     foreach(op IN ITEMS add compare multiply select subtract)
         add_executable(test-clear-${type}-${op}	
-                test-clear-${type}-${op}.cpp
-        ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-        ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-        ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+            test-clear-${type}-${op}.cpp
+            ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+            ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+            ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+        
         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
     endforeach(op)
 endforeach(type)
@@ -53,10 +58,11 @@ endforeach(type)
 foreach(type IN ITEMS int8_t uint8_t )		
     foreach(op IN ITEMS ripple-carry-add)
         add_executable(test-clear-${type}-${op}	
-                test-clear-${type}-${op}.cpp
-        ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-        ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-        ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+            test-clear-${type}-${op}.cpp
+            ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+            ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+            ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
     endforeach(op)
 endforeach(type)
@@ -105,34 +111,40 @@ endif (TFHE_FOUND)
 
 if (HELIB_FOUND)
 
-    foreach(type IN ITEMS bool int8_t uint8_t)
+    # bool int8_t uint8_t
+    foreach(type IN ITEMS int8_t)
         foreach(f IN ITEMS fp)
-    	foreach (op IN ITEMS addConst multByConst)
-        	add_executable(test-helib-${f}-${type}-${op}	
-    	                  	test-helib-${f}-${type}-${op}
-			 	${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-    		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
-    	endforeach(op)      
-    	endforeach(f)
-	foreach(f IN ITEMS f2)
-        foreach(op IN ITEMS compare)	
-    		add_executable(test-helib-${f}-${type}-${op}
-			test-helib-${f}-${type}-${op}.cpp	
-			${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
-        endforeach(op)
-    	endforeach(f)
-    	foreach(f IN ITEMS f2 fp)
-        foreach(op IN ITEMS add multiply select encrypt-decrypt negate subtract)	
-    		add_executable(test-helib-${f}-${type}-${op}
-			test-helib-${f}-${type}-${op}.cpp	
-			${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-		target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-		add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
-        endforeach(op)
-    	endforeach(f)
+            #  multByConst
+            foreach (op IN ITEMS addConst)
+                add_executable(test-helib-${f}-${type}-${op}	
+                    test-helib-${f}-${type}-${op}
+                    ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+                target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+                add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+            endforeach(op)      
+     	endforeach(f)
+        
+	#foreach(f IN ITEMS f2)
+    #    foreach(op IN ITEMS compare)	
+    #		add_executable(test-helib-${f}-${type}-${op}
+	#		test-helib-${f}-${type}-${op}.cpp	
+	#		${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+	#	target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
+    #    endforeach(op)
+    #endforeach(f)
+    #	foreach(f IN ITEMS f2 fp)
+    #		add_executable(test-helib-${f}-${type}-${op}
+    #    foreach(op IN ITEMS add multiply select encrypt-decrypt negate subtract)	
+	#		test-helib-${f}-${type}-${op}.cpp	
+	#		${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+	#	target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
+    #    endforeach(op)
+    #	endforeach(f)
+
     endforeach(type)
 
 endif (HELIB_FOUND)

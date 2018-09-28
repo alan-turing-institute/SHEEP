@@ -45,7 +45,7 @@ if (TFHE_FOUND)
     add_definitions(-DHAVE_TFHE)
 endif (TFHE_FOUND)
 
-#find_package(HElib)
+find_package(HElib)
 if (HElib_FOUND)
    include_directories(SYSTEM ${HElib_INCLUDE_DIRS})
    find_library(NTL_LIBRARIES NAMES ntl)

@@ -148,8 +148,7 @@ public:
 	  }
 	}
 
-	std::pair<bool, bool> MultiplyBit(bool x, bool y, bool sum_in, bool carry_in)
-	{
+	std::pair<bool, bool> MultiplyBit(bool x, bool y, bool sum_in, bool carry_in) {
 		bool sum_out, carry_out, product_bit;
 		product_bit = x & y;
 		return FullAdder(sum_in, product_bit, carry_in);
