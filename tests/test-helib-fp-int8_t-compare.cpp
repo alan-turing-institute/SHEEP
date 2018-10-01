@@ -18,7 +18,6 @@ int main(void) {
 	Wire out = circ.add_assignment("out", Gate::Compare, a, b);
 	circ.set_output(out);
 
-	
 	std::cout << circ;
 	std::vector<DurationT> durations;
 	ContextHElib_Fp<int8_t> ctx;
@@ -44,10 +43,5 @@ int main(void) {
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	std::cout<<" compare (1, 112) = "<<std::to_string(result.front())<<std::endl;
 	assert(result.front() == 0);
-	
-
-	
-	
-
 
 }

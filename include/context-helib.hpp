@@ -495,15 +495,21 @@ public:
   std::vector<Plaintext> decrypt(Ciphertext ct) {
     std::vector<Plaintext> result;
     std::vector<long> pt;
+    
+    long pt_transformed;
 
     this->m_ea->decrypt(ct, *(this->m_secretKey), pt);
-    long pt_transformed = pt[0];
+    
+    for (int i = 0; i < pt.size(); i++) {
+      // convention - treat this as a negative number
+      if ((pt[i]) > this->m_p / 2)    
+        pt_transformed = pt[i] - this->m_p;
+      else 
+        pt_transformed = pt[i];
 
-    //// convention - treat this as a negative number
-    if ((pt[0]) > this->m_p / 2)    
-      pt_transformed = pt[0] - this->m_p;
-
-    // return pt_transformed  % int(pow(2,this->m_bitwidth));
+      result.push_back(pt_transformed  % int(pow(2,this->m_bitwidth)));
+    }
+    
     return result;
   }
 
