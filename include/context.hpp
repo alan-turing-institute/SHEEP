@@ -163,14 +163,13 @@ public:
 		throw std::runtime_error("Unknown op");
 	}
 
-	template <typename InputContainer,
-		  typename ConstInputContainer = std::vector<Plaintext>,
-		  typename OutputContainer>
+	template <typename InputContainer, typename ConstInputContainer = std::vector<Plaintext>, typename OutputContainer>
 	microsecond eval(const Circuit& circ,
 	                 const InputContainer& input_vals,
 	                 OutputContainer& output_vals,
 	                 const ConstInputContainer& const_input_vals = ConstInputContainer(),
 	                 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
+										 
 		std::unordered_map<std::string, Ciphertext> eval_map;
 		std::unordered_map<std::string, std::vector<Plaintext>> const_eval_map;
 
@@ -178,9 +177,9 @@ public:
 		auto input_vals_it = input_vals.begin();
 		auto input_wires_it = circ.get_inputs().begin();
 		const auto input_wires_end = circ.get_inputs().end();
+
 		for (; input_vals_it != input_vals.end() || input_wires_it != input_wires_end ;
-		     ++input_vals_it, ++input_wires_it)
-		{
+		     ++input_vals_it, ++input_wires_it) {
 			eval_map.insert({input_wires_it->get_name(), *input_vals_it});
 		}
 
@@ -189,8 +188,7 @@ public:
 		auto const_input_wires_it = circ.get_const_inputs().begin();
 		const auto const_input_wires_end = circ.get_const_inputs().end();
 		for (; const_input_vals_it != const_input_vals.end() || const_input_wires_it != const_input_wires_end;
-		     ++const_input_vals_it, ++const_input_wires_it)
-		{
+		     ++const_input_vals_it, ++const_input_wires_it) {
 			const_eval_map.insert({const_input_wires_it->get_name(), *const_input_vals_it});
 		}
 
@@ -198,8 +196,7 @@ public:
 		if (input_vals_it != input_vals.end()
 		    || input_wires_it != input_wires_end
 		    || const_input_vals_it != const_input_vals.end()
-		    || const_input_wires_it != const_input_wires_end)
-		{
+		    || const_input_wires_it != const_input_wires_end) {
 			throw std::runtime_error("Number of inputs or const_inputs does not match");
 		}
 

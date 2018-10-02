@@ -39,11 +39,10 @@ configure_file(undef-output.sheep undef-output.sheep)
 #add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
 ##################################################################################################
-### clear
+### CLEAR
 ##################################################################################################
 
 foreach(type IN ITEMS bool int8_t uint8_t)
-    # add compare multiply select subtract
     foreach(op IN ITEMS add compare multiply select subtract)
         add_executable(test-clear-${type}-${op}	
             test-clear-${type}-${op}.cpp
@@ -55,7 +54,7 @@ foreach(type IN ITEMS bool int8_t uint8_t)
     endforeach(op)
 endforeach(type)
 
-foreach(type IN ITEMS int8_t uint8_t )		
+foreach(type IN ITEMS int8_t uint8_t)		
     foreach(op IN ITEMS ripple-carry-add)
         add_executable(test-clear-${type}-${op}	
             test-clear-${type}-${op}.cpp
@@ -70,52 +69,59 @@ endforeach(type)
 #add_executable(test-bit-get-set test-bit-get-set.cpp)
 #add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
-if (TFHE_FOUND)
-    add_executable(test-tfhe-bool-encrypt-decrypt
-                     test-tfhe-bool-encrypt-decrypt.cpp)
-    target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
-    add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
+# if (TFHE_FOUND)
+#     add_executable(test-tfhe-bool-encrypt-decrypt
+#                      test-tfhe-bool-encrypt-decrypt.cpp)
+#     target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
+#     add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
 
-    foreach(op IN ITEMS and or xor not select)
-        add_executable(test-tfhe-bool-${op}
-                         test-tfhe-bool-${op}.cpp
-                         ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-			 ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-                         ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+#     foreach(op IN ITEMS and or xor not select)
+#         add_executable(test-tfhe-bool-${op}
+#                          test-tfhe-bool-${op}.cpp
+#                          ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+# 			 ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+#                          ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-        target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
+#         target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
 
-        add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
-    endforeach(op)
+#         add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
+#     endforeach(op)
 
-    foreach(type IN ITEMS int8_t)
-        add_executable(test-tfhe-${type}-encrypt-decrypt
-                         test-tfhe-${type}-encrypt-decrypt.cpp)
-        target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
-        add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
+#     foreach(type IN ITEMS int8_t)
+#         add_executable(test-tfhe-${type}-encrypt-decrypt
+#                          test-tfhe-${type}-encrypt-decrypt.cpp)
+#         target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
+#         add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
 
-        foreach(op IN ITEMS add subtract multiply negate compare select)
-            add_executable(test-tfhe-${type}-${op}
-                             test-tfhe-${type}-${op}.cpp
-                             ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-			     ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-                             ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+#         foreach(op IN ITEMS add subtract multiply negate compare select)
+#             add_executable(test-tfhe-${type}-${op}
+#                              test-tfhe-${type}-${op}.cpp
+#                              ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+# 			     ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+#                              ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-            target_link_libraries(test-tfhe-${type}-${op} ${TFHE_LIBRARIES})
+#             target_link_libraries(test-tfhe-${type}-${op} ${TFHE_LIBRARIES})
 
-            add_test(NAME test-tfhe-${type}-${op} COMMAND $<TARGET_FILE:test-tfhe-${type}-${op}>)
-        endforeach(op)
-    endforeach(type)
+#             add_test(NAME test-tfhe-${type}-${op} COMMAND $<TARGET_FILE:test-tfhe-${type}-${op}>)
+#         endforeach(op)
+#     endforeach(type)
 
-endif (TFHE_FOUND)
+# endif (TFHE_FOUND)
+
+##################################################################################################
+### HELIB
+##################################################################################################
 
 if (HELIB_FOUND)
 
+    # input types
     # bool int8_t uint8_t
-    foreach(type IN ITEMS int8_t)
+    foreach(type IN ITEMS int8_t uint8_t)
+        # modules
         foreach(f IN ITEMS fp)
-            #  multByConst
-            foreach (op IN ITEMS addConst)
+
+            # operations
+            foreach (op IN ITEMS addConst multByConst)
                 add_executable(test-helib-${f}-${type}-${op}	
                     test-helib-${f}-${type}-${op}
                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -135,18 +141,26 @@ if (HELIB_FOUND)
 	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
     #    endforeach(op)
     #endforeach(f)
-    #	foreach(f IN ITEMS f2 fp)
-    #		add_executable(test-helib-${f}-${type}-${op}
-    #    foreach(op IN ITEMS add multiply select encrypt-decrypt negate subtract)	
-	#		test-helib-${f}-${type}-${op}.cpp	
-	#		${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-	#	target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
-    #    endforeach(op)
-    #	endforeach(f)
+    
+        # modules
+        # f2 fp
+    	foreach(f IN ITEMS fp)
 
+            # operations
+            # compare ????????  
+            foreach(op IN ITEMS add encrypt-decrypt multiply negate select subtract)	
+                add_executable(test-helib-${f}-${type}-${op}
+                    test-helib-${f}-${type}-${op}.cpp	
+                    ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+		    
+                target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+		        add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+
+            endforeach(op)
+    	endforeach(f)
     endforeach(type)
-
+    
 endif (HELIB_FOUND)
 
 

@@ -472,7 +472,7 @@ public:
     
     // Check whether the input is too long to be encrypted in one go
     if (pt_len > this->m_nslots) {
-			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+			throw std::runtime_error("The number of slots is greater than the number of SIMD operations that can be done at a time");
 		} 
 
     // convert plaintext input into a vector of longs
@@ -513,7 +513,6 @@ public:
     return result;
   }
 
-  
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     a += b;
     return a;
