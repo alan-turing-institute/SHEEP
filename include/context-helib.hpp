@@ -523,7 +523,6 @@ public:
     return a;
   }
   
-  
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 
     a *= b;

@@ -115,8 +115,7 @@ endforeach(type)
 if (HELIB_FOUND)
 
     # input types
-    # bool int8_t uint8_t
-    foreach(type IN ITEMS int8_t uint8_t)
+    foreach(type IN ITEMS bool int8_t uint8_t)
         # modules
         foreach(f IN ITEMS fp)
 
@@ -160,7 +159,7 @@ if (HELIB_FOUND)
             endforeach(op)
     	endforeach(f)
     endforeach(type)
-    
+
 endif (HELIB_FOUND)
 
 
