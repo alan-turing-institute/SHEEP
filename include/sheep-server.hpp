@@ -62,8 +62,8 @@ struct SheepJobConfig {
 	Circuit circuit;
 	std::set<std::string> input_names;
 	std::set<std::string> const_input_names;
-	std::vector<int> input_vals;
-	std::vector<int> const_input_vals;
+	std::vector<std::vector<int>> input_vals;
+	std::vector<std::vector<int>> const_input_vals;
 	std::map<std::string, long> parameters;
 
 	void setDefaults() {
@@ -99,21 +99,45 @@ struct SheepJobConfig {
 
 
 struct SheepJobResult {
-	std::map<std::string, std::string> outputs;  /// store output values as strings so we don't worry about Plaintext type.
+	std::map<std::string, std::vector<std::string>> outputs;  /// store output values as strings so we don't worry about Plaintext type.
 	std::map<std::string, std::string> timings;  /// store time values in microseconds as strings.
 	bool is_correct; /// all outputs compared with clear-context results
-	json::value as_json() {
+	
+  json::value as_json() {
 		json::value result = json::value::object();
-		json::value j_outputs = json::value::object();
+		
+    json::value j_outputs = json::value::object();
 		for ( auto map_iter = outputs.begin(); map_iter != outputs.end(); ++map_iter) {
-			j_outputs[map_iter->first] = json::value::string(map_iter->second);
+			
+      json::value outputs = json::value::array();
+
+      int idx = 0, out_val_cnt = 0;
+      std::string result = "";
+      for (auto out_val : map_iter->second) {
+
+        if (out_val_cnt > 0) {
+            result = result + ",";
+        }
+
+        for (int i = 0; i < out_val.length(); i++) {
+          result = result + out_val[i];
+        }
+
+        out_val_cnt += 1;
+      }
+      outputs[idx] = json::value::string(result);
+
+      j_outputs[map_iter->first] = outputs;
+
 		}
 		result["outputs"] = j_outputs;
+
 		json::value j_timings = json::value::object();
 		for ( auto map_iter = timings.begin(); map_iter != timings.end(); ++map_iter) {
 			j_timings[map_iter->first] = json::value::string(map_iter->second);
 		}
 		result["timings"] = j_timings;
+
 		json::value clear_check = json::value::object();
 		clear_check["is_correct"] = json::value::boolean(is_correct);
 		result["cleartext check"] = clear_check;
@@ -137,10 +161,10 @@ public:
 	BaseContext<PlaintextT>* make_context(std::string context_type);
 
 	template<typename PlaintextT>
-	std::vector<PlaintextT> make_plaintext_inputs();
+	std::vector<std::vector<PlaintextT>> make_plaintext_inputs();
 
 	template<typename PlaintextT>
-	std::vector<PlaintextT> make_const_plaintext_inputs();
+	std::vector<std::vector<PlaintextT>> make_const_plaintext_inputs();
 
 	template <typename PlaintextT>
 	void configure_and_run(http_request message);
@@ -151,8 +175,8 @@ public:
 	void update_parameters(std::string context, json::value params = json::value::object());
 
 	template <typename PlaintextT>
-	bool check_job_outputs(std::vector<PlaintextT> test_outputs,
-	                       std::vector<PlaintextT> clear_outputs);
+	bool check_job_outputs(std::vector<std::vector<PlaintextT>> test_outputs,
+	                       std::vector<std::vector<PlaintextT>> clear_outputs);
 	//			 std::map<std::string, std::string> test_outputs,
 	//			 std::map<std::string, std::string> clear_outputs);
 

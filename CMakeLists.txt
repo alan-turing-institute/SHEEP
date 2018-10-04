@@ -68,5 +68,5 @@ endif()
 
 link_libraries(pthread)
 
-#add_subdirectory(example bin)
+add_subdirectory(example bin)
 add_subdirectory(tests testbin)

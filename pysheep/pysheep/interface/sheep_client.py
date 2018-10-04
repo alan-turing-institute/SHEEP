@@ -177,7 +177,9 @@ def set_inputs(input_dict):
         return input_request
     input_names = input_request["content"]
     response_dict = {}
+    
     unset_inputs = [i for i in input_names if not i in input_dict.keys()]
+
     if len(unset_inputs) > 0:
         response_dict["status_code"] = 500
         response_dict["content"] = "Inputs {} not set".format(unset_inputs)

@@ -12,9 +12,9 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <utility>
 
 #include "sheep-server.hpp"
-
 
 using namespace std;
 using namespace web;
@@ -41,7 +41,7 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 	//// what contexts are supported?
 	m_available_contexts.push_back("Clear");
 #ifdef HAVE_HElib
-	m_available_contexts.push_back("HElib_F2");
+	// m_available_contexts.push_back("HElib_F2");
 	m_available_contexts.push_back("HElib_Fp");
 #endif
 #ifdef HAVE_TFHE
@@ -76,8 +76,8 @@ BaseContext<PlaintextT>* SheepServer::make_context(std::string context_type) {
 		return new ContextClear<PlaintextT>();
 
 	#ifdef HAVE_HElib
-		} else if (context_type == "HElib_F2") {
-			return  new ContextHElib_F2<PlaintextT>();
+		// } else if (context_type == "HElib_F2") {
+		// 	return  new ContextHElib_F2<PlaintextT>();
 		} else if (context_type == "HElib_Fp") {
 			return new ContextHElib_Fp<PlaintextT>();
 	#endif
@@ -103,11 +103,16 @@ BaseContext<PlaintextT>* SheepServer::make_context(std::string context_type) {
 }
 
 template<typename PlaintextT>
-std::vector<PlaintextT>
+std::vector<std::vector<PlaintextT>>
 SheepServer::make_plaintext_inputs() {
-	std::vector<PlaintextT> inputs;
-	for (auto input : m_job_config.input_vals) {
-		inputs.push_back( (PlaintextT)(input) );
+	std::vector<std::vector<PlaintextT>> inputs;
+	
+  // TODO: input from json
+
+  for (auto input : m_job_config.input_vals) {
+    std::vector<PlaintextT> input_vector(begin(input), end(input));
+
+		inputs.push_back(input_vector);
 	}
 
 	return inputs;
@@ -116,11 +121,13 @@ SheepServer::make_plaintext_inputs() {
 
 
 template<typename PlaintextT>
-std::vector<PlaintextT>
+std::vector<std::vector<PlaintextT>>
 SheepServer::make_const_plaintext_inputs() {
-	std::vector<PlaintextT> const_inputs;
+	std::vector<std::vector<PlaintextT>> const_inputs;
+  
 	for (auto input : m_job_config.const_input_vals) {
-		const_inputs.push_back( (PlaintextT)(input) );
+    std::vector<PlaintextT> input_vector(begin(input), end(input));
+		const_inputs.push_back(input_vector);
 	}
 
 	return const_inputs;
@@ -156,8 +163,8 @@ SheepServer::update_parameters(std::string context_type,
 #ifdef HAVE_HElib
 	} else if (context_type == "HElib_Fp") {
 		context = new ContextHElib_Fp<PlaintextT>();
-	} else if (context_type == "HElib_F2") {
-		context = new ContextHElib_F2<PlaintextT>();
+	// } else if (context_type == "HElib_F2") {
+	// 	context = new ContextHElib_F2<PlaintextT>();
 #endif
 #ifdef HAVE_TFHE
 	} else if (context_type == "TFHE") {
@@ -197,12 +204,15 @@ SheepServer::update_parameters(std::string context_type,
 }
 
 template <typename PlaintextT>
-bool
-SheepServer::check_job_outputs(std::vector<PlaintextT> test_outputs,
-                               std::vector<PlaintextT> clear_outputs) {
-	if (test_outputs.size() != clear_outputs.size()) return false;
+bool SheepServer::check_job_outputs(std::vector<std::vector<PlaintextT>> test_outputs,
+                               std::vector<std::vector<PlaintextT>> clear_outputs) {
+	
+  if (test_outputs.size() != clear_outputs.size()) return false;
+
 	for (int i = 0; i < test_outputs.size(); i++) {
-		if (test_outputs[i] != clear_outputs[i]) return false;
+    for (int j = 0; j < test_outputs[i].size(); j++) {
+		  if (test_outputs[i][j] != clear_outputs[i][j]) return false;
+    }
 	}
 	return true;
 }
@@ -210,19 +220,17 @@ SheepServer::check_job_outputs(std::vector<PlaintextT> test_outputs,
 template <typename PlaintextT>
 void
 SheepServer::configure_and_run(http_request message) {
-
+  
 	if (! m_job_config.isConfigured()) throw std::runtime_error("Job incompletely configured");
 	/// we can now assume we have values for context, inputs, circuit, etc
 	auto context = make_context<PlaintextT>(m_job_config.context);
 	/// set parameters for this context
 	for ( auto map_iter = m_job_config.parameters.begin(); map_iter != m_job_config.parameters.end(); ++map_iter) {
-
 		context->set_parameter(map_iter->first, map_iter->second);
-
 	}
 
-	std::vector<PlaintextT> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
-	std::vector<PlaintextT> const_plaintext_inputs = make_const_plaintext_inputs<PlaintextT>();
+	std::vector<std::vector<PlaintextT>> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
+	std::vector<std::vector<PlaintextT>> const_plaintext_inputs = make_const_plaintext_inputs<PlaintextT>();
 
 	// shared memory region for returning the results
 	size_t n_outputs = m_job_config.circuit.get_outputs().size();
@@ -237,7 +245,10 @@ SheepServer::configure_and_run(http_request message) {
 		return;
 	}
 
-	PlaintextT *outputs_shared = (PlaintextT *)mmap(NULL, n_outputs * sizeof(PlaintextT),
+  // All the inputs should be the same length, thus we can check only the first element
+  int slot_cnt = plaintext_inputs[0].size();
+
+	PlaintextT *outputs_shared = (PlaintextT *)mmap(NULL, slot_cnt*(n_outputs * sizeof(PlaintextT)),
 	                             PROT_READ | PROT_WRITE,
 	                             MAP_ANONYMOUS | MAP_SHARED, 0, 0);
 
@@ -250,22 +261,20 @@ SheepServer::configure_and_run(http_request message) {
 	pid_t child_pid = fork();
 
 	if (child_pid == -1) {
-
 		// fork did not succeed
 		message.reply(status_codes::InternalError, ("Could not run evaluation"));
 		m_job_finished = false;
-	}
 
+	}	else if (!child_pid) {
 
-	else if (!child_pid) {
 		// child process: perform the evaluation
 		std::vector<Duration> timings;
-		std::vector<PlaintextT> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
+		std::vector<std::vector<PlaintextT>> output_vals = context->eval_with_plaintexts(m_job_config.circuit,
 		                                      plaintext_inputs,
 		                                      const_plaintext_inputs,
 		                                      timings,
 		                                      m_job_config.eval_strategy);
-		std::cerr << timings.size() << std::endl;
+		
 		if (timings.size() != 3) {
 			// signal an error to the server
 			std::cerr << "Child exiting: more than three timings reported!\n";
@@ -277,30 +286,32 @@ SheepServer::configure_and_run(http_request message) {
 			timings_shared[i] = timings[i];
 		}
 
-		for (int i = 0; i < n_outputs; i++) {
-			outputs_shared[i] = output_vals[i];
-		}
-
-		std::cerr << "successful evaluation: exiting...\n";
+    for (int i = 0; i < n_outputs; i++) {
+      for (int j = 0; j < slot_cnt; j++) {
+        outputs_shared[i*slot_cnt + j] = output_vals[i][j];
+      }
+    }
 
 		// if we get here, evaluation finished successfully: child can exit
+    std::cerr << "successful evaluation: exiting...\n";
 		_exit(0);
-	}
-	else {
 
+	} else {
 
 		// parent process: wait for child or kill after timeout
 
-		// timeout hardcoded as 60 s for now
+		// timeout hardcoded as 5 s for now
 		// POSIX: can assume this is an integer type
-		time_t timeout_us = 60000000L;
+
+		time_t timeout_us = 5000000L;
 
 		// go to sleep for the length of the timeout and a grace period
 		struct timespec req, rem;
 		req.tv_nsec = (timeout_us % 1000000) * 1000;
 		// allow one second grace (since the timeout above refers to the evaluation only
 		req.tv_sec = (timeout_us / 1000000) + 1;
-		nanosleep(&req, &rem);
+		
+    nanosleep(&req, &rem);
 
 		// on waking up, is the child still alive?
 		int status;
@@ -309,42 +320,56 @@ SheepServer::configure_and_run(http_request message) {
 			kill(child_pid, SIGKILL);
 			message.reply(status_codes::InternalError, ("Evaluation timed out"));
 			m_job_finished = false;
-		}
-		else if (status) {
+		
+    } else if (status) {
 			// other abnormal termination (nonzero return or killed by signal)
 			message.reply(status_codes::InternalError, ("Evaluation terminated abnormally"));
 			m_job_finished = false;
-		}
-		else {
+
+		} else {
 			// child exited normally => evaluation completed
 			m_job_finished = true;
 
-			std::vector<PlaintextT> output_vals(outputs_shared, outputs_shared + n_outputs);
+			std::vector<std::vector<PlaintextT>> output_vals;
 
-			///  store outputs values as strings, to avoid ambiguity about type.
-			for (int i = 0; i < n_outputs; ++i ) {
-				auto output = std::make_pair<const std::string, std::string>(
+      for (int i = 0; i < n_outputs; i++) {
+
+        std::vector<PlaintextT> output_val;
+        std::vector<std::string> string_val;
+
+        for (int j = 0; j < slot_cnt; j++) {
+          output_val.push_back(outputs_shared[i*slot_cnt + j]);
+
+          ///  store outputs values as strings, to avoid ambiguity about type.
+          string_val.push_back(std::to_string(output_val[j]));
+        }
+
+        output_vals.push_back(output_val);
+
+        auto output = std::make_pair(
 				                m_job_config.circuit.get_outputs()[i].get_name(),
-				                std::to_string(output_vals[i])
-				              );
-				m_job_result.outputs.insert(output);
-			}
+				                string_val);
 
+				m_job_result.outputs.insert(output);
+      }
+      
 			auto encryption = std::make_pair<std::string, std::string>("encryption", std::to_string(timings_shared[0].count()));
 			m_job_result.timings.insert(encryption);
-			auto evaluation = std::make_pair<std::string, std::string>("evaluation", std::to_string(timings_shared[1].count()));
+			
+      auto evaluation = std::make_pair<std::string, std::string>("evaluation", std::to_string(timings_shared[1].count()));
 			m_job_result.timings.insert(evaluation);
-			auto decryption = std::make_pair<std::string, std::string>("decryption", std::to_string(timings_shared[2].count()));
+			
+      auto decryption = std::make_pair<std::string, std::string>("decryption", std::to_string(timings_shared[2].count()));
 			m_job_result.timings.insert(decryption);
 
 			//// now do the plaintext evaluation
 			auto clear_context = make_context<PlaintextT>("Clear");
 			std::vector<Duration> timings_clear;
-			std::vector<PlaintextT> clear_output_vals = clear_context->eval_with_plaintexts(m_job_config.circuit,
-			    plaintext_inputs,
-			    const_plaintext_inputs,
-			    timings_clear);
 
+			std::vector<std::vector<PlaintextT>> clear_output_vals = clear_context->eval_with_plaintexts(m_job_config.circuit,
+			    plaintext_inputs, const_plaintext_inputs, timings_clear);
+
+      // Compare the encrypted and plain results
 			bool is_correct = check_job_outputs<PlaintextT>(output_vals, clear_output_vals);
 			m_job_result.is_correct = is_correct;
 
@@ -355,7 +380,6 @@ SheepServer::configure_and_run(http_request message) {
 	// clean up shared memory buffers
 	munmap(timings_shared, n_timings * sizeof(Duration));
 	munmap(outputs_shared, n_outputs * sizeof(PlaintextT));
-
 }
 
 void SheepServer::handle_get(http_request message)
@@ -396,8 +420,6 @@ void SheepServer::handle_put(http_request message)
 	message.reply(status_codes::OK);
 };
 
-/////////////////////////////////////////////////////////////////////
-
 void SheepServer::handle_post_run(http_request message) {
 
 	/// get a context, configure it with the stored
@@ -410,7 +432,6 @@ void SheepServer::handle_post_run(http_request message) {
 	else if (m_job_config.input_type == "int16_t") configure_and_run<int16_t>(message);
 	else if (m_job_config.input_type == "int32_t") configure_and_run<int32_t>(message);
 }
-
 
 void SheepServer::handle_post_circuit(http_request message) {
 	///
@@ -430,7 +451,6 @@ void SheepServer::handle_post_circuit(http_request message) {
 	});
 	message.reply(status_codes::OK);
 }
-
 
 void SheepServer::handle_post_circuitfile(http_request message) {
 	/// set circuit filename to use
@@ -474,7 +494,6 @@ void SheepServer::handle_get_inputs(http_request message) {
 	message.reply(status_codes::OK, result);
 }
 
-
 void SheepServer::handle_get_const_inputs(http_request message) {
 
 	/// check again that the circuit exists.
@@ -501,8 +520,16 @@ void SheepServer::handle_post_inputs(http_request message) {
 			json::value input_dict = jvalue.get();
 			//	auto input_dict = val["input_dict"].as_object();
 			for (auto input_name : m_job_config.input_names) {
-				int input_val = input_dict[input_name].as_integer();
-				m_job_config.input_vals.push_back(input_val);
+        
+        std::vector<int> input_vals;
+
+        for (auto input : input_dict[input_name].as_array()) {
+          int input_val = input.as_integer();
+          input_vals.push_back(input_val);
+        }
+
+				m_job_config.input_vals.push_back(input_vals);
+
 			}
 		} catch (json::json_exception) {
 			message.reply(status_codes::InternalError, ("Unrecognized inputs"));
@@ -511,7 +538,6 @@ void SheepServer::handle_post_inputs(http_request message) {
 
 	message.reply(status_codes::OK);
 }
-
 
 void SheepServer::handle_post_const_inputs(http_request message) {
 	message.extract_json().then([ = ](pplx::task<json::value> jvalue) {
@@ -519,8 +545,14 @@ void SheepServer::handle_post_const_inputs(http_request message) {
 			json::value input_dict = jvalue.get();
 			//	auto input_dict = val["input_dict"].as_object();
 			for (auto input_name : m_job_config.const_input_names) {
-				int input_val = input_dict[input_name].as_integer();
-				m_job_config.const_input_vals.push_back(input_val);
+        
+        std::vector<int> const_input_vals;
+        for (auto input : input_dict[input_name].as_array()) {
+          int input_val = input.as_integer();
+          const_input_vals.push_back(input_val);
+        }
+
+				m_job_config.const_input_vals.push_back(const_input_vals);
 			}
 		} catch (json::json_exception) {
 			message.reply(status_codes::InternalError, ("Unrecognized inputs"));
@@ -529,7 +561,6 @@ void SheepServer::handle_post_const_inputs(http_request message) {
 
 	message.reply(status_codes::OK);
 }
-
 
 void SheepServer::handle_get_eval_strategy(http_request message) {
 	/// get the evaluation strategy
@@ -541,7 +572,6 @@ void SheepServer::handle_get_eval_strategy(http_request message) {
 	}
 	message.reply(status_codes::OK, result);
 }
-
 
 void SheepServer::handle_get_context(http_request message) {
 	/// list of available contexts?
@@ -573,7 +603,6 @@ void SheepServer::handle_get_input_type(http_request message) {
 	result["input_types"] = type_list;
 	message.reply(status_codes::OK, result);
 }
-
 
 void SheepServer::handle_post_context(http_request message) {
 	/// set which context to use.  If it has changed, reset the list of parameters.
@@ -623,8 +652,6 @@ void SheepServer::handle_put_eval_strategy(http_request message) {
 	});
 	message.reply(status_codes::OK);
 }
-
-
 
 void SheepServer::handle_get_job(http_request message) {
 	/// is the sheep job fully configured?
@@ -704,13 +731,11 @@ void SheepServer::handle_put_parameters(http_request message) {
 			message.reply(status_codes::InternalError, ("Unable to set evaluation strategy"));
 		}
 	});
-
-
 }
 
 void SheepServer::handle_get_results(http_request message) {
 
 	json::value result = m_job_result.as_json();
-
+  
 	message.reply(status_codes::OK, result);
 }

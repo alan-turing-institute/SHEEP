@@ -27,16 +27,16 @@ RUN cd cmake-3.11.4; export CC=gcc-7; export CXX=g++-7; ./bootstrap; make -j4; m
 RUN apt-get -y install libtbb-dev
 
 ###### get gmp (needed for HElib)
-# RUN apt-get -y install m4
-# RUN wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
-# RUN tar -xvf gmp-6.1.0.tar.xz
-# RUN cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7; ./configure; make; make install
+RUN apt-get -y install m4
+RUN wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
+RUN tar -xvf gmp-6.1.0.tar.xz
+RUN cd gmp-6.1.0; export CC=gcc-7; export CXX=g++-7; ./configure; make; make install
 
 ###### get ntl (needed for HElib)
 
-# RUN wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
-# RUN tar -xvzf ntl-11.1.0.tar.gz
-# RUN cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
+RUN wget http://www.shoup.net/ntl/ntl-11.1.0.tar.gz
+RUN tar -xvzf ntl-11.1.0.tar.gz
+RUN cd ntl-11.1.0/src; export CC=gcc-7; export CXX=g++-7; ./configure NTL_GMP_LIP=on NTL_EXCEPTIONS=on; make; make install
 
 ###### get cpprestsdk (for the REST API)
 RUN apt-get update
@@ -48,14 +48,14 @@ RUN cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; e
 
 ###### build SEAL
 
-# RUN wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
-# RUN tar xf SEAL_2.3.1.tar.gz
-# RUN cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install;
+RUN wget https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz
+RUN tar xf SEAL_2.3.1.tar.gz
+RUN cd SEAL_2.3.1/SEAL; mkdir build; cd build; export CC=gcc-7; export CXX=g++-7; cmake ..; make; make install;
 
 ###### get and build libpaillier
-# RUN wget http://hms.isi.jhu.edu/acsc/libpaillier/libpaillier-0.8.tar.gz
-# RUN tar -xvzf libpaillier-0.8.tar.gz
-# RUN cd libpaillier-0.8 ; ./configure; make; make install
+RUN wget http://hms.isi.jhu.edu/acsc/libpaillier/libpaillier-0.8.tar.gz
+RUN tar -xvzf libpaillier-0.8.tar.gz
+RUN cd libpaillier-0.8 ; ./configure; make; make install
 
 
 #############################################################################################################
@@ -64,28 +64,25 @@ RUN cd casablanca/Release; mkdir build.debug; cd build.debug; export CC=gcc-7; e
 
 FROM sheep_base as sheep_dev
 
+ADD . SHEEP
 
-
-#RUN cd SHEEP; git submodule init; git submodule update
+RUN cd SHEEP; git submodule init; git submodule update
 
 
 ## build TFHE
-
-# RUN cd SHEEP/lib/tfhe; git submodule init
-# RUN cd SHEEP/lib/tfhe; git submodule update
-# RUN rm -fr SHEEP/lib/tfhe/build
-# RUN mkdir -p SHEEP/lib/tfhe/build
-# RUN cd SHEEP/lib/tfhe/build; export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
-# RUN cd SHEEP/lib/tfhe/build; make; make install;
+RUN cd SHEEP/lib/tfhe; git submodule init
+RUN cd SHEEP/lib/tfhe; git submodule update
+RUN rm -fr SHEEP/lib/tfhe/build
+RUN mkdir -p SHEEP/lib/tfhe/build
+RUN cd SHEEP/lib/tfhe/build; export CC=gcc-7; export CXX=g++-7; cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DCMAKE_BUILD_TYPE=optim -DENABLE_NAYUKI_PORTABLE=off -DENABLE_SPQLIOS_AVX=off -DENABLE_SPQLIOS_FMA=off -DENABLE_NAYUKI_AVX=off
+RUN cd SHEEP/lib/tfhe/build; make; make install;
 
 ## build HElib
 
-# RUN cd SHEEP/lib/HElib/src ; export CC=gcc-7; export CXX=g++-7; make clean; make;
+RUN cd SHEEP/lib/HElib/src ; export CC=gcc-7; export CXX=g++-7; make clean; make;
 
 
 FROM sheep_dev as sheep
-
-ADD . SHEEP
 
 #### now build SHEEP
 

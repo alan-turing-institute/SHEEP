@@ -225,223 +225,223 @@ protected:
 
 
   
-template<typename PlaintextT>
-class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
+// template<typename PlaintextT>
+// class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
-public:
+// public:
 
-  typedef PlaintextT Plaintext;
-  typedef NTL::Vec<Ctxt> Ciphertext;  
+//   typedef PlaintextT Plaintext;
+//   typedef NTL::Vec<Ctxt> Ciphertext;  
   
   
-  ContextHElib_F2(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
-		  bool bootstrap=true, // bootstrap or not?
-		  long haming_weight=128) // Haming weight of secret key
-    : ContextHElib<Plaintext,Ciphertext>(2,param_set,bootstrap,haming_weight)
-  {
+//   ContextHElib_F2(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
+// 		  bool bootstrap=true, // bootstrap or not?
+// 		  long haming_weight=128) // Haming weight of secret key
+//     : ContextHElib<Plaintext,Ciphertext>(2,param_set,bootstrap,haming_weight) {
+  
+//     /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
+//     m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
+// 			  std::is_same<Plaintext, int16_t>::value ||
+// 			  std::is_same<Plaintext, int32_t>::value);
+
+//     m_bool_plaintext = std::is_same<Plaintext, bool>::value;
+//   }
+
+//   Ciphertext encrypt(std::vector<Plaintext> pt) {
+//     /// use this to fill up the vector when resizing
+//     Ctxt mu(*(this->m_publicKey));  
     
+//     /// now an NTL::Vec<Ctxt>
+//     Ciphertext ct;   
 
-    /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
-    m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
-			  std::is_same<Plaintext, int16_t>::value ||
-			  std::is_same<Plaintext, int32_t>::value);
+//     resize(ct, this->m_bitwidth, mu);
+//     for (int i=0; i < this->m_bitwidth; i++) {
+//       this->m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
+//     }
 
-    m_bool_plaintext = std::is_same<Plaintext, bool>::value;
+//     this->m_ciphertext_size = sizeof(ct[0]) * this->m_bitwidth; 
+//     return ct;  
+//   }
 
-  }
-
-
-  
-  Ciphertext encrypt(std::vector<Plaintext> pt) {
-    Ctxt mu(*(this->m_publicKey));  /// use this to fill up the vector when resizing
-    Ciphertext  ct;   /// now an NTL::Vec<Ctxt>
-    resize(ct,this->m_bitwidth, mu);
-    for (int i=0; i < this->m_bitwidth; i++) {
-      this->m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
-    }
-    this->m_ciphertext_size = sizeof(ct[0]) * this->m_bitwidth; 
-    return ct;  
-  }
-
-  Plaintext decrypt(Ciphertext ct) {
-    std::vector<long> pt;
-    decryptBinaryNums(pt, CtPtrs_VecCt(ct), *(this->m_secretKey), *(this->m_ea));
-    long pt_transformed = pt[0];
-    return pt_transformed  % int(pow(2,this->m_bitwidth));
+//   std::vector<Plaintext> decrypt(Ciphertext ct) {
+//     std::vector<long> pt;
+//     decryptBinaryNums(pt, CtPtrs_VecCt(ct), *(this->m_secretKey), *(this->m_ea));
+//     long pt_transformed = pt[0];
+//     return pt_transformed  % int(pow(2,this->m_bitwidth));
     
-  }
+//   }
 
 
-  Ciphertext Negate(Ciphertext a) {
+//   Ciphertext Negate(Ciphertext a) {
 
-    /// bootstrapping method copied from HElib's Test_binaryCompare
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-      }
-    }
-
-    
-    /// Two's complement negation - negate all bits then add one
-    Ciphertext output;
-    for (int i=0; i < this->m_bitwidth; ++i) {
-      Ctxt abit = a[i];
-      //      abit.negate();
-      abit.addConstant(to_ZZX(1L));
-      output.append(abit);
-    }
-    if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
-    /// for integers, need to add 1.
-    Ciphertext one_enc = encrypt((Plaintext)1);
-    Ciphertext output_final = Add(output,one_enc);
-    return output_final;
-  }
-
-  Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-    /// "Maximum" i.e. "OR" only valid for bool inputs.  If not, call the base-class function
-    /// (which will throw a GateNotImplemented error).
-    if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
-    /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
-    Ctxt a1 = a[0]; 
-    Ctxt a2 = a[0];     
-    a1 += b[0];  // XOR(a,b)
-    a2 *= b[0]; // AND(a,b)
-    a1 += a2; // XOR the previous two lines
-    Ciphertext output;
-    output.append(a1);
-    return output;
-  }
-
-  
-  Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
+//     /// bootstrapping method copied from HElib's Test_binaryCompare
+//     if (this->m_bootstrap) {
+//       for (int i=0; i< this->m_bitwidth; ++i) {
+// 	a[i].modDownToLevel(5);
+//       }
+//     }
 
     
-    Ctxt mu(*(this->m_publicKey));
-    Ctxt ni(*(this->m_publicKey));    
-    Ciphertext cmax, cmin;
-    CtPtrs_VecCt wMin(cmin), wMax(cmax);  /// wrappers around output vectors
-    compareTwoNumbers(wMax, wMin, mu, ni,
-		      CtPtrs_VecCt(a), CtPtrs_VecCt(b),
-		      &(this->m_unpackSlotEncoding));
-    /// mu is now a Ctxt which is the encryption of 1 if a>b and 0 otherwise.
-    /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
-    Ciphertext output;
-    output.append(mu);
-    return output;
-  }
+//     /// Two's complement negation - negate all bits then add one
+//     Ciphertext output;
+//     for (int i=0; i < this->m_bitwidth; ++i) {
+//       Ctxt abit = a[i];
+//       //      abit.negate();
+//       abit.addConstant(to_ZZX(1L));
+//       output.append(abit);
+//     }
+//     if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
+//     /// for integers, need to add 1.
+//     Ciphertext one_enc = encrypt((Plaintext)1);
+//     Ciphertext output_final = Add(output,one_enc);
+//     return output_final;
+//   }
 
-  Ciphertext Compare_signed(Ciphertext a, Ciphertext b) {
-    //// subtract a-b and look at sign-bit
-    Ciphertext b_minus_a = Subtract(b,a);
-    Ciphertext output;
+//   Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+//     /// "Maximum" i.e. "OR" only valid for bool inputs.  If not, call the base-class function
+//     /// (which will throw a GateNotImplemented error).
+//     if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
+//     /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
+//     Ctxt a1 = a[0]; 
+//     Ctxt a2 = a[0];     
+//     a1 += b[0];  // XOR(a,b)
+//     a2 *= b[0]; // AND(a,b)
+//     a1 += a2; // XOR the previous two lines
+//     Ciphertext output;
+//     output.append(a1);
+//     return output;
+//   }
 
-    Ctxt sign_bit = b_minus_a[this->m_bitwidth -1];   /// is sign-bit set?  if yes, b
-    ///    sign_bit.addConstant(to_ZZX(1L));  //// now n
-    output.append(sign_bit);
-    return output;
-  }
-
-  Ciphertext Compare(Ciphertext a, Ciphertext b) {
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-	b[i].modDownToLevel(5);
-      }
-    }
-    if (this->m_signed_plaintext) return Compare_signed(a,b);
-    else return Compare_unsigned(a,b);
-  }
   
-  
-  Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+//   Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
 
-    if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
-
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-      }
-    }
     
-    Ciphertext output;
-    Ciphertext b_neg = Negate(b);
-    CtPtrs_VecCt wout(output);
-    addTwoNumbers(wout,CtPtrs_VecCt(a),CtPtrs_VecCt(b_neg),
-		  this->m_bitwidth,
-		  &(this->m_unpackSlotEncoding));
-    return output;
-  }
+//     Ctxt mu(*(this->m_publicKey));
+//     Ctxt ni(*(this->m_publicKey));    
+//     Ciphertext cmax, cmin;
+//     CtPtrs_VecCt wMin(cmin), wMax(cmax);  /// wrappers around output vectors
+//     compareTwoNumbers(wMax, wMin, mu, ni,
+// 		      CtPtrs_VecCt(a), CtPtrs_VecCt(b),
+// 		      &(this->m_unpackSlotEncoding));
+//     /// mu is now a Ctxt which is the encryption of 1 if a>b and 0 otherwise.
+//     /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
+//     Ciphertext output;
+//     output.append(mu);
+//     return output;
+//   }
 
+//   Ciphertext Compare_signed(Ciphertext a, Ciphertext b) {
+//     //// subtract a-b and look at sign-bit
+//     Ciphertext b_minus_a = Subtract(b,a);
+//     Ciphertext output;
+
+//     Ctxt sign_bit = b_minus_a[this->m_bitwidth -1];   /// is sign-bit set?  if yes, b
+//     ///    sign_bit.addConstant(to_ZZX(1L));  //// now n
+//     output.append(sign_bit);
+//     return output;
+//   }
+
+//   Ciphertext Compare(Ciphertext a, Ciphertext b) {
+//     if (this->m_bootstrap) {
+//       for (int i=0; i< this->m_bitwidth; ++i) {
+// 	a[i].modDownToLevel(5);
+// 	b[i].modDownToLevel(5);
+//       }
+//     }
+//     if (this->m_signed_plaintext) return Compare_signed(a,b);
+//     else return Compare_unsigned(a,b);
+//   }
   
-  Ciphertext Add(Ciphertext a, Ciphertext b) {
+  
+//   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-      }
-    }
+//     if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
+
+//     if (this->m_bootstrap) {
+//       for (int i=0; i< this->m_bitwidth; ++i) {
+// 	a[i].modDownToLevel(5);
+//       }
+//     }
     
-    Ciphertext sum;
-    CtPtrs_VecCt wsum(sum);
-    addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
-		  this->m_bitwidth,
-		  &(this->m_unpackSlotEncoding));
-    return sum;
-  }
-  
+//     Ciphertext output;
+//     Ciphertext b_neg = Negate(b);
+//     CtPtrs_VecCt wout(output);
+//     addTwoNumbers(wout,CtPtrs_VecCt(a),CtPtrs_VecCt(b_neg),
+// 		  this->m_bitwidth,
+// 		  &(this->m_unpackSlotEncoding));
+//     return output;
+//   }
 
   
-  Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+//   Ciphertext Add(Ciphertext a, Ciphertext b) {
 
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-      }
-    }
+//     if (this->m_bootstrap) {
+//       for (int i=0; i< this->m_bitwidth; ++i) {
+// 	a[i].modDownToLevel(5);
+//       }
+//     }
     
-    Ciphertext product;
-    CtPtrs_VecCt wprod(product);
-    multTwoNumbers(wprod,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
-		   false,
-		   this->m_bitwidth,
-		   &(this->m_unpackSlotEncoding));
-    return product;
-  }
+//     Ciphertext sum;
+//     CtPtrs_VecCt wsum(sum);
+//     addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
+// 		  this->m_bitwidth,
+// 		  &(this->m_unpackSlotEncoding));
+//     return sum;
+//   }
+  
 
   
-  Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+//   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 
-    if (this->m_bootstrap) {
-      for (int i=0; i< this->m_bitwidth; ++i) {
-	a[i].modDownToLevel(5);
-	b[i].modDownToLevel(5);
-      }
-    }
-    /// s is 0 or 1
-    /// for each bit of a,b,output, do output = s*a + (1-s)*b
-    Ciphertext output;
-
-    for (int i=0; i < this->m_bitwidth; ++i) {
-      Ctxt sbit = s[0];
-      Ctxt abit = a[i];
-      Ctxt bbit = b[i];
-      abit *= sbit;
-      sbit.addConstant(to_ZZX(-1L));
-      sbit.multByConstant(to_ZZX(-1L));
-      sbit *= bbit;
-      abit += sbit;
-      output.append(abit);
-    }
-    return output;
-  }
-
-private:
-
-  bool m_signed_plaintext;
-  bool m_bool_plaintext;  
+//     if (this->m_bootstrap) {
+//       for (int i=0; i< this->m_bitwidth; ++i) {
+// 	a[i].modDownToLevel(5);
+//       }
+//     }
+    
+//     Ciphertext product;
+//     CtPtrs_VecCt wprod(product);
+//     multTwoNumbers(wprod,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
+// 		   false,
+// 		   this->m_bitwidth,
+// 		   &(this->m_unpackSlotEncoding));
+//     return product;
+//   }
 
   
-};  /// end of class definition
+//   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+
+//     if (this->m_bootstrap) {
+//       for (int i=0; i< this->m_bitwidth; ++i) {
+// 	a[i].modDownToLevel(5);
+// 	b[i].modDownToLevel(5);
+//       }
+//     }
+//     /// s is 0 or 1
+//     /// for each bit of a,b,output, do output = s*a + (1-s)*b
+//     Ciphertext output;
+
+//     for (int i=0; i < this->m_bitwidth; ++i) {
+//       Ctxt sbit = s[0];
+//       Ctxt abit = a[i];
+//       Ctxt bbit = b[i];
+//       abit *= sbit;
+//       sbit.addConstant(to_ZZX(-1L));
+//       sbit.multByConstant(to_ZZX(-1L));
+//       sbit *= bbit;
+//       abit += sbit;
+//       output.append(abit);
+//     }
+//     return output;
+//   }
+
+// private:
+
+//   bool m_signed_plaintext;
+//   bool m_bool_plaintext;  
+
+  
+// };  /// end of class definition
 
   ////////////////////////////////////////////////////////////////////////////
   //// ContextHElib_Fp  - use integer plaintext space, e.g. p=65537
