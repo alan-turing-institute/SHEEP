@@ -1,5 +1,5 @@
 #include <memory>
-
+#include <cassert>
 #include "context-clear.hpp"
 
 #include "circuit-repo.hpp"
