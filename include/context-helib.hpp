@@ -26,22 +26,22 @@ template <typename PlaintextT, typename CiphertextT>
 class ContextHElib : public Context< PlaintextT , CiphertextT> {
 
 public:
-  
+
   typedef PlaintextT Plaintext;
-  typedef CiphertextT Ciphertext; 
-  // typedef std::vector<PlaintextT> Ciphertext;  
+  typedef CiphertextT Ciphertext;
+  // typedef std::vector<PlaintextT> Ciphertext;
 	// typedef PlaintextT CiphertextEl;
 
   /// constructors
   ContextHElib(long p,             // plaintext modulus
 	       long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
 	       long bootstrapl=1, // bootstrap or not?
-	       long haming_weight=128): // Haming weight of secret key
+	       long hamming_weight=128): // Hamming weight of secret key
 
     m_p(p),
     m_param_set(param_set),
     m_bootstrapl(bootstrapl),
-    m_w(haming_weight)
+    m_w(hamming_weight)
   {
 
     /// BITWIDTH(bool) is 8, so need to deal with this by hand...
@@ -52,10 +52,10 @@ public:
       m_bitwidth = BITWIDTH(Plaintext);
 
     ////  populate the map that will allow us to set parameters via an input file (or string)
-    
+
     this->m_param_name_map.insert({"BaseParamSet", m_param_set});
-    this->m_param_name_map.insert({"HamingWeight", m_w});
-    this->m_param_name_map.insert({"Bootstrap", m_bootstrapl});            
+    this->m_param_name_map.insert({"HammingWeight", m_w});
+    this->m_param_name_map.insert({"Bootstrap", m_bootstrapl});
     this->m_param_name_map.insert({"m",m_m});
     this->m_param_name_map.insert({"phim",m_phim});
     this->m_param_name_map.insert({"d",m_d});
@@ -75,7 +75,7 @@ public:
     this->m_ciphertext_size = 0;
     this->m_public_key_size = 0;
     this->m_private_key_size = 0;
-    
+
     /// configure
     configure();
   }
@@ -85,8 +85,8 @@ public:
 
     m_bootstrap = (bool)m_bootstrapl;
     /// Set all the other parameters.
-    
-    long mValues[][15] = { 
+
+    long mValues[][15] = {
       // { p, phi(m),   m,   d, m1, m2, m3,    g1,   g2,   g3, ord1,ord2,ord3, B,c}
       {  2,    48,   105, 12,  3, 35,  0,    71,    76,    0,   2,  2,   0, 25, 2},
       {  2 ,  600,  1023, 10, 11, 93,  0,   838,   584,    0,  10,  6,   0, 25, 2},
@@ -98,7 +98,7 @@ public:
     long* vals = mValues[m_param_set];
     //// if parameters were not set explicitly in a parameters file, take the value from
     ////  the mValues array.  (But if they were set explicitly, use that value!)
-    
+
     if ( ! this->override_param("m"))  m_m = vals[2];
     if ( ! this->override_param("phi(m)")) m_phim = vals[1];
     if ( ! this->override_param("d"))  m_d = vals[3];
@@ -112,13 +112,13 @@ public:
     if ( ! this->override_param("ord2")) m_ord2 = vals[11];
     if ( ! this->override_param("ord3")) m_ord3 = vals[12];
     if ( ! this->override_param("B"))  m_B = vals[13];
-    if ( ! this->override_param("c"))  m_c = vals[14];    
+    if ( ! this->override_param("c"))  m_c = vals[14];
 
     NTL::Vec<long> mvec;
     append(mvec, m_m1);
     if (m_m2>1) append(mvec, m_m2);
     if (m_m3>1) append(mvec, m_m3);
-    
+
     std::vector<long> gens;
     gens.push_back(m_g1);
     if (m_g2>1) gens.push_back(m_g2);
@@ -131,7 +131,7 @@ public:
 
     /// number of levels  (copied from HElib's Test_binaryCompare)
     if ( ! this->override_param("Levels")) {
-      if (m_bootstrap) m_L = 30; 
+      if (m_bootstrap) m_L = 30;
       else m_L = 3 + NTL::NumBits(m_bitwidth+2);
     }
     /// initialize HElib context
@@ -147,26 +147,26 @@ public:
 
     // unpack slot encoding
     buildUnpackSlotEncoding(m_unpackSlotEncoding, *(m_helib_context->ea));
-    
+
     /// create secret key structure
     m_secretKey = new FHESecKey(*m_helib_context);
-    
+
     m_publicKey = m_secretKey;  //// points to the same place
-  
+
     /// generate a secret key
-    m_secretKey->GenSecKey(m_w);   /// Haming weight of 128
-     
+    m_secretKey->GenSecKey(m_w);   /// Hamming weight of 128
+
     addSome1DMatrices(*m_secretKey);
     addFrbMatrices(*m_secretKey);
 
     /// how big are keys?
     this->m_private_key_size = sizeof(*m_secretKey);
-    this->m_public_key_size = sizeof(*m_publicKey);    
-    
+    this->m_public_key_size = sizeof(*m_publicKey);
+
     if (m_bootstrap) m_secretKey->genRecryptData();
-    
+
     m_ea = new EncryptedArray(*m_helib_context);
-    
+
     m_nslots = m_ea->size();
 };
 
@@ -179,12 +179,12 @@ virtual ~ContextHElib() {
 };
 
 virtual Ciphertext encrypt(std::vector<Plaintext> pt) = 0;
-virtual std::vector<Plaintext> decrypt(Ciphertext pt) = 0;  
+virtual std::vector<Plaintext> decrypt(Ciphertext pt) = 0;
 
 long get_num_slots() {
   return m_nslots;
 }
-  
+
 protected:
 
   long m_param_set;  // which set of parameters to use (0 to 4).
@@ -207,7 +207,7 @@ protected:
   long m_ord1;
   long m_ord2;
   long m_ord3;
-  EncryptedArray* m_ea; 
+  EncryptedArray* m_ea;
   FHESecKey* m_secretKey;
   const FHEPubKey* m_publicKey;
   FHEcontext* m_helib_context;
@@ -215,60 +215,63 @@ protected:
   std::vector<zzX> m_unpackSlotEncoding;
   bool m_bootstrap;
   long m_bootstrapl;   /// long version of the bootstrap flag to allow it to be settable from param_name_map
-  
+
 };   //// end of ContextHElib class definition.
 
-  
+
 ////////////////////////////////////////////////////////////////////////////////////
 ///  ContextHElib_F2 -  use p=2, do everything with arrays of Ciphertext,
 ///  and binary operations for add, multiply, compare etc.
 
 
-  
-// template<typename PlaintextT>
-// class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
-// public:
+template<typename PlaintextT>
+class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
-//   typedef PlaintextT Plaintext;
-//   typedef NTL::Vec<Ctxt> Ciphertext;  
-  
-  
-//   ContextHElib_F2(long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
-// 		  bool bootstrap=true, // bootstrap or not?
-// 		  long haming_weight=128) // Haming weight of secret key
-//     : ContextHElib<Plaintext,Ciphertext>(2,param_set,bootstrap,haming_weight) {
-  
-//     /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
-//     m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
-// 			  std::is_same<Plaintext, int16_t>::value ||
-// 			  std::is_same<Plaintext, int32_t>::value);
+ public:
 
-//     m_bool_plaintext = std::is_same<Plaintext, bool>::value;
-//   }
+  typedef PlaintextT Plaintext;
+  typedef NTL::Vec<Ctxt> Ciphertext;
 
-//   Ciphertext encrypt(std::vector<Plaintext> pt) {
-//     /// use this to fill up the vector when resizing
-//     Ctxt mu(*(this->m_publicKey));  
-    
-//     /// now an NTL::Vec<Ctxt>
-//     Ciphertext ct;   
 
-//     resize(ct, this->m_bitwidth, mu);
-//     for (int i=0; i < this->m_bitwidth; i++) {
-//       this->m_publicKey->Encrypt(ct[i], ZZX((pt >>i)&1));
-//     }
+  ContextHElib_F2(long param_set = 0,  // parameter set, from 0 (tiny) to 4 (huge)
+    bool bootstrap = true,  // bootstrap or not?
+    long hamming_weight = 128)  // Hamming weight of secret key
+    : ContextHElib<Plaintext,Ciphertext>(2, param_set, bootstrap, hamming_weight) {
 
-//     this->m_ciphertext_size = sizeof(ct[0]) * this->m_bitwidth; 
-//     return ct;  
-//   }
+    /// this is not nice, but for Compare, it helps to know if we are dealing with signed or unsigned inputs
+    m_signed_plaintext = (std::is_same<Plaintext, int8_t>::value ||
+			  std::is_same<Plaintext, int16_t>::value ||
+			  std::is_same<Plaintext, int32_t>::value);
+
+    m_bool_plaintext = std::is_same<Plaintext, bool>::value;
+  }
+
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    Ctxt mu(*(this->m_publicKey));
+    Ciphertext ct;
+    resize(ct, this->m_bitwidth, mu);
+
+    for (int j = 0; j < this->m_bitwidth; j++) {
+        std::vector<ZZX> sliced_pt = std::vector<ZZX>(pt.size());
+        // sliced_pt[i] is the jth bit of input i
+        for (int i = 0; i < pt.size(); i++) {
+            sliced_pt[i] = ZZX((pt[i] >> j) & 1);
+        }
+        // We now encrypt sliced_pt into ct[j] and thus
+        // ct is an encryption of an m_bitwidth x pt.size() binary matrix,
+        // as m_bitwidth "slotted" ciphertexts
+        this->m_ea->encrypt(ct[j], *(this->m_publicKey), sliced_pt);
+    }
+    return ct;
+  }
 
 //   std::vector<Plaintext> decrypt(Ciphertext ct) {
 //     std::vector<long> pt;
 //     decryptBinaryNums(pt, CtPtrs_VecCt(ct), *(this->m_secretKey), *(this->m_ea));
 //     long pt_transformed = pt[0];
 //     return pt_transformed  % int(pow(2,this->m_bitwidth));
-    
+
 //   }
 
 
@@ -281,7 +284,7 @@ protected:
 //       }
 //     }
 
-    
+
 //     /// Two's complement negation - negate all bits then add one
 //     Ciphertext output;
 //     for (int i=0; i < this->m_bitwidth; ++i) {
@@ -302,8 +305,8 @@ protected:
 //     /// (which will throw a GateNotImplemented error).
 //     if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
 //     /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
-//     Ctxt a1 = a[0]; 
-//     Ctxt a2 = a[0];     
+//     Ctxt a1 = a[0];
+//     Ctxt a2 = a[0];
 //     a1 += b[0];  // XOR(a,b)
 //     a2 *= b[0]; // AND(a,b)
 //     a1 += a2; // XOR the previous two lines
@@ -312,12 +315,12 @@ protected:
 //     return output;
 //   }
 
-  
+
 //   Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
 
-    
+
 //     Ctxt mu(*(this->m_publicKey));
-//     Ctxt ni(*(this->m_publicKey));    
+//     Ctxt ni(*(this->m_publicKey));
 //     Ciphertext cmax, cmin;
 //     CtPtrs_VecCt wMin(cmin), wMax(cmax);  /// wrappers around output vectors
 //     compareTwoNumbers(wMax, wMin, mu, ni,
@@ -351,8 +354,8 @@ protected:
 //     if (this->m_signed_plaintext) return Compare_signed(a,b);
 //     else return Compare_unsigned(a,b);
 //   }
-  
-  
+
+
 //   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 
 //     if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
@@ -362,7 +365,7 @@ protected:
 // 	a[i].modDownToLevel(5);
 //       }
 //     }
-    
+
 //     Ciphertext output;
 //     Ciphertext b_neg = Negate(b);
 //     CtPtrs_VecCt wout(output);
@@ -372,7 +375,7 @@ protected:
 //     return output;
 //   }
 
-  
+
 //   Ciphertext Add(Ciphertext a, Ciphertext b) {
 
 //     if (this->m_bootstrap) {
@@ -380,7 +383,7 @@ protected:
 // 	a[i].modDownToLevel(5);
 //       }
 //     }
-    
+
 //     Ciphertext sum;
 //     CtPtrs_VecCt wsum(sum);
 //     addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
@@ -388,9 +391,9 @@ protected:
 // 		  &(this->m_unpackSlotEncoding));
 //     return sum;
 //   }
-  
 
-  
+
+
 //   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 
 //     if (this->m_bootstrap) {
@@ -398,7 +401,7 @@ protected:
 // 	a[i].modDownToLevel(5);
 //       }
 //     }
-    
+
 //     Ciphertext product;
 //     CtPtrs_VecCt wprod(product);
 //     multTwoNumbers(wprod,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
@@ -408,7 +411,7 @@ protected:
 //     return product;
 //   }
 
-  
+
 //   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
 
 //     if (this->m_bootstrap) {
@@ -435,81 +438,81 @@ protected:
 //     return output;
 //   }
 
-// private:
+ private:
 
-//   bool m_signed_plaintext;
-//   bool m_bool_plaintext;  
+   bool m_signed_plaintext;
+   bool m_bool_plaintext;
 
-  
-// };  /// end of class definition
+
+};  /// end of class definition
 
   ////////////////////////////////////////////////////////////////////////////
   //// ContextHElib_Fp  - use integer plaintext space, e.g. p=65537
 
-  
+
 template<typename PlaintextT>
 class ContextHElib_Fp : public ContextHElib< PlaintextT, Ctxt > {
 
 public:
 
   typedef PlaintextT Plaintext;
-  typedef Ctxt Ciphertext;  
-  
+  typedef Ctxt Ciphertext;
+
   ContextHElib_Fp(long p=65537,      // plaintext modulus
 		  long param_set=0,   // parameter set, from 0 (tiny) to 4 (huge)
 		  bool bootstrap=false, // bootstrap or not?
-		  long haming_weight=128) // Haming weight of secret key
-    : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,haming_weight)
+		  long hamming_weight=128) // Hamming weight of secret key
+    : ContextHElib<Plaintext,Ciphertext>(p,param_set,bootstrap,hamming_weight)
   {
-    this->m_param_name_map.insert({"p", this->m_p});     
+    this->m_param_name_map.insert({"p", this->m_p});
   }
 
-  
+
   Ciphertext encrypt(std::vector<Plaintext> pt) {
     std::vector<long> ptvec;
 
     int pt_len = pt.size();
-    
+
     // Check whether the input is too long to be encrypted in one go
     if (pt_len > this->m_nslots) {
 			throw std::runtime_error("The number of slots is greater than the number of SIMD operations that can be done at a time");
-		} 
+		}
 
     // convert plaintext input into a vector of longs
     for (int i = 0; i < pt_len; i++) {
       ptvec.push_back(pt[i]);
     }
-    
-    // fill up nslots with zeros//// 
+
+    // fill up nslots with zeros////
     for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
-    
+
     // encrypt vector of longs
     Ciphertext ct(*(this->m_publicKey));
-    
+
     this->m_ea->encrypt(ct, *(this->m_publicKey), ptvec);
     this->m_ciphertext_size = sizeof(ct);
-    
+
     return ct;
   }
 
   std::vector<Plaintext> decrypt(Ciphertext ct) {
     std::vector<Plaintext> result;
     std::vector<long> pt;
-    
+
     long pt_transformed;
 
     this->m_ea->decrypt(ct, *(this->m_secretKey), pt);
-    
+
     for (int i = 0; i < pt.size(); i++) {
       // convention - treat this as a negative number
-      if ((pt[i]) > this->m_p / 2)    
+      if ((pt[i]) > this->m_p / 2)
         pt_transformed = pt[i] - this->m_p;
-      else 
+      else
         pt_transformed = pt[i];
 
       result.push_back(pt_transformed  % int(pow(2,this->m_bitwidth)));
     }
-    
+
     return result;
   }
 
@@ -522,12 +525,12 @@ public:
     a -= b;
     return a;
   }
-  
+
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 
     a *= b;
     return a;
-    
+
   }
 
   Ciphertext Negate(Ciphertext a) {
@@ -535,9 +538,9 @@ public:
     if (this->m_bitwidth == 1)  /// special case for binary
       a.addConstant(to_ZZX(1L));
     else
-      a.multByConstant(to_ZZX(-1L));  
-    
-    return a;   
+      a.multByConstant(to_ZZX(-1L));
+
+    return a;
   }
 
   Ciphertext MultByConstant(Ciphertext a, long b) {
@@ -546,12 +549,12 @@ public:
   }
 
   Ciphertext AddConstant(Ciphertext a, long b) {
-    
+
     a.addConstant(to_ZZX(b));
-    
+
     return a;
   }
-  
+
   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
     /// s is 0 or 1
     /// output is s*a + (1-s)*b
@@ -560,10 +563,10 @@ public:
     Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
     return Add(sa, one_minus_s_times_b);
   }
-  
+
 };  /// end of class definition
-  
-  
+
+
 }  // leaving Sheep namespace
-  
+
 #endif // CONTEXT_HELIB_HPP
