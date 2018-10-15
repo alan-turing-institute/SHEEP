@@ -8,17 +8,17 @@
 using namespace SHEEP;
 
 int main(void) {
-        typedef std::vector<ContextClear<uint8_t>::Plaintext> PtVec;
+  
+	typedef std::vector<std::vector<ContextClear<uint8_t>::Plaintext>> PtVec;
 	
 	Circuit circ = single_binary_gate_circuit(Gate::Compare);
   
 	ContextClear<uint8_t> ctx;
 	
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1, 0}, PtVec{1}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0, 1}, PtVec{0}));
-
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0, 0}, PtVec{0}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1, 1}, PtVec{0}));
+	assert(eval_encrypted_check_equal(ctx, circ, PtVec{{1}, {0}}, PtVec{{1}}));
 
 
+	assert(eval_encrypted_check_equal(ctx, circ, 
+																		PtVec{{0, 1}, {0, 1}}, 
+																		PtVec{{0, 0}}));
 };

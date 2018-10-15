@@ -70,7 +70,6 @@ RUN cd SHEEP; git submodule init; git submodule update
 
 
 ## build TFHE
-
 RUN cd SHEEP/lib/tfhe; git submodule init
 RUN cd SHEEP/lib/tfhe; git submodule update
 RUN rm -fr SHEEP/lib/tfhe/build

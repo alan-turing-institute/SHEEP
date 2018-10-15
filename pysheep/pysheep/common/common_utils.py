@@ -100,9 +100,12 @@ def check_inputs(input_dict, input_type):
     """
     min_allowed, max_allowed = get_min_max(input_type)
 
-    for val in input_dict.values():
-        if int(val) < min_allowed or int(val) > max_allowed:
+    for list_int in input_dict.values():
+      for val_int in list_int:
+        if int(val_int) < min_allowed or int(val_int) > max_allowed:
+
             return False
+            
     return True  # all inputs were ok
 
 

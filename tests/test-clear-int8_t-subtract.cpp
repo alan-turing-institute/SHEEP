@@ -4,47 +4,37 @@
 
 #include "circuit-repo.hpp"
 
+typedef std::chrono::duration<double, std::micro> DurationT;
+
 using namespace SHEEP;
 
 int main(void) {
+//// instantiate the Circuit Repository
+	CircuitRepo cr;
 
-  
-    //// instantiate the Circuit Repository
-  CircuitRepo cr;
+	Circuit circ = cr.create_circuit(Gate::Subtract, 1);
+	std::cout << circ;
+	std::vector<DurationT> durations;
+	ContextClear<int8_t> ctx;
 
-  //// build a circuit with a specified depth of a specified gate
-  
-  Circuit C = cr.create_circuit(Gate::Subtract, 3);
-  std::cout << C;
-  
-  
-  ContextClear<int8_t> ctx;
-  
-  //ContextClear<int8_t>::CircuitEvaluator run_circuit;
-  //run_circuit = ctx.compile(C);
-	
-  std::list<ContextClear<int8_t>::Plaintext> plaintext_inputs = {127, 35, 6, 7};
-  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_inputs;
+	/// test small postitive numbers
+	std::vector<std::vector<int8_t>> inputs = {{22}, {15}};
+	std::vector<int8_t> exp_values = {7};
 
+	std::vector<std::vector<int8_t>> result = ctx.eval_with_plaintexts(circ, inputs, durations);
 
+	for (int i = 0; i < exp_values.size(); i++) {
+		std::cout << std::to_string(inputs[0][i]) << " - " <<  std::to_string(inputs[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+		assert(result.front()[i] == exp_values[i]);
+	}
 
-  
-  for (ContextClear<int8_t>::Plaintext pt: plaintext_inputs) {
-    ciphertext_inputs.push_back(ctx.encrypt(pt));
-  }
-  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_outputs;
-  using microsecond = std::chrono::duration<double, std::micro>;
-  microsecond time = ctx.eval(C, ciphertext_inputs, ciphertext_outputs);
-  
-  std::list<ContextClear<int8_t>::Plaintext> plaintext_outputs;
-  for (ContextClear<int8_t>::Ciphertext ct: ciphertext_outputs) {
-    ContextClear<int8_t>::Plaintext pt = ctx.decrypt(ct);
-    plaintext_outputs.push_back(pt);
-    std::cout << "output: "<<std::to_string(pt) << std::endl;
-  }
-  std::cout << "time was " << time.count() << " microseconds\n";
+	inputs = {{10, -13, 0}, {12, 66, 22}};
+	exp_values = {-2, -79, -22};
 
-  if ( plaintext_outputs.front() == 79 ) return 0;
-  return -1;
-  
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+
+	for (int i = 0; i < exp_values.size(); i++) {
+		std::cout << std::to_string(inputs[0][i]) << " - " <<  std::to_string(inputs[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+		assert(result.front()[i] == exp_values[i]);
+	}
 }

@@ -6,7 +6,7 @@
 
 int main(void) {
 	using namespace SHEEP;
-	typedef std::vector<ContextClear<bool>::Plaintext> PtVec;
+	typedef std::vector<std::vector<ContextClear<bool>::Plaintext>> PtVec;
 
 	Circuit circ;
 	Wire s = circ.add_input("s");
@@ -17,7 +17,5 @@ int main(void) {
 
 	ContextClear<bool> ctx;
 	
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {0, 1, 0}), {0}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {1, 0, 0}), {0}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {1, 1, 0}), {1}));
+	assert(all_equal(ctx.eval_with_plaintexts(circ, {{0, 1, 1}, {1, 0, 1}, {0, 0, 0}}), {{0, 0, 1}}));
 }

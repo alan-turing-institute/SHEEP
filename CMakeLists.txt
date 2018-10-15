@@ -4,7 +4,6 @@ project (Sheep)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # C++ REST API for interaction with web app - also needs openSSL, Boost, Threads
 set(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR} /usr/local/opt/openssl)
 find_package(OpenSSL)
@@ -33,14 +32,14 @@ enable_testing()
 include_directories(include)
 
 
-find_package(LP)
+#find_package(LP)
 if (LP_FOUND)
   include_directories(SYSTEM ${LP_INCLUDE_DIRS})
   find_library(GMP_LIBRARIES NAMES gmp)
   add_definitions(-DHAVE_LP)  
 endif (LP_FOUND)
 
-find_package(TFHE)
+#find_package(TFHE)
 if (TFHE_FOUND)
     include_directories(SYSTEM ${TFHE_INCLUDE_DIRS})
     add_definitions(-DHAVE_TFHE)
@@ -54,14 +53,14 @@ if (HElib_FOUND)
    add_definitions(-DHAVE_HElib)
 endif (HElib_FOUND)
 
-find_package(TBB)
+#find_package(TBB)
 if (TBB_FOUND)
   link_libraries(tbb)
   include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
   add_definitions(-DHAVE_TBB)
 endif()
 
-find_package(SEAL)
+#find_package(SEAL)
 if (SEAL_FOUND)
   include_directories(SYSTEM ${SEAL_INCLUDE_DIRS})
   add_definitions(-DHAVE_SEAL)
