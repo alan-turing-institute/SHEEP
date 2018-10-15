@@ -14,32 +14,18 @@ int main(void) {
   
 	ContextHElib_Fp<uint8_t> ctx;
 
-	/// test small postitive numbers
-	ContextHElib_Fp<uint8_t>::Plaintext pt_input = 15;
+	std::vector<ContextHElib_Fp<uint8_t>::Plaintext> pt_input = {15, 42, 240};
 	ContextHElib_Fp<uint8_t>::Ciphertext ct = ctx.encrypt(pt_input);
+
 	long const_val = 22;
+	
+	// Perform operation
 	ContextHElib_Fp<uint8_t>::Ciphertext ct_out = ctx.AddConstant(ct, const_val);
-	ContextHElib_Fp<uint8_t>::Plaintext pt_out = ctx.decrypt(ct_out);
-	std::cout<<"D( E(15) + 22) = "<<std::to_string(pt_out)<<std::endl;
-	assert(pt_out == 37);
-	/// add negative numbers
-	pt_input = 45;
-	ct = ctx.encrypt(pt_input);
-	const_val = -42;
-	ct_out = ctx.AddConstant(ct, const_val);
-	pt_out = ctx.decrypt(ct_out);
-	std::cout<<"D( E(45) - 42) = "<<std::to_string(pt_out)<<std::endl;
-	assert(pt_out == 3);
-	/// out-of-range positive
-	pt_input = 220;
-	ct = ctx.encrypt(pt_input);
-	const_val = 121;
-	ct_out = ctx.AddConstant(ct, const_val);
-	pt_out = ctx.decrypt(ct_out);
-	std::cout<<"D( E(220) + 121) = "<<std::to_string(pt_out)<<std::endl;
-	assert(pt_out == 85);
-
 	
+	// Decrypt
+	std::vector<ContextHElib_Fp<uint8_t>::Plaintext> pt_out = ctx.decrypt(ct_out);
 	
-
+	assert(pt_out[0] == 37);
+	assert(pt_out[1] == 64);
+	assert(pt_out[2] == 6);
 }

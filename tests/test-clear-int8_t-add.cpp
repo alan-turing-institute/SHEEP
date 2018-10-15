@@ -6,41 +6,31 @@
 
 using namespace SHEEP;
 
-int main(void) {
+typedef std::chrono::duration<double, std::micro> DurationT;
 
+int main(void) {
+  using namespace SHEEP;
   
-    //// instantiate the Circuit Repository
+  //// instantiate the Circuit Repository
   CircuitRepo cr;
 
-  //// build a circuit with a specified depth of a specified gate
-  
-  Circuit C = cr.create_circuit(Gate::Add, 3);
-  std::cout << C;
-  
-  ContextClear<int8_t> ctx;
-  
-  //ContextClear<int8_t>::CircuitEvaluator run_circuit;
-  //run_circuit = ctx.compile(C);
-	
-  std::list<ContextClear<int8_t>::Plaintext> plaintext_inputs = {6, 9, 25, 67};
-  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_inputs;
-  
-  for (ContextClear<int8_t>::Plaintext pt: plaintext_inputs)
-    ciphertext_inputs.push_back(ctx.encrypt(pt));
-  
-  std::list<ContextClear<int8_t>::Ciphertext> ciphertext_outputs;
-  using microsecond = std::chrono::duration<double, std::micro>;
-  microsecond time = ctx.eval(C, ciphertext_inputs, ciphertext_outputs);
-  
-  std::list<ContextClear<int8_t>::Plaintext> plaintext_outputs;
-  for (ContextClear<int8_t>::Ciphertext ct: ciphertext_outputs) {
-    ContextClear<int8_t>::Plaintext pt = ctx.decrypt(ct);
-    plaintext_outputs.push_back(pt);
-    std::cout << "output: "<<std::to_string(pt) << std::endl;
-  }
-  std::cout << "time was " << time.count() << " microseconds\n";
+  // circ contains an Add gate with two inputs and one output
+  Circuit circ = cr.create_circuit(Gate::Add, 3);
 
-  if ( plaintext_outputs.front() == 107) return 0;
-  return -1;
+  std::cout << circ;
+  std::vector<DurationT> durations;
   
+  // The type of the wires in circ are signed 8-bit numbers
+  ContextClear<int8_t> ctx;
+
+  // test small postitive numbers
+  std::vector<std::vector<int8_t>> inputs = {{1, -9}, {2, 8}, {3, 1}, {4, 0}};
+  std::vector<int8_t> exp_values = {10, 0};
+
+  std::vector<std::vector<int8_t>> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+
+  for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(inputs[0][i]) << " + " <<  std::to_string(inputs[1][i]) << " + " << std::to_string(inputs[2][i]) << " + " <<  std::to_string(inputs[3][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+    assert(result.front()[i] == exp_values[i]);
+  }
 }

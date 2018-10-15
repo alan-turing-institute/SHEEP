@@ -23,32 +23,32 @@ add_executable(clear-context-example
                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
 add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
+ 
+
+# if (HElib_FOUND)
+#     add_executable(helib-context-example
+#                      helib-context-example.cpp
+#                      ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+#     add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
+
+#     target_link_libraries(helib-context-example
+#                             ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+#     add_executable(bitonic-sort-helib
+#     		   bitonic-sort-helib.cpp
+#   		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+#   		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+#   		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+#     target_link_libraries(bitonic-sort-helib
+# 			  ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+#     add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
 
 
-if (HElib_FOUND)
-    add_executable(helib-context-example
-                     helib-context-example.cpp
-                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-    add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
-
-    target_link_libraries(helib-context-example
-                            ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-
-    add_executable(bitonic-sort-helib
-    		   bitonic-sort-helib.cpp
-  		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-  		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-  		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
-
-    target_link_libraries(bitonic-sort-helib
-			  ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-
-    add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
-
-
-
-endif(HElib_FOUND)
+# endif(HElib_FOUND)
 
 if (TFHE_FOUND)
     add_executable(tfhe-example

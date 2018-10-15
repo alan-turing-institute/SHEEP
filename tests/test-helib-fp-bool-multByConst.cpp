@@ -15,20 +15,28 @@ int main(void) {
 	ContextHElib_Fp<bool> ctx;
 
 	/// test small postitive numbers
-	ContextHElib_Fp<bool>::Plaintext pt_input = 1;
+	std::vector<ContextHElib_Fp<bool>::Plaintext> pt_input = {1, 0};
 	ContextHElib_Fp<bool>::Ciphertext ct = ctx.encrypt(pt_input);
-	long const_val = 1;
-	ContextHElib_Fp<bool>::Ciphertext ct_out = ctx.MultByConstant(ct, const_val);
-	ContextHElib_Fp<bool>::Plaintext pt_out = ctx.decrypt(ct_out);
-	std::cout<<"D( E(1) * 1) = "<<std::to_string(pt_out)<<std::endl;
-	assert(pt_out == 1);
-	/// 0+1
-	pt_input = 0;
-	ct = ctx.encrypt(pt_input);
-	const_val = -1;
-	ct_out = ctx.MultByConstant(ct, const_val);
-	pt_out = ctx.decrypt(ct_out);
-	std::cout<<"D( E(0) * 1) = "<<std::to_string(pt_out)<<std::endl;
-	assert(pt_out == 0);
 
+	long const_val = 1;
+
+	// Perform operation
+	ContextHElib_Fp<bool>::Ciphertext ct_out = ctx.MultByConstant(ct, const_val);
+
+	// Decrypt
+	std::vector<ContextHElib_Fp<bool>::Plaintext> pt_out = ctx.decrypt(ct_out);
+
+	assert(pt_out[0] == true);
+	assert(pt_out[1] == false);
+
+	const_val = 0;
+
+	// Perform operation
+	ct_out = ctx.MultByConstant(ct, const_val);
+
+	// Decrypt
+	pt_out = ctx.decrypt(ct_out);
+
+	assert(pt_out[0] == false);
+	assert(pt_out[1] == false);
 }

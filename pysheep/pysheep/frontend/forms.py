@@ -22,9 +22,6 @@ class CircuitForm(Form):
     HE_library = MultiCheckboxField('Select HE libraries:',
                                     choices=[])
 
-
-
-
 class ResultsForm(Form):
     """
     Let the user choose what results to see
@@ -74,9 +71,11 @@ def build_inputs_form(inputs):
     """
     class InputsForm(Form):
         pass
+    
     for i in inputs:
-        field = IntegerField(label=i)
-        setattr(InputsForm,i,field)
+        field = StringField(label = i)
+        setattr(InputsForm, i, field)
+
     return InputsForm
 
 

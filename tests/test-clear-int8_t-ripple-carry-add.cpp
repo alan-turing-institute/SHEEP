@@ -8,7 +8,14 @@ using namespace SHEEP;
 
 int main(void) {
 	ContextClear<int8_t> ctx;
-	assert(ctx.RippleCarryAdd(10, 12) == 22);
-	std::cout << std::to_string(ctx.RippleCarryAdd(10, -12)) << "\n";
-	assert(ctx.RippleCarryAdd(10, -12) == -2);
+	
+	std::vector<int8_t> a, b, c;
+
+	a = {10, 10};
+	b = {12, -3};
+	c = {22, 7};
+
+	std::cout << std::to_string(a[0]) << " + " << std::to_string(b[0]) << " = " << std::to_string(ctx.RippleCarryAdd(a, b)[0]) << "\n";
+
+	assert(ctx.RippleCarryAdd(a, b) == c);
 }
