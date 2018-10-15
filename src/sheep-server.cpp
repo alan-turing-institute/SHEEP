@@ -300,10 +300,10 @@ SheepServer::configure_and_run(http_request message) {
 
 		// parent process: wait for child or kill after timeout
 
-		// timeout hardcoded as 5 s for now
+		// timeout hardcoded as 10 s for now
 		// POSIX: can assume this is an integer type
 
-		time_t timeout_us = 5000000L;
+		time_t timeout_us = 10000000L;
 
 		// go to sleep for the length of the timeout and a grace period
 		struct timespec req, rem;
