@@ -207,7 +207,7 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::cout<<" === Read inputs file - found "<<inputs.size()<<" values."<<std::endl;
 	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
 	std::cout<<" === Matched inputs from file with circuit inputs"<<std::endl;
-	std::vector<std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
+	std::vector<PlaintextT> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
 	std::cout<<" === Ran benchmark test. "<<std::endl;
 	test_ctx->print_parameters();
 	test_ctx->print_sizes();

@@ -1,54 +1,54 @@
-add_executable(circuit-parser
-                 circuit-parser.cpp
-		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+# add_executable(circuit-parser
+#                  circuit-parser.cpp
+# 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-add_executable(circuit-example
-                 circuit-example.cpp
-		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-add_test(NAME circuit-example COMMAND $<TARGET_FILE:circuit-example>)
+# add_executable(circuit-example
+#                  circuit-example.cpp
+# 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+# add_test(NAME circuit-example COMMAND $<TARGET_FILE:circuit-example>)
 
-add_executable(simple-circuit-maker
-                 simple-circuit-maker.cpp
-		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+# add_executable(simple-circuit-maker
+#                  simple-circuit-maker.cpp
+# 		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-add_executable(bitonic-sorting-circuit
-    		   bitonic-sorting-circuit.cpp
-  		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-  		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-  		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
-
-
-add_executable(clear-context-example
-                 clear-context-example.cpp
-                 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
-add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
- 
-
-# if (HElib_FOUND)
-#     add_executable(helib-context-example
-#                      helib-context-example.cpp
-#                      ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
-#     add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
-
-#     target_link_libraries(helib-context-example
-#                             ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-
-#     add_executable(bitonic-sort-helib
-#     		   bitonic-sort-helib.cpp
+# add_executable(bitonic-sorting-circuit
+#     		   bitonic-sorting-circuit.cpp
 #   		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 #   		   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
 #   		   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-#     target_link_libraries(bitonic-sort-helib
-# 			  ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 
-#     add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
+# add_executable(clear-context-example
+#                  clear-context-example.cpp
+#                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+# add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
+ 
+
+if (HElib_FOUND)
+    add_executable(helib-context-example
+                     helib-context-example.cpp
+                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+    add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
+
+    # target_link_libraries(helib-context-example
+    #                         ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+    # add_executable(bitonic-sort-helib
+    # 		   bitonic-sort-helib.cpp
+  	# 	   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  	# 	   ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+  	# 	   ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+    # target_link_libraries(bitonic-sort-helib
+		# 	  ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+    # add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
 
 
 
-# endif(HElib_FOUND)
+endif(HElib_FOUND)
 
 if (TFHE_FOUND)
     add_executable(tfhe-example
@@ -119,26 +119,26 @@ endif(LP_FOUND)
 
 ### The "benchmark" executable, to run a specified HElib on a given circuit.
 
-add_executable(benchmark
-	    	benchmark.cpp
-                ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-	      )
-if (HElib_FOUND)
-target_link_libraries(benchmark ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-endif(HElib_FOUND)
+# add_executable(benchmark
+# 	    	benchmark.cpp
+#                 ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+# 	      )
+# if (HElib_FOUND)
+# target_link_libraries(benchmark ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+# endif(HElib_FOUND)
 
-if (TFHE_FOUND)
-target_link_libraries(benchmark ${TFHE_LIBRARIES})
-endif(TFHE_FOUND)
+# if (TFHE_FOUND)
+# target_link_libraries(benchmark ${TFHE_LIBRARIES})
+# endif(TFHE_FOUND)
 
-if (SEAL_FOUND)
-target_link_libraries(benchmark ${SEAL_LIBRARIES})
-endif(SEAL_FOUND)
-if (LP_FOUND)
-target_link_libraries(benchmark ${LP_LIBRARIES} ${GMP_LIBRARIES})
-endif(LP_FOUND)
+# if (SEAL_FOUND)
+# target_link_libraries(benchmark ${SEAL_LIBRARIES})
+# endif(SEAL_FOUND)
+# if (LP_FOUND)
+# target_link_libraries(benchmark ${LP_LIBRARIES} ${GMP_LIBRARIES})
+# endif(LP_FOUND)
 
-add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
+# add_test(NAME benchmark COMMAND $<TARGET_FILE:benchmark>)
 
 ### The "run-sheep-server" executable, a REST API with endpoints to specify circuits, HE libraries etc and run tests.
 
