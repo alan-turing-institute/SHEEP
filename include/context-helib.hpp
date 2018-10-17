@@ -245,15 +245,19 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
   }
 
   Ciphertext encrypt(std::vector<Plaintext> pt) {
-    
-    Ctxt mu(*(this->m_publicKey), (long)pt.size());
+
+    if (pt.size() > this->m_nslots) {
+      throw std::runtime_error("The number of slots is greater than the number of SIMD operations that can be done at a time");
+    }
+
+    Ctxt mu(*(this->m_publicKey), (long)this->m_nslots);
     Ciphertext ct;
 
     resize(ct, this->m_bitwidth, mu);
 
     for (int j = 0; j < this->m_bitwidth; j++) {
-      vector<ZZX> sliced_pt = vector<ZZX>(std::max((int) pt.size(), (int)this->m_ea->size()));
-      
+      vector<ZZX> sliced_pt = vector<ZZX>(this->m_nslots);
+
       // sliced_pt[i] is the jth bit of input i
       for (int i = 0; i < pt.size(); i++) {
           sliced_pt[i] = ZZX((pt[i] >> j) & 1);
@@ -265,7 +269,7 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
   }
 
   std::vector<Plaintext> decrypt(Ciphertext ct) {
-    
+
     std::vector<long> ct_decrypt = std::vector<long>(ct.length());
     std::vector<Plaintext> pt_transformed = std::vector<Plaintext>(ct.length());
 
@@ -280,8 +284,6 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
 
   Ciphertext Negate(Ciphertext a) {
-    
-    return a;
 
     /// bootstrapping method copied from HElib's Test_binaryCompare
     if (this->m_bootstrap) {
@@ -294,28 +296,16 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
     Ciphertext output;
 
     for (int i=0; i < this->m_bitwidth; ++i) {
-
-      std::cout <<  "DOING BIT " << i << std::endl;
-
       Ctxt abit = a[i];
-
-      std::cout <<  "Before add constant " << i << std::endl;
-
-      //abit.negate();
       abit.addConstant(to_ZZX(1L));
-
-      std::cout <<  "after add constant " << i << std::endl;
-
       output.append(abit);
-
-      std::cout <<  "After append " << i << std::endl;
     }
 
     if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
 
     /// for integers, need to add 1.
     std::vector<Plaintext> one;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < this->m_nslots; i++) {
       one.push_back(1);
     }
 
@@ -323,22 +313,25 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
     Ciphertext output_final = Add(output, one_enc);
 
     return output_final;
+
   }
 
-//   Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-//     /// "Maximum" i.e. "OR" only valid for bool inputs.  If not, call the base-class function
-//     /// (which will throw a GateNotImplemented error).
-//     if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
-//     /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
-//     Ctxt a1 = a[0];
-//     Ctxt a2 = a[0];
-//     a1 += b[0];  // XOR(a,b)
-//     a2 *= b[0]; // AND(a,b)
-//     a1 += a2; // XOR the previous two lines
-//     Ciphertext output;
-//     output.append(a1);
-//     return output;
-//   }
+   Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+     /// "Maximum" i.e. "OR" only valid for bool inputs.  If not, call the base-class function
+     /// (which will throw a GateNotImplemented error).
+     if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
+     /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
+     Ciphertext output;
+     for (int i = 0; i < this->m_nslots; i++) {
+       Ctxt a1 = a[i];
+       Ctxt a2 = a[i];
+       a1 += b[i];  // XOR(a,b)
+       a2 *= b[i]; // AND(a,b)
+       a1 += a2; // XOR the previous two lines
+       output.append(a1);
+     }
+     return output;
+   }
 
 
 //   Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
@@ -468,7 +461,7 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
   // Ciphertext AddConstant(Ciphertext a, long b) {
 
-    
+
   // }
 
 
@@ -510,11 +503,15 @@ public:
     // Check whether the input is too long to be encrypted in one go
     if (pt_len > this->m_nslots) {
 			throw std::runtime_error("The number of slots is greater than the number of SIMD operations that can be done at a time");
-		}
+    }
 
     // convert plaintext input into a vector of longs
     for (int i = 0; i < pt_len; i++) {
       ptvec.push_back(pt[i]);
+    }
+    // fill up extra slots with zeros
+    for (int i = pt_len; i <= this-> m_nslots; i++) {
+      ptvec.push_back(0);
     }
 
     // fill up nslots with zeros////
