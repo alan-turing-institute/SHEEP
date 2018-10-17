@@ -11,7 +11,7 @@ before_install:
 
    
 script:
-  - docker run sheep_sheep-server make all
+  #- docker run sheep_sheep-server make all
   - docker run sheep_sheep-server make test
 
 after_success:
