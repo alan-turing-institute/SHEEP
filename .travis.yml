@@ -11,8 +11,8 @@ before_install:
 
    
 script:
-  - docker run sheep-server make all
-  - docker run sheep-server make test
+  - docker run sheep_sheep-server make all
+  - docker run sheep_sheep-server make test
 
 after_success:
   - docker-compose down
