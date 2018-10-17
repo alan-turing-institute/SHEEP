@@ -279,30 +279,51 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
   }
 
 
-//   Ciphertext Negate(Ciphertext a) {
+  Ciphertext Negate(Ciphertext a) {
+    
+    return a;
 
-//     /// bootstrapping method copied from HElib's Test_binaryCompare
-//     if (this->m_bootstrap) {
-//       for (int i=0; i< this->m_bitwidth; ++i) {
-// 	a[i].modDownToLevel(5);
-//       }
-//     }
+    /// bootstrapping method copied from HElib's Test_binaryCompare
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	      a[i].modDownToLevel(5);
+      }
+    }
 
+    /// Two's complement negation - negate all bits then add one
+    Ciphertext output;
 
-//     /// Two's complement negation - negate all bits then add one
-//     Ciphertext output;
-//     for (int i=0; i < this->m_bitwidth; ++i) {
-//       Ctxt abit = a[i];
-//       //      abit.negate();
-//       abit.addConstant(to_ZZX(1L));
-//       output.append(abit);
-//     }
-//     if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
-//     /// for integers, need to add 1.
-//     Ciphertext one_enc = encrypt((Plaintext)1);
-//     Ciphertext output_final = Add(output,one_enc);
-//     return output_final;
-//   }
+    for (int i=0; i < this->m_bitwidth; ++i) {
+
+      std::cout <<  "DOING BIT " << i << std::endl;
+
+      Ctxt abit = a[i];
+
+      std::cout <<  "Before add constant " << i << std::endl;
+
+      //abit.negate();
+      abit.addConstant(to_ZZX(1L));
+
+      std::cout <<  "after add constant " << i << std::endl;
+
+      output.append(abit);
+
+      std::cout <<  "After append " << i << std::endl;
+    }
+
+    if (this->m_bitwidth == 1)  return output;  // for a bool, we are already done..
+
+    /// for integers, need to add 1.
+    std::vector<Plaintext> one;
+    for (int i = 0; i < 3; i++) {
+      one.push_back(1);
+    }
+
+    Ciphertext one_enc = encrypt(one);
+    Ciphertext output_final = Add(output, one_enc);
+
+    return output_final;
+  }
 
 //   Ciphertext Maximum(Ciphertext a, Ciphertext b) {
 //     /// "Maximum" i.e. "OR" only valid for bool inputs.  If not, call the base-class function
@@ -380,40 +401,42 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 //   }
 
 
-//   Ciphertext Add(Ciphertext a, Ciphertext b) {
+  Ciphertext Add(Ciphertext a, Ciphertext b) {
 
-//     if (this->m_bootstrap) {
-//       for (int i=0; i< this->m_bitwidth; ++i) {
-// 	a[i].modDownToLevel(5);
-//       }
-//     }
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	      a[i].modDownToLevel(5);
+      }
+    }
 
-//     Ciphertext sum;
-//     CtPtrs_VecCt wsum(sum);
-//     addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
-// 		  this->m_bitwidth,
-// 		  &(this->m_unpackSlotEncoding));
-//     return sum;
-//   }
+    Ciphertext sum;
+    CtPtrs_VecCt wsum(sum);
 
+    addTwoNumbers(wsum,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
+		  this->m_bitwidth,
+		  &(this->m_unpackSlotEncoding));
 
+    return sum;
+  }
 
-//   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+  Ciphertext Multiply(Ciphertext a, Ciphertext b) {
 
-//     if (this->m_bootstrap) {
-//       for (int i=0; i< this->m_bitwidth; ++i) {
-// 	a[i].modDownToLevel(5);
-//       }
-//     }
+    if (this->m_bootstrap) {
+      for (int i=0; i< this->m_bitwidth; ++i) {
+	      a[i].modDownToLevel(5);
+      }
+    }
 
-//     Ciphertext product;
-//     CtPtrs_VecCt wprod(product);
-//     multTwoNumbers(wprod,CtPtrs_VecCt(a),CtPtrs_VecCt(b),
-// 		   false,
-// 		   this->m_bitwidth,
-// 		   &(this->m_unpackSlotEncoding));
-//     return product;
-//   }
+    Ciphertext product;
+    CtPtrs_VecCt wprod(product);
+
+    multTwoNumbers(wprod, CtPtrs_VecCt(a), CtPtrs_VecCt(b),
+		   false,
+		   this->m_bitwidth,
+		   &(this->m_unpackSlotEncoding));
+
+    return product;
+  }
 
 
 //   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
@@ -442,10 +465,17 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 //     return output;
 //   }
 
- private:
 
-   bool m_signed_plaintext;
-   bool m_bool_plaintext;
+  // Ciphertext AddConstant(Ciphertext a, long b) {
+
+    
+  // }
+
+
+  private:
+
+    bool m_signed_plaintext;
+    bool m_bool_plaintext;
 
 
 };  /// end of class definition

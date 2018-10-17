@@ -69,6 +69,10 @@ configure_file(undef-output.sheep undef-output.sheep)
 #add_executable(test-bit-get-set test-bit-get-set.cpp)
 #add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
+##################################################################################################
+### TFHE
+##################################################################################################
+
 # if (TFHE_FOUND)
 #     add_executable(test-tfhe-bool-encrypt-decrypt
 #                      test-tfhe-bool-encrypt-decrypt.cpp)
@@ -149,7 +153,7 @@ if (HELIB_FOUND)
         # operations
         # compare ????????  
         # add encrypt-decrypt multiply negate select subtract
-        foreach(op IN ITEMS encrypt-decrypt)	
+        foreach(op IN ITEMS add encrypt-decrypt multiply negate)	
           add_executable(test-helib-${f}-${type}-${op}
               test-helib-${f}-${type}-${op}.cpp	
               ${CMAKE_SOURCE_DIR}/src/circuit.cpp)

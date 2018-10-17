@@ -4,39 +4,28 @@
 #include "context-helib.hpp"
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
+#include "circuit-repo.hpp"
 
 typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
-	using namespace SHEEP;
-	typedef std::vector<ContextHElib_F2<int8_t>::Plaintext> PtVec;
 
-	Circuit circ;
-	Wire in = circ.add_input("in");
-	Wire out = circ.add_assignment("out", Gate::Negate, in);
-	circ.set_output(out);
-
-	std::cout<<circ;
-	
+  using namespace SHEEP;
+  
+  CircuitRepo cr;
+	Circuit circ = cr.create_circuit(Gate::Negate, 1);
+	std::cout << circ;
+  std::vector<DurationT> durations;
 	ContextHElib_F2<int8_t> ctx;
-	std::vector<DurationT> durations;
-	
-///  positive to negative
-        std::vector<int8_t> inputs = {15};
-        std::vector<int8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(15) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == -15);
-	///  negative to positive
-	inputs = {-15};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(-15) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == 15);
-	/// max  negative
-	inputs = {-128};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(-128) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == -128);
-	
-	       
 
+	std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> pt_input = {{3, 10, -120}};
+
+	std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<int8_t> exp_values = {-3, -10, 120};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << "- (" << std::to_string(pt_input[0][i]) << ") = " << std::to_string(result[0][i]) << std::endl;
+    assert(result.front()[i] == exp_values[i]);
+  }
 }
