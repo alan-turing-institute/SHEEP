@@ -1,6 +1,6 @@
 FROM tomaslaz/sheep_base as sheep
 
-COPY build SHEEP/build
+#COPY build SHEEP/build
 COPY cmake SHEEP/cmake
 COPY CMakeLists.txt SHEEP/CMakeLists.txt 
 COPY docker-compose.yml SHEEP/docker-compose.yml
