@@ -270,15 +270,14 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
   std::vector<Plaintext> decrypt(Ciphertext ct) {
 
-    std::vector<long> ct_decrypt = std::vector<long>(ct.length());
-    std::vector<Plaintext> pt_transformed = std::vector<Plaintext>(ct.length());
+    std::vector<long> ct_decrypt = std::vector<long>(this->m_nslots);
+    std::vector<Plaintext> pt_transformed = std::vector<Plaintext>(this->m_nslots);
 
     decryptBinaryNums(ct_decrypt, CtPtrs_VecCt(ct), *(this->m_secretKey), *(this->m_ea));
 
-    for (int i = 0; i < ct.length(); i++) {
+    for (int i = 0; i < this->m_nslots; i++) {
       pt_transformed[i] = ct_decrypt[i] % int(pow(2, this->m_bitwidth));
     }
-
     return pt_transformed;
   }
 
@@ -322,76 +321,80 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
      if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
      /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
      Ciphertext output;
-     for (int i = 0; i < this->m_nslots; i++) {
-       Ctxt a1 = a[i];
-       Ctxt a2 = a[i];
-       a1 += b[i];  // XOR(a,b)
-       a2 *= b[i]; // AND(a,b)
-       a1 += a2; // XOR the previous two lines
-       output.append(a1);
-     }
+     //     for (int i = 0; i < this->m_nslots; i++) {
+     //std::cout<<"evaluating bit "<<i<<std::endl;
+     std::cout<<" size of a "<<a.length()<<std::endl;
+     Ctxt a1 = a[0];
+     //   std::cout<<" size of a1 "<<a1.length()<<std::endl;
+     Ctxt a2 = a[0];
+     a1 += b[0];  // XOR(a,b)
+     a2 *= b[0]; // AND(a,b)
+     a1 += a2; // XOR the previous two lines
+     output.append(a1);
+     //}
+     std::cout<<" about  to return outptu"<<std::endl;
      return output;
    }
 
 
-//   Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
+   Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
 
 
-//     Ctxt mu(*(this->m_publicKey));
-//     Ctxt ni(*(this->m_publicKey));
-//     Ciphertext cmax, cmin;
-//     CtPtrs_VecCt wMin(cmin), wMax(cmax);  /// wrappers around output vectors
-//     compareTwoNumbers(wMax, wMin, mu, ni,
-// 		      CtPtrs_VecCt(a), CtPtrs_VecCt(b),
-// 		      &(this->m_unpackSlotEncoding));
-//     /// mu is now a Ctxt which is the encryption of 1 if a>b and 0 otherwise.
-//     /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
-//     Ciphertext output;
-//     output.append(mu);
-//     return output;
-//   }
+     Ctxt mu(*(this->m_publicKey));
+     Ctxt ni(*(this->m_publicKey));
+     Ciphertext cmax, cmin;
+     CtPtrs_VecCt wMin(cmin), wMax(cmax);  /// wrappers around output vectors
+     compareTwoNumbers(wMax, wMin, mu, ni,
+ 		      CtPtrs_VecCt(a), CtPtrs_VecCt(b),
+ 		      &(this->m_unpackSlotEncoding));
+     /// mu is now a Ctxt which is the encryption of 1 if a>b and 0 otherwise.
+     /// but we need to put it into NTL::Vec<Ctxt> as that is our new "Ciphertext" type.
+     Ciphertext output;
+     output.append(mu);
+     return output;
+   }
 
-//   Ciphertext Compare_signed(Ciphertext a, Ciphertext b) {
-//     //// subtract a-b and look at sign-bit
-//     Ciphertext b_minus_a = Subtract(b,a);
-//     Ciphertext output;
+   Ciphertext Compare_signed(Ciphertext a, Ciphertext b) {
+     //// subtract a-b and look at sign-bit
+     Ciphertext b_minus_a = Subtract(b,a);
+     Ciphertext output;
 
-//     Ctxt sign_bit = b_minus_a[this->m_bitwidth -1];   /// is sign-bit set?  if yes, b
-//     ///    sign_bit.addConstant(to_ZZX(1L));  //// now n
-//     output.append(sign_bit);
-//     return output;
-//   }
+     Ctxt sign_bit = b_minus_a[this->m_bitwidth -1];   /// is sign-bit set?  if yes, b
+     ///    sign_bit.addConstant(to_ZZX(1L));  //// now n
+     output.append(sign_bit);
+     return output;
+   }
 
-//   Ciphertext Compare(Ciphertext a, Ciphertext b) {
-//     if (this->m_bootstrap) {
-//       for (int i=0; i< this->m_bitwidth; ++i) {
-// 	a[i].modDownToLevel(5);
-// 	b[i].modDownToLevel(5);
-//       }
-//     }
-//     if (this->m_signed_plaintext) return Compare_signed(a,b);
-//     else return Compare_unsigned(a,b);
-//   }
+   Ciphertext Compare(Ciphertext a, Ciphertext b) {
+     if (this->m_bootstrap) {
+       for (int i=0; i< this->m_bitwidth; ++i) {
+ 	a[i].modDownToLevel(5);
+ 	b[i].modDownToLevel(5);
+       }
+     }
+     if (this->m_signed_plaintext) return Compare_signed(a,b);
+     else return Compare_unsigned(a,b);
+   }
 
 
-//   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 
-//     if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
+     if (this->m_bitwidth == 1) return Add(a,b);  //// for bools, add and subtract are the same
 
-//     if (this->m_bootstrap) {
-//       for (int i=0; i< this->m_bitwidth; ++i) {
-// 	a[i].modDownToLevel(5);
-//       }
-//     }
+     if (this->m_bootstrap) {
+       for (int i=0; i< this->m_bitwidth; ++i) {
+ 	a[i].modDownToLevel(5);
+       }
+     }
 
-//     Ciphertext output;
-//     Ciphertext b_neg = Negate(b);
-//     CtPtrs_VecCt wout(output);
-//     addTwoNumbers(wout,CtPtrs_VecCt(a),CtPtrs_VecCt(b_neg),
-// 		  this->m_bitwidth,
-// 		  &(this->m_unpackSlotEncoding));
-//     return output;
-//   }
+     Ciphertext output;
+     Ciphertext b_neg = Negate(b);
+     CtPtrs_VecCt wout(output);
+     addTwoNumbers(wout,CtPtrs_VecCt(a),CtPtrs_VecCt(b_neg),
+ 		  this->m_bitwidth,
+ 		  &(this->m_unpackSlotEncoding));
+     return output;
+   }
 
 
   Ciphertext Add(Ciphertext a, Ciphertext b) {
@@ -504,16 +507,16 @@ public:
     if (pt_len > this->m_nslots) {
 			throw std::runtime_error("The number of slots is greater than the number of SIMD operations that can be done at a time");
     }
-
+    std::cout<<"pt_len, nslots are "<<pt_len<<" "<<this->m_nslots<<std::endl;
     // convert plaintext input into a vector of longs
     for (int i = 0; i < pt_len; i++) {
       ptvec.push_back(pt[i]);
     }
     // fill up extra slots with zeros
-    for (int i = pt_len; i <= this-> m_nslots; i++) {
+    for (int i = pt_len; i < this-> m_nslots; i++) {
       ptvec.push_back(0);
     }
-
+    std::cout<<" size of ptvec "<<ptvec.size()<<std::endl;
     // fill up nslots with zeros////
     for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
 
