@@ -17,18 +17,20 @@ int main(void) {
 	circ.set_output(out);
 	std::vector<DurationT> durations;
 	std::cout<<circ;
-	
+
 	ContextHElib_F2<bool> ctx;
 
-///  positive to negative
-        std::vector<bool> inputs = {true};
-        std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(true) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == false);
-	///  negative to positive
-	inputs = {false};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(false) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == true);
+	std::vector<std::vector<ContextHElib_F2<bool>::Plaintext>> pt_input = {{true, false}};
+
+	std::vector<std::vector<ContextHElib_F2<bool>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<bool> exp_values = {false, true};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+	  std::cout << "- (" << std::to_string(pt_input[0][i]) << ") = " << std::to_string(result[0][i]) << std::endl;
+	  assert(result.front()[i] == exp_values[i]);
+	}
+
+
 
 }

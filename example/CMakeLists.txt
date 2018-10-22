@@ -23,14 +23,15 @@
 #                  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
 # add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
- 
 
-# if (HElib_FOUND)
-#     add_executable(helib-context-example
-#                      helib-context-example.cpp
-#                      ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-#     add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
+if (HElib_FOUND)
+    add_executable(helib-context-example
+                     helib-context-example.cpp
+                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+    add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
+
 
 #     # target_link_libraries(helib-context-example
 #     #                         ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
@@ -47,8 +48,7 @@
 #     # add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
 
 
-
-# endif(HElib_FOUND)
+endif(HElib_FOUND)
 
 # if (TFHE_FOUND)
 #     add_executable(tfhe-example
@@ -111,7 +111,7 @@
 
 
 
-  
+
 
 # endif(LP_FOUND)
 

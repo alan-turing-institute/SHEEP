@@ -12,7 +12,7 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 int main(void) {
 	using namespace SHEEP;
 
-    //// instantiate the Circuit Repository
+  //// instantiate the Circuit Repository
 	CircuitRepo cr;
 
 	Circuit circ = cr.create_circuit(Gate::Add, 1);
@@ -20,28 +20,15 @@ int main(void) {
 	std::vector<DurationT> durations;
 	ContextHElib_F2<int8_t> ctx;
 
-	/// test small postitive numbers
-	std::vector<int8_t> inputs = {15, 22};
-	std::vector<int8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 15+22 = "<<std::to_string(result.front())<<std::endl;	
-	assert(result.front() == 37);
+	std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> pt_input = {{15, 10, 100, -80}, {22, -12, 100, -80}};
 
-	/// test small negative numbers
-	inputs = {10, -12};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 10 - 12 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == -2);
+	std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 
-	/// test result going out of range positive
-	inputs = {100, 127};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 100 + 127 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == -29);
+	std::vector<int8_t> exp_values = {37, -2, -56, 96};
 
-	/// test result going out of range negative
-	inputs = {-120, -124};
-	std::cout<<" -120 - 124 = "<<std::to_string(result.front())<<std::endl;
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 12);
+	for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(pt_input[0][i]) << " + " <<  std::to_string(pt_input[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+    assert(result.front()[i] == exp_values[i]);
+  }
 
 }

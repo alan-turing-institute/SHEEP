@@ -8,34 +8,25 @@
 typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
-	using namespace SHEEP;
-	typedef std::vector<ContextHElib_F2<int8_t>::Plaintext> PtVec;
+
+  using namespace SHEEP;
 
 	Circuit circ;
 	Wire in = circ.add_input("in");
 	Wire out = circ.add_assignment("out", Gate::Negate, in);
 	circ.set_output(out);
 
-	std::cout<<circ;
-	
-	ContextHElib_F2<uint8_t> ctx;
 	std::vector<DurationT> durations;
-	
-///  positive to negative
-        std::vector<uint8_t> inputs = {15};
-        std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(15) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == 241);
-	///  max 
-	inputs = {255};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(255) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == 1);
-	/// zero
-	inputs = {0};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" negate(0) = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == 0);
-	       
+	ContextHElib_F2<uint8_t> ctx;
 
+	std::vector<std::vector<ContextHElib_F2<uint8_t>::Plaintext>> pt_input = {{15, 255, 0}};
+
+	std::vector<std::vector<ContextHElib_F2<uint8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<uint8_t> exp_values = {241, 1, 0};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+	  std::cout << "- (" << std::to_string(pt_input[0][i]) << ") = " << std::to_string(result[0][i]) << std::endl;
+	  assert(result.front()[i] == exp_values[i]);
+	}
 }

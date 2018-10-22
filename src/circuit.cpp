@@ -51,8 +51,6 @@ std::ostream& operator<<(std::ostream& stream, const Circuit& c) {
   stream<<"INPUTS";
   for (auto input : c.get_inputs() ) {
     stream<<" "<<input.get_name();
-              std::cout<<input.get_name();
-
   }
   stream<<std::endl;
   stream<<"OUTPUTS";

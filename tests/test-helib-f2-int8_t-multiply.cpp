@@ -20,25 +20,14 @@ int main(void) {
 	std::vector<DurationT> durations;
 	ContextHElib_F2<int8_t> ctx;
 
-	/// test small postitive numbers
-	std::vector<int8_t> inputs = {3, 15};
-	std::vector<int8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 45);
-	std::cout<<" 3* 15 = "<<std::to_string(result.front())<<std::endl;	
-	/// test small negative numbers
-	inputs = {10, -12};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == -120);
-	std::cout<<" 10 * -12 = "<<std::to_string(result.front())<<std::endl;
-	/// test result going out of range positive
-	inputs = {10, 127};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 10 * 127 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == -10);
-	/// test result going out of range negative
-	inputs = {-120, 124};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" -120 * 124 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == -32);
+  std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> pt_input = {{3, 10, 10, -120}, {15, -12, 127, 124}};
 
+  std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<int8_t> exp_values = {45, -120, -10, -32};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(pt_input[0][i]) << " * " <<  std::to_string(pt_input[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+    assert(result.front()[i] == exp_values[i]);
+  }
 }
