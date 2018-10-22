@@ -12,9 +12,21 @@ typedef ContextHElib_F2<uint8_t>::Ciphertext Ciphertext;
 // Encrypt a value, decrypt the result, and check that we are
 // left with the original value.
 void test_single(ContextHElib_F2<uint8_t>& context) {
-  Plaintext pt_orig = 243;
-  Plaintext pt_new = context.decrypt(context.encrypt(pt_orig));
-  assert(pt_orig == pt_new);
+
+  std::vector<Plaintext> pt_orig = {111, 0, 32, 255};
+
+  Ciphertext temp = context.encrypt(pt_orig);
+
+  std::vector<Plaintext> pt_new = context.decrypt(temp);
+
+  std::cout << std::to_string(pt_orig[0]) << " = " << std::to_string(pt_new[0]) << std::endl;
+  std::cout << std::to_string(pt_orig[1]) << " = " << std::to_string(pt_new[1]) << std::endl;
+
+  assert(pt_orig[0] == pt_new[0]);
+  assert(pt_orig[1] == pt_new[1]);
+  assert(pt_orig[2] == pt_new[2]);
+  assert(pt_orig[3] == pt_new[3]);
+
 }
 
 int main(void) {

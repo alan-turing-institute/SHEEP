@@ -19,20 +19,18 @@ int main(void) {
 	Wire out = circ.add_assignment("out", Gate::Select, s, a, b);
 	circ.set_output(out);
 
-	
-	std::cout << circ;
+  std::cout << circ;
 	std::vector<DurationT> durations;
-	ContextHElib_F2<uint8_t> ctx;
+	ContextHElib_F2<int8_t> ctx;
 
-	/// test choosing first
-	std::vector<uint8_t> inputs = {1, 3, 15};
-	std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 3);
-	std::cout<<" select (1, 3, 15) = "<<std::to_string(result.front())<<std::endl;	
-	/// test choosing second
-	inputs = {0, 12, 55};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 55);
-	std::cout<<" select(0, 12, 55) = "<<std::to_string(result.front())<<std::endl;
+	std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> pt_input = {{1, 0}, {3, 12}, {15, 55}};
 
+	std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<int8_t> exp_values = {3, 55};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+	  std::cout << "select: " << std::to_string(pt_input[0][i]) << ", " << std::to_string(pt_input[1][i]) << ", " << std::to_string(pt_input[2][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+	  assert(result.front()[i] == exp_values[i]);
+	}
 }

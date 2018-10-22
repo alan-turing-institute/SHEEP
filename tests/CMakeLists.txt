@@ -115,16 +115,39 @@ add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 ##################################################################################################
 ### HELIB
 ##################################################################################################
+# for helib, we have "f2" (binary plaintext space) and "fp" (modulo-p).
+# "COMPARE" is only implemented for f2. "ADDCONST", "MULTBYCONST" only for fp.  Everything else for both.
+
 
 if (HELIB_FOUND)
 
     # input types
-    # bool int8_t uint8_t
     foreach(type IN ITEMS bool int8_t uint8_t)
         # modules
         foreach(f IN ITEMS fp)
+              # operations - ADDCONST, MULTBYCONST only for fp
+	      foreach (op IN ITEMS addConst multByConst)
+        	           add_executable(test-helib-${f}-${type}-${op}
+        		                test-helib-${f}-${type}-${op}
+        		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+			   target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+                 	   add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+              endforeach(op)
+     	endforeach(f)
+        foreach(f IN ITEMS f2)
+              # COMPARE only for f2
+	      foreach (op IN ITEMS compare)
+        	           add_executable(test-helib-${f}-${type}-${op}
+        		                test-helib-${f}-${type}-${op}
+        		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+			   target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+                 	   add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+              endforeach(op)
+     	endforeach(f)
+	## And now all the other gates, for both fp and f2
+        foreach(f IN ITEMS fp f2)
               # operations
-	      foreach (op IN ITEMS addConst multByConst add multiply)
+	      foreach (op IN ITEMS encrypt-decrypt negate add multiply subtract select)
         	           add_executable(test-helib-${f}-${type}-${op}
         		                test-helib-${f}-${type}-${op}
         		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -134,37 +157,7 @@ if (HELIB_FOUND)
      	endforeach(f)
     endforeach(type)
 
-	#foreach(f IN ITEMS f2)
-    #    foreach(op IN ITEMS compare)
-    #		add_executable(test-helib-${f}-${type}-${op}
-	#		test-helib-${f}-${type}-${op}.cpp
-	#		${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-	#	target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
-    #    endforeach(op)
-    #endforeach(f)
-
-        # modules
-        # f2 fp
-    foreach(type IN ITEMS int8_t bool)
-    	foreach(f IN ITEMS f2)
-
-        # operations
-        # compare ????????
-        # add encrypt-decrypt multiply negate select subtract
-        foreach(op IN ITEMS add encrypt-decrypt multiply compare negate select)
-          add_executable(test-helib-${f}-${type}-${op}
-              test-helib-${f}-${type}-${op}.cpp
-              ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
-          target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-
-          add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
-
-        endforeach(op)
-    	endforeach(f)
-    endforeach(type)
-
+# finally, one more test, only for f2/bool
 add_executable(test-helib-f2-bool-maximum
 	test-helib-f2-bool-maximum.cpp
 	${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -173,6 +166,8 @@ add_test(NAME test-helib-f2-bool-maximum COMMAND $<TARGET_FILE:test-helib-f2-boo
 
 
 endif (HELIB_FOUND)
+
+###################### END OF HELIB ###################################################################################
 
 
 #if (SEAL_FOUND)
