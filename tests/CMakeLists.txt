@@ -42,32 +42,32 @@ configure_file(undef-output.sheep undef-output.sheep)
 ### CLEAR
 ##################################################################################################
 
-# foreach(type IN ITEMS bool int8_t uint8_t)
-#     foreach(op IN ITEMS add compare multiply select subtract)
-#         add_executable(test-clear-${type}-${op}	
-#             test-clear-${type}-${op}.cpp
-#             ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#             ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-#             ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
-        
-#         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
-#     endforeach(op)
-# endforeach(type)
+ foreach(type IN ITEMS bool int8_t uint8_t)
+     foreach(op IN ITEMS add compare multiply select subtract)
+         add_executable(test-clear-${type}-${op}
+             test-clear-${type}-${op}.cpp
+             ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+             ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+             ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-# foreach(type IN ITEMS int8_t uint8_t)		
-#     foreach(op IN ITEMS ripple-carry-add)
-#         add_executable(test-clear-${type}-${op}	
-#             test-clear-${type}-${op}.cpp
-#             ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#             ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-#             ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
+     endforeach(op)
+ endforeach(type)
 
-#         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
-#     endforeach(op)
-# endforeach(type)
+ foreach(type IN ITEMS int8_t uint8_t)
+     foreach(op IN ITEMS ripple-carry-add)
+         add_executable(test-clear-${type}-${op}
+             test-clear-${type}-${op}.cpp
+             ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+             ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+             ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-#add_executable(test-bit-get-set test-bit-get-set.cpp)
-#add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
+         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
+     endforeach(op)
+ endforeach(type)
+
+add_executable(test-bit-get-set test-bit-get-set.cpp)
+add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 
 ##################################################################################################
 ### TFHE
@@ -120,44 +120,43 @@ if (HELIB_FOUND)
 
     # input types
     # bool int8_t uint8_t
-    foreach(type IN ITEMS int8_t)
+    foreach(type IN ITEMS bool int8_t uint8_t)
         # modules
-        # foreach(f IN ITEMS fp)
+        foreach(f IN ITEMS fp)
+              # operations
+	      foreach (op IN ITEMS addConst multByConst add multiply)
+        	           add_executable(test-helib-${f}-${type}-${op}
+        		                test-helib-${f}-${type}-${op}
+        		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+			   target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+                 	   add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+              endforeach(op)
+     	endforeach(f)
+    endforeach(type)
 
-        #     # operations
-        #     foreach (op IN ITEMS addConst multByConst)
-        #         add_executable(test-helib-${f}-${type}-${op}	
-        #             test-helib-${f}-${type}-${op}
-        #             ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
-        #         target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-
-        #         add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
-        #     endforeach(op)      
-     	  # endforeach(f)
-        
 	#foreach(f IN ITEMS f2)
-    #    foreach(op IN ITEMS compare)	
+    #    foreach(op IN ITEMS compare)
     #		add_executable(test-helib-${f}-${type}-${op}
-	#		test-helib-${f}-${type}-${op}.cpp	
+	#		test-helib-${f}-${type}-${op}.cpp
 	#		${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 	#	target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)	
+	#	add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
     #    endforeach(op)
     #endforeach(f)
-    
+
         # modules
         # f2 fp
+    foreach(type IN ITEMS int8_t bool)
     	foreach(f IN ITEMS f2)
 
         # operations
-        # compare ????????  
+        # compare ????????
         # add encrypt-decrypt multiply negate select subtract
-        foreach(op IN ITEMS add encrypt-decrypt multiply negate)	
+        foreach(op IN ITEMS add encrypt-decrypt multiply compare negate select)
           add_executable(test-helib-${f}-${type}-${op}
-              test-helib-${f}-${type}-${op}.cpp	
+              test-helib-${f}-${type}-${op}.cpp
               ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-  
+
           target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 
           add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
@@ -165,6 +164,13 @@ if (HELIB_FOUND)
         endforeach(op)
     	endforeach(f)
     endforeach(type)
+
+add_executable(test-helib-f2-bool-maximum
+	test-helib-f2-bool-maximum.cpp
+	${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+target_link_libraries(test-helib-f2-bool-maximum ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+add_test(NAME test-helib-f2-bool-maximum COMMAND $<TARGET_FILE:test-helib-f2-bool-maximum>)
+
 
 endif (HELIB_FOUND)
 
@@ -195,6 +201,6 @@ endif (HELIB_FOUND)
 #   target_link_libraries(test-parallel-eval ${TFHE_LIBRARIES} )
 #else(HELIB_FOUND_AND_TFHE_FOUND)
 #   target_link_libraries(test-parallel-eval)
-#endif(HELIB_FOUND AND TFHE_FOUND)  
+#endif(HELIB_FOUND AND TFHE_FOUND)
 
 # add_test(NAME test-parallel-eval COMMAND test-parallel-eval)

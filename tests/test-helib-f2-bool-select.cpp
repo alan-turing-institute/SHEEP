@@ -19,20 +19,20 @@ int main(void) {
 	Wire out = circ.add_assignment("out", Gate::Select, s, a, b);
 	circ.set_output(out);
 
-	
+
 	std::cout << circ;
 	std::vector<DurationT> durations;
 	ContextHElib_F2<bool> ctx;
 
-	/// test choosing first
-	std::vector<bool> inputs = {1, 0, 1};
-	std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 0);
-	std::cout<<" select (1, 0, 1) = "<<std::to_string(result.front())<<std::endl;	
-	/// test choosing second
-	inputs = {0, 0, 1};
-	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 1);
-	std::cout<<" select(0, 0, 1) = "<<std::to_string(result.front())<<std::endl;
+
+	/// first input is select bit
+	std::vector<std::vector<bool> > pt_input = {{1, 1, 0, 0},{1, 0, 1, 0}, {0, 1, 0, 1}};
+	std::vector<std::vector<bool> > result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+	std::vector<bool> exp_values = {1, 0, 0, 1};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+	  std::cout << std::to_string(pt_input[0][i]) << " ?  " <<  std::to_string(pt_input[1][i]) << " : " << std::to_string(pt_input[2][i]) <<" = "<< std::to_string(result[0][i]) << std::endl;
+	  assert(result.front()[i] == exp_values[i]);
+	}
 
 }

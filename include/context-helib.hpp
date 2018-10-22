@@ -338,8 +338,6 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
 
 
    Ciphertext Compare_unsigned(Ciphertext a, Ciphertext b) {
-
-
      Ctxt mu(*(this->m_publicKey));
      Ctxt ni(*(this->m_publicKey));
      Ciphertext cmax, cmin;
@@ -360,7 +358,6 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
      Ciphertext output;
 
      Ctxt sign_bit = b_minus_a[this->m_bitwidth -1];   /// is sign-bit set?  if yes, b
-     ///    sign_bit.addConstant(to_ZZX(1L));  //// now n
      output.append(sign_bit);
      return output;
    }
@@ -435,31 +432,31 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
   }
 
 
-//   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
 
-//     if (this->m_bootstrap) {
-//       for (int i=0; i< this->m_bitwidth; ++i) {
-// 	a[i].modDownToLevel(5);
-// 	b[i].modDownToLevel(5);
-//       }
-//     }
-//     /// s is 0 or 1
-//     /// for each bit of a,b,output, do output = s*a + (1-s)*b
-//     Ciphertext output;
+     if (this->m_bootstrap) {
+       for (int i=0; i< this->m_bitwidth; ++i) {
+ 	a[i].modDownToLevel(5);
+ 	b[i].modDownToLevel(5);
+       }
+     }
+     /// s is 0 or 1
+     /// for each bit of a,b,output, do output = s*a + (1-s)*b
+     Ciphertext output;
 
-//     for (int i=0; i < this->m_bitwidth; ++i) {
-//       Ctxt sbit = s[0];
-//       Ctxt abit = a[i];
-//       Ctxt bbit = b[i];
-//       abit *= sbit;
-//       sbit.addConstant(to_ZZX(-1L));
-//       sbit.multByConstant(to_ZZX(-1L));
-//       sbit *= bbit;
-//       abit += sbit;
-//       output.append(abit);
-//     }
-//     return output;
-//   }
+     for (int i=0; i < this->m_bitwidth; ++i) {
+       Ctxt sbit = s[0];
+       Ctxt abit = a[i];
+       Ctxt bbit = b[i];
+       abit *= sbit;
+       sbit.addConstant(to_ZZX(-1L));
+       sbit.multByConstant(to_ZZX(-1L));
+       sbit *= bbit;
+       abit += sbit;
+       output.append(abit);
+     }
+     return output;
+   }
 
 
   // Ciphertext AddConstant(Ciphertext a, long b) {
