@@ -60,7 +60,7 @@ public:
 	// overload taking both durations and const_plaintext_inputs
 	virtual std::vector<std::vector<PlaintextT>>
 	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT>> plaintext_inputs,
-	                     std::vector<std::vector<PlaintextT>> const_plaintext_inputs,
+	                     std::vector<PlaintextT> const_plaintext_inputs,
 	                     std::vector<std::chrono::duration<double, std::micro> >& durations,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
@@ -68,7 +68,7 @@ public:
 	// overload omitting durations only
 	virtual std::vector<std::vector<PlaintextT>>
 	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT>> plaintext_inputs,
-	                     std::vector<std::vector<PlaintextT>> const_plaintext_inputs,
+	                     std::vector<PlaintextT> const_plaintext_inputs,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
 
@@ -78,7 +78,7 @@ public:
 	                     std::vector<std::chrono::duration<double, std::micro> >& durations,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) = 0;
-	
+
 	// overload omitting both durations and const_plaintext_inputs
 	virtual std::vector<std::vector<PlaintextT>>
 	eval_with_plaintexts(const Circuit& C, std::vector<std::vector<PlaintextT>> plaintext_inputs,
@@ -122,7 +122,7 @@ public:
 
 	virtual Ciphertext dispatch(Gate g,
 				    std::vector<Ciphertext> inputs,
-				    std::vector<std::vector<Plaintext>> const_inputs)
+				    std::vector<Plaintext> const_inputs)
 	{
 		using namespace std::placeholders;
 		switch (g) {
@@ -154,10 +154,10 @@ public:
 			return Select(inputs.at(0), inputs.at(1), inputs.at(2));
 			break;
 		case (Gate::AddConstant):
-			return AddConstant( inputs, (const_inputs.at(0)).at(0));
+			return AddConstant( inputs, const_inputs.at(0));
 			break;
 		case (Gate::MultByConstant):
-			return MultByConstant( inputs, (const_inputs.at(0)).at(0));
+			return MultByConstant( inputs, const_inputs.at(0));
 			break;
 		}
 		throw std::runtime_error("Unknown op");
@@ -169,9 +169,9 @@ public:
 	                 OutputContainer& output_vals,
 	                 const ConstInputContainer& const_input_vals = ConstInputContainer(),
 	                 std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0)) {
-										 
+
 		std::unordered_map<std::string, Ciphertext> eval_map;
-		std::unordered_map<std::string, std::vector<Plaintext>> const_eval_map;
+		std::unordered_map<std::string, Plaintext> const_eval_map;
 
 		// add Circuit::inputs and inputs into the map
 		auto input_vals_it = input_vals.begin();
@@ -211,7 +211,7 @@ public:
 
 		for (const Assignment assn : circ.get_assignments()) {
 			std::vector<Ciphertext> inputs;
-			std::vector<std::vector<Plaintext>> const_inputs;
+			std::vector<Plaintext> const_inputs;
 			for (Wire w : assn.get_inputs())
 			{
 				typename decltype(eval_map)::iterator it;
@@ -392,11 +392,11 @@ public:
 	// }
 
 	// overload taking both durations and const_plaintext_inputs
-	virtual std::vector<std::vector<PlaintextT>> 
+	virtual std::vector<std::vector<PlaintextT>>
 	eval_with_plaintexts(
 	  const Circuit& C,
 	  std::vector<std::vector<PlaintextT>> plaintext_inputs,
-	  std::vector<std::vector<PlaintextT>> const_plaintext_inputs,
+	  std::vector<PlaintextT> const_plaintext_inputs,
 	  std::vector<std::chrono::duration<double, std::micro> >& durations,
 	  EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
@@ -407,7 +407,7 @@ public:
 
 		/// encrypt the inputs
 		std::vector<Ciphertext> ciphertext_inputs;
-		std::vector<std::vector<Plaintext>> const_inputs;
+		std::vector<Plaintext> const_inputs;
 		for (auto pt : plaintext_inputs) ciphertext_inputs.push_back(encrypt(pt));
 		for (auto cpt : const_plaintext_inputs) const_inputs.push_back(cpt);
 
@@ -451,7 +451,7 @@ public:
 	  EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	  std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
-		std::vector<std::vector<PlaintextT>> cptxts_empty;
+		std::vector<PlaintextT> cptxts_empty;
 		return eval_with_plaintexts(C, plaintext_inputs, cptxts_empty,
 					    durations, eval_strategy, timeout);
 	}
@@ -459,7 +459,7 @@ public:
 	// overload omitting durations only
 	virtual std::vector<std::vector<PlaintextT>>
 	eval_with_plaintexts(const Circuit& c, std::vector<std::vector<PlaintextT>> ptxts,
-	                     std::vector<std::vector<PlaintextT>> cptxts,
+	                     std::vector<PlaintextT> cptxts,
 	                     EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
@@ -474,7 +474,7 @@ public:
 	                     std::chrono::duration<double, std::micro> timeout = std::chrono::duration<double, std::micro>(0.0))
 	{
 		std::vector<std::chrono::duration<double, std::micro> > ignored;
-		std::vector<std::vector<Plaintext>> cptxts_empty;
+		std::vector<Plaintext> cptxts_empty;
 		return eval_with_plaintexts(c, ptxts, cptxts_empty, ignored, eval_strategy, timeout);
 	}
 
