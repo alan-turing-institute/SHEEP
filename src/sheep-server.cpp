@@ -41,7 +41,7 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 	//// what contexts are supported?
 	m_available_contexts.push_back("Clear");
 #ifdef HAVE_HElib
-	// m_available_contexts.push_back("HElib_F2");
+	m_available_contexts.push_back("HElib_F2");
 	m_available_contexts.push_back("HElib_Fp");
 #endif
 #ifdef HAVE_TFHE
