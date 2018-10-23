@@ -504,7 +504,6 @@ public:
     if (pt_len > this->m_nslots) {
 			throw std::runtime_error("The number of slots is greater than the number of SIMD operations that can be done at a time");
     }
-    std::cout<<"pt_len, nslots are "<<pt_len<<" "<<this->m_nslots<<std::endl;
     // convert plaintext input into a vector of longs
     for (int i = 0; i < pt_len; i++) {
       ptvec.push_back(pt[i]);
@@ -513,7 +512,6 @@ public:
     for (int i = pt_len; i < this-> m_nslots; i++) {
       ptvec.push_back(0);
     }
-    std::cout<<" size of ptvec "<<ptvec.size()<<std::endl;
     // fill up nslots with zeros////
     for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
 

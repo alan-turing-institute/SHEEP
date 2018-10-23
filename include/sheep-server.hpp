@@ -38,22 +38,7 @@ using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
 
-/*
-static std::vector<std::string> available_contexts = {"ClearHElib_Fp",
-						      "HElib_F2",
-						      "TFHE",
-						      "SEAL",
-						      "Clear"};
 
-static std::vector<std::string> available_input_types = {"bool",
-							 "uint8_t",
-							 "uint16_t",
-							 "uint32_t",
-							 "int8_t",
-							 "int16_t",
-							 "int32_t"};
-
-*/
 struct SheepJobConfig {
 	utility::string_t context;
 	utility::string_t input_type;
@@ -63,7 +48,7 @@ struct SheepJobConfig {
 	std::set<std::string> input_names;
 	std::set<std::string> const_input_names;
 	std::vector<std::vector<int>> input_vals;
-	std::vector<std::vector<int>> const_input_vals;
+	std::vector<int> const_input_vals;
 	std::map<std::string, long> parameters;
 
 	void setDefaults() {
@@ -102,13 +87,13 @@ struct SheepJobResult {
 	std::map<std::string, std::vector<std::string>> outputs;  /// store output values as strings so we don't worry about Plaintext type.
 	std::map<std::string, std::string> timings;  /// store time values in microseconds as strings.
 	bool is_correct; /// all outputs compared with clear-context results
-	
+
   json::value as_json() {
 		json::value result = json::value::object();
-		
+
     json::value j_outputs = json::value::object();
 		for ( auto map_iter = outputs.begin(); map_iter != outputs.end(); ++map_iter) {
-			
+
       json::value outputs = json::value::array();
 
       int idx = 0, out_val_cnt = 0;
@@ -164,7 +149,7 @@ public:
 	std::vector<std::vector<PlaintextT>> make_plaintext_inputs();
 
 	template<typename PlaintextT>
-	std::vector<std::vector<PlaintextT>> make_const_plaintext_inputs();
+	std::vector<PlaintextT> make_const_plaintext_inputs();
 
 	template <typename PlaintextT>
 	void configure_and_run(http_request message);
