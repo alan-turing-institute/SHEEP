@@ -1,6 +1,0 @@
-[submodule "lib/HElib"]
-	path = lib/HElib
-	url = https://github.com/shaih/HElib.git
-[submodule "lib/tfhe"]
-	path = lib/tfhe
-	url = https://github.com/tfhe/tfhe.git
