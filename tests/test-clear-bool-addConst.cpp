@@ -1,6 +1,6 @@
 #include <memory>
 #include <cassert>
-#include "context-helib.hpp"
+#include "context-clear.hpp"
 
 #include "circuit-repo.hpp"
 
@@ -23,7 +23,7 @@ int main(void) {
   std::vector<DurationT> durations;
 
   // The type of the wires in circ are unsigned 8-bit numbers
-  ContextHElib_Fp<bool> ctx;
+  ContextClear<bool> ctx;
 
   // inputs is vector of vectors
   std::vector<std::vector<bool>> inputs = {{1, 0}};
