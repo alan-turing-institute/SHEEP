@@ -15,11 +15,11 @@ app = Flask(__name__)
 app.config.from_object(config.SheepConfig)
 sys.path.append(app.config["SHEEP_HOME"])
 
-from pysheep.frontend.forms import CircuitForm, ResultsForm, PlotsForm, \
+from pysheep.forms import CircuitForm, ResultsForm, PlotsForm, \
     build_inputs_form, build_param_form
-from pysheep.frontend import frontend_utils
-from pysheep.interface import sheep_client
-from pysheep.common import common_utils, database
+from pysheep import frontend_utils
+from pysheep import sheep_client
+from pysheep import common_utils, database
 
 
 # how do we keep information throughout the lifetime of the app?  Give the app a data dict.
