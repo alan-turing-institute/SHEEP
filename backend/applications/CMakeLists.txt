@@ -25,12 +25,12 @@
 # add_test(NAME clear-context-example COMMAND $<TARGET_FILE:clear-context-example>)
 
 
-if (HElib_FOUND)
-    add_executable(helib-context-example
-                     helib-context-example.cpp
-                     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+# if (HElib_FOUND)
+#     add_executable(helib-context-example
+#                      helib-context-example.cpp
+#                      ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-    add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
+#     add_test(NAME helib-context-example COMMAND $<TARGET_FILE:helib-context-example>)
 
 
 #     # target_link_libraries(helib-context-example
@@ -48,7 +48,7 @@ if (HElib_FOUND)
 #     # add_test(NAME bitonic-sort-helib COMMAND bitonic-sort-helib)
 
 
-endif(HElib_FOUND)
+# endif(HElib_FOUND)
 
 # if (TFHE_FOUND)
 #     add_executable(tfhe-example
@@ -143,7 +143,7 @@ endif(HElib_FOUND)
 ### The "run-sheep-server" executable, a REST API with endpoints to specify circuits, HE libraries etc and run tests.
 
 add_executable(run-sheep-server
-    	       run-sheep-server.cpp
+    	       server/run-sheep-server.cpp
                ${CMAKE_SOURCE_DIR}/src/sheep-server.cpp
                ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 target_link_libraries(run-sheep-server cpprestsdk::cpprest ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})

@@ -14,23 +14,11 @@ find_package(Boost COMPONENTS system filesystem thread date_time program_options
 include_directories(${Boost_INCLUDE_DIRS})
 find_package(Threads REQUIRED)
 
-# Default include and library dirs
-# TFHE
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/lib/tfhe/src/include/")
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/tfhe/build/libtfhe/")
-# HElib
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src")
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/lib/HElib/src")
-# SEAL
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/include/SEAL")
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/usr/local/lib/SEAL")
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 enable_testing()
 
 include_directories(include)
-
 
 #find_package(LP)
 if (LP_FOUND)
@@ -68,5 +56,5 @@ endif()
 
 link_libraries(pthread)
 
-add_subdirectory(example bin)
+add_subdirectory(applications)
 add_subdirectory(tests)
