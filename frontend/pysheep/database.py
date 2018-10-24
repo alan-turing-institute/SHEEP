@@ -24,18 +24,13 @@ column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
 ### this will only require minimal changes, thanks to sqlalchemy).
 
 if "SHEEP_HOME" in os.environ.keys():
-    print(" h0")
     if "pysheep" in os.environ["SHEEP_HOME"]:
-        print(" h1")
         DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"sheep.db")
     else:
-        print(" h2")
         DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"pysheep","sheep.db")
 else:
-    print(" h3")
     DB_LOCATION = os.path.join(os.environ["HOME"],"SHEEP","sheep.db")
 
-print("SHEEP_HOME is {}".format(os.environ["SHEEP_HOME"]))
 print("DB LOCATION IS {}".format(DB_LOCATION))
 Base = declarative_base()
 engine = create_engine("sqlite:///"+DB_LOCATION)
