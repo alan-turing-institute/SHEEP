@@ -8,7 +8,7 @@
 int main(void)
 {
 	using namespace SHEEP;
-	typedef std::vector<ContextHElib_F2<int8_t>::Plaintext> PtVec;
+	typedef std::vector<std::vector<ContextHElib_F2<int8_t>::Plaintext>> PtVec;
 
 	std::cout << "Constructing context...\n";
 	ContextHElib_F2<int8_t> ctx;   // paramset, bootstrappable
@@ -20,15 +20,15 @@ int main(void)
 	outputfile << bitonic;
 	outputfile.close();
 	
-	PtVec inputs {7, 3, 22, 2 };
+	PtVec inputs {{7}, {3}, {22}, {2}};
 
 	std::cout << "Inputs are: ";
-	for (auto x : inputs) std::cout << std::to_string(x) << " ";
+	for (auto x : inputs) std::cout << std::to_string(x[0]) << " ";
 	std::cout << std::endl;
 
 	PtVec sorted = ctx.eval_with_plaintexts(bitonic, inputs);
 
 	std::cout << "Sorted result is: ";
-	for (auto x : sorted) std::cout << std::to_string(x) << " ";
+	for (auto x : sorted) std::cout << std::to_string(x[0]) << " ";
 	std::cout << std::endl;
 }

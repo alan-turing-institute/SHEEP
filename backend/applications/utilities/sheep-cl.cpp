@@ -38,11 +38,11 @@ make_context(std::string context_type, std::string context_params="") {
   	if (context_type == "Clear") {
 	  return std::make_unique<ContextClear<PlaintextT> >();
 #ifdef HAVE_HElib
-	// } else if (context_type == "HElib_F2") {
-  // 	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
-  // 	  if (context_params.length() > 0)
-  //  	    ctx->read_params_from_file(context_params);
-  // 	  return ctx;
+	  } else if (context_type == "HElib_F2") {
+  	  auto ctx =  std::make_unique<ContextHElib_F2<PlaintextT> >();
+  	  if (context_params.length() > 0)
+   	    ctx->read_params_from_file(context_params);
+  	  return ctx;
   	} else if (context_type == "HElib_Fp") {
   	  auto ctx =  std::make_unique<ContextHElib_Fp<PlaintextT> >();
   	  if (context_params.length() > 0)
@@ -114,25 +114,32 @@ std::map<std::string, T> read_inputs_file(std::string filename) {
 }
 
 template<typename PlaintextT>
-bool check_correct(std::vector<PlaintextT> test_results, std::vector<PlaintextT> plaintext_results) {
+bool check_correct(std::vector<std::vector<PlaintextT>> test_results, std::vector<std::vector<PlaintextT>> plaintext_results) {
   if (test_results.size() != plaintext_results.size())
     throw std::runtime_error("outputs have different sizes");
   if (test_results.size() == 0)
     throw std::runtime_error("zero length output");
+  
   bool all_correct = true;
+  
   auto test_iter = test_results.begin();
   auto plaintext_iter = plaintext_results.begin();
+  
   while (test_iter != test_results.end()) {
     all_correct &= (*test_iter == *plaintext_iter);
     test_iter++;
     plaintext_iter++;
   }
+
   return all_correct;
 }
 
-
 template <typename PlaintextT>
-void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<PlaintextT> cleartext_results, std::vector<DurationT>& durations) {
+void print_outputs(Circuit C, 
+  std::vector<std::vector<PlaintextT>> test_results, 
+  std::vector<std::vector<PlaintextT>> cleartext_results, 
+  std::vector<DurationT>& durations) {
+
   std::cout<<std::endl<<"==============="<<std::endl;
   std::cout<<"=== RESULTS ==="<<std::endl<<std::endl;
   std::cout<<"== Processing times: =="<<std::endl;
@@ -149,14 +156,20 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
 
   auto test_iter = test_results.begin();
   auto wire_iter = circuit_outputs.begin();
+
   while (test_iter != test_results.end()) {
-    std::cout<<wire_iter->get_name()<<": "<<std::to_string(*test_iter)<<std::endl;
+    std::cout<<wire_iter->get_name()<<": "<<std::endl;
+    
+    //TODO: fix the to_string to print the list!
+    //std::to_string(*test_iter)<<std::endl;
     wire_iter++;
     test_iter++;
   }
   //// comparison with the same circuit+inputs evaluated in clear context
   std::cout<<std::endl<<"== Check against cleartext context =="<<std::endl;
+
   bool matches = check_correct<PlaintextT>(test_results, cleartext_results);
+
   if (matches) std::cout<<"Cleartext check passed OK"<<std::endl;
   else std::cout<<"Cleartext check failed"<<std::endl;
   std::cout<<std::endl<<"==== END RESULTS ==="<<std::endl;
@@ -164,11 +177,12 @@ void print_outputs(Circuit C, std::vector<PlaintextT> test_results, std::vector<
 }
 
 template <typename T>
-std::vector<T> match_inputs_to_circuit(Circuit C, std::map<std::string, T> inputs_map) {
-  std::vector<T> ordered_inputs;
+std::vector<std::vector<T>> match_inputs_to_circuit(Circuit C, std::map<std::string, T> inputs_map) {
+  std::vector<std::vector<T>> ordered_inputs;
+
   for (auto input : C.get_inputs() ) {
     if (inputs_map.find(input.get_name()) != inputs_map.end()) {
-      ordered_inputs.push_back(inputs_map.find(input.get_name())->second);
+      ordered_inputs.push_back({inputs_map.find(input.get_name())->second});
     }
   }
   return ordered_inputs;
@@ -204,8 +218,9 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 
 	// read in inputs from input_filename
 	std::map<std::string, PlaintextT> inputs = read_inputs_file<PlaintextT>(input_filename);
+
 	std::cout<<" === Read inputs file - found "<<inputs.size()<<" values."<<std::endl;
-	std::vector<PlaintextT> ordered_inputs = match_inputs_to_circuit(C, inputs);
+	std::vector<std::vector<PlaintextT>> ordered_inputs = match_inputs_to_circuit(C, inputs);
 	std::cout<<" === Matched inputs from file with circuit inputs"<<std::endl;
 
 	std::vector<std::vector<PlaintextT>> result_bench = test_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
@@ -213,22 +228,15 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
 	std::cout<<" === Ran benchmark test. "<<std::endl;
 	test_ctx->print_parameters();
 	test_ctx->print_sizes();
-	std::vector<PlaintextT> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
-	print_outputs(C,result_bench, result_clear, durations);
+	std::vector<std::vector<PlaintextT>> result_clear = clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations, eval_strategy);
+	print_outputs(C, result_bench, result_clear, durations);
 
 	return true;
 }
 
-
-
-
-
-int
-main(int argc, const char** argv) {
-
+int main(int argc, const char** argv) {
 
   if (argc < 3) {
-
     std::cout<<"Usage: \n ./benchmark  <circuit_file> <context_name> <input_type> <inputs_file> <eval_strategy> [<params_file>]"<<std::endl;
     std::cout<<"OR: \n ./benchmark PARAMS  <context_name> <input_type> [<params_file>]"<<std::endl;
     return 0;
@@ -249,13 +257,11 @@ main(int argc, const char** argv) {
     return 0;
   }
 
-
   /// read the circuit
   std::ifstream input_circuit(argv[1]);
   Circuit C;
   input_circuit >> C;
   std::cout << C;
-
 
   /// read the other input args
   std::string context_name = argv[2];

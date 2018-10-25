@@ -14,7 +14,9 @@ ADD tests SHEEP/tests
 
 RUN rm -fr SHEEP/build; mkdir SHEEP/build
 
-RUN cd SHEEP/build; export CC=gcc-7; export CXX=g++-7; cmake ../;
+RUN cd SHEEP/build; export CC=gcc-7; export CXX=g++-7; ; cmake ../;
+
+
 
 RUN cd SHEEP/build; make all
 
