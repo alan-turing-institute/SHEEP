@@ -15,9 +15,6 @@ RUN cd SHEEP/backend/build; make all
 
 WORKDIR SHEEP/backend/build
 
-#RUN ls ../lib/HElib/src/
-#RUN ls ../lib/HElib/build/lib/
-
 EXPOSE 34568
 
 CMD ["bin/run-sheep-server"]
