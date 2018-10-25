@@ -1,3 +1,6 @@
+# either docker or user is responsible of installing all the libraries into the backend/lib
+backend/lib
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
