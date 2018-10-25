@@ -12,6 +12,8 @@
 #include <memory>
 #include <fstream>
 #include <map>
+#include <string.h> 
+#include <stdio.h>
 
 #include "context-clear.hpp"
 #ifdef HAVE_HElib

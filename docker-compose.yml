@@ -3,38 +3,38 @@ services:
   sheep-server:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: backend/Dockerfile
     command: bin/run-sheep-server
     ports:
      - "34568:34568"
     networks:
      - sheep_nw
-  sheep-frontend:
-    build:
-      context: pysheep
-      dockerfile: Dockerfile.frontend
-    ports:
-    - "5000:5000"
-    environment:
-    - FLASK_CONFIGURATION=default
-    - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
-    depends_on:
-    - sheep-server
-    networks:
-    - sheep_nw
-  sheep-notebook:
-    build:
-      context: pysheep
-      dockerfile: Dockerfile.notebook
-    depends_on:
-    - sheep-server
-    ports:
-    - "8888:8888"
-    environment:
-    - SHEEP_HOME=/pysheep
-    - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
-    networks:
-    - sheep_nw
+  # sheep-frontend:
+  #   build:
+  #     context: pysheep
+  #     dockerfile: Dockerfile.frontend
+  #   ports:
+  #   - "5000:5000"
+  #   environment:
+  #   - FLASK_CONFIGURATION=default
+  #   - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
+  #   depends_on:
+  #   - sheep-server
+  #   networks:
+  #   - sheep_nw
+  # sheep-notebook:
+  #   build:
+  #     context: pysheep
+  #     dockerfile: Dockerfile.notebook
+  #   depends_on:
+  #   - sheep-server
+  #   ports:
+  #   - "8888:8888"
+  #   environment:
+  #   - SHEEP_HOME=/pysheep
+  #   - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
+  #   networks:
+  #   - sheep_nw
 
 networks:
   sheep_nw:

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/lib/HElib/src/")
-set(CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/lib/HElib/build/lib/")
+set(CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/lib/HElib/src/")
 
 # C++ REST API for interaction with web app - also needs openSSL, Boost, Threads
 set(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR} /usr/local/opt/openssl)
@@ -60,4 +60,4 @@ endif()
 link_libraries(pthread)
 
 add_subdirectory(applications)
-#add_subdirectory(tests)
+add_subdirectory(tests)

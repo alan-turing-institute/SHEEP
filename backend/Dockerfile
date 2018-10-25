@@ -1,26 +1,23 @@
 FROM tomaslaz/sheep_base as sheep
 
-#COPY build SHEEP/build
-ADD cmake SHEEP/cmake
-ADD CMakeLists.txt SHEEP/CMakeLists.txt
-ADD docker-compose.yml SHEEP/docker-compose.yml
-ADD example SHEEP/example
-ADD include SHEEP/include
-ADD LICENSE SHEEP/LICENSE
-ADD pysheep SHEEP/pysheep
-ADD README.md SHEEP/README.md
-ADD src SHEEP/src
-ADD tests SHEEP/tests
+ADD backend/applications SHEEP/backend/applications
+ADD backend/cmake SHEEP/backend/cmake 
+ADD backend/CMakeLists.txt SHEEP/backend/CMakeLists.txt
+ADD backend/include SHEEP/backend/include
+ADD backend/src SHEEP/backend/src
+ADD backend/tests SHEEP/backend/tests
 
-RUN rm -fr SHEEP/build; mkdir SHEEP/build
+RUN rm -fr SHEEP/backend/build; mkdir SHEEP/backend/build
 
-RUN cd SHEEP/build; export CC=gcc-7; export CXX=g++-7; ; cmake ../;
+RUN cd SHEEP/backend/build; export CC=gcc-7; export CXX=g++-7; cmake ../
 
+RUN cd SHEEP/backend/build; make all
 
+WORKDIR SHEEP/backend/build
 
-RUN cd SHEEP/build; make all
+#RUN ls ../lib/HElib/src/
+#RUN ls ../lib/HElib/build/lib/
 
-WORKDIR SHEEP/build
 EXPOSE 34568
 
 CMD ["bin/run-sheep-server"]
