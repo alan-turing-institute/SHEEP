@@ -26,10 +26,10 @@ RUN pip3 install pandas
 
 #### run the flask app
 
-ADD . pysheep
+ADD . frontend
 
 #
 EXPOSE 8888
-ENV SHEEP_HOME /pysheep
-WORKDIR pysheep/notebooks
+ENV SHEEP_HOME /frontend
+WORKDIR frontend/notebooks
 CMD ["jupyter", "notebook", "--allow-root","--ip", "0.0.0.0"]
