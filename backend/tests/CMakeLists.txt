@@ -43,7 +43,7 @@ configure_file(undef-output.sheep undef-output.sheep)
 ##################################################################################################
 
  foreach(type IN ITEMS bool int8_t uint8_t)
-     foreach(op IN ITEMS add compare multiply select subtract)
+     foreach(op IN ITEMS add compare multiply select subtract addConst)
          add_executable(test-clear-${type}-${op}
              test-clear-${type}-${op}.cpp
              ${CMAKE_SOURCE_DIR}/src/circuit.cpp

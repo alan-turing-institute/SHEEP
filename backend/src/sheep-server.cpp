@@ -41,7 +41,7 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url)
 	//// what contexts are supported?
 	m_available_contexts.push_back("Clear");
 #ifdef HAVE_HElib
-	// m_available_contexts.push_back("HElib_F2");
+	m_available_contexts.push_back("HElib_F2");
 	m_available_contexts.push_back("HElib_Fp");
 #endif
 #ifdef HAVE_TFHE
@@ -106,7 +106,7 @@ template<typename PlaintextT>
 std::vector<std::vector<PlaintextT>>
 SheepServer::make_plaintext_inputs() {
 	std::vector<std::vector<PlaintextT>> inputs;
-	
+
   // TODO: input from json
 
   for (auto input : m_job_config.input_vals) {
@@ -121,13 +121,12 @@ SheepServer::make_plaintext_inputs() {
 
 
 template<typename PlaintextT>
-std::vector<std::vector<PlaintextT>>
+std::vector<PlaintextT>
 SheepServer::make_const_plaintext_inputs() {
-	std::vector<std::vector<PlaintextT>> const_inputs;
-  
+	std::vector<PlaintextT> const_inputs;
+
 	for (auto input : m_job_config.const_input_vals) {
-    std::vector<PlaintextT> input_vector(begin(input), end(input));
-		const_inputs.push_back(input_vector);
+		const_inputs.push_back(input);
 	}
 
 	return const_inputs;
@@ -206,7 +205,7 @@ SheepServer::update_parameters(std::string context_type,
 template <typename PlaintextT>
 bool SheepServer::check_job_outputs(std::vector<std::vector<PlaintextT>> test_outputs,
                                std::vector<std::vector<PlaintextT>> clear_outputs) {
-	
+
   if (test_outputs.size() != clear_outputs.size()) return false;
 
 	for (int i = 0; i < test_outputs.size(); i++) {
@@ -220,7 +219,7 @@ bool SheepServer::check_job_outputs(std::vector<std::vector<PlaintextT>> test_ou
 template <typename PlaintextT>
 void
 SheepServer::configure_and_run(http_request message) {
-  
+
 	if (! m_job_config.isConfigured()) throw std::runtime_error("Job incompletely configured");
 	/// we can now assume we have values for context, inputs, circuit, etc
 	auto context = make_context<PlaintextT>(m_job_config.context);
@@ -230,7 +229,7 @@ SheepServer::configure_and_run(http_request message) {
 	}
 
 	std::vector<std::vector<PlaintextT>> plaintext_inputs = make_plaintext_inputs<PlaintextT>();
-	std::vector<std::vector<PlaintextT>> const_plaintext_inputs = make_const_plaintext_inputs<PlaintextT>();
+	std::vector<PlaintextT> const_plaintext_inputs = make_const_plaintext_inputs<PlaintextT>();
 
 	// shared memory region for returning the results
 	size_t n_outputs = m_job_config.circuit.get_outputs().size();
@@ -274,7 +273,7 @@ SheepServer::configure_and_run(http_request message) {
 		                                      const_plaintext_inputs,
 		                                      timings,
 		                                      m_job_config.eval_strategy);
-		
+
 		if (timings.size() != 3) {
 			// signal an error to the server
 			std::cerr << "Child exiting: more than three timings reported!\n";
@@ -310,7 +309,7 @@ SheepServer::configure_and_run(http_request message) {
 		req.tv_nsec = (timeout_us % 1000000) * 1000;
 		// allow one second grace (since the timeout above refers to the evaluation only
 		req.tv_sec = (timeout_us / 1000000) + 1;
-		
+
     nanosleep(&req, &rem);
 
 		// on waking up, is the child still alive?
@@ -320,7 +319,7 @@ SheepServer::configure_and_run(http_request message) {
 			kill(child_pid, SIGKILL);
 			message.reply(status_codes::InternalError, ("Evaluation timed out"));
 			m_job_finished = false;
-		
+
     } else if (status) {
 			// other abnormal termination (nonzero return or killed by signal)
 			message.reply(status_codes::InternalError, ("Evaluation terminated abnormally"));
@@ -352,13 +351,13 @@ SheepServer::configure_and_run(http_request message) {
 
 				m_job_result.outputs.insert(output);
       }
-      
+
 			auto encryption = std::make_pair<std::string, std::string>("encryption", std::to_string(timings_shared[0].count()));
 			m_job_result.timings.insert(encryption);
-			
+
       auto evaluation = std::make_pair<std::string, std::string>("evaluation", std::to_string(timings_shared[1].count()));
 			m_job_result.timings.insert(evaluation);
-			
+
       auto decryption = std::make_pair<std::string, std::string>("decryption", std::to_string(timings_shared[2].count()));
 			m_job_result.timings.insert(decryption);
 
@@ -520,7 +519,7 @@ void SheepServer::handle_post_inputs(http_request message) {
 			json::value input_dict = jvalue.get();
 			//	auto input_dict = val["input_dict"].as_object();
 			for (auto input_name : m_job_config.input_names) {
-        
+
         std::vector<int> input_vals;
 
         for (auto input : input_dict[input_name].as_array()) {
@@ -541,23 +540,18 @@ void SheepServer::handle_post_inputs(http_request message) {
 
 void SheepServer::handle_post_const_inputs(http_request message) {
 	message.extract_json().then([ = ](pplx::task<json::value> jvalue) {
-		try {
-			json::value input_dict = jvalue.get();
-			//	auto input_dict = val["input_dict"].as_object();
-			for (auto input_name : m_job_config.const_input_names) {
-        
-        std::vector<int> const_input_vals;
-        for (auto input : input_dict[input_name].as_array()) {
-          int input_val = input.as_integer();
-          const_input_vals.push_back(input_val);
-        }
+	    try {
+	      json::value input_dict = jvalue.get();
 
-				m_job_config.const_input_vals.push_back(const_input_vals);
-			}
-		} catch (json::json_exception) {
-			message.reply(status_codes::InternalError, ("Unrecognized inputs"));
-		}
-	});
+	      for (auto input_name : m_job_config.const_input_names) {
+
+		int input_val = input_dict[input_name].as_integer();
+		m_job_config.const_input_vals.push_back(input_val);
+	      }
+	    } catch (json::json_exception) {
+	      message.reply(status_codes::InternalError, ("Unrecognized inputs"));
+	    }
+	  });
 
 	message.reply(status_codes::OK);
 }
@@ -736,6 +730,6 @@ void SheepServer::handle_put_parameters(http_request message) {
 void SheepServer::handle_get_results(http_request message) {
 
 	json::value result = m_job_result.as_json();
-  
+
 	message.reply(status_codes::OK, result);
 }
