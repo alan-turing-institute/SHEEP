@@ -7,9 +7,11 @@ import re
 import uuid
 import subprocess
 
-from ..common.database import session,BenchmarkMeasurement
-from ..common import common_utils
-from ..interface import sheep_client
+from .database import session,BenchmarkMeasurement
+from . import common_utils
+from . import sheep_client
+#import pysheep.common_utils
+#import pysheep.sheep_client
 
 def convert_input_vals_list(input_val_dict):
   """

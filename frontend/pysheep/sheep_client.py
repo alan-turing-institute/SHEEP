@@ -13,8 +13,8 @@ import os
 import requests
 import json
 
-from ..common import database
-from ..common import common_utils
+from . import database
+from . import common_utils
 
 if "SERVER_URL_BASE" in os.environ.keys():
     BASE_URI = os.environ["SERVER_URL_BASE"]

@@ -5,12 +5,12 @@ and parameter values to temporary files, and running the benchmark job.
 """
 import subprocess
 import os, uuid
-from ..common import common_utils
-from ..common.database import BenchmarkMeasurement, session
+from . import common_utils
+from .database import BenchmarkMeasurement, session
 import re
 
 if not "SHEEP_HOME" in os.environ.keys():
-    BASE_DIR = os.environ["HOME"]+"/SHEEP"
+    BASE_DIR = os.path.join(os.environ["HOME"],"SHEEP","frontend")
 else:
     BASE_DIR = os.environ["SHEEP_HOME"]
 

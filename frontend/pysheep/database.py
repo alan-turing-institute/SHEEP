@@ -27,10 +27,11 @@ if "SHEEP_HOME" in os.environ.keys():
     if "pysheep" in os.environ["SHEEP_HOME"]:
         DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"sheep.db")
     else:
-        DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"pysheep","/sheep.db")
+        DB_LOCATION = os.path.join(os.environ["SHEEP_HOME"],"pysheep","sheep.db")
 else:
     DB_LOCATION = os.path.join(os.environ["HOME"],"SHEEP","sheep.db")
 
+print("DB LOCATION IS {}".format(DB_LOCATION))
 Base = declarative_base()
 engine = create_engine("sqlite:///"+DB_LOCATION)
 

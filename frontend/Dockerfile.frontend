@@ -26,13 +26,13 @@ RUN pip3 install pandas
 
 #### run the flask app
 
-ADD . pysheep
+ADD . frontend
 
 #
-WORKDIR pysheep/webapp
+WORKDIR frontend/webapp
 ####
 EXPOSE 5000
 ENV FLASK_APP app.py
-ENV SHEEP_HOME /pysheep
+ENV SHEEP_HOME /frontend
 ####
 CMD ["python3","app.py"]

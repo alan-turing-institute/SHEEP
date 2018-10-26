@@ -8,7 +8,7 @@ import re
 from scripts.benchmark_utils import run_circuit, write_params_file, write_inputs_file
 
 if not "SHEEP_HOME" in os.environ.keys():
-    BASE_DIR = os.environ["HOME"]+"/SHEEP"
+    BASE_DIR = os.path.join(os.environ["HOME"],"SHEEP","frontend")
 else:
     BASE_DIR = os.environ["SHEEP_HOME"]
 
@@ -25,9 +25,11 @@ DEBUG_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/debug"
 if not os.path.exists(DEBUG_FILE_DIR):
     os.system("mkdir "+DEBUG_FILE_DIR)    
 
+
 def low_level_benchmarks(gates,types,contexts,max_depth=10):
     """
-    call this function with lists of the Gates, input-types, and contexts to be benchmarked.
+    call this function with lists of the Gates, input-types, 
+    and contexts to be benchmarked.
     this in turn calls run_single_benchmark for each combination.
     """
     for gate in gates:
@@ -37,7 +39,8 @@ def low_level_benchmarks(gates,types,contexts,max_depth=10):
             for depth in range(1,max_depth):
                 circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-"+str(depth)+".sheep"
 
-### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
+### inputs file depends on the gate now - most gates have depth+1 inputs, 
+### but SELECT and NEGATE have
 ### different requirements
                 
                 inputs_file = INPUT_FILE_DIR+"/inputs-"
@@ -86,6 +89,7 @@ def params_for_level(context,level):
         return param_file
     else:
         return None
+
     
 def scan_1(contexts=["HElib_Fp","SEAL"]):
     """
@@ -97,7 +101,8 @@ def scan_1(contexts=["HElib_Fp","SEAL"]):
                 for context in contexts:
                     param_file = params_for_level(context,d)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-1.sheep"
-### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
+### inputs file depends on the gate now - most gates have depth+1 inputs, 
+### but SELECT and NEGATE have
 ### different requirements                
                     inputs_file = INPUT_FILE_DIR+"/inputs-"
                     if gate == "SELECT":
@@ -129,7 +134,8 @@ def scan_2(contexts=["HElib_Fp","SEAL"]):
                 for context in contexts:
                     param_file = params_for_level(context,4)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-"+str(d)+".sheep"
-### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
+### inputs file depends on the gate now - most gates have depth+1 inputs, 
+### but SELECT and NEGATE have
 ### different requirements                
                     inputs_file = INPUT_FILE_DIR+"/inputs-"
                     if gate == "SELECT":
@@ -161,7 +167,8 @@ def scan_3(contexts=["TFHE","HElib_F2","HElib_Fp","SEAL"]):
                 for context in contexts:
                     param_file = params_for_level(context,d)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-"+str(d)+".sheep"
-### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
+### inputs file depends on the gate now - most gates have depth+1 inputs, 
+### but SELECT and NEGATE have
 ### different requirements                
                     inputs_file = INPUT_FILE_DIR+"/inputs-"
                     if gate == "SELECT":
@@ -181,3 +188,27 @@ def scan_3(contexts=["TFHE","HElib_F2","HElib_Fp","SEAL"]):
                                           param_file,
                                           DEBUG_FILE_DIR+"/debug_"+gate+str(d)+input_type+".txt"
                                           )    
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="run low-level benchmarks")
+    parser.add_argument("--scan",help="benchmark to run",required=False)
+    parser.add_argument("--contexts",help="contexts to run",required=False,
+                        action='append',
+                        default=[])
+    parser.add_argument("--gates",help="gates to run",required=False,
+                        default=["ADD","MULTIPLY","SUBTRACT","NEGATE"])
+    parser.add_argument("--depth",help="depth",required=False,default=10)    
+    args=parser.parse_args()
+    if args.scan == "scan1":
+        low_level_benchmarks.scan_1(contexts=args.contexts)
+    elif args.scan == "scan2":
+        low_level_benchmarks.scan_2(contexts=args.contexts)
+    elif args.scan == "scan3":
+        low_level_benchmarks.scan_3(contexts=args.contexts)
+    else: # run them all
+        low_level_benchmarks.run_all(args.gates,
+                                     args.types,
+                                     args.contexts,
+                                     args.depth)
