@@ -7,11 +7,8 @@ services:
 
 before_install:
   - docker-compose build sheep-server
-  #- docker-compose -d up sheep-server
 
-   
 script:
-  #- docker run sheep_sheep-server make all
   - docker run sheep_sheep-server make test
 
 after_success:
