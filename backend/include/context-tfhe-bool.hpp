@@ -11,9 +11,8 @@
 
 namespace SHEEP {
 	
-template <>
-class ContextTFHE<bool> : public Context<bool, CiphertextTFHE> {
-  //	const int minimum_lambda;
+template <> class ContextTFHE<bool> : public Context<bool, std::vector<CiphertextTFHE>> {
+  // const int minimum_lambda;
 	// shared pointers, since these are handles that are referred to elsewhere
 	std::shared_ptr<TFheGateBootstrappingParameterSet> parameters;
 	std::shared_ptr<TFheGateBootstrappingSecretKeySet> secret_key;
@@ -22,6 +21,7 @@ class ContextTFHE<bool> : public Context<bool, CiphertextTFHE> {
 	}
 
 public:
+
 	ContextTFHE(long minimum_lambda=110)
 		:
 		// fixed security level that works with
@@ -54,52 +54,81 @@ public:
 		this->m_configured = true;
 	}
 		
-	Ciphertext encrypt(Plaintext pt) {
-		Ciphertext ct(parameters);
-		bootsSymEncrypt(ct, pt, secret_key.get());
-		this->m_ciphertext_size = sizeof(*ct);	   
+	Ciphertext encrypt(std::vector<Plaintext> pt) {
+
+    CiphertextTFHE ct_el(parameters);
+    Plaintext pt_el;
+		Ciphertext ct;
+
+    std::cout << "Here goes something 2!" << std::endl;
+
+    for (int i; i < pt.size(); i ++) {
+      pt_el = pt[i];
+
+      bootsSymEncrypt(ct_el, pt_el, secret_key.get());
+
+      ct.push_back(ct_el);
+    }
+
+    this->m_ciphertext_size = sizeof(*ct_el);	   
 		return ct;
 	}
 
-	Plaintext decrypt(Ciphertext ct) {
-		Plaintext pt = bootsSymDecrypt(ct, secret_key.get());
-		return pt;
+	std::vector<Plaintext> decrypt(Ciphertext ct) {
+
+    std::vector<Plaintext> c;
+    
+    for (int i; i < ct.size(); i ++) {
+      CiphertextTFHE ct_el(parameters);
+      Plaintext pt_el;
+
+
+      ct_el = ct[i];
+
+      pt_el = bootsSymDecrypt(ct_el, secret_key.get());
+
+      std::cout << "pt_el: " << std::to_string(pt_el) << std::endl;
+
+      c.push_back(pt_el);
+    }
+
+		return c;
 	}
 
-	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-		Ciphertext result(parameters);
-		bootsAND(result, a, b, cloud_key_cptr());
-		return result;
-	}
+	// Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+	// 	Ciphertext result(parameters);
+	// 	bootsAND(result, a, b, cloud_key_cptr());
+	// 	return result;
+	// }
 	
-	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-		Ciphertext result(parameters);
-		bootsOR(result, a, b, cloud_key_cptr());
-		return result;
-	}
+	// Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+	// 	Ciphertext result(parameters);
+	// 	bootsOR(result, a, b, cloud_key_cptr());
+	// 	return result;
+	// }
 	
-	Ciphertext Add(Ciphertext a, Ciphertext b) {
-		Ciphertext result(parameters);
-		bootsXOR(result, a, b, cloud_key_cptr());
-		return result;
-	}
+	// Ciphertext Add(Ciphertext a, Ciphertext b) {
+	// 	Ciphertext result(parameters);
+	// 	bootsXOR(result, a, b, cloud_key_cptr());
+	// 	return result;
+	// }
 
-	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-		return Add(a,b); // correct in F_2
-	}
+	// Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+	// 	return Add(a,b); // correct in F_2
+	// }
 
-	Ciphertext Negate(Ciphertext a) {
-		Ciphertext result(parameters);
-		bootsNOT(result, a, cloud_key_cptr());
-		return result;
-	}
+	// Ciphertext Negate(Ciphertext a) {
+	// 	Ciphertext result(parameters);
+	// 	bootsNOT(result, a, cloud_key_cptr());
+	// 	return result;
+	// }
 
-	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-		//bootsMUX(LweSample* result, const LweSample* a, const LweSample* b, const LweSample* c, const TFheGateBootstrappingCloudKeySet* bk);
-		Ciphertext result(parameters);
-		bootsMUX(result, s, a, b, cloud_key_cptr());
-		return result;
-	}
+	// Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+	// 	//bootsMUX(LweSample* result, const LweSample* a, const LweSample* b, const LweSample* c, const TFheGateBootstrappingCloudKeySet* bk);
+	// 	Ciphertext result(parameters);
+	// 	bootsMUX(result, s, a, b, cloud_key_cptr());
+	// 	return result;
+	// }
 
 private:
   
