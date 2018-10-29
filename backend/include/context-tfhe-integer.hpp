@@ -75,7 +75,7 @@ public:
 
     std::cout << "Here goes something!" << std::endl;
 
-    for (int i; i < pt.size(); i ++) {
+    for (int i = 0; i < pt.size(); i ++) {
       
       std::cout << "Here goes nothing" << std::endl;
 
@@ -95,7 +95,7 @@ public:
     std::vector<Plaintext> decrypt_result;
     CiphertextEl ct_el(parameters);
 
-    for (int i; i < ct.size(); i ++) {
+    for (int i = 0; i < ct.size(); i ++) {
       
       // ct_el = ct[i];
 

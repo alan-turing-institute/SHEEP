@@ -57,15 +57,13 @@ public:
 	Ciphertext encrypt(std::vector<Plaintext> pt) {
 
     CiphertextTFHE ct_el(parameters);
-    Plaintext pt_el;
 		Ciphertext ct;
 
-    std::cout << "Here goes something 2!" << std::endl;
+    for (int i = 0; i < pt.size(); i ++) {
 
-    for (int i; i < pt.size(); i ++) {
-      pt_el = pt[i];
+      CiphertextTFHE ct_el(parameters);
 
-      bootsSymEncrypt(ct_el, pt_el, secret_key.get());
+      bootsSymEncrypt(ct_el, pt[i], secret_key.get());
 
       ct.push_back(ct_el);
     }
@@ -75,24 +73,19 @@ public:
 	}
 
 	std::vector<Plaintext> decrypt(Ciphertext ct) {
-
-    std::vector<Plaintext> c;
     
-    for (int i; i < ct.size(); i ++) {
+    Plaintext pt_el;
+    std::vector<Plaintext> pt;
+    
+    for (int i = 0; i < ct.size(); i ++) {
       CiphertextTFHE ct_el(parameters);
-      Plaintext pt_el;
+      
+      pt_el = bootsSymDecrypt(ct[i], secret_key.get());
 
-
-      ct_el = ct[i];
-
-      pt_el = bootsSymDecrypt(ct_el, secret_key.get());
-
-      std::cout << "pt_el: " << std::to_string(pt_el) << std::endl;
-
-      c.push_back(pt_el);
+      pt.push_back(pt_el);
     }
 
-		return c;
+		return pt;
 	}
 
 	// Ciphertext Multiply(Ciphertext a, Ciphertext b) {

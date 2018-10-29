@@ -13,26 +13,14 @@ typedef ContextTFHE<bool>::Ciphertext Ciphertext;
 // left with the original value.
 void test_single(ContextTFHE<bool>& context) {
 
-	// Plaintext pt_false_orig = false;
-	// Plaintext pt_false_new = context.decrypt(context.encrypt(pt_false_orig));
-	// assert(pt_false_orig == pt_false_new);
-
-	// Plaintext pt_true_orig = true;
-	// Plaintext pt_true_new = context.decrypt(context.encrypt(pt_true_orig));
-	// return (pt_true_orig == pt_true_new);
-
-
-  std::vector<Plaintext> wrong = {0, 1};
-
   std::vector<Plaintext> pt_orig = {true, false};
   std::vector<Plaintext> pt_new = context.decrypt(context.encrypt(pt_orig));
 
-  std::cout << "encrypt size "<< std::to_string((context.encrypt(pt_orig)).size()) << std::endl;
-  // std::cout << pt_orig[1] << " = " << pt_new[1] << std::endl;
+  for (int i = 0; i < pt_new.size(); i++) {
+    std::cout << pt_orig[i] << " = " << pt_new[i] << std::endl;
+  }
 
   assert(pt_orig == pt_new);
-
-  assert(1 == 0);
 };
 
 // // Similar to test_single, but using the container interface
