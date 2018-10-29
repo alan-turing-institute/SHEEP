@@ -76,10 +76,10 @@ BaseContext<PlaintextT>* SheepServer::make_context(std::string context_type) {
 		return new ContextClear<PlaintextT>();
 
 	#ifdef HAVE_HElib
-		// } else if (context_type == "HElib_F2") {
-		// 	return  new ContextHElib_F2<PlaintextT>();
-		} else if (context_type == "HElib_Fp") {
-			return new ContextHElib_Fp<PlaintextT>();
+	} else if (context_type == "HElib_F2") {
+	  return  new ContextHElib_F2<PlaintextT>();
+	} else if (context_type == "HElib_Fp") {
+	  return new ContextHElib_Fp<PlaintextT>();
 	#endif
 
 	#ifdef HAVE_TFHE
@@ -137,8 +137,9 @@ SheepServer::make_const_plaintext_inputs() {
 //// populate the stored m_job_config.parameters map
 void
 SheepServer::get_parameters() {
+
 	if (m_job_config.parameters.size() == 0) {
-		/// call a function that will create a context and set m_job_config.parameters to default values
+	  /// call a function that will create a context and set m_job_config.parameters to default values
 		if (m_job_config.input_type == "bool") update_parameters<bool>(m_job_config.context);
 		if (m_job_config.input_type == "uint8_t") update_parameters<uint8_t>(m_job_config.context);
 		if (m_job_config.input_type == "uint16_t") update_parameters<uint16_t>(m_job_config.context);
@@ -162,8 +163,8 @@ SheepServer::update_parameters(std::string context_type,
 #ifdef HAVE_HElib
 	} else if (context_type == "HElib_Fp") {
 		context = new ContextHElib_Fp<PlaintextT>();
-	// } else if (context_type == "HElib_F2") {
-	// 	context = new ContextHElib_F2<PlaintextT>();
+	} else if (context_type == "HElib_F2") {
+	  context = new ContextHElib_F2<PlaintextT>();
 #endif
 #ifdef HAVE_TFHE
 	} else if (context_type == "TFHE") {
