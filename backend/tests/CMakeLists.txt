@@ -77,18 +77,19 @@ if (TFHE_FOUND)
   add_executable(test-tfhe-bool-encrypt-decrypt test-tfhe-bool-encrypt-decrypt.cpp)
   target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
   add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
+  
+  # and or xor not select
+  foreach(op IN ITEMS and or xor not select substract)
+    add_executable(test-tfhe-bool-${op}
+      test-tfhe-bool-${op}.cpp
+      ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+      ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+      ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-#     foreach(op IN ITEMS and or xor not select)
-#         add_executable(test-tfhe-bool-${op}
-#                          test-tfhe-bool-${op}.cpp
-#                          ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-# 			 ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-#                          ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+    target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
 
-#         target_link_libraries(test-tfhe-bool-${op} ${TFHE_LIBRARIES})
-
-#         add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
-#     endforeach(op)
+    add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
+  endforeach(op)
 
 #     foreach(type IN ITEMS int8_t)
 #         add_executable(test-tfhe-${type}-encrypt-decrypt
@@ -125,12 +126,12 @@ if (HELIB_FOUND)
       foreach(f IN ITEMS fp)
         # operations - ADDCONST, MULTBYCONST only for fp
 	      foreach (op IN ITEMS addConst multByConst)
-        	           add_executable(test-helib-${f}-${type}-${op}
-        		                test-helib-${f}-${type}-${op}
-        		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-			   target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-                 	   add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
-              endforeach(op)
+          add_executable(test-helib-${f}-${type}-${op} test-helib-${f}-${type}-${op} ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+			    target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+          add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+        
+        endforeach(op)
      	endforeach(f)
 
       foreach(f IN ITEMS f2)

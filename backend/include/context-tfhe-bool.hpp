@@ -88,40 +88,97 @@ public:
 		return pt;
 	}
 
-	// Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	bootsAND(result, a, b, cloud_key_cptr());
-	// 	return result;
-	// }
+	Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+    Ciphertext ct;
+
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+    for (int i = 0; i < a.size(); i ++) {
+      CiphertextTFHE ct_el(parameters);
+
+      bootsAND(ct_el, a[i], b[i], cloud_key_cptr());
+
+      ct.push_back(ct_el);
+    }
+
+    return ct;
+	}
 	
-	// Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	bootsOR(result, a, b, cloud_key_cptr());
-	// 	return result;
-	// }
+	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+    Ciphertext ct;
+
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+    for (int i = 0; i < a.size(); i ++) {
+      CiphertextTFHE ct_el(parameters);
+
+      bootsOR(ct_el, a[i], b[i], cloud_key_cptr());
+
+      ct.push_back(ct_el);
+    }
+
+		return ct;
+	}
 	
-	// Ciphertext Add(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	bootsXOR(result, a, b, cloud_key_cptr());
-	// 	return result;
-	// }
+	Ciphertext Add(Ciphertext a, Ciphertext b) {
+    
+    Ciphertext ct;
 
-	// Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	// 	return Add(a,b); // correct in F_2
-	// }
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
 
-	// Ciphertext Negate(Ciphertext a) {
-	// 	Ciphertext result(parameters);
-	// 	bootsNOT(result, a, cloud_key_cptr());
-	// 	return result;
-	// }
+    for (int i = 0; i < a.size(); i ++) {
+      CiphertextTFHE ct_el(parameters);
 
-	// Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-	// 	//bootsMUX(LweSample* result, const LweSample* a, const LweSample* b, const LweSample* c, const TFheGateBootstrappingCloudKeySet* bk);
-	// 	Ciphertext result(parameters);
-	// 	bootsMUX(result, s, a, b, cloud_key_cptr());
-	// 	return result;
-	// }
+      bootsXOR(ct_el, a[i], b[i], cloud_key_cptr());
+
+      ct.push_back(ct_el);
+    }
+
+    return ct;
+	}
+
+	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+		return Add(a, b);
+	}
+
+	Ciphertext Negate(Ciphertext a) {
+    Ciphertext ct;
+
+    for (int i = 0; i < a.size(); i ++) {
+      CiphertextTFHE ct_el(parameters);
+
+      bootsNOT(ct_el, a[i], cloud_key_cptr());
+
+      ct.push_back(ct_el);
+    }
+
+    return ct;
+	}
+
+	Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
+
+    Ciphertext ct;
+
+		if ((s.size() != a.size()) || (s.size() != b.size())) {
+			throw std::runtime_error("Ciphertext s, Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+		for (int i = 0; i < a.size(); i++) {
+      CiphertextTFHE ct_el(parameters);
+
+      bootsMUX(ct_el, s[i], a[i], b[i], cloud_key_cptr());
+
+      ct.push_back(ct_el);
+		}
+		
+		return ct;
+	}
 
 private:
   
