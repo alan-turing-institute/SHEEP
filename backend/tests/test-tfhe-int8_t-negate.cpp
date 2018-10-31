@@ -5,20 +5,29 @@
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
 
-int main(void) {
-	using namespace SHEEP;
-	typedef std::vector<ContextTFHE<int8_t>::Plaintext> PtVec;
+typedef std::chrono::duration<double, std::micro> DurationT;
 
+int main(void) {
+
+  using namespace SHEEP;
+  
 	Circuit circ;
 	Wire in = circ.add_input("in");
 	Wire out = circ.add_assignment("out", Gate::Negate, in);
 	circ.set_output(out);
 
+  std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
 
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0}, PtVec{0}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1}, PtVec{-1}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-127}, PtVec{127}));
-	// Correct for int8_t (eight-bit two's complement):
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-128}, PtVec{-128}));
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{15, -15, -128}};
+
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<int8_t> exp_values = {-15, 15, -128};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << "- (" << std::to_string(pt_input[0][i]) << ") = " << std::to_string(result[0][i]) << std::endl;
+  }
+
+  assert(result.front() == exp_values);
 }

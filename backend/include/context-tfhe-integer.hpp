@@ -27,8 +27,8 @@ public:
 	
   typedef typename Context_::Plaintext Plaintext;
   typedef typename Context_::Ciphertext Ciphertext;
-  
   typedef CiphertextArrayTFHE<BITWIDTH(T)> CiphertextEl;
+  typedef CiphertextTFHE CiphertextBit;
 
 	ContextTFHE(long minimum_lambda=110):
 		// fixed security level that works with
@@ -70,14 +70,10 @@ public:
 
   Ciphertext encrypt(std::vector<Plaintext> pt) {
     
-    CiphertextEl ct_el(parameters);
 		Ciphertext ct;
 
-    std::cout << "Here goes something!" << std::endl;
-
     for (int i = 0; i < pt.size(); i ++) {
-      
-      std::cout << "Here goes nothing" << std::endl;
+      CiphertextEl ct_el(parameters);
 
       for (int j = 0; j < BITWIDTH(Plaintext); j++) { 
 			  bootsSymEncrypt(ct_el[j], bit(j, pt[i]), secret_key.get());
@@ -92,173 +88,247 @@ public:
 
 	std::vector<Plaintext> decrypt(Ciphertext ct) {
 
-    std::vector<Plaintext> decrypt_result;
-    CiphertextEl ct_el(parameters);
-
+    Plaintext pt_el;
+    std::vector<Plaintext> pt;
+    
     for (int i = 0; i < ct.size(); i ++) {
       
-      // ct_el = ct[i];
+      CiphertextEl ct_el(parameters);
+      ct_el = ct[i];
 
-      
-
-      Plaintext pt(0);
+      Plaintext pt_el(0);
 
       for (int j = 0; j < BITWIDTH(Plaintext); j++) {
-        set_bit(j, pt, bootsSymDecrypt(ct_el[j], secret_key.get()));
+        set_bit(j, pt_el, bootsSymDecrypt(ct_el[j], secret_key.get()));
       }
 
-      std::cout << "Here goes nothing" << std::endl;
-
-      //decrypt_result.push_back(ct_el);
+      pt.push_back(pt_el);
     }
 
-		return decrypt_result;
+		return pt;
 	}
 
+	std::pair<CiphertextBit, CiphertextBit> HalfAdder(LweSample *a, LweSample *b) {
+		CiphertextTFHE sum(parameters), carry(parameters);
+		bootsXOR(sum, a, b, cloud_key_cptr());
+		bootsAND(carry, a, b, cloud_key_cptr());		
+		return std::make_pair(sum, carry);
+	}
 
-	// typedef CiphertextTFHE CiphertextBit;
-	
-	// std::pair<CiphertextBit,CiphertextBit> HalfAdder(LweSample *a, LweSample *b) {
-	// 	CiphertextTFHE sum(parameters), carry(parameters);
-	// 	bootsXOR(sum, a, b, cloud_key_cptr());
-	// 	bootsAND(carry, a, b, cloud_key_cptr());		
-	// 	return std::make_pair(sum, carry);
-	// }
+  std::pair<CiphertextBit, CiphertextBit> FullAdder(LweSample *a, LweSample *b, LweSample *carry_in) {
+		CiphertextBit sum(parameters), carry_out(parameters),
+			s1(parameters), c1(parameters), c2(parameters);
 
-	// std::pair<CiphertextBit,CiphertextBit> HalfSubtractor(LweSample *a, LweSample *b) {
-	// 	CiphertextTFHE diff(parameters), borrow(parameters);
-	// 	bootsXOR(diff, a, b, cloud_key_cptr());
-	// 	bootsANDNY(borrow, a, b, cloud_key_cptr());		
-	// 	return std::make_pair(diff, borrow);
-	// }
+		std::tie(s1, c1) = HalfAdder(a, b);
+		std::tie(sum, c2) = HalfAdder(s1, carry_in);
+		bootsOR(carry_out, c1, c2, cloud_key_cptr());
+		return std::make_pair(sum, carry_out);
+	}
 
-	// std::pair<CiphertextBit,CiphertextBit> FullAdder(LweSample *a, LweSample *b, LweSample *carry_in) {
-	// 	CiphertextBit sum(parameters), carry_out(parameters),
-	// 		s1(parameters), c1(parameters), c2(parameters);
+	std::pair<CiphertextBit, CiphertextBit> HalfSubtractor(LweSample *a, LweSample *b) {
+		CiphertextTFHE diff(parameters), borrow(parameters);
+		bootsXOR(diff, a, b, cloud_key_cptr());
+		bootsANDNY(borrow, a, b, cloud_key_cptr());		
+		return std::make_pair(diff, borrow);
+	}
 
-	// 	std::tie(s1, c1) = HalfAdder(a, b);
-	// 	std::tie(sum, c2) = HalfAdder(s1, carry_in);
-	// 	bootsOR(carry_out, c1, c2, cloud_key_cptr());
-	// 	return std::make_pair(sum, carry_out);
-	// }
+	std::pair<CiphertextBit, CiphertextBit> FullSubtractor(LweSample *x, LweSample *y, LweSample *borrow_in) {
+		CiphertextBit diff(parameters), borrow_out(parameters),
+			d1(parameters), b1(parameters), b2(parameters);
 
-	// std::pair<CiphertextBit,CiphertextBit> FullSubtractor(LweSample *x, LweSample *y, LweSample *borrow_in) {
-	// 	CiphertextBit diff(parameters), borrow_out(parameters),
-	// 		d1(parameters), b1(parameters), b2(parameters);
+		std::tie(d1, b1) = HalfSubtractor(x, y);
+		std::tie(diff, b2) = HalfSubtractor(d1, borrow_in);
+		bootsOR(borrow_out, b1, b2, cloud_key_cptr());
+		return std::make_pair(diff, borrow_out);
+	}
 
-	// 	std::tie(d1, b1) = HalfSubtractor(x, y);
-	// 	std::tie(diff, b2) = HalfSubtractor(d1, borrow_in);
-	// 	bootsOR(borrow_out, b1, b2, cloud_key_cptr());
-	// 	return std::make_pair(diff, borrow_out);
-	// }
+	// Add implented as a ripple-carry adder
+	Ciphertext Add(Ciphertext a, Ciphertext b) {
 
-	// // Add implented as a ripple-carry adder
-	// Ciphertext Add(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	CiphertextBit sum(parameters), carry(parameters);
-	// 	std::tie(sum, carry) = HalfAdder(a[0], b[0]);
-	// 	bootsCOPY(result[0], sum, cloud_key_cptr());
-	// 	// Note that the loop starts at ONE, since we computed
-	// 	// the zeroth bit above
-	// 	for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
-	// 		std::tie(sum, carry) = FullAdder(a[i], b[i], carry);
-	// 		bootsCOPY(result[i], sum, cloud_key_cptr());
-	// 	}
-	// 	return result;
-	// }
+    Ciphertext ct;
 
-	// // Two's complement negation: negate each bit and add 1.
-	// Ciphertext Negate(Ciphertext a) {
-	// 	Ciphertext result(parameters), tmp(parameters), const1(parameters);
-	// 	for (size_t i = 0; i < BITWIDTH(Plaintext); ++i) {
-	// 		bootsNOT(result[i], a[i], cloud_key_cptr());
-	// 		bootsCONSTANT(const1[i], 0, cloud_key_cptr());
-	// 	}
-	// 	bootsCONSTANT(const1[0], 1, cloud_key_cptr());
-	// 	return Add(result, const1);
-	// }
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+    for (int i = 0; i < a.size(); i ++) {
+
+      CiphertextEl ct_el(parameters);
+      CiphertextBit sum(parameters), carry(parameters);
+
+      std::tie(sum, carry) = HalfAdder(a[i][0], b[i][0]);
+      bootsCOPY(ct_el[0], sum, cloud_key_cptr());
+      
+      // Note that the loop starts at ONE, since we computed
+      // the zeroth bit above
+      for (size_t j = 1; j < BITWIDTH(Plaintext); ++j) {
+        std::tie(sum, carry) = FullAdder(a[i][j], b[i][j], carry);
+        bootsCOPY(ct_el[j], sum, cloud_key_cptr());
+      }
+
+      ct.push_back(ct_el);
+    }
+
+    return ct;
+	}
+
+	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+		Ciphertext ct;
+
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+    for (int i = 0; i < a.size(); i ++) {
+      CiphertextEl ct_el(parameters);
+      CiphertextBit diff(parameters), borrow(parameters);
+
+      std::tie(diff, borrow) = HalfSubtractor(a[i][0], b[i][0]);
+      bootsCOPY(ct_el[0], diff, cloud_key_cptr());
+
+      // Note that the loop starts at ONE, since we computed
+      // the zeroth bit above
+      for (size_t j = 1; j < BITWIDTH(Plaintext); ++j) {
+        std::tie(diff, borrow) = FullSubtractor(a[i][j], b[i][j], borrow);
+        bootsCOPY(ct_el[j], diff, cloud_key_cptr());
+      }
+
+      ct.push_back(ct_el);
+    }
+
+    return ct;
+	}
+
+  Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+    
+    Ciphertext ct;
+
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+
+    for (int k = 0; k < a.size(); k ++) {
+
+      CiphertextEl ct_el(parameters);
+      std::vector<CiphertextArrayTFHE<BITWIDTH(Plaintext)+1> > carry;
+      CiphertextBit sum_bit(parameters), carry_bit(parameters);
+
+      // initialize the ciphertext array holding the carries
+      for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
+        carry.emplace_back(parameters);
+
+      for (int i = 0; i < BITWIDTH(Plaintext); i++)
+        bootsCONSTANT(ct_el[i], 0, cloud_key_cptr());
+
+      // initialize the first level of carry to zero
+      for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
+        bootsCONSTANT(carry[0][i], 0, cloud_key_cptr());
+
+      for (int i = 0; i < BITWIDTH(Plaintext); i++) {
+        for (int j = 0; j <= i; j++) {
+          std::tie(sum_bit, carry_bit) = MultiplyBit(a[k][i-j], b[k][j], ct_el[i], carry[j][i]);
+          bootsCOPY(ct_el[i], sum_bit, cloud_key_cptr());
+          bootsCOPY(carry[j+1][i+1], carry_bit, cloud_key_cptr());				
+        }
+      }
+        
+      ct.push_back(ct_el);
+    }
+
+    return ct;
+	}
+
+  // Two's complement negation: negate each bit and add 1.
+	Ciphertext Negate(Ciphertext a) {
+
+    Ciphertext ct, const1;
+
+    for (int i = 0; i < a.size(); i ++) {
+      
+      CiphertextEl ct_el(parameters), tmp(parameters), const1_el(parameters);
+
+      for (size_t j = 0; j < BITWIDTH(Plaintext); ++j) {
+        bootsNOT(ct_el[j], a[i][j], cloud_key_cptr());
+        bootsCONSTANT(const1_el[j], 0, cloud_key_cptr());
+      }
+
+      bootsCONSTANT(const1_el[0], 1, cloud_key_cptr());
+            
+      ct.push_back(ct_el);
+      const1.push_back(const1_el);
+    }
+
+    return(Add(ct, const1));
+	}
 
 	// Ciphertext SubtractNaive(Ciphertext a, Ciphertext b) {
 	// 	return Add(a,Negate(b));
 	// }
 
-	// Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext result(parameters);
-	// 	CiphertextBit diff(parameters), borrow(parameters);
-	// 	std::tie(diff, borrow) = HalfSubtractor(a[0], b[0]);
-	// 	bootsCOPY(result[0], diff, cloud_key_cptr());
-	// 	// Note that the loop starts at ONE, since we computed
-	// 	// the zeroth bit above
-	// 	for (size_t i = 1; i < BITWIDTH(Plaintext); ++i) {
-	// 		std::tie(diff, borrow) = FullSubtractor(a[i], b[i], borrow);
-	// 		bootsCOPY(result[i], diff, cloud_key_cptr());
-	// 	}
-	// 	return result;
-	// }
+	std::pair<CiphertextBit, CiphertextBit> MultiplyBit(
+		LweSample *x, LweSample *y, LweSample *sum_in, LweSample *carry_in)
+	{
+		CiphertextBit sum_out(parameters), carry_out(parameters),
+			product_bit(parameters);
+		bootsAND(product_bit, x, y, cloud_key_cptr());
+		std::tie(sum_out, carry_out) = FullAdder(sum_in, product_bit, carry_in);
+		return std::make_pair(sum_out, carry_out);
+	}
 
-	// std::pair<CiphertextBit, CiphertextBit> MultiplyBit(
-	// 	LweSample *x, LweSample *y, LweSample *sum_in, LweSample *carry_in)
-	// {
-	// 	CiphertextBit sum_out(parameters), carry_out(parameters),
-	// 		product_bit(parameters);
-	// 	bootsAND(product_bit, x, y, cloud_key_cptr());
-	// 	std::tie(sum_out, carry_out) = FullAdder(sum_in, product_bit, carry_in);
-	// 	return std::make_pair(sum_out, carry_out);
-	// }
 
-	// Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-	//  	Ciphertext result(parameters);
-	// 	std::vector<CiphertextArrayTFHE<BITWIDTH(Plaintext)+1> > carry;
-	// 	CiphertextBit sum_bit(parameters), carry_bit(parameters);
+	Ciphertext Compare(Ciphertext a, Ciphertext b) {
+    
+    Ciphertext ct;
 
-	// 	// initialize the ciphertext array holding the carries
-	// 	for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
-	// 		carry.emplace_back(parameters);
+    if (a.size() != b.size()) {
+			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
+    
+    for (int i = 0; i < a.size(); i ++) {
 
-	// 	for (int i = 0; i < BITWIDTH(Plaintext); i++)
-	// 		bootsCONSTANT(result[i], 0, cloud_key_cptr());
+              Ciphertext difference(parameters);
+              Ciphertext result(parameters);
+              // Set all result bits to zero, other than the lsb
+              // (so loop counter starts at 1)
+              for (size_t i = 1; i < BITWIDTH(Plaintext); i++)
+                bootsCONSTANT(result[i], 0, cloud_key_cptr());
 
-	// 	// initialize the first level of carry to zero
-	// 	for (int i = 0; i < BITWIDTH(Plaintext)+1; i++)
-	// 		bootsCONSTANT(carry[0][i], 0, cloud_key_cptr());
+              difference = Subtract(b, a);
 
-	// 	for (int i = 0; i < BITWIDTH(Plaintext); i++) {
-	// 		for (int j = 0; j <= i; j++) {
-	// 			std::tie(sum_bit, carry_bit) = MultiplyBit(a[i-j], b[j], result[i], carry[j][i]);
-	// 			bootsCOPY(result[i], sum_bit, cloud_key_cptr());
-	// 			bootsCOPY(carry[j+1][i+1], carry_bit, cloud_key_cptr());				
-	// 		}
-	// 	}
-	//  	return result;
-	// }
+              // 'a' was larger if the sign bit was set
+              constexpr size_t signbit = BITWIDTH(Plaintext) - 1;
+              bootsCOPY(result[0], difference[signbit], cloud_key_cptr());
+              return result;
+    
+    
+    }
 
-	// Ciphertext Compare(Ciphertext a, Ciphertext b) {
-	// 	Ciphertext difference(parameters);
-	// 	Ciphertext result(parameters);
-	// 	// Set all result bits to zero, other than the lsb
-	// 	// (so loop counter starts at 1)
-	// 	for (size_t i = 1; i < BITWIDTH(Plaintext); i++)
-	// 		bootsCONSTANT(result[i], 0, cloud_key_cptr());
+     return ct;
+	}
 
-	// 	difference = Subtract(b, a);
+  Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
 
-	// 	// 'a' was larger if the sign bit was set
-	// 	constexpr size_t signbit = BITWIDTH(Plaintext) - 1;
-	// 	bootsCOPY(result[0], difference[signbit], cloud_key_cptr());
-	// 	return result;
-	// }
+    Ciphertext ct;
 
-	// Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-	// 	//bootsMUX(LweSample* result, const LweSample* a, const LweSample* b, const LweSample* c, const TFheGateBootstrappingCloudKeySet* bk);
-	// 	Ciphertext result(parameters);
-	// 	for (size_t i = 0; i < BITWIDTH(Plaintext); i++)
-	// 		bootsMUX(result[i], s, a[i], b[i], cloud_key_cptr());
+		if ((s.size() != a.size()) || (s.size() != b.size())) {
+			throw std::runtime_error("Ciphertext s, Ciphertext a, Ciphertext b - lengths do not match.");
+		} 
 
-	// 	return result;
-	// }
+		for (int i = 0; i < a.size(); i++) {
+      CiphertextEl ct_el(parameters);
+
+      for (int j = 0; j < BITWIDTH(Plaintext); j++) {
+        bootsMUX(ct_el[j], s[i], a[i][j], b[i][j], cloud_key_cptr());
+      }
+
+      ct.push_back(ct_el);
+		}
+
+		return ct;
+	}
+
   private:
-
-          long m_minimum_lambda;
+    long m_minimum_lambda;
 
 };
 

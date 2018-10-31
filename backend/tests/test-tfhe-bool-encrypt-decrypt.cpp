@@ -41,5 +41,4 @@ int main(void) {
 	ContextTFHE<bool> context;
 
 	test_single(context);
-	//assert(test_containers(context));
 }

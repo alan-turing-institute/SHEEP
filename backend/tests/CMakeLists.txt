@@ -78,8 +78,7 @@ if (TFHE_FOUND)
   target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
   add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
   
-  # and or xor not select
-  foreach(op IN ITEMS and or xor not select substract)
+  foreach(op IN ITEMS and or xor not select subtract)
     add_executable(test-tfhe-bool-${op}
       test-tfhe-bool-${op}.cpp
       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -91,24 +90,24 @@ if (TFHE_FOUND)
     add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
   endforeach(op)
 
-#     foreach(type IN ITEMS int8_t)
-#         add_executable(test-tfhe-${type}-encrypt-decrypt
-#                          test-tfhe-${type}-encrypt-decrypt.cpp)
-#         target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
-#         add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
+  foreach(type IN ITEMS int8_t)
 
-#         foreach(op IN ITEMS add subtract multiply negate compare select)
-#             add_executable(test-tfhe-${type}-${op}
-#                              test-tfhe-${type}-${op}.cpp
-#                              ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-# 			     ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
-#                              ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+    add_executable(test-tfhe-${type}-encrypt-decrypt test-tfhe-${type}-encrypt-decrypt.cpp)
+    target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
+    add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
 
-#             target_link_libraries(test-tfhe-${type}-${op} ${TFHE_LIBRARIES})
+    # multiply
+    foreach(op IN ITEMS add subtract    negate compare select)
+      
+      add_executable(test-tfhe-${type}-${op} test-tfhe-${type}-${op}.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+			  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
-#             add_test(NAME test-tfhe-${type}-${op} COMMAND $<TARGET_FILE:test-tfhe-${type}-${op}>)
-#         endforeach(op)
-#     endforeach(type)
+      target_link_libraries(test-tfhe-${type}-${op} ${TFHE_LIBRARIES})
+
+      add_test(NAME test-tfhe-${type}-${op} COMMAND $<TARGET_FILE:test-tfhe-${type}-${op}>)
+    endforeach(op)
+  
+  endforeach(type)
 
 endif (TFHE_FOUND)
 

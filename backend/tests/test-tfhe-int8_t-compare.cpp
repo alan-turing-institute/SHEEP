@@ -5,21 +5,28 @@
 #include "circuit-test-util.hpp"
 #include "simple-circuits.hpp"
 
+typedef std::chrono::duration<double, std::micro> DurationT;
+
 int main(void) {
 	using namespace SHEEP;
-	typedef std::vector<ContextTFHE<int8_t>::Plaintext> PtVec;
 
-	Circuit circ = single_binary_gate_circuit(Gate::Compare);
+	Circuit circ;
+	Wire a = circ.add_input("a");
+	Wire b = circ.add_input("b");
+	Wire out = circ.add_assignment("out", Gate::Compare, a, b);
+	circ.set_output(out);
 
+	std::cout << circ;
+	std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
 
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1, 0}, PtVec{1}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0, -1}, PtVec{1}));
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{10, -12, -81}, {-12, -12, -80}};
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+	std::vector<int8_t> exp_values = {1, 0, 0};
 
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0, 0}, PtVec{0}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1, 1}, PtVec{0}));
+	for (int i = 0; i < exp_values.size(); i++) {
+	  std::cout << std::to_string(pt_input[0][i]) << " > " <<  std::to_string(pt_input[1][i]) << " ? " << std::to_string(result[0][i]) << std::endl;
+	}
 
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0, 1}, PtVec{0}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-1, 1}, PtVec{0}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-1, 2}, PtVec{0}));
-};
+  assert(result.front() == exp_values);
+}
