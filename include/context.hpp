@@ -106,18 +106,47 @@ public:
 	virtual Ciphertext encrypt(std::vector<Plaintext>) = 0;
 	virtual std::vector<Plaintext>  decrypt(Ciphertext) = 0;
 
+	// An Alias is just a renaming of a wire.  It has very minimal
+	// performance cost, and does not result in any additional HE
+	// library calls.  It is included mainly for convenience for when
+	// generating circuits.
 	virtual Ciphertext Alias(Ciphertext a)             { return a; };
+
+	// An Identity operation.  In general it is obtained by using a
+	// library's COPY functionality, and as such it will have higher
+	// cost than an Alias.
 	virtual Ciphertext Identity(Ciphertext)            { throw GateNotImplemented(); };
+
+	// Multiply (equivalent to AND for Boolean circuits)
 	virtual Ciphertext Multiply(Ciphertext, Ciphertext) { throw GateNotImplemented(); };
+
+	// Maximum (equivalent to OR for Boolean circuits)
 	virtual Ciphertext Maximum(Ciphertext, Ciphertext)  { throw GateNotImplemented(); };
+
+	// Add (equivalent to XOR for Boolean circuits)
 	virtual Ciphertext Add(Ciphertext, Ciphertext)      { throw GateNotImplemented(); };
+
+	// Subtract second input from first.
 	virtual Ciphertext Subtract(Ciphertext, Ciphertext) { throw GateNotImplemented(); };
+
+	// Negate (has fan-in one): return the additive inverse of its
+	// input
 	virtual Ciphertext Negate(Ciphertext)              { throw GateNotImplemented(); };
-	// if a > b, returns a Ciphertext representation of 1, and a Ciphertext 0 otherwise.
+
+	// if a > b, returns a Ciphertext representation of 1, and a
+	// Ciphertext 0 otherwise.
 	virtual Ciphertext Compare(Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
+
+	// Select from two inputs (has fan-in of three)
 	// Select(s,a,b) := lsb(s)?a:b
 	virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
+	
+	// Add, where the first input names a regular (encrypted) wire,
+	// and the second input names a plaintext input
 	virtual Ciphertext AddConstant(std::vector<Ciphertext>, long  ) { throw GateNotImplemented(); };
+
+	// Multiply, where the first input names a regular (encrypted)
+	// wire, and the second input names a plaintext input
 	virtual Ciphertext MultByConstant(std::vector<Ciphertext>, long  ) { throw GateNotImplemented(); };
 
 	virtual Ciphertext dispatch(Gate g,
