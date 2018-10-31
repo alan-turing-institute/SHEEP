@@ -100,7 +100,8 @@ def new_test():
             return redirect(url_for("sheep_error",
                                     status = param_request["status_code"],
                                     message = param_request["content"]))
-        app.data["params"] = param_request["content"]
+        app.data["params"] = param_request["content"]["params"]
+        app.data["slots"] = param_request["content"]["slots"]
         return redirect(url_for("enter_parameters"))
     else:
         result = None
@@ -123,15 +124,18 @@ def enter_parameters():
     if request.method == "POST":
         for context in pforms.keys():
             if context in request.form.keys():
-                update_params_request, eval_strat = frontend_utils.update_params(context,
-                                                                                 request.form,
-                                                                                 app.data,app.config)
+                update_params_request = frontend_utils.update_params(context,
+                                                                     request.form,
+                                                                     app.data,app.config)
                 if update_params_request["status_code"] != 200:
                     return redirect(url_for("sheep_error",
                                             status = update_params_request["status_code"],
                                             message = update_params_request["content"]))
-                params = update_params_request["content"]
+                params = update_params_request["content"]["params"]
                 app.data["params"][context] = params
+                slots = update_params_request["content"]["slots"]
+                app.data["slots"][context] = slots
+                eval_strat = update_params_request["content"]["eval_strat"]
                 app.data["eval_strategy"][context] = eval_strat
                 return redirect(url_for("enter_parameters"))
 
@@ -141,7 +145,7 @@ def enter_parameters():
             pass
         if request.form["next"] == "Next":
             return redirect(url_for("enter_input_vals"))
-    return render_template("enter_parameters.html",forms=pforms)
+    return render_template("enter_parameters.html",forms=pforms, slots=app.data["slots"])
 
 
 @app.route("/enter_input_vals",methods=["POST","GET"])
@@ -153,17 +157,17 @@ def enter_input_vals():
     iform = build_inputs_form(app.data["inputs"])(request.form)
 
     circuit_text = open(app.data["uploaded_filenames"]["circuit_file"]).readlines()
-    
+
     if request.method == "POST" and iform.validate():
-        
+
         input_vals = frontend_utils.convert_input_vals_list(iform.data)
-        
+
         if common_utils.check_inputs(input_vals, app.data["input_type"]):
 
             app.data["input_vals"] = input_vals
 
             return redirect(url_for("execute_test"))
-    
+
     return render_template("enter_input_vals.html",
                            form=iform,
                            circuit=circuit_text)

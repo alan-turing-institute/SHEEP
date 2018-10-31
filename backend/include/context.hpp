@@ -87,6 +87,7 @@ public:
 
 	virtual void print_parameters() = 0;
 	virtual std::map<std::string, long> get_parameters() = 0;
+        virtual long get_num_slots() = 0;
 	virtual void print_sizes() = 0;
 	virtual void set_parameter(std::string, long) = 0;
 	virtual void configure() = 0;
@@ -119,7 +120,8 @@ public:
 	virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
 	virtual Ciphertext AddConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
 	virtual Ciphertext MultByConstant(Ciphertext, long  ) { throw GateNotImplemented(); };
-
+        // return num_slots=1 (i.e. no SIMD) if not overriden in concrete class
+        virtual long get_num_slots() { return this->m_nslots; };
 	virtual Ciphertext dispatch(Gate g,
 				    std::vector<Ciphertext> inputs,
 				    std::vector<Plaintext> const_inputs)
@@ -530,6 +532,10 @@ public:
 		return param_map;
 	};
 
+  //  virtual long get_num_slots() {
+  //  return this->m_nslots;
+  // }
+
 	virtual void print_parameters() {
 		for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
 			std::cout << "Parameter " << map_iter->first << " = " << map_iter->second << std::endl;
@@ -552,6 +558,7 @@ protected:
 	int  m_private_key_size;
 	int  m_public_key_size;
 	int  m_ciphertext_size;
+        long m_nslots;
 };
 
 template <typename ContextT,

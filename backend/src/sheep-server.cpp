@@ -143,6 +143,7 @@ void SheepServer::get_parameters() {
       update_parameters<int16_t>(m_job_config.context);
     if (m_job_config.input_type == "int32_t")
       update_parameters<int32_t>(m_job_config.context);
+
   }
 }
 
@@ -193,6 +194,9 @@ void SheepServer::update_parameters(std::string context_type,
   context->configure();
   // update the servers param map.
   m_job_config.parameters = context->get_parameters();
+  // now find out how many slots this context/parameter-set supports
+  // and update the job config
+  m_job_config.nslots = (int)(context->get_num_slots());
   // cleanup
   delete context;
 }
@@ -398,6 +402,8 @@ void SheepServer::handle_get(http_request message) {
     return handle_get_job(message);
   else if (path == "config/")
     return handle_get_config(message);
+  else if (path == "slots/")
+    return handle_get_slots(message);
   else if (path == "results/")
     return handle_get_results(message);
   else if (path == "eval_strategy/")
@@ -710,6 +716,27 @@ void SheepServer::handle_get_parameters(http_request message) {
   }
 
   message.reply(status_codes::OK, result);
+}
+
+void SheepServer::handle_get_slots(http_request message) {
+  /// if the job_config has some parameters set, then return them.
+  /// Otherwise, create a new context, and get the default parameters.
+  /// return a dict of parameters.
+  /// input_type needs to be set already otherwise we can't instantiate context.
+  if ((m_job_config.input_type.size() == 0) ||
+      (m_job_config.context.size() == 0)) {
+    message.reply(
+        status_codes::InternalError,
+        ("Need to set input_type and context before getting num slots"));
+    return;
+  }
+  /// call the get_parameters() function to populate m_job_config.nslots
+  get_parameters();
+  /// build a json object out of it.
+  json::value result = json::value::object();
+  result["nslots"] = json::value::number(m_job_config.nslots);
+  message.reply(status_codes::OK, result);
+
 }
 
 void SheepServer::handle_get_config(http_request message) {

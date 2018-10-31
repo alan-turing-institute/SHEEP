@@ -11,25 +11,27 @@ namespace SHEEP {
 
 template <typename Ciphertext>
 struct CiphertextWrapper { typedef Ciphertext type; };
-  
+
 template <>
 struct CiphertextWrapper<bool> { typedef int type; };
-  
+
 
 template<typename PlaintextT>
 class ContextClear : public Context<PlaintextT, std::vector<PlaintextT>> {   //plaintext and ciphertext are the same type
 public:
 
   typedef PlaintextT Plaintext;
-  typedef std::vector<PlaintextT> Ciphertext;  
+  typedef std::vector<PlaintextT> Ciphertext;
 	typedef PlaintextT CiphertextEl;
 
   /// constructor
   ContextClear() {
-	  this->m_public_key_size = 0;
-	  this->m_private_key_size = 0;
-	  this->m_ciphertext_size = 0;
-	}
+    m_nslots = 100; // reasonable default size
+    this->m_public_key_size = 0;
+    this->m_private_key_size = 0;
+    this->m_ciphertext_size = 0;
+    this->m_param_name_map.insert({"num_slots", m_nslots});
+  }
 
 	Ciphertext encrypt(std::vector<Plaintext> p) {
 	  if (! this->m_configured) this->configure();
@@ -53,7 +55,7 @@ public:
 		std::tie(s1, c1) = HalfAdder(a, b);
 		std::tie(sum, c2) = HalfAdder(s1, carry_in);
 		carry_out = c1 || c2;
-		return std::make_pair(sum, carry_out);		
+		return std::make_pair(sum, carry_out);
 	}
 
 	Ciphertext RippleCarryAdd(Ciphertext a, Ciphertext b) {
@@ -63,10 +65,10 @@ public:
 
 		if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		for (int j = 0; j < a.size(); j++) {
-			
+
 			std::tie(sum, carry) = HalfAdder(bit(0, a[j]), bit(0, b[j]));
 			set_bit(0, result_el, sum);
 
@@ -78,9 +80,9 @@ public:
 			}
 
 			result.push_back(result_el);
-		}	
+		}
 
-		return result;	
+		return result;
 	}
 
 	// In Add, Multiply, Subtract and Negate, we assume that
@@ -91,14 +93,14 @@ public:
 
 	// Work in the corresponding unsigned type and cast
 	// back, so overflow is well-defined.
-  
-	Ciphertext Add(Ciphertext a, Ciphertext b) {	
-	
+
+	Ciphertext Add(Ciphertext a, Ciphertext b) {
+
 		Ciphertext c;
 
 		if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 	  if (std::is_same<Ciphertext, std::vector<bool>>::value) {
 	    for (int i = 0; i < a.size(); i++) {
@@ -126,7 +128,7 @@ public:
 
 		if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 	  if (std::is_same<Ciphertext, std::vector<bool>>::value) {
 			for (int i = 0; i < a.size(); i++) {
@@ -153,13 +155,13 @@ public:
 		product_bit = x & y;
 		return FullAdder(sum_in, product_bit, carry_in);
 	}
-  
+
 	Ciphertext Subtract(Ciphertext a, Ciphertext b) {
 		Ciphertext c;
 
 		if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		if (std::is_same<Ciphertext, std::vector<bool>>::value) {
 			for (int i = 0; i < a.size(); i++) {
@@ -183,12 +185,12 @@ public:
 	}
 
 	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
-		
+
 		Ciphertext c;
 
 		if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		for (int i = 0; i < a.size(); i++) {
 			c.push_back((a[i]>=b[i])?a[i]:b[i]);
@@ -196,7 +198,7 @@ public:
 
 		return c;
 	}
-  
+
 	Ciphertext Not(Ciphertext a) {
 		Ciphertext c;
 
@@ -206,9 +208,9 @@ public:
 
 		return c;
 	}
-  
+
 	Ciphertext Negate(Ciphertext a) {
-		
+
 	  if (std::is_same<Ciphertext, std::vector<bool>>::value) {
 	    return Not(a);
 
@@ -226,14 +228,14 @@ public:
 	    return c;
 	  }
 	}
-  
+
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
 
 		Ciphertext c;
 
 		if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		for (int i = 0; i < a.size(); i++) {
 			c.push_back(a[i] > b[i]);
@@ -248,12 +250,12 @@ public:
 
 		if ((s.size() != a.size()) || (s.size() != b.size())) {
 			throw std::runtime_error("Ciphertext s, Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		for (int i = 0; i < a.size(); i++) {
 			c.push_back((s[i] % 2)?a[i]:b[i]);
 		}
-		
+
 		return c;
 	}
 
@@ -276,8 +278,17 @@ public:
 
 		return Add(a, c);
 	}
+
+  virtual long get_num_slots() {
+    return m_nslots;
+  }
+
+
+protected:
+  long m_nslots;
+
 };
 
 }  // Leaving Sheep namespace
-  
+
 #endif // CONTEXT_CLEAR_HPP

@@ -177,7 +177,7 @@ def set_inputs(input_dict):
         return input_request
     input_names = input_request["content"]
     response_dict = {}
-    
+
     unset_inputs = [i for i in input_names if not i in input_dict.keys()]
 
     if len(unset_inputs) > 0:
@@ -279,6 +279,22 @@ def get_parameters():
     try:
         r = requests.get(BASE_URI+"/parameters/")
         response_dict["status_code"] =  r.status_code
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to get parameters"
+    return response_dict
+
+
+def get_nslots():
+    """
+    Will instantiate a context with the current parameter set,
+    and query it for how many slots it can handle.
+    """
+    response_dict = {}
+    try:
+        r = requests.get(BASE_URI+"/slots/")
+        response_dict["status_code"] = r.status_code
         response_dict["content"] = json.loads(r.content.decode("utf-8"))
     except(requests.exceptions.ConnectionError):
         response_dict["status_code"] = 404

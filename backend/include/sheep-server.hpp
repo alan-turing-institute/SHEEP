@@ -50,6 +50,7 @@ struct SheepJobConfig {
 	std::vector<std::vector<int>> input_vals;
 	std::vector<int> const_input_vals;
 	std::map<std::string, long> parameters;
+        int nslots;
 
 	void setDefaults() {
 		eval_strategy = EvaluationStrategy::serial;
@@ -78,6 +79,8 @@ struct SheepJobConfig {
 			params[map_iter.first] = json::value::number((int64_t)map_iter.second);
 		}
 		config["parameters"] = params;
+		json::value j_nslots = json::value::number(nslots);
+		config["nslots"] = j_nslots;
 		return config;
 	}
 };
@@ -176,6 +179,7 @@ private:
 	void handle_get_inputs(http_request message);
 	void handle_get_const_inputs(http_request message);
 	void handle_get_parameters(http_request message);
+  	void handle_get_slots(http_request message);
 	void handle_get_eval_strategy(http_request message);
 	void handle_get_config(http_request message);
 	void handle_get_results(http_request message);

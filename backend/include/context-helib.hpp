@@ -168,7 +168,7 @@ class ContextHElib : public Context< PlaintextT , CiphertextT> {
 
       m_ea = new EncryptedArray(*m_helib_context);
 
-      m_nslots = m_ea->size();
+      this->m_nslots = m_ea->size();
   };
 
   // destructor
@@ -182,9 +182,9 @@ class ContextHElib : public Context< PlaintextT , CiphertextT> {
   virtual Ciphertext encrypt(std::vector<Plaintext> pt) = 0;
   virtual std::vector<Plaintext> decrypt(Ciphertext pt) = 0;
 
-  long get_num_slots() {
-    return m_nslots;
-  }
+  //  long get_num_slots() {
+  //  return m_nslots;
+  // }
 
   protected:
 
@@ -194,7 +194,7 @@ class ContextHElib : public Context< PlaintextT , CiphertextT> {
     long m_L;       // maximum number of homomorphic levels
     long m_w;       // Hamming weight of secret key
     long m_c;       // number of columns in key-switching matrix
-    long m_nslots;  // number of SIMD operations that can be done at a time
+  //    long m_nslots;  // number of SIMD operations that can be done at a time
 
     long m_m;
     long m_phim;

@@ -21,9 +21,9 @@ def convert_input_vals_list(input_val_dict):
 
   output_dict = {}
 
-  for k, v in input_val_dict.items(): 
+  for k, v in input_val_dict.items():
     output_dict[k] = [int(v_value) for v_value in v.split(",")]
-  
+
   return output_dict
 
 def cleanup_upload_dir(config):
@@ -91,10 +91,10 @@ def run_test(data):
         if results_request["status_code"] != 200:
             return results_request
         results[context] = results_request["content"]
-        params_request = get_params_single_context(context, data["input_type"])
+        params_request = get_params_and_slots_single_context(context, data["input_type"])
         if params_request["status_code"] != 200:
             return params_request
-        results[context]['parameter values'] = params_request["content"]
+        results[context]['parameter values'] = params_request["content"]["params"]
 
     return {"status_code": 200, "content": results}
 
@@ -104,25 +104,35 @@ def get_params_all_contexts(context_list,input_type):
     Return a dict with the key being context_name, and the vals being
     dicts of param_name:default_val.
     """
-    all_params = {}
+    all_params = {"params":{}, "slots":{}}
     for context in context_list:
-        param_request = get_params_single_context(context,input_type)
-        if param_request["status_code"] != 200:
-            return param_request
-        all_params[context] = param_request["content"]
+      param_request = get_params_and_slots_single_context(context,input_type)
+      if not param_request["status_code"] == 200:
+        return param_request
+      all_params["params"][context] = param_request["content"]["params"]
+      all_params["slots"][context] = param_request["content"]["slots"]
     return {"status_code": 200, "content": all_params}
 
 
-def get_params_single_context(context, input_type):
+def get_params_and_slots_single_context(context, input_type):
     """
-    use sheep_client to get parameters for given context and input type
-    Just directly pass through what we get back from sheep_client, which
-    will be a dict with keys "status_code" and "content"
+    Do params and slots together, to avoid having to re-instantiate the context (can be time-consuming)
+    Use sheep_client to get parameters for given context and input type
+    We get back from sheep_client a dict with keys "status_code" and "content"
+    Check this is OK, then get the slots.
     """
     sheep_client.set_context(context)
     sheep_client.set_input_type(input_type)
-    params = sheep_client.get_parameters()
-    return params
+    params_request = sheep_client.get_parameters()
+    if not params_request["status_code"] == 200:
+      return params_request
+    params = params_request["content"]
+    slots_request = sheep_client.get_nslots()
+    if not slots_request["status_code"] == 200:
+      return slots_request
+    slots = slots_request["content"]
+    return {"status_code": 200, "content": {"params":params,
+                                            "slots": slots} }
 
 
 def update_params(context,param_dict,appdata,appconfig):
@@ -137,10 +147,10 @@ def update_params(context,param_dict,appdata,appconfig):
     if default_param_request["status_code"] != 200:
         return param_update_request
     # now retrieve the parameters
-    default_param_request = get_params_single_context(context,appdata["input_type"])
+    default_param_request = get_params_and_slots_single_context(context,appdata["input_type"])
     if default_param_request["status_code"] != 200:
         return param_update_request
-    default_params = default_param_request["content"]
+    default_params = default_param_request["content"]["params"]
     # now compare to the parameters in the form.
     params_to_update = {}
     eval_strat = "serial"
@@ -159,10 +169,12 @@ def update_params(context,param_dict,appdata,appconfig):
     param_update_request = sheep_client.set_parameters(params_to_update)
     if param_update_request["status_code"] != 200:
         return param_update_request
-
-    updated_params = get_params_single_context(context,appdata["input_type"])
-
-    return updated_params, eval_strat
+    updated_params_request = get_params_and_slots_single_context(context,appdata["input_type"])
+    if updated_params_request["status_code"] != 200:
+      return updated_params_request
+    ## insert the eval_strat into the content to be returned
+    updated_params_request["content"]["eval_strat"] = eval_strat
+    return updated_params_request
 
 
 def upload_test_result(results,app_data):
