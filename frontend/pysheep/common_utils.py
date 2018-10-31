@@ -99,18 +99,30 @@ def check_inputs(input_dict, input_type):
     check that the supplied inputs are within the ranges for the specified input type.
     """
     min_allowed, max_allowed = get_min_max(input_type)
+    inputs = [(k,v) for k,v in input_dict.items() if not "(C)" in k]
+    const_inputs = [(k,v) for k,v in input_dict.items() if "(C)" in k]
+
     try:
-        for v in input_dict.values():
-            if isinstance(v,list):
-                for val_int in v:
-                    if int(val_int) < min_allowed or int(val_int) > max_allowed:
-                        return False
-            else:  ## probably a const input
-                if int(v) < min_allowed or int(v) > max_allowed:
+        for k, v in inputs:
+            if not isinstance(v,list):
+                return False  ## need to be lists
+            if not len(v) == len(inputs[0][1]): ## need to all have the same length
+                return False
+            for val_int in v:
+                if int(val_int) < min_allowed or int(val_int) > max_allowed:
                     return False
+        for k, v in const_inputs:
+            if not isinstance(v,int):  ## const_inputs need to be integers.
+                print("Not an integer!")
+                return False
+            if v < min_allowed or v > max_allowed:
+                return False
         return True  # all inputs were ok
     except:
         return False
+
+
+
 
 def cleanup_time_string(t):
     """

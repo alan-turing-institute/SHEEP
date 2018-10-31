@@ -142,7 +142,6 @@ public:
 	// Select(s,a,b) := lsb(s)?a:b
 	virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) { throw GateNotImplemented(); };
 
-
 	// Add, where the first input names a regular (encrypted) wire,
 	// and the second input names a plaintext input
 	virtual Ciphertext AddConstant(Ciphertext, long) { throw GateNotImplemented(); };
