@@ -7,7 +7,7 @@ import os
 import uuid
 
 def get_inputs(circuit_file):
-    """ 
+    """
     print out the inputs that a circuit file expects.
     """
     circuit = open(circuit_file)
@@ -18,7 +18,7 @@ def get_inputs(circuit_file):
 
 def write_inputs_file(inputs,upload_folder="/tmp"):
     """
-    write the input names and values to a file, 
+    write the input names and values to a file,
     just because that's easier to pass to the executable.
     """
     inputs_filename = os.path.join(upload_folder,"inputs_"+str(uuid.uuid4())+".inputs")
@@ -93,21 +93,24 @@ def get_min_max(input_type):
             max_allowed = pow(2,int(bitwidth)-1) -1
     return min_allowed, max_allowed
 
-    
+
 def check_inputs(input_dict, input_type):
-    """ 
+    """
     check that the supplied inputs are within the ranges for the specified input type.
     """
     min_allowed, max_allowed = get_min_max(input_type)
-
-    for list_int in input_dict.values():
-      for val_int in list_int:
-        if int(val_int) < min_allowed or int(val_int) > max_allowed:
-
-            return False
-            
-    return True  # all inputs were ok
-
+    try:
+        for v in input_dict.values():
+            if isinstance(v,list):
+                for val_int in v:
+                    if int(val_int) < min_allowed or int(val_int) > max_allowed:
+                        return False
+            else:  ## probably a const input
+                if int(v) < min_allowed or int(v) > max_allowed:
+                    return False
+        return True  # all inputs were ok
+    except:
+        return False
 
 def cleanup_time_string(t):
     """
@@ -127,14 +130,14 @@ def cleanup_time_string(t):
 def parse_test_output(outputstring,debug_filename=None):
     """
     Extract values from the stdout output of the "benchmark" executable.
-    return a dict in the format { "processing times (seconds)" : {}, 
-                                  "outputs" : {}, 
-                                  "sizes" : {}, 
-                                  "params":{}, 
+    return a dict in the format { "processing times (seconds)" : {},
+                                  "outputs" : {},
+                                  "sizes" : {},
+                                  "params":{},
                                   "sizes"{} }
     TODO - refactor this so it is less monolithic and less fragile..
     """
-    
+
     results = {}
     processing_times = {}
     test_outputs = {}
@@ -183,7 +186,7 @@ def parse_test_output(outputstring,debug_filename=None):
                     in_results_section = False
             elif "Processing times" in line:
                 in_outputs = False
-                in_processing_times = True                
+                in_processing_times = True
         elif "=== RESULTS" in line:
             in_results_section = True
             pass

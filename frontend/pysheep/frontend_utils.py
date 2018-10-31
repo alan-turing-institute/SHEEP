@@ -22,8 +22,12 @@ def convert_input_vals_list(input_val_dict):
   output_dict = {}
 
   for k, v in input_val_dict.items():
-    output_dict[k] = [int(v_value) for v_value in v.split(",")]
-
+    ## if its a const input we don't want it to be a list
+    if "(C)" in k:
+      output_dict[k] = int(v)
+    else:
+      ## split on commas
+      output_dict[k] = [int(v_value) for v_value in v.split(",")]
   return output_dict
 
 def cleanup_upload_dir(config):
@@ -78,7 +82,6 @@ def run_test(data):
                 pt_inputs[k.split()[0]] = v
             else:
                 ct_inputs[k] = v
-
         sheep_client.set_inputs(ct_inputs)
         sheep_client.set_const_inputs(pt_inputs)
         sheep_client.set_parameters(data["params"][context])

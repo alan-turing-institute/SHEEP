@@ -155,22 +155,21 @@ def enter_input_vals():
     user for the input values.
     """
     iform = build_inputs_form(app.data["inputs"])(request.form)
-
+    valid_inputs = True
     circuit_text = open(app.data["uploaded_filenames"]["circuit_file"]).readlines()
 
     if request.method == "POST" and iform.validate():
 
         input_vals = frontend_utils.convert_input_vals_list(iform.data)
-
-        if common_utils.check_inputs(input_vals, app.data["input_type"]):
-
+        valid_inputs = common_utils.check_inputs(input_vals, app.data["input_type"])
+        if valid_inputs:
             app.data["input_vals"] = input_vals
-
             return redirect(url_for("execute_test"))
 
     return render_template("enter_input_vals.html",
                            form=iform,
-                           circuit=circuit_text)
+                           circuit=circuit_text,
+                           badinputs=(not valid_inputs))
 
 
 @app.route("/execute_test",methods=["POST","GET"])
