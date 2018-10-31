@@ -1,17 +1,20 @@
 version: '3'
+
 services:
+
   sheep-server:
     build:
       context: .
-      dockerfile: Dockerfile
-    command: bin/run-sheep-server
+      dockerfile: backend/Dockerfile
+    command: applications/run-sheep-server
     ports:
      - "34568:34568"
     networks:
      - sheep_nw
+     
   sheep-frontend:
     build:
-      context: pysheep
+      context: frontend
       dockerfile: Dockerfile.frontend
     ports:
     - "5000:5000"
@@ -22,16 +25,17 @@ services:
     - sheep-server
     networks:
     - sheep_nw
+  
   sheep-notebook:
     build:
-      context: pysheep
+      context: frontend
       dockerfile: Dockerfile.notebook
     depends_on:
     - sheep-server
     ports:
     - "8888:8888"
     environment:
-    - SHEEP_HOME=/pysheep
+    - SHEEP_HOME=/frontend
     - SERVER_URL_BASE=http://sheep_sheep-server_1:34568/SheepServer
     networks:
     - sheep_nw
@@ -39,3 +43,4 @@ services:
 networks:
   sheep_nw:
     driver: bridge
+    
