@@ -96,8 +96,7 @@ if (TFHE_FOUND)
     target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
     add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
 
-    # multiply
-    foreach(op IN ITEMS add subtract    negate compare select)
+    foreach(op IN ITEMS add subtract multiply negate select compare)
       
       add_executable(test-tfhe-${type}-${op} test-tfhe-${type}-${op}.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 			  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)

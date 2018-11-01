@@ -266,8 +266,7 @@ public:
 	// }
 
 	std::pair<CiphertextBit, CiphertextBit> MultiplyBit(
-		LweSample *x, LweSample *y, LweSample *sum_in, LweSample *carry_in)
-	{
+		LweSample *x, LweSample *y, LweSample *sum_in, LweSample *carry_in) {
 		CiphertextBit sum_out(parameters), carry_out(parameters),
 			product_bit(parameters);
 		bootsAND(product_bit, x, y, cloud_key_cptr());
@@ -278,32 +277,31 @@ public:
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
     
-    Ciphertext ct;
+    Ciphertext ct, difference;
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
 		} 
     
+    difference = Subtract(b, a);
+
     for (int i = 0; i < a.size(); i ++) {
 
-              Ciphertext difference(parameters);
-              Ciphertext result(parameters);
-              // Set all result bits to zero, other than the lsb
-              // (so loop counter starts at 1)
-              for (size_t i = 1; i < BITWIDTH(Plaintext); i++)
-                bootsCONSTANT(result[i], 0, cloud_key_cptr());
+      CiphertextEl ct_el(parameters);
 
-              difference = Subtract(b, a);
+      // Set all result bits to zero, other than the lsb
+      // (so loop counter starts at 1)
+      for (size_t j = 1; j < BITWIDTH(Plaintext); j++)
+        bootsCONSTANT(ct_el[j], 0, cloud_key_cptr());
 
-              // 'a' was larger if the sign bit was set
-              constexpr size_t signbit = BITWIDTH(Plaintext) - 1;
-              bootsCOPY(result[0], difference[signbit], cloud_key_cptr());
-              return result;
-    
-    
+      // 'a' was larger if the sign bit was set
+      constexpr size_t signbit = BITWIDTH(Plaintext) - 1;
+      bootsCOPY(ct_el[0], difference[i][signbit], cloud_key_cptr());
+
+      ct.push_back(ct_el);
     }
 
-     return ct;
+    return ct;
 	}
 
   Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
