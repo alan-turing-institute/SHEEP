@@ -149,6 +149,11 @@ public:
 	// Multiply, where the first input names a regular (encrypted)
 	// wire, and the second input names a plaintext input
 	virtual Ciphertext MultByConstant(Ciphertext, long) { throw GateNotImplemented(); };
+
+        // Rotate, i.e. shift the elements of the vector, by n places.
+        virtual Ciphertext Rotate(Ciphertext, long) { throw GateNotImplemented(); };
+
+        // Get the number of "slots" i.e. elements for each input, for SIMD operations.
         virtual long get_num_slots() { return this->m_nslots; };
 
 	virtual Ciphertext dispatch(Gate g,
@@ -189,6 +194,9 @@ public:
 			break;
 		case (Gate::MultByConstant):
 		  return MultByConstant( inputs.at(0), const_inputs.at(0));
+			break;
+		case (Gate::Rotate):
+		  return Rotate( inputs.at(0), const_inputs.at(0));
 			break;
 		}
 		throw std::runtime_error("Unknown op");

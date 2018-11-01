@@ -279,8 +279,21 @@ public:
 		return Add(a, c);
 	}
 
+  	Ciphertext Rotate(Ciphertext a, long n) {
+	  /// shift the elements of the ciphertext by n places:
+		Ciphertext c;
+		for (int i = 0; i < a.size(); i++) {
+		  int index = (i-n) % a.size();
+		  c.push_back(a[index] );
+		}
+
+		return c;
+	}
+
   virtual long get_num_slots() {
+
     return m_nslots;
+
   }
 
 
