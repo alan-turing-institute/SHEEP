@@ -17,13 +17,13 @@ int main(void) {
 	circ.set_output(out);
 
   std::vector<DurationT> durations;
-	ContextTFHE<int8_t> ctx;
+	ContextTFHE<uint8_t> ctx;
 
-	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{15, -15, -128, 0}};
+	std::vector<std::vector<ContextTFHE<uint8_t>::Plaintext>> pt_input = {{15, 128}};
 
-	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+	std::vector<std::vector<ContextTFHE<uint8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 
-	std::vector<int8_t> exp_values = {-15, 15, -128, 0};
+	std::vector<uint8_t> exp_values = {241, 128};
 
 	for (int i = 0; i < exp_values.size(); i++) {
     std::cout << "- (" << std::to_string(pt_input[0][i]) << ") = " << std::to_string(result[0][i]) << std::endl;

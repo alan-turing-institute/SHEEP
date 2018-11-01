@@ -19,11 +19,11 @@ int main(void) {
 	std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
 
-	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{15, 10, 100, -80}, {22, -12, 100, -80}};
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{15, 10, 10, -8, 80}, {22, -12, 0, -8, 80}};
 
 	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 
-	std::vector<int8_t> exp_values = {37, -2, -56, 96};
+	std::vector<int8_t> exp_values = {37, -2, 10, -16, -96};
 
 	for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(pt_input[0][i]) << " + " <<  std::to_string(pt_input[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
