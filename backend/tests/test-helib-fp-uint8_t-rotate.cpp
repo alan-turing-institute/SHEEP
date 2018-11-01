@@ -23,15 +23,15 @@ int main(void) {
   std::vector<DurationT> durations;
 
   // The type of the wires in circ are unsigned bools
-  ContextHElib_Fp<int8_t> ctx;
+  ContextHElib_Fp<uint8_t> ctx;
 
   // inputs is vector of vectors
-  std::vector<std::vector<int8_t>> inputs = {{1, 2, 3, 4}};
+  std::vector<std::vector<uint8_t>> inputs = {{1, 2, 3, 4}};
   // const_inputs is vector (same across slots)
-  std::vector<int8_t> const_inputs = {-3};
-  std::vector<int8_t> exp_values = {4, 1, 2, 3};
+  std::vector<uint8_t> const_inputs = {1};
+  std::vector<uint8_t> exp_values = {2, 3, 4, 1};
 
-  std::vector<std::vector<int8_t> > result = ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+  std::vector<std::vector<uint8_t> > result = ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
 
   std::cout << "Original vector: ";
   for (int i = 0; i < exp_values.size(); i++) {

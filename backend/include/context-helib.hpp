@@ -593,6 +593,14 @@ public:
     return Add(sa, one_minus_s_times_b);
   }
 
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// shift the elements of the vector by n places
+    Ciphertext result(a);
+    this->m_ea->rotate1D(result, 0, n);
+    return result;
+  }
+
+
 };  /// end of class definition
 
 
