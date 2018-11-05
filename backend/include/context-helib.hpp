@@ -594,9 +594,9 @@ public:
   }
 
   Ciphertext Rotate(Ciphertext a, long n) {
-    /// shift the elements of the vector by n places
+    /// Cyclically rotate the linear array by n positions
     Ciphertext result(a);
-    this->m_ea->rotate1D(result, 0, n);
+    this->m_ea->rotate(result, n);
     return result;
   }
 
