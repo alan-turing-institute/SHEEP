@@ -94,7 +94,7 @@ def get_min_max(input_type):
     return min_allowed, max_allowed
 
 
-def check_inputs(input_dict, input_type):
+def check_inputs(input_dict, input_type, num_slots=None):
     """
     check that the supplied inputs are within the ranges for the specified input type.
     """
@@ -108,17 +108,19 @@ def check_inputs(input_dict, input_type):
                 return False  ## need to be lists
             if not len(v) == len(inputs[0][1]): ## need to all have the same length
                 return False
+            if num_slots and len(v)>num_slots:
+                return False
             for val_int in v:
                 if int(val_int) < min_allowed or int(val_int) > max_allowed:
                     return False
         for k, v in const_inputs:
             if not isinstance(v,int):  ## const_inputs need to be integers.
-                print("Not an integer!")
                 return False
             if v < min_allowed or v > max_allowed:
                 return False
         return True  # all inputs were ok
-    except:
+    except Exception as e:
+        print(" ERROR {}".format(e))
         return False
 
 
