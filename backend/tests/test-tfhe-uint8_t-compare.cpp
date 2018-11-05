@@ -18,11 +18,11 @@ int main(void) {
 
 	std::cout << circ;
 	std::vector<DurationT> durations;
-	ContextTFHE<int8_t> ctx;
+	ContextTFHE<uint8_t> ctx;
 
-	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{10, -12, -81}, {-12, -12, -80}};
-	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
-	std::vector<int8_t> exp_values = {1, 0, 0};
+	std::vector<std::vector<ContextTFHE<uint8_t>::Plaintext>> pt_input = {{10, 0, 80}, {2, 0, 81}};
+	std::vector<std::vector<ContextTFHE<uint8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+	std::vector<uint8_t> exp_values = {1, 0, 0};
 
 	for (int i = 0; i < exp_values.size(); i++) {
 	  std::cout << std::to_string(pt_input[0][i]) << " > " <<  std::to_string(pt_input[1][i]) << " ? " << std::to_string(result[0][i]) << std::endl;
