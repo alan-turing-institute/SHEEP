@@ -1,4 +1,0 @@
-INPUTS input_0
-CONST_INPUTS c_input_0
-OUTPUTS output_0
- input_0 c_input_0 ADDCONST output_0

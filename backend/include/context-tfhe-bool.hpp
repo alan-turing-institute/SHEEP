@@ -10,9 +10,8 @@
 #include "context-tfhe-common.hpp"
 
 namespace SHEEP {
-	
+
 template <> class ContextTFHE<bool> : public Context<bool, std::vector<CiphertextTFHE>> {
-  // const int minimum_lambda;
 	// shared pointers, since these are handles that are referred to elsewhere
 	std::shared_ptr<TFheGateBootstrappingParameterSet> parameters;
 	std::shared_ptr<TFheGateBootstrappingSecretKeySet> secret_key;
@@ -29,11 +28,13 @@ public:
 		// TFHE documentation and examples.
 		m_minimum_lambda(minimum_lambda)
 	{
+	  this->m_nslots = 1;
 	  this->m_param_name_map.insert({"MinimumLambda",m_minimum_lambda});
+	  this->m_param_name_map.insert({"NumSlots", this->m_nslots});
 	  this->m_private_key_size = 0;
 	  this->m_public_key_size = 0;
 	  this->m_ciphertext_size = 0;
-	  
+
 	  configure();
 	}
 
@@ -50,10 +51,10 @@ public:
 					     delete_gate_bootstrapping_secret_keyset(p);
 				   });
 		this->m_private_key_size = sizeof(*secret_key);
-		this->m_public_key_size = sizeof(*secret_key);		
+		this->m_public_key_size = sizeof(*secret_key);
 		this->m_configured = true;
 	}
-		
+
 	Ciphertext encrypt(std::vector<Plaintext> pt) {
 
     CiphertextTFHE ct_el(parameters);
@@ -68,18 +69,18 @@ public:
       ct.push_back(ct_el);
     }
 
-    this->m_ciphertext_size = sizeof(*ct_el);	   
+    this->m_ciphertext_size = sizeof(*ct_el);
 		return ct;
 	}
 
 	std::vector<Plaintext> decrypt(Ciphertext ct) {
-    
+
     Plaintext pt_el;
     std::vector<Plaintext> pt;
-    
+
     for (int i = 0; i < ct.size(); i ++) {
       CiphertextTFHE ct_el(parameters);
-      
+
       pt_el = bootsSymDecrypt(ct[i], secret_key.get());
 
       pt.push_back(pt_el);
@@ -93,7 +94,7 @@ public:
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
     for (int i = 0; i < a.size(); i ++) {
       CiphertextTFHE ct_el(parameters);
@@ -105,13 +106,13 @@ public:
 
     return ct;
 	}
-	
-	Ciphertext Maximum(Ciphertext a, Ciphertext b) {
+
+  Ciphertext Maximum(Ciphertext a, Ciphertext b) {
     Ciphertext ct;
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
     for (int i = 0; i < a.size(); i ++) {
       CiphertextTFHE ct_el(parameters);
@@ -123,14 +124,14 @@ public:
 
 		return ct;
 	}
-	
+
 	Ciphertext Add(Ciphertext a, Ciphertext b) {
-    
+
     Ciphertext ct;
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
     for (int i = 0; i < a.size(); i ++) {
       CiphertextTFHE ct_el(parameters);
@@ -167,7 +168,7 @@ public:
 
 		if ((s.size() != a.size()) || (s.size() != b.size())) {
 			throw std::runtime_error("Ciphertext s, Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		for (int i = 0; i < a.size(); i++) {
       CiphertextTFHE ct_el(parameters);
@@ -176,14 +177,14 @@ public:
 
       ct.push_back(ct_el);
 		}
-		
+
 		return ct;
 	}
 
 private:
-  
+
   long m_minimum_lambda;
-  
+
 };
 
 }

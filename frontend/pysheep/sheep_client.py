@@ -106,7 +106,7 @@ def set_input_type(input_type):
     set input type, if it is in the list of available types.
     """
     if not isinstance(input_type, str):
-        return {"status_code": 550, "content": "incorrect input type for set_input_type"}
+        return {"status_code": 500, "content": "incorrect input type for set_input_type"}
     type_request = get_available_input_types()
     if type_request["status_code"] != 200:
         return type_request
@@ -171,13 +171,13 @@ def set_inputs(input_dict):
     set input values.
     """
     if not isinstance(input_dict, dict):
-        return {"status_code": 550, "content": "incorrect input type for set_inputs"}
+        return {"status_code": 500, "content": "incorrect input type for set_inputs"}
     input_request = get_inputs()
     if input_request["status_code"] != 200:
         return input_request
     input_names = input_request["content"]
     response_dict = {}
-    
+
     unset_inputs = [i for i in input_names if not i in input_dict.keys()]
 
     if len(unset_inputs) > 0:
@@ -190,6 +190,22 @@ def set_inputs(input_dict):
         response_dict["content"] = "Inputs {} are not inputs to the circuit".format(unused_inputs)
         return response_dict
     try:
+        input_type = get_config()["content"]["input_type"]
+    except(KeyError):
+        response_dict["status_code"] = 500
+        response_dict["content"] = "Input type not set"
+        return response_dict
+    ## check we don't have too many input values for the number of slots
+    num_slots_request = get_nslots()
+    if num_slots_request["status_code"] != 200:
+        return num_slots_request
+    num_slots = num_slots_request["content"]["nslots"]
+    consistent_inputs = common_utils.check_inputs(input_dict, input_type, num_slots)
+    if not consistent_inputs:
+        response_dict["status_code"] = 500
+        response_dict["content"] = "Inputs are wrong type, or different lengths, or > nslots values per wire"
+        return response_dict
+    try:
         r = requests.post(BASE_URI+"/inputs/",
                           json=input_dict)
         response_dict["status_code"] = r.status_code
@@ -199,12 +215,13 @@ def set_inputs(input_dict):
         response_dict["content"] = "Unable to connect to SHEEP server to set inputs"
     return response_dict
 
+
 def set_const_inputs(input_dict):
     """
     set input values.
     """
     if not isinstance(input_dict, dict):
-        return {"status_code": 550, "content": "incorrect input type for set_inputs"}
+        return {"status_code": 500, "content": "incorrect input type for set_inputs"}
     input_request = get_const_inputs()
     if input_request["status_code"] != 200:
         return input_request
@@ -236,7 +253,7 @@ def set_circuit_filename(circuit_filename):
     Specify full path to circuit filename.
     """
     if not isinstance(circuit_filename, str):
-        return {"status_code": 550, "content": "incorrect input type for set_circuit_filename"}
+        return {"status_code": 500, "content": "incorrect input type for set_circuit_filename"}
     response_dict = {}
     try:
         r = requests.post(BASE_URI+"/circuitfile/",
@@ -254,7 +271,7 @@ def set_circuit(circuit_filename):
     Read the circuit and pass it to the server as a string.
     """
     if not isinstance(circuit_filename, str):
-        return {"status_code": 550, "content": "incorrect input type for set_circuit"}
+        return {"status_code": 500, "content": "incorrect input type for set_circuit"}
     response_dict = {}
     if not os.path.exists(circuit_filename):
         response_dict["status_code"] = 500
@@ -286,12 +303,28 @@ def get_parameters():
     return response_dict
 
 
+def get_nslots():
+    """
+    Will instantiate a context with the current parameter set,
+    and query it for how many slots it can handle.
+    """
+    response_dict = {}
+    try:
+        r = requests.get(BASE_URI+"/slots/")
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to get parameters"
+    return response_dict
+
+
 def set_parameters(param_dict):
     """
     Set the parameters from a dict { param_name: param_val}
     """
     if not isinstance(param_dict, dict):
-        return {"status_code": 550, "content": "incorrect input type for set_parameters"}
+        return {"status_code": 500, "content": "incorrect input type for set_parameters"}
     response_dict = {}
     try:
         r=requests.put(BASE_URI+"/parameters/",
@@ -309,7 +342,7 @@ def set_eval_strategy(strategy):
     choose between serial and parallel evaluation.
     """
     if not isinstance(strategy, str):
-        return {"status_code": 550, "content": "incorrect input type for set_strategy"}
+        return {"status_code": 500, "content": "incorrect input type for set_strategy"}
     response_dict = {}
     if not strategy in ["serial","parallel"]:
         response_dict["status_code"] = 500
