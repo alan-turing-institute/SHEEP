@@ -33,7 +33,7 @@ public:
     this->m_param_name_map.insert({"NumSlots", this->m_nslots});
   }
 
-	Ciphertext encrypt(std::vector<Plaintext> p) {
+  Ciphertext encrypt(std::vector<Plaintext> p) {
 	  if (! this->m_configured) this->configure();
 	  this->m_ciphertext_size = sizeof(p);
 	  return p; // plaintext and ciphertext are the same for this context
@@ -290,13 +290,6 @@ public:
 
 		return c;
 	}
-
-  virtual long get_num_slots() {
-
-    return m_nslots;
-
-  }
-
 
 };
 
