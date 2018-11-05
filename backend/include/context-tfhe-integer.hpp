@@ -24,7 +24,7 @@ template <typename T> class ContextTFHE: public Context<T, std::vector<Ciphertex
 public:
 
 	typedef Context<T, std::vector<CiphertextArrayTFHE<BITWIDTH(T)>>> Context_;
-	
+
   typedef typename Context_::Plaintext Plaintext;
   typedef typename Context_::Ciphertext Ciphertext;
   typedef CiphertextArrayTFHE<BITWIDTH(T)> CiphertextEl;
@@ -38,8 +38,9 @@ public:
 		// parameters and key, with the appropriate clean-up routines
 
   {
-
+                this->m_nslots = 1;
 		this->m_param_name_map.insert({"MinimumLambda",m_minimum_lambda});
+		this->m_param_name_map.insert({"NumSlots", this->m_nslots});
 		this->m_private_key_size = 0;
 		this->m_public_key_size = 0;
 		this->m_ciphertext_size = 0;
@@ -48,7 +49,7 @@ public:
 	}
 
   void configure() {
-    
+
     parameters = std::shared_ptr<TFheGateBootstrappingParameterSet>(
       new_default_gate_bootstrapping_parameters(m_minimum_lambda),
       [](TFheGateBootstrappingParameterSet *p) {
@@ -63,19 +64,19 @@ public:
 
 		this->m_private_key_size = sizeof(*secret_key);
 
-		//// no public key used here? 
-		this->m_public_key_size = sizeof(*secret_key);		
+		//// no public key used here?
+		this->m_public_key_size = sizeof(*secret_key);
 		this->m_configured = true;
 	}
 
   Ciphertext encrypt(std::vector<Plaintext> pt) {
-    
+
 		Ciphertext ct;
 
     for (int i = 0; i < pt.size(); i ++) {
       CiphertextEl ct_el(parameters);
 
-      for (int j = 0; j < BITWIDTH(Plaintext); j++) { 
+      for (int j = 0; j < BITWIDTH(Plaintext); j++) {
 			  bootsSymEncrypt(ct_el[j], bit(j, pt[i]), secret_key.get());
 		  }
 
@@ -90,9 +91,9 @@ public:
 
     Plaintext pt_el;
     std::vector<Plaintext> pt;
-    
+
     for (int i = 0; i < ct.size(); i ++) {
-      
+
       CiphertextEl ct_el(parameters);
       ct_el = ct[i];
 
@@ -111,7 +112,7 @@ public:
 	std::pair<CiphertextBit, CiphertextBit> HalfAdder(LweSample *a, LweSample *b) {
 		CiphertextTFHE sum(parameters), carry(parameters);
 		bootsXOR(sum, a, b, cloud_key_cptr());
-		bootsAND(carry, a, b, cloud_key_cptr());		
+		bootsAND(carry, a, b, cloud_key_cptr());
 		return std::make_pair(sum, carry);
 	}
 
@@ -128,7 +129,7 @@ public:
 	std::pair<CiphertextBit, CiphertextBit> HalfSubtractor(LweSample *a, LweSample *b) {
 		CiphertextTFHE diff(parameters), borrow(parameters);
 		bootsXOR(diff, a, b, cloud_key_cptr());
-		bootsANDNY(borrow, a, b, cloud_key_cptr());		
+		bootsANDNY(borrow, a, b, cloud_key_cptr());
 		return std::make_pair(diff, borrow);
 	}
 
@@ -149,7 +150,7 @@ public:
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
     for (int i = 0; i < a.size(); i ++) {
 
@@ -158,7 +159,7 @@ public:
 
       std::tie(sum, carry) = HalfAdder(a[i][0], b[i][0]);
       bootsCOPY(ct_el[0], sum, cloud_key_cptr());
-      
+
       // Note that the loop starts at ONE, since we computed
       // the zeroth bit above
       for (size_t j = 1; j < BITWIDTH(Plaintext); ++j) {
@@ -177,7 +178,7 @@ public:
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
     for (int i = 0; i < a.size(); i ++) {
       CiphertextEl ct_el(parameters);
@@ -200,12 +201,12 @@ public:
 	}
 
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-    
+
     Ciphertext ct;
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
     for (int k = 0; k < a.size(); k ++) {
 
@@ -228,10 +229,10 @@ public:
         for (int j = 0; j <= i; j++) {
           std::tie(sum_bit, carry_bit) = MultiplyBit(a[k][i-j], b[k][j], ct_el[i], carry[j][i]);
           bootsCOPY(ct_el[i], sum_bit, cloud_key_cptr());
-          bootsCOPY(carry[j+1][i+1], carry_bit, cloud_key_cptr());				
+          bootsCOPY(carry[j+1][i+1], carry_bit, cloud_key_cptr());
         }
       }
-        
+
       ct.push_back(ct_el);
     }
 
@@ -244,7 +245,7 @@ public:
     Ciphertext ct, const1;
 
     for (int i = 0; i < a.size(); i ++) {
-      
+
       CiphertextEl ct_el(parameters), tmp(parameters), const1_el(parameters);
 
       for (size_t j = 0; j < BITWIDTH(Plaintext); ++j) {
@@ -253,7 +254,7 @@ public:
       }
 
       bootsCONSTANT(const1_el[0], 1, cloud_key_cptr());
-            
+
       ct.push_back(ct_el);
       const1.push_back(const1_el);
     }
@@ -276,13 +277,13 @@ public:
 
 
 	Ciphertext Compare(Ciphertext a, Ciphertext b) {
-    
+
     Ciphertext ct, difference;
 
     if (a.size() != b.size()) {
 			throw std::runtime_error("Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
-    
+		}
+
     difference = Subtract(b, a);
 
     for (int i = 0; i < a.size(); i ++) {
@@ -310,7 +311,7 @@ public:
 
 		if ((s.size() != a.size()) || (s.size() != b.size())) {
 			throw std::runtime_error("Ciphertext s, Ciphertext a, Ciphertext b - lengths do not match.");
-		} 
+		}
 
 		for (int i = 0; i < a.size(); i++) {
       CiphertextEl ct_el(parameters);

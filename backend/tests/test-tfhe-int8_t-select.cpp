@@ -19,15 +19,15 @@ int main(void) {
 	std::cout << circ;
 	std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
-
-  std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{1, 0}, {3, -12}, {15, -55}};
+	ctx.set_parameter("NumSlots",2);
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{1, 0}, {3, -12}, {15, -55}};
 
 	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 
 	std::vector<int8_t> exp_values = {3, -55};
 
 	for (int i = 0; i < exp_values.size(); i++) {
-    std::cout << "select: " << std::to_string(pt_input[0][i]) << ", " << std::to_string(pt_input[1][i]) << ", " << std::to_string(pt_input[2][i]) << " = " << std::to_string(result[0][i]) << std::endl;
-    assert(result.front()[i] == exp_values[i]);
-  }
+	  std::cout << "select: " << std::to_string(pt_input[0][i]) << ", " << std::to_string(pt_input[1][i]) << ", " << std::to_string(pt_input[2][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+	  assert(result.front()[i] == exp_values[i]);
+	}
 }

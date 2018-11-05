@@ -19,7 +19,7 @@ int main(void) {
 	std::cout << circ;
 	std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
-
+	ctx.set_parameter("NumSlots",3);
 	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{10, -12, -81}, {-12, -12, -80}};
 	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 	std::vector<int8_t> exp_values = {1, 0, 0};

@@ -30,7 +30,7 @@ public:
     this->m_public_key_size = 0;
     this->m_private_key_size = 0;
     this->m_ciphertext_size = 0;
-    this->m_param_name_map.insert({"num_slots", this->m_nslots});
+    this->m_param_name_map.insert({"NumSlots", this->m_nslots});
   }
 
 	Ciphertext encrypt(std::vector<Plaintext> p) {

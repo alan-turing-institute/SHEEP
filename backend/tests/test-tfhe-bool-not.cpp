@@ -15,11 +15,11 @@ int main(void) {
 	Wire out = circ.add_assignment("out", Gate::Negate, in);
 	circ.set_output(out);
 
-  std::cout << circ;
+	std::cout << circ;
 	std::vector<DurationT> durations;
 	ContextTFHE<bool> ctx;
-
-  std::vector<std::vector<ContextTFHE<bool>::Plaintext>> pt_input = {{true, false}};
+	ctx.set_parameter("NumSlots",4);
+	std::vector<std::vector<ContextTFHE<bool>::Plaintext>> pt_input = {{true, false}};
 	std::vector<std::vector<ContextTFHE<bool>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 
 	std::vector<bool> exp_values = {false, true};
