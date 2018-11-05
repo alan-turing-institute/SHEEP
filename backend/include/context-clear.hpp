@@ -26,11 +26,11 @@ public:
 
   /// constructor
   ContextClear() {
-    m_nslots = 100; // reasonable default size
+    this->m_nslots = 100; // reasonable default size
     this->m_public_key_size = 0;
     this->m_private_key_size = 0;
     this->m_ciphertext_size = 0;
-    this->m_param_name_map.insert({"num_slots", m_nslots});
+    this->m_param_name_map.insert({"NumSlots", this->m_nslots});
   }
 
 	Ciphertext encrypt(std::vector<Plaintext> p) {
@@ -279,6 +279,7 @@ public:
 		return Add(a, c);
 	}
 
+
   	Ciphertext Rotate(Ciphertext a, long n) {
 	  /// shift the elements of the ciphertext by n places:
 		Ciphertext c;
@@ -296,9 +297,6 @@ public:
 
   }
 
-
-protected:
-  long m_nslots;
 
 };
 

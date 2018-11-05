@@ -27,6 +27,10 @@ struct GateNotImplemented : public std::runtime_error {
 	GateNotImplemented() : std::runtime_error("Gate not implemented.") { };
 };
 
+struct TooManyInputVals : public std::runtime_error {
+	TooManyInputVals() : std::runtime_error("Number of values per wire > num slots.") { };
+};
+
 struct TimeoutException : public std::exception {
 	std::chrono::duration<double, std::micro> execution_time;
 	std::string what_str;
@@ -217,7 +221,7 @@ public:
 		const auto input_wires_end = circ.get_inputs().end();
 		for (; input_vals_it != input_vals.end() || input_wires_it != input_wires_end ;
 		     ++input_vals_it, ++input_wires_it) {
-			eval_map.insert({input_wires_it->get_name(), *input_vals_it});
+		  eval_map.insert({input_wires_it->get_name(), *input_vals_it});
 		}
 		// add Circuit::const_inputs and const inputs into the map
 		auto const_input_vals_it = const_input_vals.begin();
@@ -438,7 +442,11 @@ public:
 		/// encrypt the inputs
 		std::vector<Ciphertext> ciphertext_inputs;
 		std::vector<Plaintext> const_inputs;
-		for (auto pt : plaintext_inputs) ciphertext_inputs.push_back(encrypt(pt));
+		for (auto pt : plaintext_inputs) {
+		  // check that the num of input vals on this wire is <= nslots
+		  if (pt.size() > this->m_nslots) throw TooManyInputVals();
+		  ciphertext_inputs.push_back(encrypt(pt));
+		}
 		for (auto cpt : const_plaintext_inputs) const_inputs.push_back(cpt);
 
 		auto enc_end_time = high_res_clock::now();
@@ -569,9 +577,6 @@ public:
 		return param_map;
 	};
 
-  //  virtual long get_num_slots() {
-  //  return this->m_nslots;
-  // }
 
 	virtual void print_parameters() {
 		for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
@@ -608,7 +613,7 @@ void encrypt(ContextT& context,
 {
 	std::transform(plaintext_begin, plaintext_end, ciphertext_begin,
 		       [&context](typename ContextT::Plaintext pt) {
-			       return context.encrypt(pt);
+			 return context.encrypt(pt);
 		       });
 }
 

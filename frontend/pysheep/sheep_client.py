@@ -195,10 +195,15 @@ def set_inputs(input_dict):
         response_dict["status_code"] = 500
         response_dict["content"] = "Input type not set"
         return response_dict
-    consistent_inputs = common_utils.check_inputs(input_dict, input_type)
+    ## check we don't have too many input values for the number of slots
+    num_slots_request = get_nslots()
+    if num_slots_request["status_code"] != 200:
+        return num_slots_request
+    num_slots = num_slots_request["content"]["nslots"]
+    consistent_inputs = common_utils.check_inputs(input_dict, input_type, num_slots)
     if not consistent_inputs:
         response_dict["status_code"] = 500
-        response_dict["content"] = "Inputs are wrong type, or different lengths"
+        response_dict["content"] = "Inputs are wrong type, or different lengths, or > nslots values per wire"
         return response_dict
     try:
         r = requests.post(BASE_URI+"/inputs/",
@@ -209,6 +214,7 @@ def set_inputs(input_dict):
         response_dict["status_code"] = 404
         response_dict["content"] = "Unable to connect to SHEEP server to set inputs"
     return response_dict
+
 
 def set_const_inputs(input_dict):
     """

@@ -4,32 +4,29 @@
 #include "context-tfhe.hpp"
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
+#include "circuit-repo.hpp"
+
+typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
 	using namespace SHEEP;
-	typedef std::vector<ContextTFHE<int8_t>::Plaintext> PtVec;
-	
-	Circuit circ = single_binary_gate_circuit(Gate::Multiply);
 
+	CircuitRepo cr;
+
+	Circuit circ = cr.create_circuit(Gate::Multiply, 1);
+	std::cout << circ;
+	std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
+	ctx.set_parameter("NumSlots",4);
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{3, 10, 10, -120}, {15, -12, 127, 0}};
 
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {0,0}), {0}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {0,1}), {0}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {1,0}), {0}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {1,1}), {1}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {17, -7}), {-119}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {-7, 17}), {-119}));
-	assert(all_equal(ctx.eval_with_plaintexts(circ, {2,-127}), {2}));	
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
 
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {2,1}), {2}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {2,2}), {4}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {2,3}), {6}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {-1,0}), {0}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {-1,1}), {-1}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {-1,-1}), {1}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {-127,-127}), {1}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {2,127}), {-2}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {2,-127}), {2}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {2,64}), {-128}));
-	// assert(all_equal(ctx.eval_with_plaintexts(circ, {-128,-128}), {0}));
+	std::vector<int8_t> exp_values = {45, -120, -10, 0};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+	  std::cout << std::to_string(pt_input[0][i]) << " * " <<  std::to_string(pt_input[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+	}
+
+	assert(result.front() == exp_values);
 }

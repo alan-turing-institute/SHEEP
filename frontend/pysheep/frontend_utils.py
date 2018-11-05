@@ -75,18 +75,22 @@ def run_test(data):
         sheep_client.set_input_type(data["input_type"])
         sheep_client.set_context(context)
         sheep_client.set_circuit(data["uploaded_filenames"]["circuit_file"])
-
+        ## configure the context
+        sheep_client.set_parameters(data["params"][context])
+        sheep_client.set_eval_strategy(data["eval_strategy"][context])
+        ## set input values
         ct_inputs, pt_inputs = {}, {}
         for k,v in data["input_vals"].items():
             if "(C)" in k:
                 pt_inputs[k.split()[0]] = v
             else:
                 ct_inputs[k] = v
-        sheep_client.set_inputs(ct_inputs)
-        sheep_client.set_const_inputs(pt_inputs)
-        sheep_client.set_parameters(data["params"][context])
-
-        sheep_client.set_eval_strategy(data["eval_strategy"][context])
+        inputs_set = sheep_client.set_inputs(ct_inputs)
+        if not inputs_set["status_code"] == 200:
+          return inputs_set
+        const_inputs_set = sheep_client.set_const_inputs(pt_inputs)
+        if not const_inputs_set["status_code"] == 200:
+          return const_inputs_set
         run_request = sheep_client.run_job()
         if run_request["status_code"] != 200:
             return run_request

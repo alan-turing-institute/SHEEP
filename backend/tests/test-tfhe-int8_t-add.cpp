@@ -4,22 +4,30 @@
 #include "context-tfhe.hpp"
 #include "simple-circuits.hpp"
 #include "circuit-test-util.hpp"
+#include "circuit-repo.hpp"
+
+typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
 	using namespace SHEEP;
-	typedef std::vector<ContextTFHE<int8_t>::Plaintext> PtVec;
 
-	Circuit circ = single_binary_gate_circuit(Gate::Add);
+  //// instantiate the Circuit Repository
+	CircuitRepo cr;
 
+	Circuit circ = cr.create_circuit(Gate::Add, 1);
+	std::cout << circ;
+	std::vector<DurationT> durations;
 	ContextTFHE<int8_t> ctx;
+	ctx.set_parameter("NumSlots",5);
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {{15, 10, 10, -8, 80}, {22, -12, 0, -8, 80}};
 
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0,0}, PtVec{0}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0,1}, PtVec{1}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{1,0}, PtVec{1}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{10,12}, PtVec{22}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{0,-1}, PtVec{-1}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-1,-2}, PtVec{-3}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{10,-12}, PtVec{-2}));
-	assert(eval_encrypted_check_equal(ctx, circ, PtVec{-128,1}, PtVec{-127}));
-	// etc...
+	std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+	std::vector<int8_t> exp_values = {37, -2, 10, -16, -96};
+
+	for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(pt_input[0][i]) << " + " <<  std::to_string(pt_input[1][i]) << " = " << std::to_string(result[0][i]) << std::endl;
+  }
+
+  assert(result.front() == exp_values);
 }

@@ -182,10 +182,6 @@ class ContextHElib : public Context< PlaintextT , CiphertextT> {
   virtual Ciphertext encrypt(std::vector<Plaintext> pt) = 0;
   virtual std::vector<Plaintext> decrypt(Ciphertext pt) = 0;
 
-  //  long get_num_slots() {
-  //  return m_nslots;
-  // }
-
   protected:
 
     long m_param_set;  // which set of parameters to use (0 to 4).
@@ -194,7 +190,6 @@ class ContextHElib : public Context< PlaintextT , CiphertextT> {
     long m_L;       // maximum number of homomorphic levels
     long m_w;       // Hamming weight of secret key
     long m_c;       // number of columns in key-switching matrix
-  //    long m_nslots;  // number of SIMD operations that can be done at a time
 
     long m_m;
     long m_phim;
@@ -321,17 +316,14 @@ class ContextHElib_F2 : public ContextHElib< PlaintextT, NTL::Vec<Ctxt> > {
      if (! this->m_bool_plaintext) Context<Plaintext, Ciphertext>::Maximum(a, b);
      /// OR(a,b) = XOR( XOR(a,b), AND(a,b))
      Ciphertext output;
-     //     for (int i = 0; i < this->m_nslots; i++) {
-     //std::cout<<"evaluating bit "<<i<<std::endl;
-     std::cout<<" size of a "<<a.length()<<std::endl;
+
      Ctxt a1 = a[0];
-     //   std::cout<<" size of a1 "<<a1.length()<<std::endl;
      Ctxt a2 = a[0];
      a1 += b[0];  // XOR(a,b)
      a2 *= b[0]; // AND(a,b)
      a1 += a2; // XOR the previous two lines
      output.append(a1);
-     //}
+
      std::cout<<" about  to return outptu"<<std::endl;
      return output;
    }
