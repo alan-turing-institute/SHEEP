@@ -2,6 +2,9 @@
 ## CLEAR
 ####################################################################################
 
+add_executable(testsig
+  testsig.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
 add_executable(circuit-parser
   examples/circuit-parser.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
@@ -114,7 +117,7 @@ endif(HElib_FOUND)
 
 ####################################################################################
 ## SHEEP-CL
-## 
+##
 ## The "sheep-cl" executable, to run a specified context on a given circuit.
 ####################################################################################
 
