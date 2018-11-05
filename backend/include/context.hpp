@@ -561,9 +561,6 @@ public:
 		return param_map;
 	};
 
-  //  virtual long get_num_slots() {
-  //  return this->m_nslots;
-  // }
 
 	virtual void print_parameters() {
 		for ( auto map_iter = m_param_name_map.begin(); map_iter != m_param_name_map.end(); ++map_iter) {
