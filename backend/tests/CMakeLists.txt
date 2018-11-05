@@ -126,7 +126,7 @@ if (HELIB_FOUND)
         # modules
         foreach(f IN ITEMS fp)
               # operations - ADDCONST, MULTBYCONST only for fp
-	      foreach (op IN ITEMS addConst multByConst)
+	      foreach (op IN ITEMS addConst multByConst rotate)
         	           add_executable(test-helib-${f}-${type}-${op}
         		                test-helib-${f}-${type}-${op}
         		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
