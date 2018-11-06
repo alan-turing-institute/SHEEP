@@ -57,23 +57,27 @@ public:
 
 	Ciphertext encrypt(std::vector<Plaintext> pt) {
 
-    CiphertextTFHE ct_el(parameters);
-		Ciphertext ct;
+	  CiphertextTFHE ct_el(parameters);
+	  Ciphertext ct;
 
-    for (int i = 0; i < pt.size(); i ++) {
+	  for (int i = 0; i < pt.size(); i ++) {
 
-      CiphertextTFHE ct_el(parameters);
+	    CiphertextTFHE ct_el(parameters);
+	    bootsSymEncrypt(ct_el, pt[i], secret_key.get());
+	    ct.push_back(ct_el);
+	  }
+	  /// now pad with enc(0) to make the ciphertext size equal to nslots.
+	  for (int i = pt.size(); i < this->m_nslots; i++) {
+	    CiphertextTFHE ct_el(parameters);
+	    bootsSymEncrypt(ct_el, (Plaintext)0, secret_key.get());
+	    ct.push_back(ct_el);
+	  }
 
-      bootsSymEncrypt(ct_el, pt[i], secret_key.get());
-
-      ct.push_back(ct_el);
-    }
-
-    this->m_ciphertext_size = sizeof(*ct_el);
-		return ct;
+	  this->m_ciphertext_size = sizeof(*ct_el);
+	  return ct;
 	}
 
-	std::vector<Plaintext> decrypt(Ciphertext ct) {
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
 
     Plaintext pt_el;
     std::vector<Plaintext> pt;
@@ -180,6 +184,18 @@ public:
 
 		return ct;
 	}
+
+
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// shift the elements of the ciphertext by n places:
+    Ciphertext c;
+    for (int i = 0; i < a.size(); i++) {
+      int index = (i-n) % a.size();
+      c.push_back(a[index] );
+    }
+
+    return c;
+  }
 
 private:
 

@@ -585,6 +585,14 @@ public:
     return Add(sa, one_minus_s_times_b);
   }
 
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// Cyclically rotate the linear array by n positions
+    Ciphertext result(a);
+    this->m_ea->rotate(result, n);
+    return result;
+  }
+
+
 };  /// end of class definition
 
 

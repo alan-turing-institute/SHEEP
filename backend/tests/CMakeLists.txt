@@ -1,49 +1,49 @@
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
 
-#add_executable(test-invalid-circuit
-#  test-invalid-circuit.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
+add_executable(test-invalid-circuit
+  test-invalid-circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
 
-#add_executable(test-invalid-circuit-from-file
-#  test-invalid-circuit-from-file.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_executable(test-invalid-circuit-from-file
+  test-invalid-circuit-from-file.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
-configure_file(good.sheep good.sheep)
-configure_file(multiple-input.sheep multiple-input.sheep)
-configure_file(multiple-assignment.sheep multiple-assignment.sheep)
-configure_file(undef-gate-input.sheep undef-gate-input.sheep)
-configure_file(undef-output.sheep undef-output.sheep)
+#configure_file(good.sheep good.sheep)
+#configure_file(multiple-input.sheep multiple-input.sheep)
+#configure_file(multiple-assignment.sheep multiple-assignment.sheep)
+#configure_file(undef-gate-input.sheep undef-gate-input.sheep)
+#configure_file(undef-output.sheep undef-output.sheep)
 #add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
 
-#add_executable(test-write-read-circuit
-#                 test-write-read-circuit.cpp
-#		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
+add_executable(test-write-read-circuit
+                 test-write-read-circuit.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
 
-# add_executable(test-circuit-copy
-#  test-circuit-copy.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
+ add_executable(test-circuit-copy
+  test-circuit-copy.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
 
-#add_executable(test-circuit-par
-#  test-circuit-par.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-#add_test(NAME test-circuit-par COMMAND test-circuit-par)
+add_executable(test-circuit-par
+  test-circuit-par.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-par COMMAND test-circuit-par)
 
-#add_executable(test-circuit-seq
-#  test-circuit-seq.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-#add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
+add_executable(test-circuit-seq
+  test-circuit-seq.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
 ##################################################################################################
 ### CLEAR
 ##################################################################################################
 
  foreach(type IN ITEMS bool int8_t uint8_t)
-     foreach(op IN ITEMS add compare multiply select subtract addConst)
+     foreach(op IN ITEMS add compare multiply select subtract addConst rotate)
          add_executable(test-clear-${type}-${op}
              test-clear-${type}-${op}.cpp
              ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -77,8 +77,8 @@ if (TFHE_FOUND)
   add_executable(test-tfhe-bool-encrypt-decrypt test-tfhe-bool-encrypt-decrypt.cpp)
   target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
   add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
-  
-  foreach(op IN ITEMS and or xor not select subtract)
+
+  foreach(op IN ITEMS and or xor not select subtract rotate)
     add_executable(test-tfhe-bool-${op}
       test-tfhe-bool-${op}.cpp
       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -95,9 +95,9 @@ if (TFHE_FOUND)
     add_executable(test-tfhe-${type}-encrypt-decrypt test-tfhe-${type}-encrypt-decrypt.cpp)
     target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
     add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
-   
-    foreach(op IN ITEMS add subtract multiply negate select compare)
-      
+
+    foreach(op IN ITEMS add subtract multiply negate select compare rotate)
+
       add_executable(test-tfhe-${type}-${op} test-tfhe-${type}-${op}.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 			  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
 
@@ -105,7 +105,7 @@ if (TFHE_FOUND)
 
       add_test(NAME test-tfhe-${type}-${op} COMMAND $<TARGET_FILE:test-tfhe-${type}-${op}>)
     endforeach(op)
-  
+
   endforeach(type)
 
 endif (TFHE_FOUND)
@@ -120,16 +120,16 @@ if (HELIB_FOUND)
 
     # input types
     foreach(type IN ITEMS bool int8_t uint8_t)
-      # modules
-      foreach(f IN ITEMS fp)
-        # operations - ADDCONST, MULTBYCONST only for fp
-	      foreach (op IN ITEMS addConst multByConst)
-          add_executable(test-helib-${f}-${type}-${op} test-helib-${f}-${type}-${op} ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
-			    target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
-          add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
-        
-        endforeach(op)
+        # modules
+        foreach(f IN ITEMS fp)
+              # operations - ADDCONST, MULTBYCONST only for fp
+	      foreach (op IN ITEMS addConst multByConst rotate)
+        	           add_executable(test-helib-${f}-${type}-${op}
+        		                test-helib-${f}-${type}-${op}
+        		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+			   target_link_libraries(test-helib-${f}-${type}-${op} ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+                 	   add_test(NAME test-helib-${f}-${type}-${op} COMMAND $<TARGET_FILE:test-helib-${f}-${type}-${op}>)
+              endforeach(op)
      	endforeach(f)
 
       foreach(f IN ITEMS f2)

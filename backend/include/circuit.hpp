@@ -1,12 +1,12 @@
-/* 
+/*
  * == Circuits and circuit elements ==
- * 
+ *
  * A circuit (class Circuit) is a directed acyclic graph of circuit
  * elements, which is the representation of a computation used by the
  * sheep evaluator.  These circuits are 'arithmetic' rather than
  * logical, and this is reflected in the language used (e.g. we have a
  * gate called 'Multiply' rather than 'And').
- * 
+ *
  * The circuit is a completely abstract representation of the
  * computation to be performed, and the 'type' over which circuits
  * compute is deliberately not specified by this part of the library.
@@ -46,9 +46,9 @@
  * that a library supports that we want to expose should be
  * representable in this form however: this might sometimes
  * necessitate adding a new operation.
- * 
+ *
  * == Inputs and Constant/Plaintext Inputs ==
- * 
+ *
  * Most HE libraries support a limited number of operations where one
  * operand is a ciphertext value and the other is a plaintext value.
  * For example, MultByConstant takes a Ciphertext and a Plaintext and
@@ -80,7 +80,8 @@ enum class Gate {
   Compare,
   Select,
   AddConstant,
-  MultByConstant
+  MultByConstant,
+  Rotate
 };
 
 // This is used by the interpreter for the parser of the SHEEP
@@ -96,7 +97,8 @@ static const std::map<std::string, Gate> gate_name_map = {
     {"COMPARE", Gate::Compare},
     {"SELECT", Gate::Select},
     {"ADDCONST", Gate::AddConstant},
-    {"MULTBYCONST", Gate::MultByConstant}
+    {"MULTBYCONST", Gate::MultByConstant},
+    {"ROTATE", Gate::Rotate}
 };
 
 // Wires - identified by their name.
@@ -201,7 +203,7 @@ class Circuit {
     std::tie(it_ignored, inserted) = wire_names.insert(name);
     if (!inserted) throw MultipleAssignmentError(name);
   }
-  
+
  public:
   Wire add_input(std::string name) {
     try_insert_wire_name(name);

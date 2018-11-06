@@ -1,0 +1,10 @@
+INPUTS input_0 input_1
+CONST_INPUTS c_input_0 c_input_1 c_input_2
+OUTPUTS output_0
+ input_0 input_1 MULTIPLY output_1
+ output_1 c_input_0 ROTATE output_2
+ output_1 c_input_1 ROTATE output_3
+ output_1 c_input_2 ROTATE output_4
+ output_1 output_2 ADD output_5
+ output_5 output_3 ADD output_6
+ output_6 output_4 ADD output_0
