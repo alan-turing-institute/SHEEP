@@ -24,17 +24,17 @@ int main(void) {
 
   // The type of the wires in circ are unsigned bools
   ContextTFHE<int8_t> ctx;
-  ctx.set_parameter("NumSlots",8);
+  ctx.set_parameter("NumSlots",10);
   // inputs is vector of vectors
   std::vector<std::vector<int8_t>> inputs = {{1, 2, 3, 4, 5, 6, 7, 8}};
   // const_inputs is vector (same across slots)
   std::vector<int8_t> const_inputs = {-3};
-  std::vector<int8_t> exp_values = {4, 5, 6, 7, 8, 1, 2, 3};
+  std::vector<int8_t> exp_values = {4, 5, 6, 7, 8, 0, 0,1, 2, 3};
 
   std::vector<std::vector<int8_t> > result = ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
 
   std::cout << "Original vector: ";
-  for (int i = 0; i < exp_values.size(); i++) {
+  for (int i = 0; i < inputs[0].size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " ";
   }
   std::cout<<std::endl<<"Rotated vector:  ";

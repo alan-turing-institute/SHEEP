@@ -71,23 +71,30 @@ public:
 
   Ciphertext encrypt(std::vector<Plaintext> pt) {
 
-		Ciphertext ct;
-
+    Ciphertext ct;
     for (int i = 0; i < pt.size(); i ++) {
       CiphertextEl ct_el(parameters);
-
       for (int j = 0; j < BITWIDTH(Plaintext); j++) {
-			  bootsSymEncrypt(ct_el[j], bit(j, pt[i]), secret_key.get());
-		  }
-
+	bootsSymEncrypt(ct_el[j], bit(j, pt[i]), secret_key.get());
+      }
       ct.push_back(ct_el);
       this->m_ciphertext_size = sizeof(*ct_el);
     }
+    /// now pad with enc(0) to make the ciphertext size equal to nslots.
+    for (int i = pt.size(); i < this->m_nslots; i ++) {
+      CiphertextEl ct_el(parameters);
+      Plaintext zero = 0;
+      for (int j = 0; j < BITWIDTH(Plaintext); j++) {
+	bootsSymEncrypt(ct_el[j], bit(j,zero), secret_key.get());
+      }
+      ct.push_back(ct_el);
+    }
 
-		return ct;
-	}
 
-	std::vector<Plaintext> decrypt(Ciphertext ct) {
+    return ct;
+  }
+
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
 
     Plaintext pt_el;
     std::vector<Plaintext> pt;
