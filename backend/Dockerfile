@@ -1,4 +1,4 @@
-FROM tomaslaz/sheep_base as sheep
+FROM tomaslaz/sheep_base:v1 as sheep
 
 ADD backend/applications SHEEP/backend/applications
 ADD backend/cmake SHEEP/backend/cmake 
