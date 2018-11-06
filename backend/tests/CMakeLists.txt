@@ -78,7 +78,7 @@ if (TFHE_FOUND)
   target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
   add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
 
-  foreach(op IN ITEMS and or xor not select subtract)
+  foreach(op IN ITEMS and or xor not select subtract rotate)
     add_executable(test-tfhe-bool-${op}
       test-tfhe-bool-${op}.cpp
       ${CMAKE_SOURCE_DIR}/src/circuit.cpp

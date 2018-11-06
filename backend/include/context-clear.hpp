@@ -35,9 +35,13 @@ public:
 
   Ciphertext encrypt(std::vector<Plaintext> p) {
 	  if (! this->m_configured) this->configure();
-	  this->m_ciphertext_size = sizeof(p);
+	  this->m_ciphertext_size = sizeof(p[0]) * this->m_nslots;
+	  /// we are given a vector of Plaintexts p, which can have any number
+	  /// of elements.  To make it consistent with real HE schemes, we should
+	  /// pad this vector with zeros until it has size m_nslots.
+	  for (int i=p.size(); i < this->m_nslots; i++) p.push_back((Plaintext)0);
 	  return p; // plaintext and ciphertext are the same for this context
-	}
+  }
 
 	std::vector<Plaintext> decrypt(Ciphertext c) {
 		return c; // plaintext and ciphertext are the same for this context

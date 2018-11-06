@@ -24,7 +24,7 @@ int main(void) {
 
   // The type of the wires in circ are unsigned bools
   ContextClear<bool> ctx;
-
+  ctx.set_parameter("NumSlots",8);
   // inputs is vector of vectors
   std::vector<std::vector<bool>> inputs = {{1, 1, 1, 1, 0, 0, 0, 0}};
   // const_inputs is vector (same across slots)

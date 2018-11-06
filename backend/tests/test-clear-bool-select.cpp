@@ -16,6 +16,6 @@ int main(void) {
 	circ.set_output(out);
 
 	ContextClear<bool> ctx;
-	
+	ctx.set_parameter("NumSlots",3);
 	assert(all_equal(ctx.eval_with_plaintexts(circ, {{0, 1, 1}, {1, 0, 1}, {0, 0, 0}}), {{0, 0, 1}}));
 }
