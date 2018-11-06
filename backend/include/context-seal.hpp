@@ -21,22 +21,24 @@ public:
   
   // constructors
   
-  ContextSeal(long plaintext_modulus = (1 << 8),
-    long security = 128,  /* This is the security level (either 128 or 192).
-                We limit ourselves to 2 predefined choices,
-                as coefficient modules are preset by SEAL for these choices.*/
-    long N = 4096): // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"):
-  m_N(N),
-	m_security(security),
-	m_plaintext_modulus(plaintext_modulus) {
+  ContextSeal(long plaintext_modulus = 40961, // for slots, this should be a prime congruent to 1 (mod N)
+	      long security = 128,  /* This is the security level (either 128 or 192).
+				       We limit ourselves to 2 predefined choices,
+				       as coefficient modules are preset by SEAL for these choices.*/
+	      long N = 4096)
+    :
+    m_N(N),
+    m_security(security),
+    m_plaintext_modulus(plaintext_modulus)
+  {
     this->m_param_name_map.insert({"N",m_N});    
     this->m_param_name_map.insert({"PlaintextModulus",m_plaintext_modulus});
     this->m_param_name_map.insert({"Security",m_security});
-
+		
     this->m_private_key_size = 0;
     this->m_public_key_size = 0;
     this->m_ciphertext_size = 0;
-    
+		
     configure();
   }
 
@@ -54,7 +56,7 @@ public:
       throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 192");
     }
 	
-    parms.set_plain_modulus(40961);
+    parms.set_plain_modulus(m_plaintext_modulus);
     m_context = seal::SEALContext::Create(parms);
     m_encoder = new seal::BatchEncoder(m_context);
 	
@@ -74,7 +76,6 @@ public:
   }
 
   Ciphertext encrypt(std::vector<Plaintext> p) {
-
     if (this->get_num_slots() < p.size()) {
       throw std::runtime_error("ContextSeal::encrypt: The number of input data elements exceeds the number of slots provided by the context.");
     }
