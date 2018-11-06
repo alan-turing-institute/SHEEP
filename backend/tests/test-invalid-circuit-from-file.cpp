@@ -4,12 +4,12 @@
 
 int main(void)
 {
-	std::ifstream good("good.sheep");
+	std::ifstream good("tests/good.sheep");
 	assert(good.is_open());
 	Circuit C_good;
 	good >> C_good;
 
-	std::ifstream multiple_input("multiple-input.sheep");
+	std::ifstream multiple_input("tests/multiple-input.sheep");
 	assert(multiple_input.is_open());
 	Circuit C_multiple_input;
 	try {
@@ -20,7 +20,7 @@ int main(void)
 		          << "   What: " << e.what() << std::endl;
 	}
 
-	std::ifstream multiple_assignment("multiple-assignment.sheep");
+	std::ifstream multiple_assignment("tests/multiple-assignment.sheep");
 	assert(multiple_assignment.is_open());
 	Circuit C_multiple_assignment;
 	try {
@@ -31,7 +31,7 @@ int main(void)
 		          << "   What: " << e.what() << std::endl;
 	}
 
-	std::ifstream undef_gate_input("undef-gate-input.sheep");
+	std::ifstream undef_gate_input("tests/undef-gate-input.sheep");
 	assert(undef_gate_input.is_open());
 	Circuit C_undef_gate_input;
 	try {
@@ -42,7 +42,7 @@ int main(void)
 		          << "   What: " << e.what() << std::endl;
 	}
 
-	std::ifstream undef_output("undef-output.sheep");
+	std::ifstream undef_output("tests/undef-output.sheep");
 	assert(undef_output.is_open());
 	Circuit C_undef_output;
 	try {

@@ -1,42 +1,42 @@
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
 
-#add_executable(test-invalid-circuit
-#  test-invalid-circuit.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
+add_executable(test-invalid-circuit
+  test-invalid-circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
 
-#add_executable(test-invalid-circuit-from-file
-#  test-invalid-circuit-from-file.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_executable(test-invalid-circuit-from-file
+  test-invalid-circuit-from-file.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
 configure_file(good.sheep good.sheep)
 configure_file(multiple-input.sheep multiple-input.sheep)
 configure_file(multiple-assignment.sheep multiple-assignment.sheep)
 configure_file(undef-gate-input.sheep undef-gate-input.sheep)
 configure_file(undef-output.sheep undef-output.sheep)
-#add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
+add_test(NAME test-invalid-circuit-from-file COMMAND $<TARGET_FILE:test-invalid-circuit-from-file>)
 
-#add_executable(test-write-read-circuit
-#                 test-write-read-circuit.cpp
-#		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
+add_executable(test-write-read-circuit
+                 test-write-read-circuit.cpp
+		 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-write-read-circuit COMMAND $<TARGET_FILE:test-write-read-circuit>)
 
-# add_executable(test-circuit-copy
-#  test-circuit-copy.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
+ add_executable(test-circuit-copy
+  test-circuit-copy.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+add_test(NAME test-circuit-copy COMMAND test-circuit-copy)
 
-#add_executable(test-circuit-par
-#  test-circuit-par.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-#add_test(NAME test-circuit-par COMMAND test-circuit-par)
+add_executable(test-circuit-par
+  test-circuit-par.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-par COMMAND test-circuit-par)
 
-#add_executable(test-circuit-seq
-#  test-circuit-seq.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
-#  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
-#add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
+add_executable(test-circuit-seq
+  test-circuit-seq.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp)
+add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
 
 ##################################################################################################
 ### CLEAR
