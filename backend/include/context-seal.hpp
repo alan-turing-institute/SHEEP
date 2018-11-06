@@ -138,8 +138,7 @@ public:
   }
   
   Ciphertext MultByConstant(Ciphertext a, long b) {
-    std::vector<Plaintext64> b_vec(this->get_num_slots(), 0);
-    b_vec[0] = b;
+    std::vector<Plaintext64> b_vec(this->get_num_slots(), b);
     seal::Plaintext pt;
     m_encoder->encode(b_vec, pt);
     m_evaluator->multiply_plain_inplace(a, pt);
@@ -147,8 +146,7 @@ public:
   }
 
   Ciphertext AddConstant(Ciphertext a, long b) {
-    std::vector<Plaintext64> b_vec(this->get_num_slots(), 0);
-    b_vec[0] = b;
+    std::vector<Plaintext64> b_vec(this->get_num_slots(), b);
     seal::Plaintext pt;
     m_encoder->encode(b_vec, pt);
     m_evaluator->add_plain_inplace(a, pt);
