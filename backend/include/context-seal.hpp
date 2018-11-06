@@ -17,6 +17,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
 public:
 	typedef PlaintextT Plaintext;
   	typedef seal::Ciphertext Ciphertext;
+  typedef typename std::conditional<std::is_signed<Plaintext>::value, std::int64_t, std::uint64_t>::type Plaintext64;
   
   // constructors
   
@@ -24,7 +25,7 @@ public:
     long security = 128,  /* This is the security level (either 128 or 192).
                 We limit ourselves to 2 predefined choices,
                 as coefficient modules are preset by SEAL for these choices.*/
-    long N = 2048): // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"):
+    long N = 4096): // This must be a power-of-2 cyclotomic polynomial described as a string, e.g. "1x^2048 + 1"):
   m_N(N),
 	m_security(security),
 	m_plaintext_modulus(plaintext_modulus) {
@@ -40,82 +41,116 @@ public:
   }
 
   void configure() {
-    
-  std::stringstream x;
-  x << "1x^" << m_N << " + 1"; 
-  this->m_poly_modulus = x.str();
-	seal::EncryptionParameters parms;
-	parms.set_poly_modulus(m_poly_modulus);
-	if (m_security == 128) {
-		parms.set_coeff_modulus(seal::coeff_modulus_128(parms.poly_modulus().coeff_count() - 1));
-	} else if (m_security == 192) {
-		parms.set_coeff_modulus(seal::coeff_modulus_192(parms.poly_modulus().coeff_count() - 1));
-	} else {
-		throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 129");
-	}
+    std::stringstream x;
+    x << "1x^" << m_N << " + 1"; 
+    this->m_poly_modulus = x.str();
+    seal::EncryptionParameters parms(seal::scheme_type::BFV);
+    parms.set_poly_modulus_degree(m_N);
+    if (m_security == 128) {
+      parms.set_coeff_modulus(seal::coeff_modulus_128(m_N));
+    } else if (m_security == 192) {
+      parms.set_coeff_modulus(seal::coeff_modulus_192(m_N));
+    } else {
+      throw std::invalid_argument("Unsupported security value in ContextSeal, expected 128 or 192");
+    }
 	
-	parms.set_plain_modulus(m_plaintext_modulus);
-	m_context = new seal::SEALContext(parms);
-	m_encoder = new seal::IntegerEncoder(m_context->plain_modulus()); // We default to an IntegerEncoder with base b=2. TODO: include CRT and fractional encoder
-
-	seal::KeyGenerator keygen(*m_context);
-	m_public_key = keygen.public_key();
-	m_secret_key = keygen.secret_key();
-
-	//// sizes of objects, in bytes
-	this->m_public_key_size = sizeof(m_public_key);
-	this->m_private_key_size = sizeof(m_secret_key);	
+    parms.set_plain_modulus(40961);
+    m_context = seal::SEALContext::Create(parms);
+    m_encoder = new seal::BatchEncoder(m_context);
 	
-	m_encryptor = new seal::Encryptor(*m_context, m_public_key);
-	m_evaluator = new seal::Evaluator(*m_context);
-	m_decryptor = new seal::Decryptor(*m_context, m_secret_key);
+    seal::KeyGenerator keygen(m_context);
+    m_public_key = keygen.public_key();
+    m_secret_key = keygen.secret_key();
+
+    //// sizes of objects, in bytes
+    this->m_public_key_size = sizeof(m_public_key);
+    this->m_private_key_size = sizeof(m_secret_key);	
+	
+    m_encryptor = new seal::Encryptor(m_context, m_public_key);
+    m_evaluator = new seal::Evaluator(m_context);
+    m_decryptor = new seal::Decryptor(m_context, m_secret_key);
+
+    this->m_nslots = m_encoder->slot_count();
   }
 
-  Ciphertext encrypt(Plaintext p) {
-	seal::Plaintext pt = m_encoder->encode(p);
-	seal::Ciphertext ct;
-	m_encryptor->encrypt(pt, ct);
-	this->m_ciphertext_size = sizeof(ct);
-	return ct;
+  Ciphertext encrypt(std::vector<Plaintext> p) {
+
+    if (this->get_num_slots() < p.size()) {
+      throw std::runtime_error("ContextSeal::encrypt: The number of input data elements exceeds the number of slots provided by the context.");
+    }
+
+    // the SEAL BatchEncoder can encode vectors of int64 or uint64, so
+    // promote any other Plaintext type, but keep the signedness of
+    // this type.  Plaintext64 is this promoted type (defined above).
+    std::vector<Plaintext64> p64(this->get_num_slots(), (Plaintext64)0);
+    // We can assume p.size() < number of slots due to check above
+    for (size_t i = 0; i < p.size(); i++)
+      p64[i] = p[i];
+
+    seal::Plaintext pt;
+    m_encoder->encode(p64, pt);
+    seal::Ciphertext ct;
+    m_encryptor->encrypt(pt, ct);
+    this->m_ciphertext_size = sizeof(ct);
+    return ct;
   }
 
-  Plaintext decrypt(Ciphertext ct) {
-  	seal::Plaintext pt;
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    seal::Plaintext pt;
     m_decryptor->decrypt(ct, pt);
-    Plaintext p = m_encoder->decode_int32(pt);
+
+    std::vector<Plaintext64> p64(this->get_num_slots());
+    m_encoder->decode(pt, p64);
+
+    std::vector<Plaintext> p(this->get_num_slots());
+
+    // TODO: rewrite to avoid explcit check for bool and
+    // implementation-defined behaviour
+    if (std::is_same<Plaintext, bool>::value) {
+      for (size_t i = 0; i < this->get_num_slots(); i++)
+	p[i] = (p64[i] % 2);
+    } else {
+      for (size_t i = 0; i < this->get_num_slots(); i++)
+	p[i] = p64[i];
+    }
     return p;
   }
   
   Ciphertext Add(Ciphertext a, Ciphertext b) {
-  	m_evaluator->add(a, b);
+  	m_evaluator->add_inplace(a, b);
   	return a;
   }
 
-
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
-  	m_evaluator->multiply(a, b);
+  	m_evaluator->multiply_inplace(a, b);
   	return a;
   }
 
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
-  	m_evaluator->sub(a, b);
+  	m_evaluator->sub_inplace(a, b);
   	return a;
   }
   
   Ciphertext Negate(Ciphertext a) {
-  	m_evaluator->negate(a);
+  	m_evaluator->negate_inplace(a);
   	return a;
   }
   
   Ciphertext MultByConstant(Ciphertext a, long b) {
-    seal::Plaintext pt = m_encoder->encode((int64_t)b);
-  	m_evaluator->multiply_plain(a, pt);
+    std::vector<Plaintext64> b_vec(this->get_num_slots(), 0);
+    b_vec[0] = b;
+    seal::Plaintext pt;
+    m_encoder->encode(b_vec, pt);
+    m_evaluator->multiply_plain_inplace(a, pt);
     return a;
   }
 
   Ciphertext AddConstant(Ciphertext a, long b) {
-    seal::Plaintext pt = m_encoder->encode((int64_t)b);
-  	m_evaluator->multiply_plain(a, pt);
+    std::vector<Plaintext64> b_vec(this->get_num_slots(), 0);
+    b_vec[0] = b;
+    seal::Plaintext pt;
+    m_encoder->encode(b_vec, pt);
+    m_evaluator->add_plain_inplace(a, pt);
     return a;
   }
 
@@ -123,7 +158,7 @@ public:
     /// s is 0 or 1
     /// output is s*a + (1-s)*b
     Ciphertext sa = Multiply(s,a);
-    Ciphertext one_minus_s = MultByConstant( AddConstant(s,-1L), -1L);
+    Ciphertext one_minus_s = MultByConstant(AddConstant(s,-1L), -1L);
     Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
     return Add(sa, one_minus_s_times_b);
   }
@@ -131,7 +166,7 @@ public:
   // destructor
   virtual ~ContextSeal() {
     /// delete everything we new-ed in the constructor
-    if (m_context != NULL) delete m_context;
+    //if (m_context != NULL) delete m_context;
     if (m_encoder != NULL) delete m_encoder;
     if (m_encryptor != NULL) delete m_encryptor;
     if (m_evaluator != NULL) delete m_evaluator;
@@ -139,17 +174,17 @@ public:
   };
 
 protected:
-	string m_poly_modulus;
+  std::string m_poly_modulus;
   long m_security;
   long m_N;
   long m_plaintext_modulus;
-  seal::SEALContext* m_context;
-	seal::IntegerEncoder* m_encoder;
-	seal::PublicKey m_public_key;
-	seal::SecretKey m_secret_key;
-	seal::Encryptor* m_encryptor;
-	seal::Evaluator* m_evaluator;
-	seal::Decryptor* m_decryptor;
+  std::shared_ptr<seal::SEALContext> m_context;
+  seal::BatchEncoder* m_encoder;
+  seal::PublicKey m_public_key;
+  seal::SecretKey m_secret_key;
+  seal::Encryptor* m_encryptor;
+  seal::Evaluator* m_evaluator;
+  seal::Decryptor* m_decryptor;
 };
 
 }  // Leaving Sheep namespace
