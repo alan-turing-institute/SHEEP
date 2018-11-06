@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
- 
+
 <head>
     <title>SHEEP</title>
- 
- 
+
+
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
- 
+
     <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
 
   <script>
@@ -19,19 +19,19 @@
     margin-top: auto;
     margin-bottom: auto;
     margin-left: auto;
-    margin-right: auto;    
+    margin-right: auto;
     width: 40%;
     display: none;
     background: url(/static/sheep_waiting.gif) no-repeat;
     cursor: wait;
     }
   </style>
-    
- 
+
+
 </head>
- 
+
 <body>
- 
+
     <div id="content" class="container">
         <div class="header">
             <nav>
@@ -42,7 +42,7 @@
             </nav>
             <h3 class="text-muted">Homomorphic Encryption Evaluation</h3>
         </div>
- 
+
         <div>
             <h1>Enter parameters</h1>
         </div>
@@ -65,24 +65,27 @@
 			<td><h2>{{ key }} </h2></td>
 		      </tr>
 		      {% for field in value %}
-		      {% if field != "eval_strategy" %}		      
-		      <tr>			
+		      {% if field != "eval_strategy" %}
+		      <tr>
 			<td>{{ field.label }}</td><td>{{ field }}</td>
 		      </tr>
-		      {% endif %}		      
+		      {% endif %}
 		      {% endfor %}
 		      <tr>
 			<td> <input type=submit name={{ key }} value="Apply" onclick="loading();"> </td>
 		      </tr>
-		    </form> 
+		      <tr>
+			<td><strong>Num slots: {{ slots[key]["nslots"] }} </strong>  </td>
+		      </tr>
+		    </form>
 		    </table>
 		    </td>
 		    {% endfor %}
 		  </tr>
 		  <tr>
-		    
+
 		    <form method="POST" action="" enctype="multipart/form-data">
-		      
+
 		    <td> <input type=submit class="btn btn-lg btn-success" name="next" value="Next" onclick="loading();"> </td>
 		</form>
 		  </tr>
@@ -96,7 +99,7 @@
       <h3> Calculating .... </h3>
       </p>
   </div>
- 
+
 </body>
- 
+
 </html>
