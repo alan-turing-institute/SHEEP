@@ -9,7 +9,7 @@ before_install:
   - docker-compose build sheep-server
 
 script:
-  - docker run sheep_sheep-server make test
+  - docker run sheep_sheep-server /bin/bash -c "make all; make test"
 
 after_success:
   - docker-compose down
