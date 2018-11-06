@@ -35,4 +35,11 @@ int main(void) {
         std::cout<<" 200 + 127 = "<<std::to_string(result.front()[0])<<std::endl;
         assert(result.front()[0] == 71);
 
+	/// test slots
+	inputs = {{1,1,1}, {2,3,255}};
+        result = ctx.eval_with_plaintexts(circ, inputs, durations);
+        assert(result[0][0] == 3);
+	assert(result[0][1] == 4);
+	assert(result[0][2] == 0);
+	
 }

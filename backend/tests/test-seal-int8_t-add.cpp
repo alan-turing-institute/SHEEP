@@ -44,4 +44,12 @@ int main(void) {
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
 	assert(result.front()[0] == 12);
 
+	/// test slots
+	inputs = {{15,1,-1}, {22,-2,1}};
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	assert(result[0][0] == 37);
+	assert(result[0][1] == -1);
+	assert(result[0][2] == 0);
+	
+
 }

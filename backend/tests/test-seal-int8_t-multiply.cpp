@@ -12,7 +12,7 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 int main(void) {
 	using namespace SHEEP;
 
-    //// instantiate the Circuit Repository
+	//// instantiate the Circuit Repository
 	CircuitRepo cr;
 
 	Circuit circ = cr.create_circuit(Gate::Multiply, 1);
@@ -42,4 +42,12 @@ int main(void) {
 	std::cout<<" -120 * 124 = "<<std::to_string(result.front()[0])<<std::endl;
 	assert(result.front()[0] == -32);
 
+	/// test slots
+	inputs = {{10, 9, 8}, {-11, -10, 9}};
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::cout << "(10,9,8) * (-11,-10,9) == (" << std::to_string(result[0][0]) << ","
+		  << std::to_string(result[0][1]) << "," << std::to_string(result[0][2]) << ")\n";
+	assert(result[0][0] == -110);
+	assert(result[0][1] == -90);
+	assert(result[0][2] == 72);
 }

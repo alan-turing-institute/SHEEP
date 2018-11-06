@@ -31,7 +31,18 @@ int main(void) {
 	std::cout<<"D( E(120) * 121) = "<<std::to_string(pt_out[0])<<std::endl;
 	assert(pt_out[0] == 184);
 
+	/// test slots
+	pt_input = {1,60,12};
+	ct = ctx.encrypt(pt_input);
+	const_val = 4;
+	ct_out = ctx.MultByConstant(ct, const_val);
+	pt_out = ctx.decrypt(ct_out);
+
+	std::cout << "D[E(1,60,12) * 4] == (" << std::to_string(pt_out[0]) << ","
+		  << std::to_string(pt_out[1]) << "," << std::to_string(pt_out[2]) << ")\n";
 	
-	
+	assert(pt_out[0] == 4);
+	assert(pt_out[1] == 240);
+	assert(pt_out[2] == 48);
 
 }

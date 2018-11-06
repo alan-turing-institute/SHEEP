@@ -18,7 +18,7 @@ int main(void) {
 	Circuit circ = cr.create_circuit(Gate::Add, 1);
 	std::cout << circ;
 	std::vector<DurationT> durations;
-	ContextSeal<bool> ctx(2);
+	ContextSeal<bool> ctx;
 
 	/// test two 1s
 	std::vector<std::vector<bool> > inputs = {{1}, {1}};
@@ -38,4 +38,11 @@ int main(void) {
 	std::cout<<" 0 + 0 = "<<std::to_string(result.front()[0])<<std::endl;
 	assert(result.front()[0] == 0);
 
+	/// test use of slots
+	assert(ctx.get_num_slots() >= 2);
+	inputs = {{0, 1}, {1, 1}};
+	result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::cout<<" (0,1) + (1,1) = " << std::to_string(result[0][0]) << std::to_string(result[0][1]) << std::endl;
+	assert(result[0][0] == 1);
+	assert(result[0][1] == 0);
 }
