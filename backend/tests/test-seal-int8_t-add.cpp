@@ -21,27 +21,27 @@ int main(void) {
 	ContextSeal<int8_t> ctx;
 
 	/// test small postitive numbers
-	std::vector<int8_t> inputs = {15, 22};
-	std::vector<int8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 15+22 = "<<std::to_string(result.front())<<std::endl;	
-	assert(result.front() == 37);
+	std::vector<std::vector<int8_t> > inputs = {{15}, {22}};
+	std::vector<std::vector<int8_t> > result = ctx.eval_with_plaintexts(circ, inputs, durations);
+	std::cout<<" 15+22 = "<<std::to_string(result.front()[0])<<std::endl;	
+	assert(result.front()[0] == 37);
 
 	/// test small negative numbers
-	inputs = {10, -12};
+	inputs = {{10}, {-12}};
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 10 - 12 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == -2);
+	std::cout<<" 10 - 12 = "<<std::to_string(result.front()[0])<<std::endl;
+	assert(result.front()[0] == -2);
 
 	/// test result going out of range positive
-	inputs = {100, 127};
+	inputs = {{100}, {127}};
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	std::cout<<" 100 + 127 = "<<std::to_string(result.front())<<std::endl;
-	assert(result.front() == -29);
+	std::cout<<" 100 + 127 = "<<std::to_string(result.front()[0])<<std::endl;
+	assert(result.front()[0] == -29);
 
 	/// test result going out of range negative
-	inputs = {-120, -124};
-	std::cout<<" -120 - 124 = "<<std::to_string(result.front())<<std::endl;
+	inputs = {{-120}, {-124}};
+	std::cout<<" -120 - 124 = "<<std::to_string(result.front()[0])<<std::endl;
 	result = ctx.eval_with_plaintexts(circ, inputs, durations);
-	assert(result.front() == 12);
+	assert(result.front()[0] == 12);
 
 }

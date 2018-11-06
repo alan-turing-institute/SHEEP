@@ -12,7 +12,7 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 int main(void) {
 	using namespace SHEEP;
 
-    //// instantiate the Circuit Repository
+	//// instantiate the Circuit Repository
 	CircuitRepo cr;
 
 	Circuit circ = cr.create_circuit(Gate::Multiply, 1);
@@ -23,16 +23,15 @@ int main(void) {
 	//ContextSeal<uint8_t>::CircuitEvaluator run_circuit;
 	//run_circuit = ctx.compile(circ);
 
-/// test small postitive numbers
-        std::vector<uint8_t> inputs = {5, 22};
-        std::vector<uint8_t> result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" 5*22 = "<<std::to_string(result.front())<<std::endl;      
-        assert(result.front() == 110);
+	/// test small postitive numbers
+	std::vector<std::vector<uint8_t> > inputs{{5}, {22}};
+	std::vector<std::vector<uint8_t> > result = ctx.eval_with_plaintexts(circ, inputs, durations);
+        std::cout<<" 5*22 = "<<std::to_string(result.front()[0])<<std::endl;      
+        assert(result.front()[0] == 110);
 
         /// test result going out of range positive
-        inputs = {100, 127};
+        inputs = {{100}, {127}};
         result = ctx.eval_with_plaintexts(circ, inputs, durations);
-        std::cout<<" 100 + 127 = "<<std::to_string(result.front())<<std::endl;
-        assert(result.front() == 156);
-
+        std::cout<<" 100 + 127 = "<<std::to_string(result.front()[0])<<std::endl;
+        assert(result.front()[0] == 156);
 }
