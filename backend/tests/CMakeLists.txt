@@ -179,7 +179,9 @@ if (SEAL_FOUND)
         add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
       endforeach(op)
     endforeach(type)
-
+    add_executable(test-seal-int64_t-rotate test-seal-int64_t-rotate ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    target_link_libraries(test-seal-int64_t-rotate ${SEAL_LIBRARIES})
+    add_test(NAME test-seal-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-int64_t-rotate>) 
 endif (SEAL_FOUND)
 
 #add_executable(test-parallel-eval test-parallel-eval.cpp
