@@ -168,19 +168,19 @@ endif (HELIB_FOUND)
 ###################### END OF HELIB ###################################################################################
 
 
-#if (SEAL_FOUND)
-#
-#    foreach(type IN ITEMS bool int8_t uint8_t)
-#      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
-#          add_executable(test-seal-${type}-${op}
-#                          test-seal-${type}-${op}
-#        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
-#        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
-#      endforeach(op)
-#    endforeach(type)
-#
-#endif (SEAL_FOUND)
+if (SEAL_FOUND)
+
+    foreach(type IN ITEMS bool int8_t uint8_t)
+      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
+          add_executable(test-seal-${type}-${op}
+                          test-seal-${type}-${op}
+        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
+        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
+      endforeach(op)
+    endforeach(type)
+
+endif (SEAL_FOUND)
 
 #add_executable(test-parallel-eval test-parallel-eval.cpp
 #  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
