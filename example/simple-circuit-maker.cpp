@@ -1,14 +1,12 @@
-#include "circuit-repo.hpp"
 #include <fstream>
 #include <iostream>
+#include "circuit-repo.hpp"
 
-
-int main(int argc, const char** argv)
-{
+int main(int argc, const char** argv) {
   if (argc < 4) {
-    std::cout<<"Usage: simple-circuit-maker <gate> <depth> <output_filename>"<<std::endl;
+    std::cout << "Usage: simple-circuit-maker <gate> <depth> <output_filename>"
+              << std::endl;
     return 0;
-
   }
   std::string gate_name = argv[1];
 
@@ -16,13 +14,12 @@ int main(int argc, const char** argv)
 
   std::string output_filename = argv[3];
 
-  
   CircuitRepo cr;
 
   auto it = gate_name_map.find(gate_name);
   if (it != gate_name_map.end()) {
     Gate gate = it->second;
-    Circuit c = cr.create_circuit(gate,depth);
+    Circuit c = cr.create_circuit(gate, depth);
 
     std::ofstream outfile(output_filename);
     outfile << c;

@@ -1,9 +1,9 @@
-#include <cstdint>
-#include <cassert>
 #include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include "circuit-test-util.hpp"
 #include "context-helib.hpp"
 #include "simple-circuits.hpp"
-#include "circuit-test-util.hpp"
 
 using namespace SHEEP;
 typedef ContextHElib_Fp<uint8_t>::Plaintext Plaintext;
