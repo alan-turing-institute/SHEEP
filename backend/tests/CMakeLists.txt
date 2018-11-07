@@ -5,6 +5,7 @@ add_executable(test-invalid-circuit
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
 
+
 #add_executable(test-invalid-circuit-from-file
 #  test-invalid-circuit-from-file.cpp
 #  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -168,19 +169,21 @@ endif (HELIB_FOUND)
 ###################### END OF HELIB ###################################################################################
 
 
-#if (SEAL_FOUND)
-#
-#    foreach(type IN ITEMS bool int8_t uint8_t)
-#      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
-#          add_executable(test-seal-${type}-${op}
-#                          test-seal-${type}-${op}
-#        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-#        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
-#        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
-#      endforeach(op)
-#    endforeach(type)
-#
-#endif (SEAL_FOUND)
+if (SEAL_FOUND)
+
+    foreach(type IN ITEMS bool int8_t uint8_t)
+      foreach (op IN ITEMS add multiply multByConst) #select encrypt-decrypt negate subtract addConst)
+          add_executable(test-seal-${type}-${op}
+                          test-seal-${type}-${op}
+        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
+        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
+      endforeach(op)
+    endforeach(type)
+    add_executable(test-seal-int64_t-rotate test-seal-int64_t-rotate ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    target_link_libraries(test-seal-int64_t-rotate ${SEAL_LIBRARIES})
+    add_test(NAME test-seal-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-int64_t-rotate>)
+endif (SEAL_FOUND)
 
 ##################################################################################################
 ### LIBPAILLIER

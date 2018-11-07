@@ -51,7 +51,7 @@ if (TBB_FOUND)
   add_definitions(-DHAVE_TBB)
 endif()
 
-#find_package(SEAL)
+find_package(SEAL)
 if (SEAL_FOUND)
   include_directories(SYSTEM ${SEAL_INCLUDE_DIRS})
   add_definitions(-DHAVE_SEAL)
