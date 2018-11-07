@@ -1,5 +1,5 @@
-#include <memory>
 #include <cassert>
+#include <memory>
 #include "context-helib.hpp"
 
 #include "circuit-repo.hpp"
@@ -10,7 +10,6 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
   using namespace SHEEP;
-
 
   Circuit C;
   Wire in0 = C.add_input("in0");
@@ -31,17 +30,17 @@ int main(void) {
   std::vector<uint8_t> const_inputs = {1};
   std::vector<uint8_t> exp_values = {2, 3, 4, 1};
 
-  std::vector<std::vector<uint8_t> > result = ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+  std::vector<std::vector<uint8_t>> result =
+      ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
 
   std::cout << "Original vector: ";
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " ";
   }
-  std::cout<<std::endl<<"Rotated vector:  ";
+  std::cout << std::endl << "Rotated vector:  ";
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(result[0][i]) << " ";
-    //assert(result.front()[i] == exp_values[i]);
+    // assert(result.front()[i] == exp_values[i]);
   }
-  std::cout<<std::endl;
-
+  std::cout << std::endl;
 }

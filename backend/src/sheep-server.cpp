@@ -143,7 +143,6 @@ void SheepServer::get_parameters() {
       update_parameters<int16_t>(m_job_config.context);
     if (m_job_config.input_type == "int32_t")
       update_parameters<int32_t>(m_job_config.context);
-
   }
 }
 
@@ -736,7 +735,6 @@ void SheepServer::handle_get_slots(http_request message) {
   json::value result = json::value::object();
   result["nslots"] = json::value::number(m_job_config.nslots);
   message.reply(status_codes::OK, result);
-
 }
 
 void SheepServer::handle_get_config(http_request message) {

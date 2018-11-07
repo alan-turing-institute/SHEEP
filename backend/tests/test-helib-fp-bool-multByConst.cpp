@@ -1,42 +1,40 @@
 #include <memory>
 
-#include <cstdint>
-#include <cassert>
 #include <algorithm>
-#include "context-helib.hpp"
+#include <cassert>
+#include <cstdint>
 #include "circuit-repo.hpp"
 #include "circuit-test-util.hpp"
-
+#include "context-helib.hpp"
 
 int main(void) {
-
   using namespace SHEEP;
-  
-	ContextHElib_Fp<bool> ctx;
 
-	/// test small postitive numbers
-	std::vector<ContextHElib_Fp<bool>::Plaintext> pt_input = {1, 0};
-	ContextHElib_Fp<bool>::Ciphertext ct = ctx.encrypt(pt_input);
+  ContextHElib_Fp<bool> ctx;
 
-	long const_val = 1;
+  /// test small postitive numbers
+  std::vector<ContextHElib_Fp<bool>::Plaintext> pt_input = {1, 0};
+  ContextHElib_Fp<bool>::Ciphertext ct = ctx.encrypt(pt_input);
 
-	// Perform operation
-	ContextHElib_Fp<bool>::Ciphertext ct_out = ctx.MultByConstant(ct, const_val);
+  long const_val = 1;
 
-	// Decrypt
-	std::vector<ContextHElib_Fp<bool>::Plaintext> pt_out = ctx.decrypt(ct_out);
+  // Perform operation
+  ContextHElib_Fp<bool>::Ciphertext ct_out = ctx.MultByConstant(ct, const_val);
 
-	assert(pt_out[0] == true);
-	assert(pt_out[1] == false);
+  // Decrypt
+  std::vector<ContextHElib_Fp<bool>::Plaintext> pt_out = ctx.decrypt(ct_out);
 
-	const_val = 0;
+  assert(pt_out[0] == true);
+  assert(pt_out[1] == false);
 
-	// Perform operation
-	ct_out = ctx.MultByConstant(ct, const_val);
+  const_val = 0;
 
-	// Decrypt
-	pt_out = ctx.decrypt(ct_out);
+  // Perform operation
+  ct_out = ctx.MultByConstant(ct, const_val);
 
-	assert(pt_out[0] == false);
-	assert(pt_out[1] == false);
+  // Decrypt
+  pt_out = ctx.decrypt(ct_out);
+
+  assert(pt_out[0] == false);
+  assert(pt_out[1] == false);
 }
