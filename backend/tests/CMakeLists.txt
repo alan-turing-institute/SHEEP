@@ -5,10 +5,11 @@ add_executable(test-invalid-circuit
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
 
-add_executable(test-invalid-circuit-from-file
-  test-invalid-circuit-from-file.cpp
-  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
+#add_executable(test-invalid-circuit-from-file
+#  test-invalid-circuit-from-file.cpp
+#  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#
 #configure_file(good.sheep good.sheep)
 #configure_file(multiple-input.sheep multiple-input.sheep)
 #configure_file(multiple-assignment.sheep multiple-assignment.sheep)
@@ -181,8 +182,24 @@ if (SEAL_FOUND)
     endforeach(type)
     add_executable(test-seal-int64_t-rotate test-seal-int64_t-rotate ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
     target_link_libraries(test-seal-int64_t-rotate ${SEAL_LIBRARIES})
-    add_test(NAME test-seal-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-int64_t-rotate>) 
+    add_test(NAME test-seal-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-int64_t-rotate>)
 endif (SEAL_FOUND)
+
+##################################################################################################
+### LIBPAILLIER
+##################################################################################################
+
+if (LP_FOUND)
+ foreach(type IN ITEMS bool int8_t uint8_t)
+   foreach (op IN ITEMS encrypt-decrypt add multByConst negate rotate)
+   add_executable(test-lp-${type}-${op} test-lp-${type}-${op} ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-lp-${type}-${op} ${LP_LIBRARIES} ${GMP_LIBRARIES})
+  add_test(NAME test-lp-${type}-${op} COMMAND $<TARGET_FILE:test-lp-${type}-${op}>)
+  endforeach(op)
+ endforeach(type)
+endif (LP_FOUND)
+############### end of libpaillier ###############################################################
+
 
 #add_executable(test-parallel-eval test-parallel-eval.cpp
 #  ${CMAKE_SOURCE_DIR}/src/circuit.cpp

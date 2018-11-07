@@ -23,7 +23,7 @@ enable_testing()
 
 include_directories(include)
 
-#find_package(LP)
+find_package(LP)
 if (LP_FOUND)
   include_directories(SYSTEM ${LP_INCLUDE_DIRS})
   find_library(GMP_LIBRARIES NAMES gmp)
