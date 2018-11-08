@@ -1,6 +1,7 @@
 #ifndef CIRCUIT_TEST_UTIL_HPP
 #define CIRCUIT_TEST_UTIL_HPP
 
+#include "circuit.hpp"
 #include "all_equal.hpp"
 
 template <typename ContextT, typename PTcontainer>
