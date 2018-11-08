@@ -98,8 +98,7 @@ static const std::map<std::string, Gate> gate_name_map = {
     {"SELECT", Gate::Select},
     {"ADDCONST", Gate::AddConstant},
     {"MULTBYCONST", Gate::MultByConstant},
-    {"ROTATE", Gate::Rotate}
-};
+    {"ROTATE", Gate::Rotate}};
 
 // Wires - identified by their name.
 class Wire {

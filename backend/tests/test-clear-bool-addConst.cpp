@@ -1,5 +1,5 @@
-#include <memory>
 #include <cassert>
+#include <memory>
 #include "context-clear.hpp"
 
 #include "circuit-repo.hpp"
@@ -10,7 +10,6 @@ typedef std::chrono::duration<double, std::micro> DurationT;
 
 int main(void) {
   using namespace SHEEP;
-
 
   Circuit C;
   Wire in0 = C.add_input("in0");
@@ -31,10 +30,13 @@ int main(void) {
   std::vector<bool> const_inputs = {1};
   std::vector<bool> exp_values = {0, 1};
 
-  std::vector<std::vector<bool>> result = ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+  std::vector<std::vector<bool>> result =
+      ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
 
   for (int i = 0; i < exp_values.size(); i++) {
-    std::cout << std::to_string(inputs[0][i]) << " + " <<  std::to_string(const_inputs[0]) << " = " << std::to_string(result[0][i]) << std::endl;
+    std::cout << std::to_string(inputs[0][i]) << " + "
+              << std::to_string(const_inputs[0]) << " = "
+              << std::to_string(result[0][i]) << std::endl;
     assert(result.front()[i] == exp_values[i]);
   }
 }
