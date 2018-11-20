@@ -1,0 +1,37 @@
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include "circuit-repo.hpp"
+#include "circuit-test-util.hpp"
+#include "context-tfhe.hpp"
+#include "simple-circuits.hpp"
+
+typedef std::chrono::duration<double, std::micro> DurationT;
+
+int main(void) {
+  using namespace SHEEP;
+
+  //// instantiate the Circuit Repository
+  CircuitRepo cr;
+
+  Circuit circ = cr.create_circuit(Gate::Add, 1);
+  std::cout << circ;
+  std::vector<DurationT> durations;
+  ContextTFHE<int8_t> ctx;
+  ctx.set_parameter("NumSlots", 5);
+  std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> pt_input = {
+      {15, 10, 10, -8, 80}, {22, -12, 0, -8, 80}};
+
+  std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result =
+      ctx.eval_with_plaintexts(circ, pt_input, durations);
+
+  std::vector<int8_t> exp_values = {37, -2, 10, -16, -96};
+
+  for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(pt_input[0][i]) << " + "
+              << std::to_string(pt_input[1][i]) << " = "
+              << std::to_string(result[0][i]) << std::endl;
+  }
+
+  assert(result.front() == exp_values);
+}

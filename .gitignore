@@ -1,3 +1,6 @@
+# either docker or user is responsible of installing all the libraries into the backend/lib
+backend/lib
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -24,6 +27,9 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Uploaded files from webapp
+frontend/webapp/uploads/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -105,3 +111,9 @@ venv.bak/
 
 # Visual Studio Code
 .vscode
+
+# emacs autosave
+*~
+
+# sqlite file
+sheep.db

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>SHEEP</title>
+
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+
+  <script>
+        function loading(){
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("badinputs").style.display = "none";
+        document.getElementById("circuit").style.display = "none";
+        }
+
+  </script>
+  <style>
+    div#loading {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    display: none;
+    background: url(/static/sheep_waiting.gif) no-repeat;
+    cursor: wait;
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+
+<div id="content" class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="/">Home</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Homomorphic Encryption Evaluation</h3>
+        </div>
+
+        <div>
+            <h1>Enter input values</h1>
+        </div>
+
+        <div class="row marketing">
+            <div class="col-lg-6">
+
+            </div>
+        </div>
+	<div>
+	  <form method="POST" action="" enctype="multipart/form-data">
+	    <table>
+	      {% for field in form %}
+	      <tr>
+		<td>{{ field.label }}</td><td>{{ field }}</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+	    <p><input type=submit value="Go!" onclick="loading();"></form></p>
+
+</div>
+<div id="circuit">
+  <p> <h3>  Circuit:</h3></p>
+<p> {% for line in  circuit %} </p>
+<br> {{ line }} <br>
+{% endfor %}
+</div>
+
+{% if badinputs %}
+<div id="badinputs">
+  <p>
+    <h3> Invalid input values .... </h3>
+    Values are out-of-range for selected input type, or different length lists of values, or too many values for number of available slots.
+  </p>
+   <img src="/static/sheep_confused.gif" alt="try again">
+  </div>
+
+{% endif %}
+
+ <div id="loading">
+    <img src="/static/sheep_waiting.gif" alt="waiting">
+    <p>
+      <h3> Calculating .... </h3>
+      </p>
+  </div>
+
+
+
+
+</body>
+
+</html>
