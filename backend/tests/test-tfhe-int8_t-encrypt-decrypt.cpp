@@ -12,6 +12,7 @@ typedef ContextTFHE<int8_t>::Ciphertext Ciphertext;
 // Encrypt a value, decrypt the result, and check that we are
 // left with the original value.
 void test_single(ContextTFHE<int8_t>& context) {
+
   std::vector<Plaintext> pt_orig = {10, 0, -5};
   std::vector<Plaintext> pt_new = context.decrypt(context.encrypt(pt_orig));
 
@@ -21,6 +22,7 @@ void test_single(ContextTFHE<int8_t>& context) {
   }
 
   assert(pt_orig == pt_new);
+
 }
 
 int main(void) {
