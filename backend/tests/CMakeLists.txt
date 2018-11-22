@@ -191,7 +191,7 @@ endif (SEAL_FOUND)
 
 if (LP_FOUND)
  foreach(type IN ITEMS bool int8_t uint8_t)
-   foreach (op IN ITEMS encrypt-decrypt add multByConst negate rotate)
+   foreach (op IN ITEMS encrypt-decrypt add multByConst negate rotate encrypt-serialize)
    add_executable(test-lp-${type}-${op} test-lp-${type}-${op} ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
   target_link_libraries(test-lp-${type}-${op} ${LP_LIBRARIES} ${GMP_LIBRARIES})
   add_test(NAME test-lp-${type}-${op} COMMAND $<TARGET_FILE:test-lp-${type}-${op}>)

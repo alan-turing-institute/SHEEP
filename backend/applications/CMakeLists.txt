@@ -61,6 +61,15 @@ endif(HElib_FOUND)
      target_link_libraries(tfhe-example
                              ${TFHE_LIBRARIES})
 
+
+     add_executable(tfhe_example
+                      examples/tfhe_example.cpp
+ 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+
+
+     target_link_libraries(tfhe_example
+                             ${TFHE_LIBRARIES})
+
      add_executable(bitonic-sort-tfhe
  		   examples/bitonic-sort-tfhe.cpp
    		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -81,7 +90,7 @@ endif(HElib_FOUND)
                              ${SEAL_LIBRARIES})
 
      add_executable(seal-param-selector
-                      examples/seal-param-selector.cpp)
+                      utilities/seal-param-selector.cpp)
      target_link_libraries(seal-param-selector
                              ${SEAL_LIBRARIES}
  			    pthread)
