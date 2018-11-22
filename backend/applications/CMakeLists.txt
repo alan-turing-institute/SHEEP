@@ -62,11 +62,6 @@ endif(HElib_FOUND)
                              ${TFHE_LIBRARIES})
 
 
-     add_executable(tfhe_example
-                      examples/tfhe_example.cpp
- 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-
-
      target_link_libraries(tfhe_example
                              ${TFHE_LIBRARIES})
 
