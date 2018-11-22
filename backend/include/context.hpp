@@ -32,6 +32,11 @@ struct TooManyInputVals : public std::runtime_error {
       : std::runtime_error("Number of values per wire > num slots."){};
 };
 
+struct SerializationNotImplemented : public std::runtime_error {
+  SerializationNotImplemented()
+      : std::runtime_error("Serialization of ciphertext not implemented for this context."){};
+};
+
 struct TimeoutException : public std::exception {
   std::chrono::duration<double, std::micro> execution_time;
   std::string what_str;
@@ -91,6 +96,9 @@ class BaseContext {
       std::chrono::duration<double, std::micro> timeout =
           std::chrono::duration<double, std::micro>(0.0)) = 0;
 
+  // encrypt a plaintext and serialize the resulting ciphertext
+  virtual std::string encrypt_and_serialize(std::vector<PlaintextT>) = 0;
+
   virtual void print_parameters() = 0;
   virtual std::map<std::string, long> get_parameters() = 0;
   virtual long get_num_slots() = 0;
@@ -115,6 +123,8 @@ class Context : public BaseContext<PlaintextT> {
   virtual void configure() { m_configured = true; };
   virtual Ciphertext encrypt(std::vector<Plaintext>) = 0;
   virtual std::vector<Plaintext> decrypt(Ciphertext) = 0;
+
+  virtual std::string encrypt_and_serialize(std::vector<PlaintextT>) { throw SerializationNotImplemented(); };
 
   // An Alias is just a renaming of a wire.  It has very minimal
   // performance cost, and does not result in any additional HE

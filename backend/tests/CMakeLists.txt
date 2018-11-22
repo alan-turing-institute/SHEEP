@@ -75,11 +75,8 @@ add_test(NAME test-bit-get-set COMMAND $<TARGET_FILE:test-bit-get-set>)
 ##################################################################################################
 
 if (TFHE_FOUND)
-  add_executable(test-tfhe-bool-encrypt-decrypt test-tfhe-bool-encrypt-decrypt.cpp)
-  target_link_libraries(test-tfhe-bool-encrypt-decrypt ${TFHE_LIBRARIES})
-  add_test(NAME test-tfhe-bool-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-bool-encrypt-decrypt>)
-
-  foreach(op IN ITEMS and or xor not select subtract rotate)
+  ## operations for bool plaintext
+  foreach(op IN ITEMS and or xor not select subtract rotate encrypt-decrypt encrypt-serialize)
     add_executable(test-tfhe-bool-${op}
       test-tfhe-bool-${op}.cpp
       ${CMAKE_SOURCE_DIR}/src/circuit.cpp
@@ -91,13 +88,10 @@ if (TFHE_FOUND)
     add_test(NAME test-tfhe-bool-${op} COMMAND $<TARGET_FILE:test-tfhe-bool-${op}>)
   endforeach(op)
 
+  ## operations for int / uint plaintext
   foreach(type IN ITEMS int8_t uint8_t)
 
-    add_executable(test-tfhe-${type}-encrypt-decrypt test-tfhe-${type}-encrypt-decrypt.cpp)
-    target_link_libraries(test-tfhe-${type}-encrypt-decrypt ${TFHE_LIBRARIES})
-    add_test(NAME test-tfhe-${type}-encrypt-decrypt COMMAND $<TARGET_FILE:test-tfhe-${type}-encrypt-decrypt>)
-
-    foreach(op IN ITEMS add subtract multiply negate select compare rotate)
+    foreach(op IN ITEMS add subtract multiply negate select compare rotate encrypt-decrypt encrypt-serialize)
 
       add_executable(test-tfhe-${type}-${op} test-tfhe-${type}-${op}.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp
 			  ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
@@ -147,7 +141,7 @@ if (HELIB_FOUND)
 	    ## And now all the other gates, for both fp and f2
       foreach(f IN ITEMS fp f2)
         # operations
-	      foreach (op IN ITEMS encrypt-decrypt negate add multiply subtract select)
+	      foreach (op IN ITEMS encrypt-decrypt negate add multiply subtract select encrypt-serialize)
         	           add_executable(test-helib-${f}-${type}-${op}
         		                test-helib-${f}-${type}-${op}
         		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -163,6 +157,12 @@ if (HELIB_FOUND)
     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
   target_link_libraries(test-helib-f2-bool-maximum ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
   add_test(NAME test-helib-f2-bool-maximum COMMAND $<TARGET_FILE:test-helib-f2-bool-maximum>)
+
+#  add_executable(test-helib-fp-int8_t-encrypt-serialize
+#    test-helib-fp-int8_t-encrypt-serialize.cpp
+#    ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#  target_link_libraries(test-helib-fp-int8_t-encrypt-serialize ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+#  add_test(NAME test-helib-fp-int8_t-encrypt-serialize COMMAND $<TARGET_FILE:test-helib-fp-int8_t-encrypt-serialize>)
 
 endif (HELIB_FOUND)
 
