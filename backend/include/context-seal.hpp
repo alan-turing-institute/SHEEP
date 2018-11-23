@@ -118,6 +118,21 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     return p;
   }
 
+  std::string encrypt_and_serialize(std::vector<Plaintext> pt) {
+
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+
+    ct.save(ss);
+
+    std::string ctstring = ss.str();
+
+    return ctstring;
+
+  };
+
+
+
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     m_evaluator->add_inplace(a, b);
     return a;
