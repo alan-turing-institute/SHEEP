@@ -79,10 +79,7 @@ class ContextTFHE<bool> : public Context<bool, std::vector<CiphertextTFHE>> {
     std::vector<Plaintext> pt;
 
     for (int i = 0; i < ct.size(); i++) {
-      CiphertextTFHE ct_el(parameters);
-
       pt_el = bootsSymDecrypt(ct[i], secret_key.get());
-
       pt.push_back(pt_el);
     }
 
