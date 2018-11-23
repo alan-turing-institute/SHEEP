@@ -74,18 +74,18 @@ endif(HElib_FOUND)
  endif(TFHE_FOUND)
 
  if (SEAL_FOUND)
-     add_executable(seal-example
-                      examples/seal-example.cpp
- 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-     add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
-     target_link_libraries(seal-example
-                             ${SEAL_LIBRARIES})
+#     add_executable(seal-example
+#                      examples/seal-example.cpp
+# 		     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+#     add_test(NAME seal-example COMMAND $<TARGET_FILE:seal-example>)
+#     target_link_libraries(seal-example
+#                             ${SEAL_LIBRARIES})
 
-     add_executable(seal-param-selector
-                      utilities/seal-param-selector.cpp)
-     target_link_libraries(seal-param-selector
-                             ${SEAL_LIBRARIES}
- 			    pthread)
+#     add_executable(seal-param-selector
+#                      utilities/seal-param-selector.cpp)
+#     target_link_libraries(seal-param-selector
+#                             ${SEAL_LIBRARIES}
+# 			    pthread)
  endif(SEAL_FOUND)
 
 
