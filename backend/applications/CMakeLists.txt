@@ -62,9 +62,6 @@ endif(HElib_FOUND)
                              ${TFHE_LIBRARIES})
 
 
-     target_link_libraries(tfhe_example
-                             ${TFHE_LIBRARIES})
-
      add_executable(bitonic-sort-tfhe
  		   examples/bitonic-sort-tfhe.cpp
    		   ${CMAKE_SOURCE_DIR}/src/circuit.cpp
