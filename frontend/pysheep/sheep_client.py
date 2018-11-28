@@ -337,6 +337,31 @@ def set_parameters(param_dict):
     return response_dict
 
 
+def encrypt_and_serialize(plaintext_vec):
+    """
+    Given a vector of plaintexts, encrypt them and get the string
+    of the serialized output
+    """
+    nslot_request = get_nslots()
+    if nslot_request["status_code"] != 200:
+        return nslot_request
+    nslots = nslot_request["content"]["nslots"]
+
+    if len(plaintext_vec) > nslots:
+        return {"status_code": 500, "content": "Not enough slots"}
+    response_dict = {}
+    try:
+        r=requests.post(BASE_URI+"/serialized_ct/", json={"inputs":plaintext_vec})
+        if r.status_code != 200:
+            return r
+        response_dict["status_code"] = 200
+        response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set parameters"
+    return response_dict
+
+
 def set_eval_strategy(strategy):
     """
     choose between serial and parallel evaluation.

@@ -98,6 +98,7 @@ class BaseContext {
 
   // encrypt a plaintext and serialize the resulting ciphertext
   virtual std::string encrypt_and_serialize(std::vector<PlaintextT>) = 0;
+  virtual int get_serialized_ciphertext_size(std::vector<PlaintextT>) = 0;
 
   virtual void print_parameters() = 0;
   virtual std::map<std::string, long> get_parameters() = 0;
@@ -124,7 +125,12 @@ class Context : public BaseContext<PlaintextT> {
   virtual Ciphertext encrypt(std::vector<Plaintext>) = 0;
   virtual std::vector<Plaintext> decrypt(Ciphertext) = 0;
 
-  virtual std::string encrypt_and_serialize(std::vector<PlaintextT>) { throw SerializationNotImplemented(); };
+  virtual std::string encrypt_and_serialize(std::vector<Plaintext>) { throw SerializationNotImplemented(); };
+  virtual int get_serialized_ciphertext_size(std::vector<Plaintext> pt) {
+    std::string sct = encrypt_and_serialize(pt);
+    return sct.size();
+  };
+
 
   // An Alias is just a renaming of a wire.  It has very minimal
   // performance cost, and does not result in any additional HE
