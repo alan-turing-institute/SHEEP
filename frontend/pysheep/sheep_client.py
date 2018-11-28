@@ -330,7 +330,7 @@ def set_parameters(param_dict):
         r=requests.put(BASE_URI+"/parameters/",
                        json=param_dict)
         response_dict["status_code"] = r.status_code
-        response_dict["content"] = r.content.decode("utf-8")
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
     except(requests.exceptions.ConnectionError):
         response_dict["status_code"] = 404
         response_dict["content"] = "Unable to connect to SHEEP server to set parameters"
@@ -355,7 +355,7 @@ def encrypt_and_serialize(plaintext_vec):
         if r.status_code != 200:
             return r
         response_dict["status_code"] = 200
-        response_dict["content"] = r.content.decode("utf-8")
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
     except(requests.exceptions.ConnectionError):
         response_dict["status_code"] = 404
         response_dict["content"] = "Unable to connect to SHEEP server to set parameters"
