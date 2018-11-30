@@ -496,3 +496,17 @@ def upload_results(circuit_name):
     except(requests.exceptions.ConnectionError):
         return {"status_code": 404,
                 "content": "Unable to connect to SHEEP server to get results"}
+
+def get_circuit():
+    """
+    Get the server to return its circuit as a string
+    """
+    response_dict = {}
+    try:
+        r=requests.get(BASE_URI+"/circuit/")
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to get results"
+    return response_dict

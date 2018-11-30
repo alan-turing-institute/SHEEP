@@ -171,6 +171,7 @@ class SheepServer {
   void handle_post(http_request message);
   /// actual endpoints
   void handle_get_context(http_request message);
+  void handle_get_circuit(http_request message);
   void handle_get_input_type(http_request message);
   void handle_get_inputs(http_request message);
   void handle_get_const_inputs(http_request message);

@@ -322,7 +322,7 @@ void SheepServer::configure_and_run(http_request message) {
     // timeout hardcoded as 10 s for now
     // POSIX: can assume this is an integer type
 
-    time_t timeout_us = 10000000L;
+    time_t timeout_us = 60000000L;
 
     // go to sleep for the length of the timeout and a grace period
     struct timespec req, rem;
@@ -411,6 +411,8 @@ void SheepServer::handle_get(http_request message) {
   auto path = message.relative_uri().path();
   if (path == "context/")
     return handle_get_context(message);
+  else if (path == "circuit/")
+    return handle_get_circuit(message);
   else if (path == "parameters/")
     return handle_get_parameters(message);
   else if (path == "input_type/")
@@ -812,6 +814,25 @@ void SheepServer::handle_get_config(http_request message) {
   json::value result = m_job_config.as_json();
   message.reply(status_codes::OK, result);
 }
+
+void SheepServer::handle_get_circuit(http_request message) {
+  /// if we haven't already got the parameters, do this now.
+  if (m_job_config.circuit.get_inputs().size() <= 0) {
+    message.reply(
+        status_codes::InternalError,
+        ("Circuit not set"));
+    return;
+  }
+  std::stringstream circuit_stream;
+  circuit_stream << m_job_config.circuit;
+  std::string circuit_string = circuit_stream.str();
+  json::value result = json::value::object();
+  result["circuit"] = json::value::string(circuit_string);
+  message.reply(status_codes::OK, result);
+
+}
+
+
 
 void SheepServer::handle_put_parameters(http_request message) {
   /// put parameter name:value into job_config
