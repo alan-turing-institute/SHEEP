@@ -151,6 +151,9 @@ class SheepServer {
   template <typename PlaintextT>
   void configure_and_run(http_request message);
 
+  template <typename PlaintextT>
+  std::string configure_and_serialize(std::vector<int> pt);
+
   void get_parameters();
 
   template <typename PlaintextT>
@@ -160,8 +163,6 @@ class SheepServer {
   template <typename PlaintextT>
   bool check_job_outputs(std::vector<std::vector<PlaintextT>> test_outputs,
                          std::vector<std::vector<PlaintextT>> clear_outputs);
-  //			 std::map<std::string, std::string> test_outputs,
-  //			 std::map<std::string, std::string> clear_outputs);
 
  private:
   /// generic methods - will then dispatch to specific ones based on URL
@@ -182,6 +183,7 @@ class SheepServer {
 
   void handle_post_inputs(http_request message);
   void handle_post_const_inputs(http_request message);
+  void handle_post_serialized_ciphertext(http_request message);
 
   void handle_post_input_type(http_request message);
   void handle_post_circuit(http_request message);

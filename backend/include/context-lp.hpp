@@ -75,6 +75,24 @@ class ContextLP
     return pt;
   }
 
+
+  std::string encrypt_and_serialize(std::vector<Plaintext> pt) {
+
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    // loop over slots
+    for (int i=0; i < ct.size(); i++) {
+      int ct_el_size = PAILLIER_BITS_TO_BYTES(this->pubKey->bits)*2;
+      char* byte_array = (char*)paillier_ciphertext_to_bytes(ct_el_size, &ct[i]);
+      ss.write(byte_array, ct_el_size);
+    }
+    std::string ctstring = ss.str();
+
+    return ctstring;
+
+  };
+
+
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     if (a.size() != b.size()) {
       throw std::runtime_error(

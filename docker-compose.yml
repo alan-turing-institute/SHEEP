@@ -3,6 +3,7 @@ version: '3'
 services:
 
   sheep-server:
+    container_name: sheep_sheep-server_1
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -11,8 +12,9 @@ services:
      - "34568:34568"
     networks:
      - sheep_nw
-     
+
   sheep-frontend:
+    container_name: sheep_sheep-frontend_1
     build:
       context: frontend
       dockerfile: Dockerfile.frontend
@@ -25,8 +27,9 @@ services:
     - sheep-server
     networks:
     - sheep_nw
-  
+
   sheep-notebook:
+    container_name: sheep_sheep-notebook_1
     build:
       context: frontend
       dockerfile: Dockerfile.notebook
@@ -43,4 +46,3 @@ services:
 networks:
   sheep_nw:
     driver: bridge
-    

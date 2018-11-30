@@ -113,6 +113,7 @@ std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
   return inputs;
 }
 
+
 template <typename PlaintextT>
 std::vector<PlaintextT> SheepServer::make_const_plaintext_inputs() {
   std::vector<PlaintextT> const_inputs;
@@ -149,10 +150,9 @@ void SheepServer::get_parameters() {
 template <typename PlaintextT>
 void SheepServer::update_parameters(std::string context_type,
                                     json::value parameters) {
-  //			       std::string param_name,
-  //			       long param_value) {
 
-  BaseContext<PlaintextT> *context;
+  BaseContext<PlaintextT> *context = make_context<PlaintextT>(context_type);
+  /*
   if (context_type == "Clear") {
     context = new ContextClear<PlaintextT>();
 #ifdef HAVE_HElib
@@ -178,6 +178,7 @@ void SheepServer::update_parameters(std::string context_type,
   } else {
     throw std::runtime_error("Unknown context requested");
   }
+  */
   /// first set parameters to current values stored in the server (if any)
   for (auto map_iter : m_job_config.parameters) {
     context->set_parameter(map_iter.first, map_iter.second);
@@ -213,6 +214,27 @@ bool SheepServer::check_job_outputs(
   }
   return true;
 }
+
+template <typename PlaintextT>
+std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
+  /// convert inputvec to plaintext type
+  std::vector<PlaintextT> ptvec;
+  for (auto input_val : inputvec) {
+    ptvec.push_back((PlaintextT)input_val);
+  }
+  /// we can  assume we have values for context, input_type
+
+  auto context = make_context<PlaintextT>(m_job_config.context);
+  /// set parameters for this context
+  for (auto map_iter = m_job_config.parameters.begin();
+       map_iter != m_job_config.parameters.end(); ++map_iter) {
+    context->set_parameter(map_iter->first, map_iter->second);
+
+  }
+  std::string serialized_ct = context->encrypt_and_serialize(ptvec);
+  return serialized_ct;
+}
+
 
 template <typename PlaintextT>
 void SheepServer::configure_and_run(http_request message) {
@@ -421,6 +443,10 @@ void SheepServer::handle_post(http_request message) {
     return handle_post_inputs(message);
   else if (path == "const_inputs/")
     return handle_post_const_inputs(message);
+  else if (path == "serialized_ct/")
+    return handle_post_serialized_ciphertext(message);
+  else if (path == "serialized_ct_size/")
+    return handle_post_serialized_ciphertext(message);
   else if (path == "job/")
     return handle_post_job(message);
   else if (path == "circuitfile/")
@@ -459,6 +485,8 @@ void SheepServer::handle_post_run(http_request message) {
     configure_and_run<int16_t>(message);
   else if (m_job_config.input_type == "int32_t")
     configure_and_run<int32_t>(message);
+  else
+    message.reply(status_codes::InternalError, ("Unknown input type"));
 }
 
 void SheepServer::handle_post_circuit(http_request message) {
@@ -506,9 +534,7 @@ void SheepServer::handle_post_circuitfile(http_request message) {
 }
 
 void SheepServer::handle_get_inputs(http_request message) {
-  /// check again that the circuit exists.
-  //  if (! circuit_file.good())
-  //   message.reply(status_codes::InternalError,("Circuit file not found"));
+
   json::value result = json::value::object();
   json::value inputs = json::value::array();
 
@@ -545,7 +571,6 @@ void SheepServer::handle_post_inputs(http_request message) {
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
     try {
       json::value input_dict = jvalue.get();
-      //	auto input_dict = val["input_dict"].as_object();
       for (auto input_name : m_job_config.input_names) {
         std::vector<int> input_vals;
 
@@ -580,6 +605,50 @@ void SheepServer::handle_post_const_inputs(http_request message) {
 
   message.reply(status_codes::OK);
 }
+
+
+void SheepServer::handle_post_serialized_ciphertext(http_request message) {
+
+  message.extract_json().then([=](pplx::task<json::value> jvalue) {
+    try {
+      json::value input_dict = jvalue.get();
+      auto input_vals = input_dict["inputs"].as_array();
+      std::vector<int> plaintext_inputs;
+      for (auto input_val : input_vals) {
+	plaintext_inputs.push_back(input_val.as_integer());
+      }
+      std::string sct;
+      if (m_job_config.input_type == "bool")
+	  sct = configure_and_serialize<bool>(plaintext_inputs);
+	else if (m_job_config.input_type == "uint8_t")
+	  sct = configure_and_serialize<uint8_t>(plaintext_inputs);
+	else if (m_job_config.input_type == "uint16_t")
+	  sct = configure_and_serialize<uint16_t>(plaintext_inputs);
+	else if (m_job_config.input_type == "uint32_t")
+	  sct = configure_and_serialize<uint32_t>(plaintext_inputs);
+	else if (m_job_config.input_type == "int8_t")
+	  sct = configure_and_serialize<int8_t>(plaintext_inputs);
+	else if (m_job_config.input_type == "int16_t")
+	  sct = configure_and_serialize<int16_t>(plaintext_inputs);
+	else if (m_job_config.input_type == "int32_t")
+	  sct = configure_and_serialize<int32_t>(plaintext_inputs);
+	else
+	  message.reply(status_codes::InternalError, ("Unknown input type"));
+      std::cout<<"size of ciphertext string is "<<sct.size()<<std::endl;
+      json::value result = json::value::object();
+      result["ciphertext"] = json::value::string(sct);
+      result["size"] = json::value::number((int64_t)(sct.size()));
+
+      message.reply(status_codes::OK, result);
+
+    } catch (json::json_exception) {
+      message.reply(status_codes::InternalError, ("Unrecognized inputs"));
+    }
+  });
+
+
+}
+
 
 void SheepServer::handle_get_eval_strategy(http_request message) {
   /// get the evaluation strategy

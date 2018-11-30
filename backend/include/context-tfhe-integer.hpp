@@ -114,6 +114,26 @@ class ContextTFHE
     return pt;
   }
 
+  std::string encrypt_and_serialize(std::vector<Plaintext> pt) {
+
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    const TFheGateBootstrappingParameterSet* const_params(parameters.get());
+    // loop over slots
+    for (int i=0; i < ct.size(); i++) {
+      CiphertextEl ct_el(parameters);
+      ct_el = ct[i];
+      // loop over bits
+      for (int j = 0; j < BITWIDTH(Plaintext); j++) {
+	export_gate_bootstrapping_ciphertext_toStream(ss, ct_el[j], const_params);
+      }
+    }
+    std::string ctstring = ss.str();
+
+    return ctstring;
+
+  };
+
   std::pair<CiphertextBit, CiphertextBit> HalfAdder(LweSample *a,
                                                     LweSample *b) {
     CiphertextTFHE sum(parameters), carry(parameters);

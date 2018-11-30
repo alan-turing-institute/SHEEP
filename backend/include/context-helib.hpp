@@ -275,6 +275,17 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
     return pt_transformed;
   }
 
+
+  std::string encrypt_and_serialize(std::vector<PlaintextT> pt) {
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    for (int i=0; i< this->m_bitwidth; ++i) {
+      ss << ct[i];
+    }
+    std::string ctstring = ss.str();
+    return ctstring;
+  };
+
   Ciphertext Negate(Ciphertext a) {
     /// bootstrapping method copied from HElib's Test_binaryCompare
     if (this->m_bootstrap) {
@@ -519,6 +530,14 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
 
     return result;
   }
+
+  std::string encrypt_and_serialize(std::vector<PlaintextT> pt) {
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    ss << ct;
+    std::string ctstring = ss.str();
+    return ctstring;
+  };
 
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     a += b;

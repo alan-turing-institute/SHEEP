@@ -79,15 +79,28 @@ class ContextTFHE<bool> : public Context<bool, std::vector<CiphertextTFHE>> {
     std::vector<Plaintext> pt;
 
     for (int i = 0; i < ct.size(); i++) {
-      CiphertextTFHE ct_el(parameters);
-
       pt_el = bootsSymDecrypt(ct[i], secret_key.get());
-
       pt.push_back(pt_el);
     }
 
     return pt;
   }
+
+  std::string encrypt_and_serialize(std::vector<Plaintext> pt) {
+
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    const TFheGateBootstrappingParameterSet* const_params(parameters.get());
+    for (int i=0; i < ct.size(); i++) {
+      // CiphertextTFHE ct_el(parameters);
+      export_gate_bootstrapping_ciphertext_toStream(ss, ct[i], const_params);
+    }
+    std::string ctstring = ss.str();
+
+    return ctstring;
+
+  };
+
 
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
     Ciphertext ct;
