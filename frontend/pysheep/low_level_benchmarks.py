@@ -1,5 +1,5 @@
 """
-Run low-level benchmark tests over specified combinations of 
+Run low-level benchmark tests over specified combinations of
 gate, depth, input_type, context.
 """
 import subprocess
@@ -8,6 +8,9 @@ import re
 
 from .benchmark_utils import (run_circuit, write_params_file,
                               write_inputs_file, params_for_level)
+
+from .common_utils import get_bitwidth
+
 
 if not "SHEEP_HOME" in os.environ.keys():
     BASE_DIR = os.environ["HOME"]+"/SHEEP"
@@ -21,11 +24,11 @@ if not os.path.exists(CIRCUIT_FILE_DIR):
 
 INPUT_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/inputs"
 if not os.path.exists(INPUT_FILE_DIR):
-    os.system("mkdir "+INPUT_FILE_DIR)    
+    os.system("mkdir "+INPUT_FILE_DIR)
 
 DEBUG_FILE_DIR = BASE_DIR+"/benchmark_inputs/low_level/debug"
 if not os.path.exists(DEBUG_FILE_DIR):
-    os.system("mkdir "+DEBUG_FILE_DIR)    
+    os.system("mkdir "+DEBUG_FILE_DIR)
 
 
 def run_all(gates,types,contexts,max_depth=10):
@@ -42,7 +45,7 @@ def run_all(gates,types,contexts,max_depth=10):
 
 ### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
 ### different requirements
-                
+
                 inputs_file = INPUT_FILE_DIR+"/inputs-"
                 if gate == "SELECT":
                     inputs_file += "select-"
@@ -77,7 +80,7 @@ def scan_1(contexts=["HElib_Fp","SEAL"]):
                     param_file = params_for_level(context,d)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-1.sheep"
 ### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
-### different requirements                
+### different requirements
                     inputs_file = INPUT_FILE_DIR+"/inputs-"
                     if gate == "SELECT":
                         inputs_file += "select-"
@@ -109,7 +112,7 @@ def scan_2(contexts=["HElib_Fp","SEAL"]):
                     param_file = params_for_level(context,4)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-"+str(d)+".sheep"
 ### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
-### different requirements                
+### different requirements
                     inputs_file = INPUT_FILE_DIR+"/inputs-"
                     if gate == "SELECT":
                         inputs_file += "select-"
@@ -127,7 +130,7 @@ def scan_2(contexts=["HElib_Fp","SEAL"]):
                                           "serial",
                                           param_file,
                                           DEBUG_FILE_DIR+"/debug_"+gate+str(d)+input_type+".txt"
-                                          )    
+                                          )
 
 
 def scan_3(contexts=["TFHE","HElib_F2","HElib_Fp","SEAL"]):
@@ -141,7 +144,7 @@ def scan_3(contexts=["TFHE","HElib_F2","HElib_Fp","SEAL"]):
                     param_file = params_for_level(context,d)
                     circuit_file = CIRCUIT_FILE_DIR+"/circuit-"+gate+"-"+str(d)+".sheep"
 ### inputs file depends on the gate now - most gates have depth+1 inputs, but SELECT and NEGATE have
-### different requirements                
+### different requirements
                     inputs_file = INPUT_FILE_DIR+"/inputs-"
                     if gate == "SELECT":
                         inputs_file += "select-"
@@ -159,4 +162,4 @@ def scan_3(contexts=["TFHE","HElib_F2","HElib_Fp","SEAL"]):
                                           "serial",
                                           param_file,
                                           DEBUG_FILE_DIR+"/debug_"+gate+str(d)+input_type+".txt"
-                                          )    
+                                          )

@@ -13,12 +13,6 @@ import sqlite3
 
 import os
 
-#### the following regexes are only necessary for when we allow the user to
-#### enter their own SQL query - shouldn't be there long-term!
-import re
-table_regex = re.compile("(FROM|from) ([\w]+)")
-column_regex = re.compile("(SELECT|select) ([\*\w\,\s]+) (FROM|from)")
-
 ### location of the sqlite file holding the DB
 ### (at some point may replace with e.g. postgres DB, but
 ### this will only require minimal changes, thanks to sqlalchemy).
@@ -31,7 +25,6 @@ if "SHEEP_HOME" in os.environ.keys():
 else:
     DB_LOCATION = os.path.join(os.environ["HOME"],"SHEEP","sheep.db")
 
-print("DB LOCATION IS {}".format(DB_LOCATION))
 Base = declarative_base()
 engine = create_engine("sqlite:///"+DB_LOCATION)
 
@@ -42,9 +35,7 @@ class BenchmarkMeasurement(Base):
     context_name = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
     input_signed = Column(Boolean, nullable=False)
-    gate_name = Column(String(250), nullable=True)
     circuit_name = Column(String(250), nullable=True)
-    depth = Column(Integer, nullable=True)
     num_inputs = Column(Integer, nullable=True)
     num_slots = Column(Integer, nullable=True)
     tbb_enabled = Column(Boolean, nullable=True)
@@ -52,33 +43,15 @@ class BenchmarkMeasurement(Base):
     encryption_time = Column(Float, nullable=True)
     execution_time = Column(Float, nullable=False)
     is_correct = Column(Boolean, nullable=False)
-    ciphertext_size = Column(Integer, nullable=True)
-    private_key_size = Column(Integer, nullable=True)
-    public_key_size = Column(Integer, nullable=True)
-##### add all the parameters for all the contexts
-    HElib_BaseParamSet = Column(Integer, nullable=True)
-    HElib_BitsPerLevel = Column(Integer, nullable=True)
-    HElib_HamingWeight = Column(Integer, nullable=True)
-    HElib_Bootstrap = Column(Integer, nullable=True)
-    HElib_c = Column(Integer, nullable=True)
-    HElib_d = Column(Integer, nullable=True)
-    HElib_g1 = Column(Integer, nullable=True)
-    HElib_g2 = Column(Integer, nullable=True)
-    HElib_g3 = Column(Integer, nullable=True)
-    HElib_Levels = Column(Integer, nullable=True)
-    HElib_m = Column(Integer, nullable=True)
-    HElib_m1 = Column(Integer, nullable=True)
-    HElib_m2 = Column(Integer, nullable=True)
-    HElib_m3 = Column(Integer, nullable=True)
-    HElib_ord1 = Column(Integer, nullable=True)
-    HElib_ord2 = Column(Integer, nullable=True)
-    HElib_ord3 = Column(Integer, nullable=True)
-    HElib_phim = Column(Integer, nullable=True)
-    TFHE_MinimumLambda = Column(Integer, nullable=True)
-    SEAL_PlaintextModulus = Column(Integer, nullable=True)
-    SEAL_N = Column(Integer, nullable=True)
-    SEAL_Security = Column(Integer, nullable=True)
+    parameter_set = Column(Integer, nullable=False)
 
+
+class ParameterSetting(Base):
+    __tablename__ = "paramsets"
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    paramset_id = Column(Integer, nullable=False)
+    param_name = Column(String(100), nullable=False)
+    param_value = Column(Integer, nullable=False)
 
 
 Base.metadata.create_all(engine)
@@ -99,24 +72,7 @@ def get_table_and_columns(query):
         columns = column_regex.search(query).groups()[1].split(",")
     return table_name, columns
 
-def execute_query_sqlite3(query):
-    """
-    raw sql query
-    """
-    table,columns = get_table_and_columns(query)
-    db = sqlite3.connect(DB_LOCATION)
-    cursor = db.cursor()
-    ### get the column headings, if e.g. '*' was used in the query
-    if table and (len(columns) == 0 or columns[0] == "*"):
-        cursor.execute("PRAGMA table_info("+table+");")
-        columns_raw = cursor.fetchall()
-        columns = []
-        for c in columns_raw:
-            columns.append(c[1])
-    ### now execute the query
-    cursor.execute(query)
-    output = cursor.fetchall()
-    return columns, output
+
 
 def execute_query_sqlalchemy(filt):
     """
