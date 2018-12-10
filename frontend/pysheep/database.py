@@ -69,48 +69,6 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-def get_table_and_columns(query):
-    """
-    parse the query to extract table name and columns
-    """
-    table_name = ""
-    columns = []
-    if table_regex.search(query):
-        table_name = table_regex.search(query).groups()[1]
-    if column_regex.search(query):
-        columns = column_regex.search(query).groups()[1].split(",")
-    return table_name, columns
-
-
-def execute_query_sqlalchemy(filt):
-    """
-    Perform a query on the db
-    """
-    session.query(BenchmarkMeasurement).filter(filt).all()
-
-
-
-def build_filter(input_dict):
-    """
-    convert dict of inputs from web form PlotsForm into SQLAlchemy filter.
-    """
-    field_to_attribute_dict = {
-        "context_selections" : BenchmarkMeasurement.context_name,
-        "gate_selections" : BenchmarkMeasurement.gate_name,
-        "input_type_width" : BenchmarkMeasurement.input_bitwidth,
-        "input_type_signed" : BenchmarkMeasurement.input_signed
-    }
-    and_expr = and_()
-    for field, values in input_dict.items():
-        if not field in field_to_attribute_dict.keys():
-            continue
-        or_expr = or_()
-        for val in values:
-            or_expr += field_to_attribute_dict[field] == val
-        and_expr &= or_expr
-    return and_expr
-
-
 def get_last_benchmark_id():
     bms = session.query(BenchmarkMeasurement).all()
     if len(bms) == 0:
