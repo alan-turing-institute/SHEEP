@@ -33,7 +33,7 @@ engine = create_engine("sqlite:///"+DB_LOCATION)
 
 class BenchmarkMeasurement(Base):
     __tablename__ = "benchmarks"
-    benchmark_id = Column(Integer, primary_key=True,nullable=False)
+    benchmark_id = Column(Integer, primary_key=True,autoincrement=True)
     context = Column(String(250), nullable=False)
     input_bitwidth = Column(Integer, nullable=False)
     input_signed = Column(Boolean, nullable=False)
@@ -43,7 +43,8 @@ class BenchmarkMeasurement(Base):
     tbb_enabled = Column(Boolean, nullable=False)
     is_correct = Column(Boolean, nullable=False)
     timings = relationship("Timing", uselist=True)
-    parameters = relationship("ParameterSetting",uselist=True) #, back_populates="benchmarks")
+    parameters = relationship("ParameterSetting",uselist=True)
+    scan_id = Column(String(250), nullable=True)
 
 
 class Timing(Base):
@@ -83,12 +84,13 @@ def upload_benchmark_result(circuit_name,
                             num_slots,
                             tbb_enabled,
                             results_dict,
-                            params_dict):
+                            params_dict,
+                            scan_id = None):
     """
     upload a benchmark result, either from web frontend or notebook.
     """
     bm = BenchmarkMeasurement()
-    bm.benchmark_id = get_last_benchmark_id() + 1
+#    bm.benchmark_id = get_last_benchmark_id() + 1
     bm.context = context
     bm.input_bitwidth = common_utils.get_bitwidth(input_type)
     bm.input_signed = input_type.startswith("int")
@@ -97,8 +99,10 @@ def upload_benchmark_result(circuit_name,
     bm.num_inputs = num_inputs
     bm.num_slots = num_slots
     bm.tbb_enabled = tbb_enabled
+    if scan_id:
+        bm.scan_id = scan_id
     session.add(bm)
-
+    session.commit()
     for k,v in results_dict['timings'].items():
         t = Timing()
         t.timing_name = k

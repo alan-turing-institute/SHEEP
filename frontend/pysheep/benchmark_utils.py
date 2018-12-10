@@ -11,26 +11,24 @@ from . import common_utils
 from . import sheep_client
 from .database import BenchmarkMeasurement, Timing, ParameterSetting, session, upload_benchmark_result
 
-if not "SHEEP_HOME" in os.environ.keys():
-    BASE_DIR = os.path.join(os.environ["HOME"],"SHEEP","frontend")
-else:
-    BASE_DIR = os.environ["SHEEP_HOME"]
 
-TMP_INPUTS_DIR = BASE_DIR+"/benchmark_inputs/mid_level/inputs/TMP"
-if not os.path.exists(TMP_INPUTS_DIR):
-    os.system("mkdir "+TMP_INPUTS_DIR)
-
-
-TMP_PARAMS_DIR = BASE_DIR+"/benchmark_inputs/params/TMP"
-if not os.path.exists(TMP_PARAMS_DIR):
-    os.system("mkdir "+TMP_PARAMS_DIR)
-
+def check_result(func,**kwargs):
+    """
+    wrap calls to sheep-server API, check return code, and return response content
+    """
+    response = func(**kwargs)
+    if response["status_code"] != 200:
+        print(response["content"])
+        raise RuntimeError("Error in call to sheep-server")
+    return response["content"]
 
 def generate_input_vals(inputs, const_inputs, input_type, nslots):
     """
     randomly generate input values conforming to the selected input types
     """
     lower,upper = common_utils.get_min_max(input_type)
+    lower = max(lower, -1*pow(2,15))
+    upper = min(upper, pow(2,15))
     inputs_dict = {}
     for k in inputs:
         inputs_dict[k] = []
@@ -43,31 +41,34 @@ def generate_input_vals(inputs, const_inputs, input_type, nslots):
 
 
 
-def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial"):
+def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial", scan_id=None):
     """
     Run the circuit and retreive the results.
+    scan_id is an optional argument that can help with retrieving a set of results from the database.
     """
-    sheep_client.new_job()
+    check_result(sheep_client.new_job)
     ## configure the sheep client
-    sheep_client.set_context(context)
-    sheep_client.set_input_type(input_type)
-    sheep_client.set_parameters(params)
-    sheep_client.set_eval_strategy(eval_strategy)
-    sheep_client.set_circuit(circuit_file)
+    check_result(sheep_client.set_context,context_name=context)
+    check_result(sheep_client.set_input_type,input_type=input_type)
+## TEMP COMMENT OUT FOR NOW    check_result(sheep_client.set_parameters,param_dict=params)
+    check_result(sheep_client.set_eval_strategy,strategy=eval_strategy)
+    check_result(sheep_client.set_circuit,circuit_filename=circuit_file)
 
     ## randomly assign input values
-    nslots = sheep_client.get_nslots()["content"]["nslots"]
-    inputs = sheep_client.get_inputs()["content"]
-    const_inputs = sheep_client.get_const_inputs()["content"]
+    r = check_result(sheep_client.get_nslots)
+    nslots = min(r["nslots"],100)
+#    nslots = r["nslots"]
+    inputs = check_result(sheep_client.get_inputs)
+    const_inputs = check_result(sheep_client.get_const_inputs)
     input_vals, const_input_vals = generate_input_vals(inputs, const_inputs, input_type, nslots)
-    sheep_client.set_inputs(input_vals)
-    sheep_client.set_const_inputs(input_vals)
+    check_result(sheep_client.set_inputs,input_dict=input_vals)
+    check_result(sheep_client.set_const_inputs, input_dict=const_input_vals)
 
     ## run the job
-    sheep_client.run_job()
+    check_result(sheep_client.run_job)
     ## get the results
-    results = sheep_client.get_results()["content"]
-    parameters = sheep_client.get_parameters()["content"]
+    results = check_result(sheep_client.get_results)
+    parameters = check_result(sheep_client.get_parameters)
     uploaded_OK = upload_benchmark_result(circuit_file.split("/")[-1],
                                           context,
                                           input_type,
@@ -75,7 +76,8 @@ def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial
                                           nslots,
                                           eval_strategy=="parallel",
                                           results,
-                                          parameters)
+                                          parameters,
+                                          scan_id)
     return uploaded_OK
 
 
@@ -101,6 +103,31 @@ def params_for_level(context,level):
             8: {"N": 16384},
             9: {"N": 32768},
         }
+        return param_dict[level]
     else:
         param_dict = {}
     return param_dict
+
+def levels_for_params(context, param_dict):
+    """
+    inverse of the above function - given a set of parameters,
+    look up what we expect the safe multiplicative depth to be.
+    """
+    if context == "HElib_Fp":
+        return param_dict["Levels"]
+    elif context == "SEAL":
+        if param_dict["N"] == 2048:
+            return 1
+        elif param_dict["N"] == 4096:
+            return 3
+        elif param_dict["N"] == 8192:
+            return 5
+        elif param_dict["N"] == 16384:
+            return 8
+        elif param_dict["N"] == 32768:
+            return 9
+        else:
+            raise RuntimeError("Unrecognized value of N parameter")
+    else:
+        print("Levels not known for this context")
+        return 0

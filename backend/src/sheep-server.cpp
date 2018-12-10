@@ -152,33 +152,7 @@ void SheepServer::update_parameters(std::string context_type,
                                     json::value parameters) {
 
   BaseContext<PlaintextT> *context = make_context<PlaintextT>(context_type);
-  /*
-  if (context_type == "Clear") {
-    context = new ContextClear<PlaintextT>();
-#ifdef HAVE_HElib
-  } else if (context_type == "HElib_Fp") {
-    context = new ContextHElib_Fp<PlaintextT>();
-  } else if (context_type == "HElib_F2") {
-    context = new ContextHElib_F2<PlaintextT>();
-#endif
-#ifdef HAVE_TFHE
-  } else if (context_type == "TFHE") {
-    context = new ContextTFHE<PlaintextT>();
-#endif
-#ifdef HAVE_SEAL
-  } else if (context_type == "SEAL") {
-    context = new ContextSeal<PlaintextT>();
-#endif
 
-#ifdef HAVE_LP
-  } else if (context_type == "LP") {
-    context = new ContextLP<PlaintextT>();
-#endif
-
-  } else {
-    throw std::runtime_error("Unknown context requested");
-  }
-  */
   /// first set parameters to current values stored in the server (if any)
   for (auto map_iter : m_job_config.parameters) {
     context->set_parameter(map_iter.first, map_iter.second);
@@ -386,6 +360,7 @@ void SheepServer::configure_and_run(http_request message) {
 
       //// now do the plaintext evaluation
       auto clear_context = make_context<PlaintextT>("Clear");
+      clear_context->set_parameter("NumSlots",slot_cnt);
       std::vector<Duration> timings_clear;
 
       std::vector<std::vector<PlaintextT>> clear_output_vals =
