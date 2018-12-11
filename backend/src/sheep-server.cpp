@@ -114,9 +114,8 @@ std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
 }
 
 
-template <typename PlaintextT>
-std::vector<PlaintextT> SheepServer::make_const_plaintext_inputs() {
-  std::vector<PlaintextT> const_inputs;
+std::vector<long> SheepServer::make_const_plaintext_inputs() {
+  std::vector<long> const_inputs;
 
   for (auto input : m_job_config.const_input_vals) {
     const_inputs.push_back(input);
@@ -124,6 +123,7 @@ std::vector<PlaintextT> SheepServer::make_const_plaintext_inputs() {
 
   return const_inputs;
 }
+
 
 //// populate the stored m_job_config.parameters map
 void SheepServer::get_parameters() {
@@ -152,33 +152,7 @@ void SheepServer::update_parameters(std::string context_type,
                                     json::value parameters) {
 
   BaseContext<PlaintextT> *context = make_context<PlaintextT>(context_type);
-  /*
-  if (context_type == "Clear") {
-    context = new ContextClear<PlaintextT>();
-#ifdef HAVE_HElib
-  } else if (context_type == "HElib_Fp") {
-    context = new ContextHElib_Fp<PlaintextT>();
-  } else if (context_type == "HElib_F2") {
-    context = new ContextHElib_F2<PlaintextT>();
-#endif
-#ifdef HAVE_TFHE
-  } else if (context_type == "TFHE") {
-    context = new ContextTFHE<PlaintextT>();
-#endif
-#ifdef HAVE_SEAL
-  } else if (context_type == "SEAL") {
-    context = new ContextSeal<PlaintextT>();
-#endif
 
-#ifdef HAVE_LP
-  } else if (context_type == "LP") {
-    context = new ContextLP<PlaintextT>();
-#endif
-
-  } else {
-    throw std::runtime_error("Unknown context requested");
-  }
-  */
   /// first set parameters to current values stored in the server (if any)
   for (auto map_iter : m_job_config.parameters) {
     context->set_parameter(map_iter.first, map_iter.second);
@@ -250,8 +224,8 @@ void SheepServer::configure_and_run(http_request message) {
 
   std::vector<std::vector<PlaintextT>> plaintext_inputs =
       make_plaintext_inputs<PlaintextT>();
-  std::vector<PlaintextT> const_plaintext_inputs =
-      make_const_plaintext_inputs<PlaintextT>();
+  std::vector<long> const_plaintext_inputs =
+      make_const_plaintext_inputs();
 
   // shared memory region for returning the results
   size_t n_outputs = m_job_config.circuit.get_outputs().size();
@@ -322,7 +296,7 @@ void SheepServer::configure_and_run(http_request message) {
     // timeout hardcoded as 10 s for now
     // POSIX: can assume this is an integer type
 
-    time_t timeout_us = 10000000L;
+    time_t timeout_us = 60000000L;
 
     // go to sleep for the length of the timeout and a grace period
     struct timespec req, rem;
@@ -386,6 +360,7 @@ void SheepServer::configure_and_run(http_request message) {
 
       //// now do the plaintext evaluation
       auto clear_context = make_context<PlaintextT>("Clear");
+      clear_context->set_parameter("NumSlots",slot_cnt);
       std::vector<Duration> timings_clear;
 
       std::vector<std::vector<PlaintextT>> clear_output_vals =
@@ -411,6 +386,8 @@ void SheepServer::handle_get(http_request message) {
   auto path = message.relative_uri().path();
   if (path == "context/")
     return handle_get_context(message);
+  else if (path == "circuit/")
+    return handle_get_circuit(message);
   else if (path == "parameters/")
     return handle_get_parameters(message);
   else if (path == "input_type/")
@@ -812,6 +789,25 @@ void SheepServer::handle_get_config(http_request message) {
   json::value result = m_job_config.as_json();
   message.reply(status_codes::OK, result);
 }
+
+void SheepServer::handle_get_circuit(http_request message) {
+  /// if we haven't already got the parameters, do this now.
+  if (m_job_config.circuit.get_inputs().size() <= 0) {
+    message.reply(
+        status_codes::InternalError,
+        ("Circuit not set"));
+    return;
+  }
+  std::stringstream circuit_stream;
+  circuit_stream << m_job_config.circuit;
+  std::string circuit_string = circuit_stream.str();
+  json::value result = json::value::object();
+  result["circuit"] = json::value::string(circuit_string);
+  message.reply(status_codes::OK, result);
+
+}
+
+
 
 void SheepServer::handle_put_parameters(http_request message) {
   /// put parameter name:value into job_config

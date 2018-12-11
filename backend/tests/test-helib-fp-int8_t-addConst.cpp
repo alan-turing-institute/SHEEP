@@ -27,7 +27,7 @@ int main(void) {
   // inputs is vector of vectors
   std::vector<std::vector<int8_t>> inputs = {{-117, 2, -3, 4}};
   // const_inputs is vector (same across slots)
-  std::vector<int8_t> const_inputs = {6};
+  std::vector<long> const_inputs = {6};
   std::vector<int8_t> exp_values = {-111, 8, 3, 10};
 
   std::vector<std::vector<int8_t>> result =
