@@ -114,9 +114,8 @@ std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
 }
 
 
-template <typename PlaintextT>
-std::vector<PlaintextT> SheepServer::make_const_plaintext_inputs() {
-  std::vector<PlaintextT> const_inputs;
+std::vector<long> SheepServer::make_const_plaintext_inputs() {
+  std::vector<long> const_inputs;
 
   for (auto input : m_job_config.const_input_vals) {
     const_inputs.push_back(input);
@@ -124,6 +123,7 @@ std::vector<PlaintextT> SheepServer::make_const_plaintext_inputs() {
 
   return const_inputs;
 }
+
 
 //// populate the stored m_job_config.parameters map
 void SheepServer::get_parameters() {
@@ -224,8 +224,8 @@ void SheepServer::configure_and_run(http_request message) {
 
   std::vector<std::vector<PlaintextT>> plaintext_inputs =
       make_plaintext_inputs<PlaintextT>();
-  std::vector<PlaintextT> const_plaintext_inputs =
-      make_const_plaintext_inputs<PlaintextT>();
+  std::vector<long> const_plaintext_inputs =
+      make_const_plaintext_inputs();
 
   // shared memory region for returning the results
   size_t n_outputs = m_job_config.circuit.get_outputs().size();

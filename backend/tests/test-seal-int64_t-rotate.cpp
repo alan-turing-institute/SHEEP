@@ -39,7 +39,7 @@ int main(void) {
   exp_values[0] = ctx.get_num_slots() - 1;
 
   // const_inputs is vector (not vector<vector>), same across slots
-  std::vector<int64_t> const_inputs = {1};
+  std::vector<long> const_inputs = {1};
 
   std::vector<std::vector<int64_t> > result =
       ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);

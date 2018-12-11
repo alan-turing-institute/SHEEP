@@ -67,7 +67,7 @@ class BaseContext {
   // overload taking both durations and const_plaintext_inputs
   virtual std::vector<std::vector<PlaintextT>> eval_with_plaintexts(
       const Circuit& C, std::vector<std::vector<PlaintextT>> plaintext_inputs,
-      std::vector<PlaintextT> const_plaintext_inputs,
+      std::vector<long> const_plaintext_inputs,
       std::vector<std::chrono::duration<double, std::micro>>& durations,
       EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
       std::chrono::duration<double, std::micro> timeout =
@@ -76,7 +76,7 @@ class BaseContext {
   // overload omitting durations only
   virtual std::vector<std::vector<PlaintextT>> eval_with_plaintexts(
       const Circuit& C, std::vector<std::vector<PlaintextT>> plaintext_inputs,
-      std::vector<PlaintextT> const_plaintext_inputs,
+      std::vector<long> const_plaintext_inputs,
       EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
       std::chrono::duration<double, std::micro> timeout =
           std::chrono::duration<double, std::micro>(0.0)) = 0;
@@ -199,7 +199,7 @@ class Context : public BaseContext<PlaintextT> {
   virtual long get_num_slots() { return this->m_nslots; };
 
   virtual Ciphertext dispatch(Gate g, std::vector<Ciphertext> inputs,
-                              std::vector<Plaintext> const_inputs) {
+                              std::vector<long> const_inputs) {
     using namespace std::placeholders;
     switch (g) {
       case (Gate::Alias):
@@ -243,7 +243,7 @@ class Context : public BaseContext<PlaintextT> {
   }
 
   template <typename InputContainer,
-            typename ConstInputContainer = std::vector<Plaintext>,
+            typename ConstInputContainer = std::vector<long>,
             typename OutputContainer>
   microsecond eval(
       const Circuit& circ, const InputContainer& input_vals,
@@ -252,7 +252,7 @@ class Context : public BaseContext<PlaintextT> {
       std::chrono::duration<double, std::micro> timeout =
           std::chrono::duration<double, std::micro>(0.0)) {
     std::unordered_map<std::string, Ciphertext> eval_map;
-    std::unordered_map<std::string, Plaintext> const_eval_map;
+    std::unordered_map<std::string, long> const_eval_map;
 
     // add Circuit::inputs and inputs into the map
     auto input_vals_it = input_vals.begin();
@@ -292,7 +292,7 @@ class Context : public BaseContext<PlaintextT> {
 
     for (const Assignment assn : circ.get_assignments()) {
       std::vector<Ciphertext> inputs;
-      std::vector<Plaintext> const_inputs;
+      std::vector<long> const_inputs;
       for (Wire w : assn.get_inputs()) {
         typename decltype(eval_map)::iterator it;
         if ((it = eval_map.find(w.get_name())) != eval_map.end()) {
@@ -337,7 +337,7 @@ class Context : public BaseContext<PlaintextT> {
     typedef std::chrono::high_resolution_clock high_res_clock;
 
     tbb::concurrent_unordered_map<std::string, Ciphertext> eval_map;
-    tbb::concurrent_unordered_map<std::string, Plaintext> const_eval_map;
+    tbb::concurrent_unordered_map<std::string, long> const_eval_map;
     tbb::concurrent_unordered_map<std::string, continue_node<continue_msg>>
         node_map;
 
@@ -396,7 +396,7 @@ class Context : public BaseContext<PlaintextT> {
                            &timeout_wall_time,
                            &start_time](const continue_msg&) {
         std::vector<Ciphertext> inputs;
-        std::vector<Plaintext> const_inputs;
+        std::vector<long> const_inputs;
 
         for (Wire w : assn.get_inputs()) {
           typename decltype(eval_map)::iterator it;
@@ -472,7 +472,7 @@ class Context : public BaseContext<PlaintextT> {
   // overload taking both durations and const_plaintext_inputs
   virtual std::vector<std::vector<PlaintextT>> eval_with_plaintexts(
       const Circuit& C, std::vector<std::vector<PlaintextT>> plaintext_inputs,
-      std::vector<PlaintextT> const_plaintext_inputs,
+      std::vector<long> const_plaintext_inputs,
       std::vector<std::chrono::duration<double, std::micro>>& durations,
       EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
       std::chrono::duration<double, std::micro> timeout =
@@ -483,14 +483,15 @@ class Context : public BaseContext<PlaintextT> {
 
     /// encrypt the inputs
     std::vector<Ciphertext> ciphertext_inputs;
-    std::vector<Plaintext> const_inputs;
+    std::vector<long> const_inputs;
     for (auto pt : plaintext_inputs) {
       // check that the num of input vals on this wire is <= nslots
       if (pt.size() > this->m_nslots) throw TooManyInputVals();
       ciphertext_inputs.push_back(encrypt(pt));
     }
-    for (auto cpt : const_plaintext_inputs) const_inputs.push_back(cpt);
-
+    for (auto cpt : const_plaintext_inputs) {
+      const_inputs.push_back(cpt);
+    }
     auto enc_end_time = high_res_clock::now();
     durations.push_back(microsecond(enc_end_time - enc_start_time));
 
@@ -529,7 +530,7 @@ class Context : public BaseContext<PlaintextT> {
       EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
       std::chrono::duration<double, std::micro> timeout =
           std::chrono::duration<double, std::micro>(0.0)) {
-    std::vector<PlaintextT> cptxts_empty;
+    std::vector<long> cptxts_empty;
     return eval_with_plaintexts(C, plaintext_inputs, cptxts_empty, durations,
                                 eval_strategy, timeout);
   }
@@ -537,7 +538,7 @@ class Context : public BaseContext<PlaintextT> {
   // overload omitting durations only
   virtual std::vector<std::vector<PlaintextT>> eval_with_plaintexts(
       const Circuit& c, std::vector<std::vector<PlaintextT>> ptxts,
-      std::vector<PlaintextT> cptxts,
+      std::vector<long> cptxts,
       EvaluationStrategy eval_strategy = EvaluationStrategy::serial,
       std::chrono::duration<double, std::micro> timeout =
           std::chrono::duration<double, std::micro>(0.0)) {
@@ -553,7 +554,7 @@ class Context : public BaseContext<PlaintextT> {
       std::chrono::duration<double, std::micro> timeout =
           std::chrono::duration<double, std::micro>(0.0)) {
     std::vector<std::chrono::duration<double, std::micro>> ignored;
-    std::vector<Plaintext> cptxts_empty;
+    std::vector<long> cptxts_empty;
     return eval_with_plaintexts(c, ptxts, cptxts_empty, ignored, eval_strategy,
                                 timeout);
   }

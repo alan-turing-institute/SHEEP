@@ -45,7 +45,7 @@ struct SheepJobConfig {
   std::set<std::string> input_names;
   std::set<std::string> const_input_names;
   std::vector<std::vector<int>> input_vals;
-  std::vector<int> const_input_vals;
+  std::vector<long> const_input_vals;
   std::map<std::string, long> parameters;
   int nslots;
 
@@ -145,8 +145,7 @@ class SheepServer {
   template <typename PlaintextT>
   std::vector<std::vector<PlaintextT>> make_plaintext_inputs();
 
-  template <typename PlaintextT>
-  std::vector<PlaintextT> make_const_plaintext_inputs();
+  std::vector<long> make_const_plaintext_inputs();
 
   template <typename PlaintextT>
   void configure_and_run(http_request message);
