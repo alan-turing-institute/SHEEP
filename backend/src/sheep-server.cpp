@@ -232,7 +232,7 @@ void SheepServer::configure_and_run(http_request message) {
   // shared memory region for returning the results
   size_t n_gates = m_job_config.circuit.get_assignments().size();
   size_t n_outputs = m_job_config.circuit.get_outputs().size();
-  size_t n_timings = 3 + n_outputs;
+  size_t n_timings = 3 + n_gates;
 
  Duration *timings_shared = (Duration *)mmap(
 					     NULL,
@@ -369,9 +369,9 @@ void SheepServer::configure_and_run(http_request message) {
           "decryption", std::to_string(timings_shared[2].count()));
       m_job_result.timings.insert(decryption);
 
-      for (int i=0; i < n_outputs; i++) {
+      for (int i=0; i < n_gates; i++) {
 	auto gate_time = std::make_pair(
-	   m_job_config.circuit.get_outputs()[i].get_name(),
+	   m_job_config.circuit.get_assignments()[i].get_output().get_name(),
 	   std::to_string(timings_shared[3+i].count()));
 	m_job_result.timings.insert(gate_time);
       }
