@@ -205,6 +205,8 @@ std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
     context->set_parameter(map_iter->first, map_iter->second);
 
   }
+  /// apply the new parameters
+  context->configure();
   std::string serialized_ct = context->encrypt_and_serialize(ptvec);
   return serialized_ct;
 }
@@ -221,19 +223,23 @@ void SheepServer::configure_and_run(http_request message) {
        map_iter != m_job_config.parameters.end(); ++map_iter) {
     context->set_parameter(map_iter->first, map_iter->second);
   }
-
+  /// apply the new parameters
+  context->configure();
   std::vector<std::vector<PlaintextT>> plaintext_inputs =
       make_plaintext_inputs<PlaintextT>();
   std::vector<long> const_plaintext_inputs =
       make_const_plaintext_inputs();
-
   // shared memory region for returning the results
+  size_t n_gates = m_job_config.circuit.get_assignments().size();
   size_t n_outputs = m_job_config.circuit.get_outputs().size();
-  size_t n_timings = 3;
+  size_t n_timings = 3 + n_outputs;
 
-  Duration *timings_shared = (Duration *)mmap(
-      NULL, n_timings * sizeof(Duration), PROT_READ | PROT_WRITE,
-      MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+ Duration *timings_shared = (Duration *)mmap(
+					     NULL,
+					     n_timings * sizeof(Duration),
+					     PROT_READ | PROT_WRITE,
+					     MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+
 
   if (timings_shared == MAP_FAILED) {
     message.reply(status_codes::InternalError, ("Could not run evaluation"));
@@ -250,10 +256,9 @@ void SheepServer::configure_and_run(http_request message) {
 
   if (outputs_shared == MAP_FAILED) {
     message.reply(status_codes::InternalError, ("Could not run evaluation"));
-    munmap(timings_shared, n_timings);
+    munmap(timings_shared, 1);
     return;
   }
-
   pid_t child_pid = fork();
 
   if (child_pid == -1) {
@@ -263,21 +268,27 @@ void SheepServer::configure_and_run(http_request message) {
 
   } else if (!child_pid) {
     // child process: perform the evaluation
-    std::vector<Duration> timings;
+    std::vector<Duration> totalTimings;
+    std::map<std::string, Duration> perGateTimings;
+    auto timings = std::make_pair(totalTimings, perGateTimings);
     std::vector<std::vector<PlaintextT>> output_vals =
         context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs,
                                       const_plaintext_inputs, timings,
                                       m_job_config.eval_strategy);
 
-    if (timings.size() != 3) {
+    if (timings.first.size() != 3) {
       // signal an error to the server
       std::cerr << "Child exiting: more than three timings reported!\n";
       _exit(1);
     }
-
     // insert the various things in the shared memory buffer
     for (int i = 0; i < 3; i++) {
-      timings_shared[i] = timings[i];
+      timings_shared[i] = timings.first[i];
+    }
+    int timing_index = 3;
+    for (auto gate_timing : timings.second) {
+      timings_shared[timing_index] = gate_timing.second;
+      timing_index++;
     }
 
     for (int i = 0; i < n_outputs; i++) {
@@ -358,15 +369,22 @@ void SheepServer::configure_and_run(http_request message) {
           "decryption", std::to_string(timings_shared[2].count()));
       m_job_result.timings.insert(decryption);
 
+      for (int i=0; i < n_outputs; i++) {
+	auto gate_time = std::make_pair(
+	   m_job_config.circuit.get_outputs()[i].get_name(),
+	   std::to_string(timings_shared[3+i].count()));
+	m_job_result.timings.insert(gate_time);
+      }
+
       //// now do the plaintext evaluation
       auto clear_context = make_context<PlaintextT>("Clear");
       clear_context->set_parameter("NumSlots",slot_cnt);
-      std::vector<Duration> timings_clear;
+      //      std::vector<Duration> timings_clear;
 
       std::vector<std::vector<PlaintextT>> clear_output_vals =
           clear_context->eval_with_plaintexts(
-              m_job_config.circuit, plaintext_inputs, const_plaintext_inputs,
-              timings_clear);
+					      m_job_config.circuit, plaintext_inputs, const_plaintext_inputs);
+      //              timings_clear);
 
       // Compare the encrypted and plain results
       bool is_correct =
@@ -611,7 +629,6 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	  sct = configure_and_serialize<int32_t>(plaintext_inputs);
 	else
 	  message.reply(status_codes::InternalError, ("Unknown input type"));
-      std::cout<<"size of ciphertext string is "<<sct.size()<<std::endl;
       json::value result = json::value::object();
       result["ciphertext"] = json::value::string(sct);
       result["size"] = json::value::number((int64_t)(sct.size()));

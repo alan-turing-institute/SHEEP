@@ -31,7 +31,7 @@ int main(void) {
   std::vector<bool> exp_values = {0, 1};
 
   std::vector<std::vector<bool>> result =
-      ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+      ctx.eval_with_plaintexts(C, inputs, const_inputs);
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " + "

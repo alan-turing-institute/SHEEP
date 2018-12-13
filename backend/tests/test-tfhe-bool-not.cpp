@@ -22,7 +22,7 @@ int main(void) {
   std::vector<std::vector<ContextTFHE<bool>::Plaintext>> pt_input = {
       {true, false}};
   std::vector<std::vector<ContextTFHE<bool>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<bool> exp_values = {false, true};
 

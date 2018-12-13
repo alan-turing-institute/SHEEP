@@ -25,7 +25,7 @@ int main(void) {
   std::vector<std::vector<ContextHElib_F2<uint8_t>::Plaintext>> pt_input = {
       {10, 12, 81}, {12, 12, 80}};
   std::vector<std::vector<ContextHElib_F2<uint8_t>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
   std::vector<uint8_t> exp_values = {0, 0, 1};
 
   for (int i = 0; i < exp_values.size(); i++) {

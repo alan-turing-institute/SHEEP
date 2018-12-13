@@ -26,13 +26,13 @@ int main(void) {
   /// test small postitive numbers
   std::vector<std::vector<uint8_t> > inputs{{5}, {22}};
   std::vector<std::vector<uint8_t> > result =
-      ctx.eval_with_plaintexts(circ, inputs, durations);
+      ctx.eval_with_plaintexts(circ, inputs);
   std::cout << " 5*22 = " << std::to_string(result.front()[0]) << std::endl;
   assert(result.front()[0] == 110);
 
   /// test result going out of range positive
   inputs = {{100}, {127}};
-  result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  result = ctx.eval_with_plaintexts(circ, inputs);
   std::cout << " 100 + 127 = " << std::to_string(result.front()[0])
             << std::endl;
   assert(result.front()[0] == 156);
@@ -40,7 +40,7 @@ int main(void) {
   /// test slots
   /// test slots
   inputs = {{10, 11, 12}, {11, 12, 12}};
-  result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  result = ctx.eval_with_plaintexts(circ, inputs);
   std::cout << "(10,11,12) * (11,12,12) == (" << std::to_string(result[0][0])
             << "," << std::to_string(result[0][1]) << ","
             << std::to_string(result[0][2]) << ")\n";

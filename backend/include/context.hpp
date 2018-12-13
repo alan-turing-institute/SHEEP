@@ -247,6 +247,13 @@ class Context : public BaseContext<PlaintextT> {
     throw std::runtime_error("Unknown op");
   }
 
+  /*
+     eval method, add inputs to eval map, then steps through
+     assignments and dispatches to gates to perform the calculations.
+     This is the full method, has a DurationContainer& argument, where
+     per-gate timings will be put.
+  */
+
   template <typename InputContainer,
             typename ConstInputContainer = std::vector<long>,
             typename OutputContainer>
@@ -330,6 +337,30 @@ class Context : public BaseContext<PlaintextT> {
     }
     return duration;
   }
+
+
+  //  overload of eval method, without DurationContainer argument.
+
+
+  template <typename InputContainer,
+            typename ConstInputContainer = std::vector<long>,
+            typename OutputContainer>
+  microsecond eval(
+      const Circuit& circ,
+      const InputContainer& input_vals,
+      OutputContainer& output_vals,
+      const ConstInputContainer& const_input_vals = ConstInputContainer(),
+      std::chrono::duration<double, std::micro> timeout =
+          std::chrono::duration<double, std::micro>(0.0)) {
+    std::vector<std::chrono::duration<double, std::micro> > totalTimings;
+    std::map<std::string, std::chrono::duration<double, std::micro> > gateTimings;
+    DurationContainer durations = std::make_pair(totalTimings, gateTimings);
+    return eval(circ, durations, input_vals, output_vals, const_input_vals, timeout);
+  }
+
+
+  //  parallel_eval for evaluating circuit using TBB
+
 
   template <typename InputContainer,
             typename ConstInputContainer = std::vector<PlaintextT>,
@@ -472,6 +503,21 @@ class Context : public BaseContext<PlaintextT> {
 #endif  // HAVE_TBB
   }
 
+  // overload of parallel_eval, omitting DurationContainer argument
+  template <typename InputContainer,
+            typename ConstInputContainer = std::vector<PlaintextT>,
+            typename OutputContainer>
+  microsecond parallel_eval(
+      const Circuit& circ,
+      const InputContainer& input_vals,
+      OutputContainer& output_vals,
+      const ConstInputContainer& const_input_vals = ConstInputContainer(),
+      std::chrono::duration<double, std::micro> timeout =
+          std::chrono::duration<double, std::micro>(0.0)) {
+    DurationContainer durations;
+    return parallel_eval(circ, durations, input_vals, output_vals, const_input_vals, timeout);
+  }
+
 
   // overload taking both durations and const_plaintext_inputs
   virtual std::vector<std::vector<PlaintextT>> eval_with_plaintexts(
@@ -506,7 +552,7 @@ class Context : public BaseContext<PlaintextT> {
 
     switch (eval_strategy) {
       case EvaluationStrategy::serial:
-        eval_duration = eval(C, durations, ciphertext_inputs, ciphertext_outputs,
+        eval_duration = eval(C, durations,  ciphertext_inputs, ciphertext_outputs,
                              const_inputs, timeout);
         break;
       case EvaluationStrategy::parallel:

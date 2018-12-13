@@ -23,7 +23,7 @@ int main(void) {
       {15, 10, 10, 8, 80}, {22, 12, 0, 8, 80}};
 
   std::vector<std::vector<ContextLP<uint8_t>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<uint8_t> exp_values = {37, 22, 10, 16, 160};
 

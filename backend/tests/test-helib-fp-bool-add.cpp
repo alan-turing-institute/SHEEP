@@ -23,7 +23,7 @@ int main(void) {
       {1, 0, 1, 0}, {1, 1, 0, 0}};
 
   std::vector<std::vector<ContextHElib_Fp<bool>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<bool> exp_values = {0, 1, 1, 0};
 
