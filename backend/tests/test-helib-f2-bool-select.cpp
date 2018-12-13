@@ -27,7 +27,7 @@ int main(void) {
   std::vector<std::vector<bool> > pt_input = {
       {1, 1, 0, 0}, {1, 0, 1, 0}, {0, 1, 0, 1}};
   std::vector<std::vector<bool> > result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
   std::vector<bool> exp_values = {1, 0, 0, 1};
 
   for (int i = 0; i < exp_values.size(); i++) {

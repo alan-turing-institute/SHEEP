@@ -26,7 +26,7 @@ int main(void) {
   std::vector<std::vector<bool> > inputs = {{1, 1, 0, 0}, {0, 1, 0, 1}};
   std::vector<bool> expected_result = {1, 1, 1, 0};
   std::vector<std::vector<bool> > result =
-      ctx.eval_with_plaintexts(circ, inputs, durations);
+      ctx.eval_with_plaintexts(circ, inputs);
   for (int i = 0; i < expected_result.size(); i++) {
     std::cout << " compare (" << inputs[0][i] << "," << inputs[1][i]
               << ") = " << std::to_string(result.front()[i]) << std::endl;

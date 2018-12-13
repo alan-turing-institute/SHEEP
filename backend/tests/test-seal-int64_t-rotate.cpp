@@ -42,7 +42,7 @@ int main(void) {
   std::vector<long> const_inputs = {1};
 
   std::vector<std::vector<int64_t> > result =
-      ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+      ctx.eval_with_plaintexts(C, inputs, const_inputs);
 
   std::cout << "Original vector: ";
   for (int i = 0; i < ctx.get_num_slots(); i++) {

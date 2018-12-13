@@ -24,26 +24,26 @@ int main(void) {
 
   /// test first bigger
   std::vector<bool> inputs = {1, 0};
-  std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  std::vector<bool> result = ctx.eval_with_plaintexts(circ, inputs);
   std::cout << " compare (1,0 ) = " << std::to_string(result.front())
             << std::endl;
   assert(result.front() == 1);
 
   /// test equal
   inputs = {1, 1};
-  result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  result = ctx.eval_with_plaintexts(circ, inputs);
   std::cout << " compare (1, 1) = " << std::to_string(result.front())
             << std::endl;
   assert(result.front() == 0);
   inputs = {0, 0};
-  result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  result = ctx.eval_with_plaintexts(circ, inputs);
   std::cout << " compare (0, 0) = " << std::to_string(result.front())
             << std::endl;
   assert(result.front() == 0);
 
   /// test second bigger
   inputs = {0, 1};
-  result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  result = ctx.eval_with_plaintexts(circ, inputs);
   std::cout << " compare (0, 1) = " << std::to_string(result.front())
             << std::endl;
   assert(result.front() == 0);

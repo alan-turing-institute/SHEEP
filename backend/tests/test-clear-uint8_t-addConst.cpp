@@ -31,7 +31,7 @@ int main(void) {
   std::vector<uint8_t> exp_values = {123, 8, 9, 10};
 
   std::vector<std::vector<uint8_t>> result =
-      ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+      ctx.eval_with_plaintexts(C, inputs, const_inputs);
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " + "

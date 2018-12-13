@@ -31,7 +31,7 @@ int main(void) {
   std::vector<uint8_t> exp_values = {6, 7, 8, 1, 2, 3, 4, 5};
 
   std::vector<std::vector<uint8_t>> result =
-      ctx.eval_with_plaintexts(C, inputs, const_inputs, durations);
+      ctx.eval_with_plaintexts(C, inputs, const_inputs);
 
   std::cout << "Original vector: ";
   for (int i = 0; i < exp_values.size(); i++) {

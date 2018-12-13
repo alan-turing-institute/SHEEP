@@ -288,6 +288,24 @@ def set_circuit(circuit_filename):
     return response_dict
 
 
+def set_circuit_text(circuit_text):
+    """
+    Read the circuit and pass it to the server as a string.
+    """
+    if not isinstance(circuit_text, str):
+        return {"status_code": 500, "content": "incorrect input type for set_circuit"}
+    response_dict = {}
+    try:
+        r = requests.post(BASE_URI+"/circuit/",
+                          json={"circuit": circuit_text})
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set circuit"
+    return response_dict
+
+
 def get_parameters():
     """
     Will instantiate a context and query it for its parameters"

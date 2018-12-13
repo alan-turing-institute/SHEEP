@@ -24,7 +24,7 @@ int main(void) {
       {true, false}};
 
   std::vector<std::vector<ContextLP<bool>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<bool> exp_values = {false, true};
 
