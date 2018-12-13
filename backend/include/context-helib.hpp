@@ -331,8 +331,6 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
     a2 *= b[0];  // AND(a,b)
     a1 += a2;    // XOR the previous two lines
     output.append(a1);
-
-    std::cout << " about  to return outptu" << std::endl;
     return output;
   }
 
