@@ -271,10 +271,15 @@ void SheepServer::configure_and_run(http_request message) {
     std::vector<Duration> totalTimings;
     std::map<std::string, Duration> perGateTimings;
     auto timings = std::make_pair(totalTimings, perGateTimings);
+
+    //define the timeout
+    std::chrono::duration<double, std::micro> timeout_micro(1000000.0 * m_job_config.timeout);
+
     std::vector<std::vector<PlaintextT>> output_vals =
         context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs,
                                       const_plaintext_inputs, timings,
-                                      m_job_config.eval_strategy);
+                                      m_job_config.eval_strategy,
+				      timeout_micro);
 
     if (timings.first.size() != 3) {
       // signal an error to the server
@@ -304,10 +309,9 @@ void SheepServer::configure_and_run(http_request message) {
   } else {
     // parent process: wait for child or kill after timeout
 
-    // timeout hardcoded as 10 s for now
     // POSIX: can assume this is an integer type
 
-    time_t timeout_us = 60000000L;
+    time_t timeout_us = 1000000L * (m_job_config.timeout + 1);
 
     // go to sleep for the length of the timeout and a grace period
     struct timespec req, rem;
@@ -460,6 +464,8 @@ void SheepServer::handle_put(http_request message) {
     return handle_put_parameters(message);
   else if (path == "eval_strategy/")
     return handle_put_eval_strategy(message);
+  else if (path == "timeout/")
+    return handle_put_timeout(message);
   message.reply(status_codes::OK);
 };
 
@@ -655,6 +661,7 @@ void SheepServer::handle_get_eval_strategy(http_request message) {
   message.reply(status_codes::OK, result);
 }
 
+
 void SheepServer::handle_get_context(http_request message) {
   /// list of available contexts?
   json::value result = json::value::object();
@@ -736,6 +743,24 @@ void SheepServer::handle_put_eval_strategy(http_request message) {
   });
   message.reply(status_codes::OK);
 }
+
+void SheepServer::handle_put_timeout(http_request message) {
+  /// set which eval_strategy to use
+  message.extract_json().then([=](pplx::task<json::value> jvalue) {
+    try {
+      json::value val = jvalue.get();
+      auto timeout = val["timeout"].as_integer();
+
+      m_job_config.timeout = timeout;
+
+    } catch (json::json_exception) {
+      message.reply(status_codes::InternalError,
+                    ("Unable to set timeout"));
+    }
+  });
+  message.reply(status_codes::OK);
+}
+
 
 void SheepServer::handle_get_job(http_request message) {
   /// is the sheep job fully configured?
