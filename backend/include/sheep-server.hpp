@@ -44,8 +44,8 @@ struct SheepJobConfig {
   Circuit circuit;
   std::set<std::string> input_names;
   std::set<std::string> const_input_names;
-  std::vector<std::vector<int>> input_vals;
-  std::vector<long> const_input_vals;
+  std::map<std::string, std::vector<int>> input_vals;
+  std::map<std::string, long> const_input_vals;
   std::map<std::string, long> parameters;
   int nslots;
   int timeout;

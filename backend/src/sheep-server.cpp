@@ -102,11 +102,11 @@ template <typename PlaintextT>
 std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
   std::vector<std::vector<PlaintextT>> inputs;
 
-  // TODO: input from json
 
-  for (auto input : m_job_config.input_vals) {
-    std::vector<PlaintextT> input_vector(begin(input), end(input));
-
+  for (auto input_wire : m_job_config.circuit.get_inputs()) {
+    std::string input_name = input_wire.get_name();
+    std::vector<PlaintextT> input_vector(begin(m_job_config.input_vals[input_name]),
+					 end(m_job_config.input_vals[input_name]));
     inputs.push_back(input_vector);
   }
 
@@ -117,8 +117,9 @@ std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
 std::vector<long> SheepServer::make_const_plaintext_inputs() {
   std::vector<long> const_inputs;
 
-  for (auto input : m_job_config.const_input_vals) {
-    const_inputs.push_back(input);
+  for (auto input_wire : m_job_config.circuit.get_const_inputs()) {
+    std::string input_name = input_wire.get_name();
+    const_inputs.push_back(m_job_config.const_input_vals[input_name]);
   }
 
   return const_inputs;
@@ -574,13 +575,11 @@ void SheepServer::handle_post_inputs(http_request message) {
       json::value input_dict = jvalue.get();
       for (auto input_name : m_job_config.input_names) {
         std::vector<int> input_vals;
-
         for (auto input : input_dict[input_name].as_array()) {
           int input_val = input.as_integer();
           input_vals.push_back(input_val);
         }
-
-        m_job_config.input_vals.push_back(input_vals);
+        m_job_config.input_vals[input_name] = input_vals;
       }
     } catch (json::json_exception) {
       message.reply(status_codes::InternalError, ("Unrecognized inputs"));
@@ -597,7 +596,7 @@ void SheepServer::handle_post_const_inputs(http_request message) {
 
       for (auto input_name : m_job_config.const_input_names) {
         int input_val = input_dict[input_name].as_integer();
-        m_job_config.const_input_vals.push_back(input_val);
+	m_job_config.const_input_vals[input_name] = input_val;
       }
     } catch (json::json_exception) {
       message.reply(status_codes::InternalError, ("Unrecognized inputs"));
