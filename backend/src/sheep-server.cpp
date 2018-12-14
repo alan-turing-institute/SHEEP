@@ -150,28 +150,59 @@ void SheepServer::get_parameters() {
 
 template <typename PlaintextT>
 void SheepServer::update_parameters(std::string context_type,
-                                    json::value parameters) {
-
+                                    json::value parameters)
+{
   BaseContext<PlaintextT> *context = make_context<PlaintextT>(context_type);
 
-  /// first set parameters to current values stored in the server (if any)
-  for (auto map_iter : m_job_config.parameters) {
-    context->set_parameter(map_iter.first, map_iter.second);
+  size_t nparams = context->get_parameters().size();
+
+  SharedBuffer<size_t> nslots_shared;
+  SharedBuffer<long> new_param_vals_shared(nparams);
+
+  int status = protect_eval(60L, [&](){
+      /// first set parameters to current values stored in the server (if any)
+      for (auto map_iter : m_job_config.parameters) {
+	context->set_parameter(map_iter.first, map_iter.second);
+      }
+      /// update parameters if specified
+      auto params = parameters.as_object();
+      for (auto p : params) {
+	std::string param_name = p.first;
+	long param_value = (long)(p.second.as_integer());
+	context->set_parameter(param_name, param_value);
+      }
+      /// apply the new parameters
+      context->configure();
+      // update the servers param map.
+      int i = 0;
+      for (auto& param : context->get_parameters()) {
+	// place the parameter value only in the shared buffer
+	// (iteration is in sorted order, so implicitly know the key
+	// to restore later).
+	new_param_vals_shared[i++] = param.second;
+      }
+      // now find out how many slots this context/parameter-set supports
+      // and update the job config
+      *nslots_shared = (int)(context->get_num_slots());
+    });
+
+  if (status == PE_TIMEOUT) {
+    throw std::runtime_error("Timed out when setting parameters");
+  } else if (status) {
+    throw std::runtime_error("Setting parameters failed");
   }
-  /// update parameters if specified
-  auto params = parameters.as_object();
-  for (auto p : params) {
-    std::string param_name = p.first;
-    long param_value = (long)(p.second.as_integer());
-    context->set_parameter(param_name, param_value);
+
+  // extract various things from shared memory
+
+  // set number of slots
+  m_job_config.nslots = *nslots_shared;
+  
+  // set parameter values
+  int i = 0;
+  for (auto& p : context->get_parameters()) {
+    m_job_config.parameters[p.first] = new_param_vals_shared[i++];
   }
-  /// apply the new parameters
-  context->configure();
-  // update the servers param map.
-  m_job_config.parameters = context->get_parameters();
-  // now find out how many slots this context/parameter-set supports
-  // and update the job config
-  m_job_config.nslots = (int)(context->get_num_slots());
+
   // cleanup
   delete context;
 }
@@ -192,24 +223,41 @@ bool SheepServer::check_job_outputs(
 
 template <typename PlaintextT>
 std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
-  /// convert inputvec to plaintext type
-  std::vector<PlaintextT> ptvec;
-  for (auto input_val : inputvec) {
-    ptvec.push_back((PlaintextT)input_val);
-  }
-  /// we can  assume we have values for context, input_type
+  // Ask for a 4 Mb buffer.  This should be enough to hold any
+  // serialization of a single plaintext we are likely to encounter.
+  // TODO: handle arbitrary size.
+  size_t ct_buffer_size = 4*1024*1024;
+  SharedBuffer<char> serialized_ct_shared(ct_buffer_size);
 
-  auto context = make_context<PlaintextT>(m_job_config.context);
-  /// set parameters for this context
-  for (auto map_iter = m_job_config.parameters.begin();
-       map_iter != m_job_config.parameters.end(); ++map_iter) {
-    context->set_parameter(map_iter->first, map_iter->second);
+  int status = protect_eval(60L, [&](){
+      /// convert inputvec to plaintext type
+      std::vector<PlaintextT> ptvec;
+      for (auto input_val : inputvec) {
+	ptvec.push_back((PlaintextT)input_val);
+      }
+      /// we can  assume we have values for context, input_type
+      
+      auto context = make_context<PlaintextT>(m_job_config.context);
+      /// set parameters for this context
+      for (auto map_iter = m_job_config.parameters.begin();
+	   map_iter != m_job_config.parameters.end(); ++map_iter) {
+	context->set_parameter(map_iter->first, map_iter->second);
+	
+      }
+      /// apply the new parameters
+      context->configure();
+      std::string serialized_ct = context->encrypt_and_serialize(ptvec);
+      strncpy(serialized_ct_shared.data(), serialized_ct.c_str(), ct_buffer_size);
+      serialized_ct_shared[ct_buffer_size - 1] = 0;
+    });
 
+  if (status == PE_TIMEOUT) {
+    throw std::runtime_error("Timed out");
+  } else if (status) {
+    throw std::runtime_error("Error performing serialization");
+  } else {
+    return std::string(serialized_ct_shared.data());
   }
-  /// apply the new parameters
-  context->configure();
-  std::string serialized_ct = context->encrypt_and_serialize(ptvec);
-  return serialized_ct;
 }
 
 
@@ -275,9 +323,7 @@ void SheepServer::configure_and_run(http_request message) {
 	    outputs_shared[i * slot_cnt + j] = output_vals[i][j];
 	  }
 	}
-
 	std::cerr << "successful evaluation: exiting...\n";
-	_exit(0);
       });
 
     if (status == PE_TIMEOUT) {
@@ -562,15 +608,15 @@ void SheepServer::handle_post_const_inputs(http_request message) {
 void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
-    try {
-      json::value input_dict = jvalue.get();
-      auto input_vals = input_dict["inputs"].as_array();
-      std::vector<int> plaintext_inputs;
-      for (auto input_val : input_vals) {
-	plaintext_inputs.push_back(input_val.as_integer());
-      }
-      std::string sct;
-      if (m_job_config.input_type == "bool")
+      try {
+	json::value input_dict = jvalue.get();
+	auto input_vals = input_dict["inputs"].as_array();
+	std::vector<int> plaintext_inputs;
+	for (auto input_val : input_vals) {
+	  plaintext_inputs.push_back(input_val.as_integer());
+	}
+	std::string sct;
+	if (m_job_config.input_type == "bool")
 	  sct = configure_and_serialize<bool>(plaintext_inputs);
 	else if (m_job_config.input_type == "uint8_t")
 	  sct = configure_and_serialize<uint8_t>(plaintext_inputs);
@@ -586,18 +632,20 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	  sct = configure_and_serialize<int32_t>(plaintext_inputs);
 	else
 	  message.reply(status_codes::InternalError, ("Unknown input type"));
-      json::value result = json::value::object();
-      result["ciphertext"] = json::value::string(sct);
-      result["size"] = json::value::number((int64_t)(sct.size()));
-
-      message.reply(status_codes::OK, result);
-
-    } catch (json::json_exception) {
-      message.reply(status_codes::InternalError, ("Unrecognized inputs"));
-    }
-  });
-
-
+	json::value result = json::value::object();
+	result["ciphertext"] = json::value::string(sct);
+	result["size"] = json::value::number((int64_t)(sct.size()));
+      
+	message.reply(status_codes::OK, result);
+      
+      } catch (json::json_exception&) {
+	message.reply(status_codes::InternalError, ("Unrecognized inputs"));
+      } catch (std::bad_alloc&) {
+	message.reply(status_codes::InternalError, ("Could not allocate shared memory"));
+      } catch (std::runtime_error& e) {
+	message.reply(status_codes::InternalError, (e.what()));
+      }
+    });
 }
 
 
@@ -818,9 +866,11 @@ void SheepServer::handle_put_parameters(http_request message) {
 
       message.reply(status_codes::OK);
 
-    } catch (json::json_exception) {
+    } catch (json::json_exception&) {
       message.reply(status_codes::InternalError,
                     ("Unable to set evaluation strategy"));
+    } catch(std::runtime_error& e) {
+      message.reply(status_codes::InternalError, e.what());
     }
   });
 }
