@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "sheep-server.hpp"
+#include "protect-eval.hpp"
 
 using namespace std;
 using namespace web;
@@ -216,113 +217,71 @@ template <typename PlaintextT>
 void SheepServer::configure_and_run(http_request message) {
   if (!m_job_config.isConfigured())
     throw std::runtime_error("Job incompletely configured");
-  /// we can now assume we have values for context, inputs, circuit, etc
-  auto context = make_context<PlaintextT>(m_job_config.context);
-  /// set parameters for this context
-  for (auto map_iter = m_job_config.parameters.begin();
-       map_iter != m_job_config.parameters.end(); ++map_iter) {
-    context->set_parameter(map_iter->first, map_iter->second);
-  }
-  /// apply the new parameters
-  context->configure();
+
   std::vector<std::vector<PlaintextT>> plaintext_inputs =
-      make_plaintext_inputs<PlaintextT>();
+    make_plaintext_inputs<PlaintextT>();
   std::vector<long> const_plaintext_inputs =
-      make_const_plaintext_inputs();
+    make_const_plaintext_inputs();
+  
   // shared memory region for returning the results
   size_t n_gates = m_job_config.circuit.get_assignments().size();
   size_t n_outputs = m_job_config.circuit.get_outputs().size();
+  // All the inputs should be the same length, thus we can check only the first element
+  size_t slot_cnt = plaintext_inputs[0].size();
+  size_t n_plaintexts_out = slot_cnt * n_outputs;
   size_t n_timings = 3 + n_gates;
 
- Duration *timings_shared = (Duration *)mmap(
-					     NULL,
-					     n_timings * sizeof(Duration),
-					     PROT_READ | PROT_WRITE,
-					     MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+  try {
+    SharedBuffer<Duration> timings_shared(n_timings);
+    SharedBuffer<PlaintextT> outputs_shared(n_plaintexts_out);
 
+    int status = protect_eval(10L, [&](){
 
-  if (timings_shared == MAP_FAILED) {
-    message.reply(status_codes::InternalError, ("Could not run evaluation"));
-    return;
-  }
-
-  // All the inputs should be the same length, thus we can check only the first
-  // element
-  int slot_cnt = plaintext_inputs[0].size();
-
-  PlaintextT *outputs_shared = (PlaintextT *)mmap(
-      NULL, slot_cnt * (n_outputs * sizeof(PlaintextT)), PROT_READ | PROT_WRITE,
-      MAP_ANONYMOUS | MAP_SHARED, 0, 0);
-
-  if (outputs_shared == MAP_FAILED) {
-    message.reply(status_codes::InternalError, ("Could not run evaluation"));
-    munmap(timings_shared, 1);
-    return;
-  }
-  pid_t child_pid = fork();
-
-  if (child_pid == -1) {
-    // fork did not succeed
-    message.reply(status_codes::InternalError, ("Could not run evaluation"));
-    m_job_finished = false;
-
-  } else if (!child_pid) {
-    // child process: perform the evaluation
-    std::vector<Duration> totalTimings;
-    std::map<std::string, Duration> perGateTimings;
-    auto timings = std::make_pair(totalTimings, perGateTimings);
-    std::vector<std::vector<PlaintextT>> output_vals =
+	/// we can now assume we have values for context, inputs, circuit, etc
+	auto context = make_context<PlaintextT>(m_job_config.context);
+	/// set parameters for this context
+	for (auto map_iter = m_job_config.parameters.begin();
+	     map_iter != m_job_config.parameters.end(); ++map_iter) {
+	  context->set_parameter(map_iter->first, map_iter->second);
+	}
+	/// apply the new parameters
+	context->configure();
+	
+	std::vector<Duration> totalTimings;
+	std::map<std::string, Duration> perGateTimings;
+	auto timings = std::make_pair(totalTimings, perGateTimings);
+	std::vector<std::vector<PlaintextT>> output_vals =
         context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs,
                                       const_plaintext_inputs, timings,
                                       m_job_config.eval_strategy);
 
-    if (timings.first.size() != 3) {
-      // signal an error to the server
-      std::cerr << "Child exiting: more than three timings reported!\n";
-      _exit(1);
-    }
-    // insert the various things in the shared memory buffer
-    for (int i = 0; i < 3; i++) {
-      timings_shared[i] = timings.first[i];
-    }
-    int timing_index = 3;
-    for (auto gate_timing : timings.second) {
-      timings_shared[timing_index] = gate_timing.second;
-      timing_index++;
-    }
+	if (timings.first.size() != 3) {
+	  // signal an error to the server
+	  std::cerr << "Child exiting: more than three timings reported!\n";
+	  _exit(1);
+	}
+	// insert the various things in the shared memory buffer
+	for (int i = 0; i < 3; i++) {
+	  timings_shared[i] = timings.first[i];
+	}
+	int timing_index = 3;
+	for (auto gate_timing : timings.second) {
+	  timings_shared[timing_index] = gate_timing.second;
+	  timing_index++;
+	}
+	
+	for (int i = 0; i < n_outputs; i++) {
+	  for (int j = 0; j < slot_cnt; j++) {
+	    outputs_shared[i * slot_cnt + j] = output_vals[i][j];
+	  }
+	}
 
-    for (int i = 0; i < n_outputs; i++) {
-      for (int j = 0; j < slot_cnt; j++) {
-        outputs_shared[i * slot_cnt + j] = output_vals[i][j];
-      }
-    }
+	std::cerr << "successful evaluation: exiting...\n";
+	_exit(0);
+      });
 
-    // if we get here, evaluation finished successfully: child can exit
-    std::cerr << "successful evaluation: exiting...\n";
-    _exit(0);
-
-  } else {
-    // parent process: wait for child or kill after timeout
-
-    // timeout hardcoded as 10 s for now
-    // POSIX: can assume this is an integer type
-
-    time_t timeout_us = 60000000L;
-
-    // go to sleep for the length of the timeout and a grace period
-    struct timespec req, rem;
-    req.tv_nsec = (timeout_us % 1000000) * 1000;
-    // allow one second grace (since the timeout above refers to the evaluation
-    // only
-    req.tv_sec = (timeout_us / 1000000) + 1;
-
-    nanosleep(&req, &rem);
-
-    // on waking up, is the child still alive?
-    int status;
-    if (!waitpid(child_pid, &status, WNOHANG)) {
+    if (status == PE_TIMEOUT) {
       // this is an error (eval's own timeout should have stopped it)
-      kill(child_pid, SIGKILL);
       message.reply(status_codes::InternalError, ("Evaluation timed out"));
       m_job_finished = false;
 
@@ -393,11 +352,9 @@ void SheepServer::configure_and_run(http_request message) {
 
       message.reply(status_codes::OK);
     }
+  } catch (std::bad_alloc& e) {
+    message.reply(status_codes::InternalError, ("Could not run evaluation"));
   }
-
-  // clean up shared memory buffers
-  munmap(timings_shared, n_timings * sizeof(Duration));
-  munmap(outputs_shared, n_outputs * sizeof(PlaintextT));
 }
 
 void SheepServer::handle_get(http_request message) {
