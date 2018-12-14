@@ -1,0 +1,1154 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 47.43      6.74     6.74 12288000     0.00     0.00  seal::util::divide_uint128_uint64_inplace(unsigned long*, unsigned long, unsigned long*)
+ 14.00      8.73     1.99    44700     0.04     0.04  seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&)
+  9.08     10.02     1.29      100    12.90    47.78  seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&)
+  4.72     10.69     0.67 36454400     0.00     0.00  double std::normal_distribution<double>::operator()<seal::util::RandomToStandardAdapter>(seal::util::RandomToStandardAdapter&, std::normal_distribution<double>::param_type const&)
+  3.94     11.25     0.56     8900     0.06     0.10  seal::KeyGenerator::set_poly_coeffs_uniform(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.164]
+  3.17     11.70     0.45     8200     0.05     0.05  seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&)
+  2.29     12.03     0.33 251531176     0.00     0.00  seal::FastPRNG<0ul, 0ul>::generate()
+  1.97     12.31     0.28     1400     0.20     0.20  seal::util::BaseConverter::mont_rq(unsigned long const*, unsigned long*) const
+  1.51     12.52     0.22  7862042     0.00     0.00  seal::AESEncryptor::counter_encrypt(unsigned long, unsigned long, seal::aes_block*) const
+  1.41     12.72     0.20      300     0.67     5.38  seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&)
+  1.34     12.91     0.19     8900     0.02     0.12  seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165]
+  1.13     13.07     0.16     1100     0.15     0.15  seal::util::BaseConverter::fastbconv_sk(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  0.99     13.21     0.14     1400     0.10     0.10  seal::util::BaseConverter::fastbconv_mtilde(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  0.88     13.34     0.13                             seal::FastPRNG<0ul, 0ul>::~FastPRNG()
+  0.77     13.45     0.11     2000     0.06     0.06  seal::util::SmallNTTTables::ntt_powers_of_primitive_root(unsigned long, unsigned long*) const
+  0.77     13.56     0.11     1100     0.10     0.10  seal::util::BaseConverter::fastbconv(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  0.49     13.63     0.07     1100     0.06     0.16  seal::util::BaseConverter::fast_floor(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  0.49     13.70     0.07     1000     0.07     0.09  seal::Encryptor::set_poly_coeffs_normal(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const
+  0.42     13.76     0.06     1000     0.06     6.97  seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&)
+  0.42     13.82     0.06     1000     0.06     0.06  seal::util::try_minimal_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&)
+  0.28     13.86     0.04     3000     0.01     0.01  seal::util::dyadic_product_coeffmod(unsigned long const*, unsigned long const*, unsigned long, seal::SmallModulus const&, unsigned long*)
+  0.25     13.89     0.04                             seal::AESEncryptor::ecb_encrypt(seal::aes_block const*, unsigned long, seal::aes_block*) const
+  0.21     13.92     0.03     1000     0.03     0.18  seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&)
+  0.21     13.95     0.03      500     0.06     0.06  seal::Encryptor::preencrypt(unsigned long const*, unsigned long, seal::SEALContext::ContextData const&, unsigned long*)
+  0.14     13.97     0.02   409600     0.00     0.00  seal::util::exponentiate_uint64(unsigned long, unsigned long)
+  0.14     13.99     0.02      100     0.20     0.20  seal::BatchEncoder::populate_matrix_reps_index_map()
+  0.14     14.01     0.02                             std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_S_right(std::_Rb_tree_node_base*)
+  0.14     14.03     0.02                             __gnu_cxx::__enable_if<std::__is_scalar<unsigned long>::__value, unsigned long*>::__type std::__fill_n_a<unsigned long*, unsigned long, unsigned long>(unsigned long*, unsigned long, unsigned long const&)
+  0.07     14.04     0.01   204800     0.00     0.00  std::pair<std::_Rb_tree_iterator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, bool> std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_emplace_unique<unsigned long&, std::pair<unsigned long, unsigned long>&>(unsigned long&, std::pair<unsigned long, unsigned long>&)
+  0.07     14.05     0.01     1300     0.01     0.01  seal::util::multiply_uint_uint64(unsigned long const*, unsigned long, unsigned long, unsigned long, unsigned long*)
+  0.07     14.06     0.01      557     0.02     0.02  seal::util::divide_uint192_uint64_inplace(unsigned long*, unsigned long, unsigned long*)
+  0.07     14.07     0.01      500     0.02     0.07  seal::BatchEncoder::encode(std::vector<unsigned long, std::allocator<unsigned long> > const&, seal::Plaintext&)
+  0.07     14.08     0.01      500     0.02     0.03  seal::Encryptor::set_poly_coeffs_zero_one_negone(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const
+  0.07     14.09     0.01      400     0.03     0.03  seal::Evaluator::add_inplace(seal::Ciphertext&, seal::Ciphertext const&)
+  0.07     14.10     0.01      200     0.05    35.00  seal::SEALContext::validate(seal::EncryptionParameters)
+  0.07     14.11     0.01      100     0.10     0.50  seal::KeyGenerator::generate_pk()
+  0.07     14.12     0.01      100     0.10     0.67  seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&)
+  0.07     14.13     0.01      100     0.10     0.10  seal::Decryptor::compute_secret_key_array(unsigned long)
+  0.07     14.14     0.01      100     0.10     0.40  seal::Evaluator::populate_Zmstar_to_generator()
+  0.07     14.15     0.01      100     0.10     0.10  std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >::_M_default_append(unsigned long)
+  0.07     14.16     0.01                             __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::deallocate(std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >*, unsigned long)
+  0.07     14.17     0.01                             void std::_Destroy_aux<false>::__destroy<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*>(std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*, std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*)
+  0.07     14.18     0.01                             std::vector<bool, std::allocator<bool> >::operator=(std::initializer_list<bool>)
+  0.07     14.19     0.01                             std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_put_node(std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >*)
+  0.07     14.20     0.01                             seal::SmallModulus const* std::__niter_base<seal::SmallModulus const*, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >(__gnu_cxx::__normal_iterator<seal::SmallModulus const*, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >)
+  0.07     14.21     0.01                             bool std::operator==<unsigned long, 4ul>(std::array<unsigned long, 4ul> const&, std::array<unsigned long, 4ul> const&)
+  0.00     14.21     0.00   252656     0.00     0.00  seal::util::MemoryPoolHeadMT::item_byte_count() const
+  0.00     14.21     0.00    55600     0.00     0.00  seal::util::MemoryPoolMT::get_for_byte_count(unsigned long)
+  0.00     14.21     0.00    55500     0.00     0.00  seal::util::MemoryPoolHeadMT::get()
+  0.00     14.21     0.00    54900     0.00     0.00  seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*)
+  0.00     14.21     0.00    11300     0.00     0.00  seal::MMProfGlobal::get_pool(unsigned long)
+  0.00     14.21     0.00     9900     0.00     0.00  seal::util::ClippedNormalDistribution::ClippedNormalDistribution(double, double, double)
+  0.00     14.21     0.00     8700     0.00     0.00  std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose()
+  0.00     14.21     0.00     6000     0.00     0.00  seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&)
+  0.00     14.21     0.00     5700     0.00     0.00  seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long)
+  0.00     14.21     0.00     5100     0.00     0.00  seal::SmallModulus::set_value(unsigned long)
+  0.00     14.21     0.00     5072     0.00     0.00  seal::util::try_minimal_primitive_root(unsigned long, seal::util::Modulus const&, unsigned long*, seal::util::MemoryPool&)
+  0.00     14.21     0.00     4400     0.00     0.00  seal::Ciphertext::reserve_internal(unsigned long, unsigned long, unsigned long)
+  0.00     14.21     0.00     2900     0.00     0.00  seal::AESEncryptor::set_key(seal::aes_block const&)
+  0.00     14.21     0.00     2900     0.00     0.00  seal::FastPRNGFactory<0ul, 0ul>::create()
+  0.00     14.21     0.00     2900     0.00     0.00  std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+  0.00     14.21     0.00     2200     0.00     0.00  seal::AESDecryptor::ecb_decrypt(seal::aes_block const&, seal::aes_block&)
+  0.00     14.21     0.00     2200     0.00     0.00  seal::util::Pointer<seal::util::Pointer<unsigned long, void>, void>::release()
+  0.00     14.21     0.00     2200     0.00     0.00  std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >::reserve(unsigned long)
+  0.00     14.21     0.00     1800     0.00     0.00  seal::Ciphertext::data(unsigned long)
+  0.00     14.21     0.00     1300     0.00     0.00  seal::util::Pointer<seal::util::SmallNTTTables, void>::release()
+  0.00     14.21     0.00     1000     0.00     0.00  seal::util::SmallNTTTables::reset()
+  0.00     14.21     0.00     1000     0.00     0.00  seal::util::try_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&)
+  0.00     14.21     0.00     1000     0.00     0.00  _init
+  0.00     14.21     0.00      800     0.00     0.00  seal::util::Pointer<seal::util::BaseConverter, void>::release()
+  0.00     14.21     0.00      700     0.00     0.00  seal::Ciphertext::resize(std::shared_ptr<seal::SEALContext> const&, std::array<unsigned long, 4ul>, unsigned long)
+  0.00     14.21     0.00      700     0.00     0.00  seal::Ciphertext::data(unsigned long) const
+  0.00     14.21     0.00      600     0.00     0.00  seal::EncryptionParameters::compute_parms_id()
+  0.00     14.21     0.00      600     0.00     0.00  seal::util::HashFunction::keccak_1600(unsigned long (&) [5][5])
+  0.00     14.21     0.00      600     0.00     0.00  seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&)
+  0.00     14.21     0.00      600     0.00     0.00  auto seal::util::allocate<seal::util::Pointer<unsigned long, void>, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&)
+  0.00     14.21     0.00      600     0.00     0.00  auto seal::util::allocate<unsigned long, unsigned long, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, unsigned long&&)
+  0.00     14.21     0.00      500     0.00     0.64  seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&)
+  0.00     14.21     0.00      500     0.00     0.00  seal::Encryptor::encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&)
+  0.00     14.21     0.00      400     0.00     0.00  seal::util::Pointer<seal::SmallModulus, void>::release()
+  0.00     14.21     0.00      300     0.00     0.00  unsigned long seal::util::barrett_reduce_128<unsigned long long, seal::is_uint64_t<unsigned long long> >(unsigned long long const*, seal::SmallModulus const&)
+  0.00     14.21     0.00      300     0.00     5.38  seal::Evaluator::multiply_inplace(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::PolyModulus::PolyModulus(seal::util::PolyModulus&&)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::PolyModulus::PolyModulus(unsigned long const*, unsigned long, unsigned long)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::PolyModulus::operator=(seal::util::PolyModulus&&)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::ConstPointer<unsigned long, void>::release()
+  0.00     14.21     0.00      200     0.00     0.01  seal::util::BaseConverter::reset()
+  0.00     14.21     0.00      200     0.00    17.49  seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::divide_uint_uint_inplace(unsigned long*, unsigned long const*, unsigned long, unsigned long*, seal::util::MemoryPool&)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::Modulus::Modulus(seal::util::Modulus&&)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::Modulus::Modulus(unsigned long const*, unsigned long)
+  0.00     14.21     0.00      200     0.00     0.00  seal::util::Modulus::operator=(seal::util::Modulus&&)
+  0.00     14.21     0.00      200     0.00     0.01  auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&)
+  0.00     14.21     0.00      200     0.00     0.00  auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&)
+  0.00     14.21     0.00      200     0.00     0.00  auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&)
+  0.00     14.21     0.00      200     0.00     0.00  auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&)
+  0.00     14.21     0.00      200     0.00     0.00  std::pair<std::__detail::_Node_iterator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, false, true>, bool> std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_emplace<std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> > >(std::integral_constant<bool, true>, std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> >&&)
+  0.00     14.21     0.00      200     0.00     0.00  std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+  0.00     14.21     0.00      100     0.00     0.00  seal::Ciphertext::operator=(seal::Ciphertext const&)
+  0.00     14.21     0.00      100     0.00     0.00  seal::SEALContext::ContextData::~ContextData()
+  0.00     14.21     0.00      100     0.00    70.00  seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&)
+  0.00     14.21     0.00      100     0.00     0.00  seal::BatchEncoder::populate_roots_of_unity_vector(seal::SEALContext::ContextData const&)
+  0.00     14.21     0.00      100     0.00     0.04  seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&)
+  0.00     14.21     0.00      100     0.00     0.20  seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&)
+  0.00     14.21     0.00      100     0.00    47.78  seal::KeyGenerator::galois_keys(int)
+  0.00     14.21     0.00      100     0.00     0.10  seal::KeyGenerator::generate_sk()
+  0.00     14.21     0.00      100     0.00     0.59  seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&)
+  0.00     14.21     0.00      100     0.00     0.00  seal::UniformRandomGeneratorFactory::default_factory()
+  0.00     14.21     0.00      100     0.00     0.00  seal::Decryptor::decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&)
+  0.00     14.21     0.00      100     0.00     0.00  seal::Decryptor::Decryptor(std::shared_ptr<seal::SEALContext> const&, seal::SecretKey const&)
+  0.00     14.21     0.00      100     0.00     0.00  seal::Encryptor::Encryptor(std::shared_ptr<seal::SEALContext> const&, seal::PublicKey const&)
+  0.00     14.21     0.00      100     0.00     0.40  seal::Evaluator::Evaluator(std::shared_ptr<seal::SEALContext> const&)
+  0.00     14.21     0.00      100     0.00     0.00  seal::KeyGenerator::public_key() const
+  0.00     14.21     0.00      100     0.00     0.00  seal::KeyGenerator::secret_key() const
+  0.00     14.21     0.00      100     0.00     0.10  seal::KeyGenerator::populate_decomposition_factors(seal::SEALContext::ContextData const&, int, std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >&) const
+  0.00     14.21     0.00      100     0.00     0.01  seal::KeyGenerator::set_poly_coeffs_zero_one_negone(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const
+  0.00     14.21     0.00      100     0.00     0.00  seal::util::BaseConverter::fastbconv_plain_gamma(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  0.00     14.21     0.00      100     0.00     0.00  std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+  0.00     14.21     0.00      100     0.00     0.00  std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose()
+  0.00     14.21     0.00      100     0.00     0.00  std::vector<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >, std::allocator<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> > > >::_M_default_append(unsigned long)
+  0.00     14.21     0.00       66     0.00     0.00  void std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> >::_M_realloc_insert<seal::util::MemoryPoolHead::allocation const&>(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead::allocation*, std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> > >, seal::util::MemoryPoolHead::allocation const&)
+  0.00     14.21     0.00       26     0.00     0.00  seal::util::MemoryPoolHeadMT::MemoryPoolHeadMT(unsigned long)
+  0.00     14.21     0.00       26     0.00     0.00  seal::util::MemoryPoolHeadMT::~MemoryPoolHeadMT()
+  0.00     14.21     0.00       25     0.00     0.00  std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::insert(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead* const*, std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> > >, seal::util::MemoryPoolHead* const&)
+  0.00     14.21     0.00        6     0.00     0.00  std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >, std::_Select1st<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > > >::_M_erase(std::_Rb_tree_node<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > >*)
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal10CiphertextaSERKS0_
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal11SEALContext8validateENS_20EncryptionParametersE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal12BatchEncoderC2ERKSt10shared_ptrINS_11SEALContextEE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal12KeyGeneratorC2ERKSt10shared_ptrINS_11SEALContextEE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal13MemoryManager8mm_prof_E
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal26save_encryption_parametersERKNS_20EncryptionParametersERSo
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal4util13BaseConverterC2ERKSt6vectorINS_12SmallModulusESaIS3_EEmRKS3_RKNS_16MemoryPoolHandleE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal4util14SmallNTTTablesC2EiRKNS_12SmallModulusERKNS_16MemoryPoolHandleE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal4util16global_variables18global_memory_poolE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal4util17is_primitive_rootEmmRKNS_12SmallModulusE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal4util22ntt_multiply_poly_polyEPKmS2_RKNS0_14SmallNTTTablesEPmRNS0_10MemoryPoolE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal9DecryptorC2ERKSt10shared_ptrINS_11SEALContextEERKNS_9SecretKeyE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal9EncryptorC2ERKSt10shared_ptrINS_11SEALContextEERKNS_9PublicKeyE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4seal9EvaluatorC2ERKSt10shared_ptrINS_11SEALContextEE
+  0.00     14.21     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZNK4seal12SmallModulus4saveERSo
+  0.00     14.21     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int) [clone .constprop.53]
+  0.00     14.21     0.00        1     0.00     0.00  seal::util::MemoryPoolMT::~MemoryPoolMT()
+  0.00     14.21     0.00        1     0.00     0.00  std::_Sp_counted_ptr<seal::FastPRNGFactory<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+  0.00     14.21     0.00        1     0.00     0.00  std::_Sp_counted_ptr<seal::FastPRNGFactory<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose()
+  0.00     14.21     0.00        1     0.00     0.00  seal::util::MemoryPoolHead*& std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::emplace_back<seal::util::MemoryPoolHead*&>(seal::util::MemoryPoolHead*&)
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2015 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.07% of 14.21 seconds
+
+index % time    self  children    called     name
+                0.01    6.99     200/200         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[1]     49.3    0.01    6.99     200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.00    3.50     200/200         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.03    3.46     500/1000        seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+                0.00    0.00     300/1300        seal::util::multiply_uint_uint64(unsigned long const*, unsigned long, unsigned long, unsigned long, unsigned long*) [50]
+                0.00    0.00     200/200         auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&) [66]
+                0.00    0.00     200/200         auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&) [70]
+                0.00    0.00     200/200         auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [71]
+                0.00    0.00     800/1300        seal::util::Pointer<seal::util::SmallNTTTables, void>::release() [98]
+                0.00    0.00     600/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     600/1000        _init [100]
+                0.00    0.00     600/6000        seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&) [88]
+                0.00    0.00     400/800         seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+                0.00    0.00     200/200         seal::util::Modulus::Modulus(unsigned long const*, unsigned long) [118]
+                0.00    0.00     200/200         seal::util::Modulus::operator=(seal::util::Modulus&&) [119]
+                0.00    0.00     200/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+                0.00    0.00     200/200         seal::util::PolyModulus::PolyModulus(unsigned long const*, unsigned long, unsigned long) [113]
+                0.00    0.00     200/200         seal::util::PolyModulus::operator=(seal::util::PolyModulus&&) [114]
+                0.00    0.00     200/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00     200/200         seal::util::divide_uint_uint_inplace(unsigned long*, unsigned long const*, unsigned long, unsigned long*, seal::util::MemoryPool&) [116]
+                0.00    0.00     200/200         seal::util::ConstPointer<unsigned long, void>::release() [115]
+-----------------------------------------------
+                0.00    7.00     100/100         seal::SEALContext::Create(seal::EncryptionParameters const&) [3]
+[2]     49.3    0.00    7.00     100         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+                0.01    6.99     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.00    0.00     200/200         seal::util::Modulus::Modulus(seal::util::Modulus&&) [117]
+                0.00    0.00     200/200         seal::util::PolyModulus::PolyModulus(seal::util::PolyModulus&&) [112]
+                0.00    0.00     200/200         std::pair<std::__detail::_Node_iterator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, false, true>, bool> std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_emplace<std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> > >(std::integral_constant<bool, true>, std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> >&&) [120]
+                0.00    0.00     100/100         seal::SEALContext::ContextData::~ContextData() [123]
+                0.00    0.00     100/600         seal::EncryptionParameters::compute_parms_id() [104]
+                0.00    0.00     100/1300        seal::util::Pointer<seal::util::SmallNTTTables, void>::release() [98]
+                0.00    0.00     100/800         seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+                0.00    0.00     100/100         seal::UniformRandomGeneratorFactory::default_factory() [125]
+-----------------------------------------------
+                                                 <spontaneous>
+[3]     49.3    0.00    7.00                 seal::SEALContext::Create(seal::EncryptionParameters const&) [3]
+                0.00    7.00     100/100         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+-----------------------------------------------
+                0.03    3.46     500/1000        seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.03    3.46     500/1000        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[4]     49.1    0.06    6.91    1000         seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+                6.74    0.00 12288000/12288000     seal::util::divide_uint128_uint64_inplace(unsigned long*, unsigned long, unsigned long*) [5]
+                0.11    0.00    2000/2000        seal::util::SmallNTTTables::ntt_powers_of_primitive_root(unsigned long, unsigned long*) const [28]
+                0.06    0.00    1000/1000        seal::util::try_minimal_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [33]
+                0.00    0.00    1000/1000        seal::util::SmallNTTTables::reset() [65]
+                0.00    0.00    6000/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+-----------------------------------------------
+                6.74    0.00 12288000/12288000     seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+[5]     47.4    6.74    0.00 12288000         seal::util::divide_uint128_uint64_inplace(unsigned long*, unsigned long, unsigned long*) [5]
+-----------------------------------------------
+                                                 <spontaneous>
+[6]     34.5    0.00    4.90                 SHEEP::ContextSeal<bool>::configure() [6]
+                0.00    4.78     100/100         seal::KeyGenerator::galois_keys(int) [7]
+                0.00    0.06     100/100         seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&) [34]
+                0.00    0.04     100/100         seal::Evaluator::Evaluator(std::shared_ptr<seal::SEALContext> const&) [38]
+                0.00    0.02     100/100         seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [44]
+                0.00    0.00     100/100         seal::KeyGenerator::public_key() const [129]
+                0.00    0.00     100/100         seal::KeyGenerator::secret_key() const [130]
+                0.00    0.00     100/100         seal::Encryptor::Encryptor(std::shared_ptr<seal::SEALContext> const&, seal::PublicKey const&) [128]
+                0.00    0.00     100/100         seal::Decryptor::Decryptor(std::shared_ptr<seal::SEALContext> const&, seal::SecretKey const&) [127]
+-----------------------------------------------
+                0.00    4.78     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[7]     33.6    0.00    4.78     100         seal::KeyGenerator::galois_keys(int) [7]
+                1.29    3.49     100/100         seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+-----------------------------------------------
+                1.29    3.49     100/100         seal::KeyGenerator::galois_keys(int) [7]
+[8]     33.6    1.29    3.49     100         seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+                1.57    0.00   35200/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.19    0.86    8800/8900        seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165] [14]
+                0.55    0.31    8800/8900        seal::KeyGenerator::set_poly_coeffs_uniform(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.164] [15]
+                0.00    0.01     100/100         seal::KeyGenerator::populate_decomposition_factors(seal::SEALContext::ContextData const&, int, std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >&) const [54]
+                0.00    0.00    2200/2900        seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+                0.00    0.00    6600/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    6600/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00    4400/4400        seal::Ciphertext::reserve_internal(unsigned long, unsigned long, unsigned long) [91]
+                0.00    0.00    4400/5700        seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+                0.00    0.00    2200/2200        std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >::reserve(unsigned long) [96]
+                0.00    0.00    2200/2900        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [93]
+                0.00    0.00    2200/8700        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [87]
+                0.00    0.00     100/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     100/100         std::vector<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >, std::allocator<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> > > >::_M_default_append(unsigned long) [134]
+-----------------------------------------------
+                0.00    3.50     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[9]     24.6    0.00    3.50     200         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.03    3.46     500/1000        seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+                0.01    0.00    1000/1300        seal::util::multiply_uint_uint64(unsigned long const*, unsigned long, unsigned long, unsigned long, unsigned long*) [50]
+                0.00    0.00    1600/5100        seal::SmallModulus::set_value(unsigned long) [49]
+                0.00    0.00     200/200         seal::util::BaseConverter::reset() [67]
+                0.00    0.00     200/200         auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [69]
+                0.00    0.00    5400/6000        seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&) [88]
+                0.00    0.00    2700/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    2200/2200        seal::util::Pointer<seal::util::Pointer<unsigned long, void>, void>::release() [95]
+                0.00    0.00    2200/2200        seal::AESDecryptor::ecb_decrypt(seal::aes_block const&, seal::aes_block&) [94]
+                0.00    0.00    1800/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+                0.00    0.00     600/600         auto seal::util::allocate<seal::util::Pointer<unsigned long, void>, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [107]
+                0.00    0.00     500/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     400/400         seal::util::Pointer<seal::SmallModulus, void>::release() [110]
+                0.00    0.00     400/1300        seal::util::Pointer<seal::util::SmallNTTTables, void>::release() [98]
+                0.00    0.00     400/1000        _init [100]
+                0.00    0.00     300/300         unsigned long seal::util::barrett_reduce_128<unsigned long long, seal::is_uint64_t<unsigned long long> >(unsigned long long const*, seal::SmallModulus const&) [111]
+-----------------------------------------------
+                0.00    0.00     100/44700       seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&) [64]
+                0.01    0.00     200/44700       seal::KeyGenerator::generate_sk() [63]
+                0.02    0.00     400/44700       seal::KeyGenerator::generate_pk() [35]
+                0.04    0.00     800/44700       seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.04    0.00    1000/44700       seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [23]
+                0.31    0.00    7000/44700       seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+                1.57    0.00   35200/44700       seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[10]    14.0    1.99    0.00   44700         seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+-----------------------------------------------
+                0.20    1.41     300/300         seal::Evaluator::multiply_inplace(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [12]
+[11]    11.4    0.20    1.41     300         seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+                0.31    0.00    7000/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.30    0.00    5500/8200        seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [18]
+                0.28    0.00    1400/1400        seal::util::BaseConverter::mont_rq(unsigned long const*, unsigned long*) const [21]
+                0.07    0.11    1100/1100        seal::util::BaseConverter::fast_floor(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [24]
+                0.16    0.00    1100/1100        seal::util::BaseConverter::fastbconv_sk(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [25]
+                0.14    0.00    1400/1400        seal::util::BaseConverter::fastbconv_mtilde(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [26]
+                0.04    0.00    3000/3000        seal::util::dyadic_product_coeffmod(unsigned long const*, unsigned long const*, unsigned long, seal::SmallModulus const&, unsigned long*) [36]
+                0.00    0.00    1800/1800        seal::Ciphertext::data(unsigned long) [97]
+                0.00    0.00     700/700         seal::Ciphertext::data(unsigned long) const [103]
+                0.00    0.00     600/600         auto seal::util::allocate<unsigned long, unsigned long, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, unsigned long&&) [108]
+                0.00    0.00     300/700         seal::Ciphertext::resize(std::shared_ptr<seal::SEALContext> const&, std::array<unsigned long, 4ul>, unsigned long) [102]
+-----------------------------------------------
+                0.00    1.61     300/300         SHEEP::ContextSeal<bool>::Multiply(seal::Ciphertext, seal::Ciphertext) [13]
+[12]    11.4    0.00    1.61     300         seal::Evaluator::multiply_inplace(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [12]
+                0.20    1.41     300/300         seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[13]    11.4    0.00    1.61                 SHEEP::ContextSeal<bool>::Multiply(seal::Ciphertext, seal::Ciphertext) [13]
+                0.00    1.61     300/300         seal::Evaluator::multiply_inplace(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [12]
+-----------------------------------------------
+                0.00    0.01     100/8900        seal::KeyGenerator::generate_pk() [35]
+                0.19    0.86    8800/8900        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[14]     7.5    0.19    0.87    8900         seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165] [14]
+                0.67    0.20 36454400/36454400     double std::normal_distribution<double>::operator()<seal::util::RandomToStandardAdapter>(seal::util::RandomToStandardAdapter&, std::normal_distribution<double>::param_type const&) [16]
+                0.00    0.00    8900/9900        seal::util::ClippedNormalDistribution::ClippedNormalDistribution(double, double, double) [86]
+-----------------------------------------------
+                0.01    0.00     100/8900        seal::KeyGenerator::generate_pk() [35]
+                0.55    0.31    8800/8900        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[15]     6.1    0.56    0.31    8900         seal::KeyGenerator::set_poly_coeffs_uniform(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.164] [15]
+                0.19    0.12 145817600/251531176     seal::FastPRNG<0ul, 0ul>::generate() [17]
+-----------------------------------------------
+                0.67    0.20 36454400/36454400     seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165] [14]
+[16]     6.1    0.67    0.20 36454400         double std::normal_distribution<double>::operator()<seal::util::RandomToStandardAdapter>(seal::util::RandomToStandardAdapter&, std::normal_distribution<double>::param_type const&) [16]
+                0.12    0.08 92825284/251531176     seal::FastPRNG<0ul, 0ul>::generate() [17]
+-----------------------------------------------
+                0.00    0.00  409600/251531176     seal::KeyGenerator::set_poly_coeffs_zero_one_negone(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [68]
+                0.00    0.00 2048000/251531176     seal::Encryptor::set_poly_coeffs_zero_one_negone(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [47]
+                0.01    0.01 10430692/251531176     seal::Encryptor::set_poly_coeffs_normal(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [30]
+                0.12    0.08 92825284/251531176     double std::normal_distribution<double>::operator()<seal::util::RandomToStandardAdapter>(seal::util::RandomToStandardAdapter&, std::normal_distribution<double>::param_type const&) [16]
+                0.19    0.12 145817600/251531176     seal::KeyGenerator::set_poly_coeffs_uniform(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.164] [15]
+[17]     3.8    0.33    0.21 251531176         seal::FastPRNG<0ul, 0ul>::generate() [17]
+                0.21    0.00 7859142/7862042     seal::AESEncryptor::counter_encrypt(unsigned long, unsigned long, seal::aes_block*) const [22]
+-----------------------------------------------
+                0.01    0.00     200/8200        seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.03    0.00     500/8200        seal::BatchEncoder::encode(std::vector<unsigned long, std::allocator<unsigned long> > const&, seal::Plaintext&) [39]
+                0.11    0.00    2000/8200        seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [23]
+                0.30    0.00    5500/8200        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[18]     3.2    0.45    0.00    8200         seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [18]
+-----------------------------------------------
+                                                 <spontaneous>
+[19]     2.5    0.00    0.36                 SHEEP::ContextSeal<bool>::encrypt(std::vector<bool, std::allocator<bool> >) [19]
+                0.00    0.32     500/500         seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.01    0.03     500/500         seal::BatchEncoder::encode(std::vector<unsigned long, std::allocator<unsigned long> > const&, seal::Plaintext&) [39]
+                0.00    0.00     500/500         seal::Encryptor::encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [109]
+-----------------------------------------------
+                0.00    0.32     500/500         SHEEP::ContextSeal<bool>::encrypt(std::vector<bool, std::allocator<bool> >) [19]
+[20]     2.3    0.00    0.32     500         seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.03    0.15    1000/1000        seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [23]
+                0.07    0.02    1000/1000        seal::Encryptor::set_poly_coeffs_normal(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [30]
+                0.03    0.00     500/500         seal::Encryptor::preencrypt(unsigned long const*, unsigned long, seal::SEALContext::ContextData const&, unsigned long*) [41]
+                0.01    0.00     500/500         seal::Encryptor::set_poly_coeffs_zero_one_negone(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [47]
+                0.00    0.00     500/2900        seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+                0.00    0.00     500/5700        seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+                0.00    0.00     500/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     500/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00     500/2900        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [93]
+                0.00    0.00     500/8700        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [87]
+-----------------------------------------------
+                0.28    0.00    1400/1400        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[21]     2.0    0.28    0.00    1400         seal::util::BaseConverter::mont_rq(unsigned long const*, unsigned long*) const [21]
+-----------------------------------------------
+                0.00    0.00    2900/7862042     seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+                0.21    0.00 7859142/7862042     seal::FastPRNG<0ul, 0ul>::generate() [17]
+[22]     1.5    0.22    0.00 7862042         seal::AESEncryptor::counter_encrypt(unsigned long, unsigned long, seal::aes_block*) const [22]
+-----------------------------------------------
+                0.03    0.15    1000/1000        seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+[23]     1.3    0.03    0.15    1000         seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [23]
+                0.11    0.00    2000/8200        seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [18]
+                0.04    0.00    1000/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.00    0.00    1000/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    1000/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.07    0.11    1100/1100        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[24]     1.3    0.07    0.11    1100         seal::util::BaseConverter::fast_floor(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [24]
+                0.11    0.00    1100/1100        seal::util::BaseConverter::fastbconv(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [29]
+-----------------------------------------------
+                0.16    0.00    1100/1100        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[25]     1.1    0.16    0.00    1100         seal::util::BaseConverter::fastbconv_sk(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [25]
+                0.00    0.00    3300/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    3300/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.14    0.00    1400/1400        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[26]     1.0    0.14    0.00    1400         seal::util::BaseConverter::fastbconv_mtilde(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [26]
+                0.00    0.00    1400/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    1400/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                                                 <spontaneous>
+[27]     0.9    0.13    0.00                 seal::FastPRNG<0ul, 0ul>::~FastPRNG() [27]
+-----------------------------------------------
+                0.11    0.00    2000/2000        seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+[28]     0.8    0.11    0.00    2000         seal::util::SmallNTTTables::ntt_powers_of_primitive_root(unsigned long, unsigned long*) const [28]
+-----------------------------------------------
+                0.11    0.00    1100/1100        seal::util::BaseConverter::fast_floor(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [24]
+[29]     0.8    0.11    0.00    1100         seal::util::BaseConverter::fastbconv(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [29]
+                0.00    0.00    1100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    1100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.07    0.02    1000/1000        seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+[30]     0.7    0.07    0.02    1000         seal::Encryptor::set_poly_coeffs_normal(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [30]
+                0.01    0.01 10430692/251531176     seal::FastPRNG<0ul, 0ul>::generate() [17]
+                0.00    0.00    1000/9900        seal::util::ClippedNormalDistribution::ClippedNormalDistribution(double, double, double) [86]
+-----------------------------------------------
+                                                 <spontaneous>
+[31]     0.5    0.00    0.07                 SHEEP::ContextSeal<bool>::decrypt(seal::Ciphertext) [31]
+                0.01    0.06     100/100         seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.00    0.00     100/100         seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&) [64]
+                0.00    0.00     100/100         seal::Decryptor::decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [126]
+-----------------------------------------------
+                0.01    0.06     100/100         SHEEP::ContextSeal<bool>::decrypt(seal::Ciphertext) [31]
+[32]     0.5    0.01    0.06     100         seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.04    0.00     800/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.01    0.00     200/8200        seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [18]
+                0.01    0.00     100/100         seal::Decryptor::compute_secret_key_array(unsigned long) [53]
+                0.00    0.00     500/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     400/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00     100/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+                0.00    0.00     100/100         seal::util::BaseConverter::fastbconv_plain_gamma(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [131]
+-----------------------------------------------
+                0.06    0.00    1000/1000        seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+[33]     0.4    0.06    0.00    1000         seal::util::try_minimal_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [33]
+                0.00    0.00    1000/1000        seal::util::try_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [99]
+-----------------------------------------------
+                0.00    0.06     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[34]     0.4    0.00    0.06     100         seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&) [34]
+                0.01    0.04     100/100         seal::KeyGenerator::generate_pk() [35]
+                0.00    0.01     100/100         seal::KeyGenerator::generate_sk() [63]
+                0.00    0.00     300/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+-----------------------------------------------
+                0.01    0.04     100/100         seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&) [34]
+[35]     0.3    0.01    0.04     100         seal::KeyGenerator::generate_pk() [35]
+                0.02    0.00     400/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.00    0.01     100/8900        seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165] [14]
+                0.01    0.00     100/8900        seal::KeyGenerator::set_poly_coeffs_uniform(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.164] [15]
+                0.00    0.00     100/2900        seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+                0.00    0.00     100/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     100/5700        seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00     100/2900        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [93]
+                0.00    0.00     100/8700        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [87]
+-----------------------------------------------
+                0.04    0.00    3000/3000        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[36]     0.3    0.04    0.00    3000         seal::util::dyadic_product_coeffmod(unsigned long const*, unsigned long const*, unsigned long, seal::SmallModulus const&, unsigned long*) [36]
+-----------------------------------------------
+                0.01    0.03     100/100         seal::Evaluator::Evaluator(std::shared_ptr<seal::SEALContext> const&) [38]
+[37]     0.3    0.01    0.03     100         seal::Evaluator::populate_Zmstar_to_generator() [37]
+                0.02    0.00  409600/409600      seal::util::exponentiate_uint64(unsigned long, unsigned long) [42]
+                0.01    0.00  204800/204800      std::pair<std::_Rb_tree_iterator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, bool> std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_emplace_unique<unsigned long&, std::pair<unsigned long, unsigned long>&>(unsigned long&, std::pair<unsigned long, unsigned long>&) [48]
+-----------------------------------------------
+                0.00    0.04     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[38]     0.3    0.00    0.04     100         seal::Evaluator::Evaluator(std::shared_ptr<seal::SEALContext> const&) [38]
+                0.01    0.03     100/100         seal::Evaluator::populate_Zmstar_to_generator() [37]
+-----------------------------------------------
+                0.01    0.03     500/500         SHEEP::ContextSeal<bool>::encrypt(std::vector<bool, std::allocator<bool> >) [19]
+[39]     0.3    0.01    0.03     500         seal::BatchEncoder::encode(std::vector<unsigned long, std::allocator<unsigned long> > const&, seal::Plaintext&) [39]
+                0.03    0.00     500/8200        seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [18]
+                0.00    0.00     500/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+-----------------------------------------------
+                                                 <spontaneous>
+[40]     0.2    0.04    0.00                 seal::AESEncryptor::ecb_encrypt(seal::aes_block const*, unsigned long, seal::aes_block*) const [40]
+-----------------------------------------------
+                0.03    0.00     500/500         seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+[41]     0.2    0.03    0.00     500         seal::Encryptor::preencrypt(unsigned long const*, unsigned long, seal::SEALContext::ContextData const&, unsigned long*) [41]
+-----------------------------------------------
+                0.02    0.00  409600/409600      seal::Evaluator::populate_Zmstar_to_generator() [37]
+[42]     0.1    0.02    0.00  409600         seal::util::exponentiate_uint64(unsigned long, unsigned long) [42]
+-----------------------------------------------
+                0.02    0.00     100/100         seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [44]
+[43]     0.1    0.02    0.00     100         seal::BatchEncoder::populate_matrix_reps_index_map() [43]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+-----------------------------------------------
+                0.00    0.02     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[44]     0.1    0.00    0.02     100         seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [44]
+                0.02    0.00     100/100         seal::BatchEncoder::populate_matrix_reps_index_map() [43]
+                0.00    0.00     100/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/100         seal::BatchEncoder::populate_roots_of_unity_vector(seal::SEALContext::ContextData const&) [124]
+-----------------------------------------------
+                                                 <spontaneous>
+[45]     0.1    0.02    0.00                 std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_S_right(std::_Rb_tree_node_base*) [45]
+-----------------------------------------------
+                                                 <spontaneous>
+[46]     0.1    0.02    0.00                 __gnu_cxx::__enable_if<std::__is_scalar<unsigned long>::__value, unsigned long*>::__type std::__fill_n_a<unsigned long*, unsigned long, unsigned long>(unsigned long*, unsigned long, unsigned long const&) [46]
+-----------------------------------------------
+                0.01    0.00     500/500         seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+[47]     0.1    0.01    0.00     500         seal::Encryptor::set_poly_coeffs_zero_one_negone(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [47]
+                0.00    0.00 2048000/251531176     seal::FastPRNG<0ul, 0ul>::generate() [17]
+-----------------------------------------------
+                0.01    0.00  204800/204800      seal::Evaluator::populate_Zmstar_to_generator() [37]
+[48]     0.1    0.01    0.00  204800         std::pair<std::_Rb_tree_iterator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, bool> std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_emplace_unique<unsigned long&, std::pair<unsigned long, unsigned long>&>(unsigned long&, std::pair<unsigned long, unsigned long>&) [48]
+-----------------------------------------------
+                0.00    0.00     200/5100        seal::SmallModulus::SmallModulus(unsigned long) [72]
+                0.00    0.00     200/5100        auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [71]
+                0.00    0.00     300/5100        auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&) [70]
+                0.00    0.00     400/5100        auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [69]
+                0.00    0.00     600/5100        seal::util::BaseConverter::reset() [67]
+                0.00    0.00     800/5100        auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&) [66]
+                0.00    0.00    1000/5100        seal::util::SmallNTTTables::reset() [65]
+                0.00    0.00    1600/5100        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[49]     0.1    0.00    0.01    5100         seal::SmallModulus::set_value(unsigned long) [49]
+                0.01    0.00     557/557         seal::util::divide_uint192_uint64_inplace(unsigned long*, unsigned long, unsigned long*) [51]
+-----------------------------------------------
+                0.00    0.00     300/1300        seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.01    0.00    1000/1300        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[50]     0.1    0.01    0.00    1300         seal::util::multiply_uint_uint64(unsigned long const*, unsigned long, unsigned long, unsigned long, unsigned long*) [50]
+-----------------------------------------------
+                0.01    0.00     557/557         seal::SmallModulus::set_value(unsigned long) [49]
+[51]     0.1    0.01    0.00     557         seal::util::divide_uint192_uint64_inplace(unsigned long*, unsigned long, unsigned long*) [51]
+-----------------------------------------------
+                0.01    0.00     400/400         SHEEP::ContextSeal<bool>::Add(seal::Ciphertext, seal::Ciphertext) [56]
+[52]     0.1    0.01    0.00     400         seal::Evaluator::add_inplace(seal::Ciphertext&, seal::Ciphertext const&) [52]
+                0.00    0.00     800/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     400/700         seal::Ciphertext::resize(std::shared_ptr<seal::SEALContext> const&, std::array<unsigned long, 4ul>, unsigned long) [102]
+-----------------------------------------------
+                0.01    0.00     100/100         seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+[53]     0.1    0.01    0.00     100         seal::Decryptor::compute_secret_key_array(unsigned long) [53]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.01     100/100         seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[54]     0.1    0.00    0.01     100         seal::KeyGenerator::populate_decomposition_factors(seal::SEALContext::ContextData const&, int, std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >&) const [54]
+                0.01    0.00     100/100         std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >::_M_default_append(unsigned long) [55]
+-----------------------------------------------
+                0.01    0.00     100/100         seal::KeyGenerator::populate_decomposition_factors(seal::SEALContext::ContextData const&, int, std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >&) const [54]
+[55]     0.1    0.01    0.00     100         std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >::_M_default_append(unsigned long) [55]
+-----------------------------------------------
+                                                 <spontaneous>
+[56]     0.1    0.00    0.01                 SHEEP::ContextSeal<bool>::Add(seal::Ciphertext, seal::Ciphertext) [56]
+                0.01    0.00     400/400         seal::Evaluator::add_inplace(seal::Ciphertext&, seal::Ciphertext const&) [52]
+-----------------------------------------------
+                                                 <spontaneous>
+[57]     0.1    0.01    0.00                 __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::deallocate(std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >*, unsigned long) [57]
+-----------------------------------------------
+                                                 <spontaneous>
+[58]     0.1    0.01    0.00                 void std::_Destroy_aux<false>::__destroy<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*>(std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*, std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*) [58]
+-----------------------------------------------
+                                                 <spontaneous>
+[59]     0.1    0.01    0.00                 std::vector<bool, std::allocator<bool> >::operator=(std::initializer_list<bool>) [59]
+-----------------------------------------------
+                                                 <spontaneous>
+[60]     0.1    0.01    0.00                 std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_put_node(std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >*) [60]
+-----------------------------------------------
+                                                 <spontaneous>
+[61]     0.1    0.01    0.00                 seal::SmallModulus const* std::__niter_base<seal::SmallModulus const*, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >(__gnu_cxx::__normal_iterator<seal::SmallModulus const*, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >) [61]
+-----------------------------------------------
+                                                 <spontaneous>
+[62]     0.1    0.01    0.00                 bool std::operator==<unsigned long, 4ul>(std::array<unsigned long, 4ul> const&, std::array<unsigned long, 4ul> const&) [62]
+-----------------------------------------------
+                0.00    0.01     100/100         seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&) [34]
+[63]     0.1    0.00    0.01     100         seal::KeyGenerator::generate_sk() [63]
+                0.01    0.00     200/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.00    0.00     100/100         seal::KeyGenerator::set_poly_coeffs_zero_one_negone(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [68]
+                0.00    0.00     100/2900        seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+                0.00    0.00     200/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     100/8700        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [87]
+                0.00    0.00     100/2900        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [93]
+-----------------------------------------------
+                0.00    0.00     100/100         SHEEP::ContextSeal<bool>::decrypt(seal::Ciphertext) [31]
+[64]     0.0    0.00    0.00     100         seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&) [64]
+                0.00    0.00     100/44700       seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [10]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00    1000/1000        seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+[65]     0.0    0.00    0.00    1000         seal::util::SmallNTTTables::reset() [65]
+                0.00    0.00    1000/5100        seal::SmallModulus::set_value(unsigned long) [49]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[66]     0.0    0.00    0.00     200         auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&) [66]
+                0.00    0.00     800/5100        seal::SmallModulus::set_value(unsigned long) [49]
+                0.00    0.00     200/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     200/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[67]     0.0    0.00    0.00     200         seal::util::BaseConverter::reset() [67]
+                0.00    0.00     600/5100        seal::SmallModulus::set_value(unsigned long) [49]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::KeyGenerator::generate_sk() [63]
+[68]     0.0    0.00    0.00     100         seal::KeyGenerator::set_poly_coeffs_zero_one_negone(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [68]
+                0.00    0.00  409600/251531176     seal::FastPRNG<0ul, 0ul>::generate() [17]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[69]     0.0    0.00    0.00     200         auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [69]
+                0.00    0.00     400/5100        seal::SmallModulus::set_value(unsigned long) [49]
+                0.00    0.00     200/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     200/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[70]     0.0    0.00    0.00     200         auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&) [70]
+                0.00    0.00     300/5100        seal::SmallModulus::set_value(unsigned long) [49]
+                0.00    0.00     200/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     200/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[71]     0.0    0.00    0.00     200         auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [71]
+                0.00    0.00     200/5100        seal::SmallModulus::set_value(unsigned long) [49]
+                0.00    0.00     200/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     200/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+                0.00    0.00     200/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+-----------------------------------------------
+                                                 <spontaneous>
+[72]     0.0    0.00    0.00                 seal::SmallModulus::SmallModulus(unsigned long) [72]
+                0.00    0.00     200/5100        seal::SmallModulus::set_value(unsigned long) [49]
+-----------------------------------------------
+                0.00    0.00     100/2900        seal::KeyGenerator::generate_sk() [63]
+                0.00    0.00     100/2900        seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     500/2900        seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.00    0.00    2200/2900        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[73]     0.0    0.00    0.00    2900         seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+                0.00    0.00    2900/7862042     seal::AESEncryptor::counter_encrypt(unsigned long, unsigned long, seal::aes_block*) const [22]
+                0.00    0.00    5800/8700        std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [87]
+                0.00    0.00    2900/2900        seal::AESEncryptor::set_key(seal::aes_block const&) [92]
+-----------------------------------------------
+                0.00    0.00     100/252656      seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.00    0.00     200/252656      seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.00    0.00     200/252656      auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&) [70]
+                0.00    0.00     200/252656      auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [71]
+                0.00    0.00     200/252656      auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&) [66]
+                0.00    0.00     200/252656      auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [69]
+                0.00    0.00     400/252656      seal::util::Pointer<seal::util::Pointer<unsigned long, void>, void>::release() [95]
+                0.00    0.00     400/252656      std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+                0.00    0.00     600/252656      auto seal::util::allocate<unsigned long, unsigned long, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, unsigned long&&) [108]
+                0.00    0.00     600/252656      auto seal::util::allocate<seal::util::Pointer<unsigned long, void>, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [107]
+                0.00    0.00    1000/252656      seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+                0.00    0.00    1800/252656      seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.00    0.00  246756/252656      seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+[81]     0.0    0.00    0.00  252656         seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     100/55600       seal::BatchEncoder::populate_matrix_reps_index_map() [43]
+                0.00    0.00     100/55600       seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&) [64]
+                0.00    0.00     100/55600       seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [44]
+                0.00    0.00     100/55600       seal::Ciphertext::operator=(seal::Ciphertext const&) [122]
+                0.00    0.00     100/55600       seal::Decryptor::compute_secret_key_array(unsigned long) [53]
+                0.00    0.00     100/55600       seal::Encryptor::Encryptor(std::shared_ptr<seal::SEALContext> const&, seal::PublicKey const&) [128]
+                0.00    0.00     100/55600       seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     100/55600       seal::util::BaseConverter::fastbconv_plain_gamma(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [131]
+                0.00    0.00     100/55600       seal::util::divide_uint_uint_inplace(unsigned long*, unsigned long const*, unsigned long, unsigned long*, seal::util::MemoryPool&) [116]
+                0.00    0.00     200/55600       auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&) [70]
+                0.00    0.00     200/55600       auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [71]
+                0.00    0.00     200/55600       auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&) [66]
+                0.00    0.00     200/55600       seal::Decryptor::Decryptor(std::shared_ptr<seal::SEALContext> const&, seal::SecretKey const&) [127]
+                0.00    0.00     200/55600       seal::KeyGenerator::generate_sk() [63]
+                0.00    0.00     200/55600       auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [69]
+                0.00    0.00     500/55600       seal::BatchEncoder::encode(std::vector<unsigned long, std::allocator<unsigned long> > const&, seal::Plaintext&) [39]
+                0.00    0.00     500/55600       seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.00    0.00     500/55600       seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.00    0.00     600/55600       seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.00    0.00     600/55600       seal::EncryptionParameters::compute_parms_id() [104]
+                0.00    0.00     600/55600       auto seal::util::allocate<unsigned long, unsigned long, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, unsigned long&&) [108]
+                0.00    0.00     600/55600       auto seal::util::allocate<seal::util::Pointer<unsigned long, void>, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [107]
+                0.00    0.00     600/55600       seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [106]
+                0.00    0.00     900/55600       seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+                0.00    0.00    1000/55600       seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [23]
+                0.00    0.00    1100/55600       seal::util::BaseConverter::fastbconv(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [29]
+                0.00    0.00    1400/55600       seal::util::BaseConverter::fastbconv_mtilde(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [26]
+                0.00    0.00    2700/55600       seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.00    0.00    3300/55600       seal::util::BaseConverter::fastbconv_sk(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [25]
+                0.00    0.00    3800/55600       seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&) [88]
+                0.00    0.00    4400/55600       seal::Ciphertext::reserve_internal(unsigned long, unsigned long, unsigned long) [91]
+                0.00    0.00    6000/55600       seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [4]
+                0.00    0.00    6600/55600       seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+                0.00    0.00   17800/55600       auto seal::util::allocate<unsigned long, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [749]
+[82]     0.0    0.00    0.00   55600         seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00  246756/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+                0.00    0.00   55500/55500       seal::util::MemoryPoolHeadMT::get() [83]
+                0.00    0.00      26/26          seal::util::MemoryPoolHeadMT::MemoryPoolHeadMT(unsigned long) [136]
+                0.00    0.00      25/25          std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::insert(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead* const*, std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> > >, seal::util::MemoryPoolHead* const&) [138]
+                0.00    0.00       1/1           seal::util::MemoryPoolHead*& std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::emplace_back<seal::util::MemoryPoolHead*&>(seal::util::MemoryPoolHead*&) [159]
+-----------------------------------------------
+                0.00    0.00   55500/55500       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+[83]     0.0    0.00    0.00   55500         seal::util::MemoryPoolHeadMT::get() [83]
+                0.00    0.00      40/66          void std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> >::_M_realloc_insert<seal::util::MemoryPoolHead::allocation const&>(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead::allocation*, std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> > >, seal::util::MemoryPoolHead::allocation const&) [135]
+-----------------------------------------------
+                0.00    0.00     100/54900       seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&) [64]
+                0.00    0.00     100/54900       seal::util::ConstPointer<unsigned long, void>::release() [115]
+                0.00    0.00     100/54900       seal::Decryptor::compute_secret_key_array(unsigned long) [53]
+                0.00    0.00     100/54900       seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     100/54900       seal::util::BaseConverter::fastbconv_plain_gamma(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [131]
+                0.00    0.00     100/54900       seal::util::divide_uint_uint_inplace(unsigned long*, unsigned long const*, unsigned long, unsigned long*, seal::util::MemoryPool&) [116]
+                0.00    0.00     200/54900       seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.00    0.00     300/54900       seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+                0.00    0.00     400/54900       seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+                0.00    0.00     500/54900       seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.00    0.00     600/54900       seal::EncryptionParameters::compute_parms_id() [104]
+                0.00    0.00     600/54900       seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [106]
+                0.00    0.00    1000/54900       seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [23]
+                0.00    0.00    1100/54900       seal::util::BaseConverter::fastbconv(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [29]
+                0.00    0.00    1200/54900       seal::util::Pointer<seal::util::Pointer<unsigned long, void>, void>::release() [95]
+                0.00    0.00    1400/54900       seal::util::BaseConverter::fastbconv_mtilde(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [26]
+                0.00    0.00    3300/54900       seal::util::BaseConverter::fastbconv_sk(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [25]
+                0.00    0.00    3800/54900       seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&) [88]
+                0.00    0.00    4400/54900       std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+                0.00    0.00    6600/54900       seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+                0.00    0.00    8500/54900       seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+                0.00    0.00   20400/54900       seal::util::Pointer<unsigned long, void>::release() [743]
+[84]     0.0    0.00    0.00   54900         seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     100/11300       seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [44]
+                0.00    0.00     100/11300       seal::Decryptor::Decryptor(std::shared_ptr<seal::SEALContext> const&, seal::SecretKey const&) [127]
+                0.00    0.00     100/11300       seal::Encryptor::Encryptor(std::shared_ptr<seal::SEALContext> const&, seal::PublicKey const&) [128]
+                0.00    0.00     100/11300       seal::KeyGenerator::generate_sk() [63]
+                0.00    0.00     100/11300       seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+                0.00    0.00     100/11300       seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     200/11300       auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [71]
+                0.00    0.00     300/11300       seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&) [34]
+                0.00    0.00     500/11300       seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.00    0.00     600/11300       seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [106]
+                0.00    0.00     800/11300       seal::Evaluator::add_inplace(seal::Ciphertext&, seal::Ciphertext const&) [52]
+                0.00    0.00    8300/11300       seal::MemoryManager::GetPool(unsigned long) [648]
+[85]     0.0    0.00    0.00   11300         seal::MMProfGlobal::get_pool(unsigned long) [85]
+-----------------------------------------------
+                0.00    0.00    1000/9900        seal::Encryptor::set_poly_coeffs_normal(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const [30]
+                0.00    0.00    8900/9900        seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165] [14]
+[86]     0.0    0.00    0.00    9900         seal::util::ClippedNormalDistribution::ClippedNormalDistribution(double, double, double) [86]
+-----------------------------------------------
+                0.00    0.00     100/8700        seal::KeyGenerator::generate_sk() [63]
+                0.00    0.00     100/8700        seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     500/8700        seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.00    0.00    2200/8700        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+                0.00    0.00    5800/8700        seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+[87]     0.0    0.00    0.00    8700         std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [87]
+-----------------------------------------------
+                0.00    0.00     600/6000        seal::SEALContext::validate(seal::EncryptionParameters) [1]
+                0.00    0.00    5400/6000        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[88]     0.0    0.00    0.00    6000         seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&) [88]
+                0.00    0.00    3800/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00    3800/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     100/5700        seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     500/5700        seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.00    0.00     700/5700        seal::Ciphertext::resize(std::shared_ptr<seal::SEALContext> const&, std::array<unsigned long, 4ul>, unsigned long) [102]
+                0.00    0.00    4400/5700        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[89]     0.0    0.00    0.00    5700         seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+                0.00    0.00     900/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     300/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00    5072/5072        seal::util::try_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [99]
+[90]     0.0    0.00    0.00    5072         seal::util::try_minimal_primitive_root(unsigned long, seal::util::Modulus const&, unsigned long*, seal::util::MemoryPool&) [90]
+-----------------------------------------------
+                0.00    0.00    4400/4400        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[91]     0.0    0.00    0.00    4400         seal::Ciphertext::reserve_internal(unsigned long, unsigned long, unsigned long) [91]
+                0.00    0.00    4400/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+-----------------------------------------------
+                0.00    0.00    2900/2900        seal::FastPRNGFactory<0ul, 0ul>::create() [73]
+[92]     0.0    0.00    0.00    2900         seal::AESEncryptor::set_key(seal::aes_block const&) [92]
+-----------------------------------------------
+                0.00    0.00     100/2900        seal::KeyGenerator::generate_sk() [63]
+                0.00    0.00     100/2900        seal::KeyGenerator::generate_pk() [35]
+                0.00    0.00     500/2900        seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [20]
+                0.00    0.00    2200/2900        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[93]     0.0    0.00    0.00    2900         std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [93]
+-----------------------------------------------
+                0.00    0.00    2200/2200        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[94]     0.0    0.00    0.00    2200         seal::AESDecryptor::ecb_decrypt(seal::aes_block const&, seal::aes_block&) [94]
+-----------------------------------------------
+                0.00    0.00    2200/2200        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[95]     0.0    0.00    0.00    2200         seal::util::Pointer<seal::util::Pointer<unsigned long, void>, void>::release() [95]
+                0.00    0.00    1200/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00     400/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00    2200/2200        seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[96]     0.0    0.00    0.00    2200         std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >::reserve(unsigned long) [96]
+-----------------------------------------------
+                0.00    0.00    1800/1800        seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[97]     0.0    0.00    0.00    1800         seal::Ciphertext::data(unsigned long) [97]
+-----------------------------------------------
+                0.00    0.00     100/1300        seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+                0.00    0.00     400/1300        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.00    0.00     800/1300        seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[98]     0.0    0.00    0.00    1300         seal::util::Pointer<seal::util::SmallNTTTables, void>::release() [98]
+-----------------------------------------------
+                0.00    0.00    1000/1000        seal::util::try_minimal_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [33]
+[99]     0.0    0.00    0.00    1000         seal::util::try_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [99]
+                0.00    0.00    5072/5072        seal::util::try_minimal_primitive_root(unsigned long, seal::util::Modulus const&, unsigned long*, seal::util::MemoryPool&) [90]
+-----------------------------------------------
+                0.00    0.00     400/1000        seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+                0.00    0.00     600/1000        seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[100]    0.0    0.00    0.00    1000         _init [100]
+-----------------------------------------------
+                0.00    0.00     100/800         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+                0.00    0.00     100/800         seal::SEALContext::ContextData::~ContextData() [123]
+                0.00    0.00     200/800         std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+                0.00    0.00     400/800         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[101]    0.0    0.00    0.00     800         seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+                0.00    0.00    8500/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00    1000/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     300/700         seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+                0.00    0.00     400/700         seal::Evaluator::add_inplace(seal::Ciphertext&, seal::Ciphertext const&) [52]
+[102]    0.0    0.00    0.00     700         seal::Ciphertext::resize(std::shared_ptr<seal::SEALContext> const&, std::array<unsigned long, 4ul>, unsigned long) [102]
+                0.00    0.00     700/5700        seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [89]
+-----------------------------------------------
+                0.00    0.00     700/700         seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[103]    0.0    0.00    0.00     700         seal::Ciphertext::data(unsigned long) const [103]
+-----------------------------------------------
+                0.00    0.00     100/600         seal::EncryptionParameters::EncryptionParameters(seal::scheme_type) [666]
+                0.00    0.00     100/600         seal::EncryptionParameters::set_poly_modulus_degree(unsigned long) [665]
+                0.00    0.00     100/600         seal::EncryptionParameters::set_coeff_modulus(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&) [662]
+                0.00    0.00     100/600         seal::EncryptionParameters::set_plain_modulus(seal::SmallModulus const&) [663]
+                0.00    0.00     100/600         seal::EncryptionParameters::set_plain_modulus(unsigned long) [664]
+                0.00    0.00     100/600         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[104]    0.0    0.00    0.00     600         seal::EncryptionParameters::compute_parms_id() [104]
+                0.00    0.00     600/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     600/600         seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [106]
+                0.00    0.00     600/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     600/600         seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [106]
+[105]    0.0    0.00    0.00     600         seal::util::HashFunction::keccak_1600(unsigned long (&) [5][5]) [105]
+-----------------------------------------------
+                0.00    0.00     600/600         seal::EncryptionParameters::compute_parms_id() [104]
+[106]    0.0    0.00    0.00     600         seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [106]
+                0.00    0.00     600/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     600/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     600/600         seal::util::HashFunction::keccak_1600(unsigned long (&) [5][5]) [105]
+                0.00    0.00     600/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     600/600         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[107]    0.0    0.00    0.00     600         auto seal::util::allocate<seal::util::Pointer<unsigned long, void>, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [107]
+                0.00    0.00     600/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     600/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     600/600         seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&) [11]
+[108]    0.0    0.00    0.00     600         auto seal::util::allocate<unsigned long, unsigned long, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, unsigned long&&) [108]
+                0.00    0.00     600/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     600/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+-----------------------------------------------
+                0.00    0.00     500/500         SHEEP::ContextSeal<bool>::encrypt(std::vector<bool, std::allocator<bool> >) [19]
+[109]    0.0    0.00    0.00     500         seal::Encryptor::encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [109]
+-----------------------------------------------
+                0.00    0.00     400/400         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[110]    0.0    0.00    0.00     400         seal::util::Pointer<seal::SmallModulus, void>::release() [110]
+-----------------------------------------------
+                0.00    0.00     300/300         seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [9]
+[111]    0.0    0.00    0.00     300         unsigned long seal::util::barrett_reduce_128<unsigned long long, seal::is_uint64_t<unsigned long long> >(unsigned long long const*, seal::SmallModulus const&) [111]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[112]    0.0    0.00    0.00     200         seal::util::PolyModulus::PolyModulus(seal::util::PolyModulus&&) [112]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[113]    0.0    0.00    0.00     200         seal::util::PolyModulus::PolyModulus(unsigned long const*, unsigned long, unsigned long) [113]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[114]    0.0    0.00    0.00     200         seal::util::PolyModulus::operator=(seal::util::PolyModulus&&) [114]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[115]    0.0    0.00    0.00     200         seal::util::ConstPointer<unsigned long, void>::release() [115]
+                0.00    0.00     100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[116]    0.0    0.00    0.00     200         seal::util::divide_uint_uint_inplace(unsigned long*, unsigned long const*, unsigned long, unsigned long*, seal::util::MemoryPool&) [116]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[117]    0.0    0.00    0.00     200         seal::util::Modulus::Modulus(seal::util::Modulus&&) [117]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[118]    0.0    0.00    0.00     200         seal::util::Modulus::Modulus(unsigned long const*, unsigned long) [118]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::validate(seal::EncryptionParameters) [1]
+[119]    0.0    0.00    0.00     200         seal::util::Modulus::operator=(seal::util::Modulus&&) [119]
+-----------------------------------------------
+                0.00    0.00     200/200         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[120]    0.0    0.00    0.00     200         std::pair<std::__detail::_Node_iterator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, false, true>, bool> std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_emplace<std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> > >(std::integral_constant<bool, true>, std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> >&&) [120]
+                0.00    0.00     100/100         std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_rehash(unsigned long, unsigned long const&) [132]
+-----------------------------------------------
+                0.00    0.00     100/200         std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release() [1930]
+                0.00    0.00     100/200         std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+[121]    0.0    0.00    0.00     200         std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [121]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::PublicKey::operator=(seal::PublicKey const&) [812]
+[122]    0.0    0.00    0.00     100         seal::Ciphertext::operator=(seal::Ciphertext const&) [122]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[123]    0.0    0.00    0.00     100         seal::SEALContext::ContextData::~ContextData() [123]
+                0.00    0.00     100/800         seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [44]
+[124]    0.0    0.00    0.00     100         seal::BatchEncoder::populate_roots_of_unity_vector(seal::SEALContext::ContextData const&) [124]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [2]
+[125]    0.0    0.00    0.00     100         seal::UniformRandomGeneratorFactory::default_factory() [125]
+-----------------------------------------------
+                0.00    0.00     100/100         SHEEP::ContextSeal<bool>::decrypt(seal::Ciphertext) [31]
+[126]    0.0    0.00    0.00     100         seal::Decryptor::decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [126]
+-----------------------------------------------
+                0.00    0.00     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[127]    0.0    0.00    0.00     100         seal::Decryptor::Decryptor(std::shared_ptr<seal::SEALContext> const&, seal::SecretKey const&) [127]
+                0.00    0.00     200/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+-----------------------------------------------
+                0.00    0.00     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[128]    0.0    0.00    0.00     100         seal::Encryptor::Encryptor(std::shared_ptr<seal::SEALContext> const&, seal::PublicKey const&) [128]
+                0.00    0.00     100/11300       seal::MMProfGlobal::get_pool(unsigned long) [85]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+-----------------------------------------------
+                0.00    0.00     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[129]    0.0    0.00    0.00     100         seal::KeyGenerator::public_key() const [129]
+-----------------------------------------------
+                0.00    0.00     100/100         SHEEP::ContextSeal<bool>::configure() [6]
+[130]    0.0    0.00    0.00     100         seal::KeyGenerator::secret_key() const [130]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [32]
+[131]    0.0    0.00    0.00     100         seal::util::BaseConverter::fastbconv_plain_gamma(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const [131]
+                0.00    0.00     100/55600       seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+                0.00    0.00     100/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+-----------------------------------------------
+                0.00    0.00     100/100         std::pair<std::__detail::_Node_iterator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, false, true>, bool> std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_emplace<std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> > >(std::integral_constant<bool, true>, std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> >&&) [120]
+[132]    0.0    0.00    0.00     100         std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_rehash(unsigned long, unsigned long const&) [132]
+-----------------------------------------------
+                                 100             std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+                0.00    0.00     100/100         std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release() [1930]
+[133]    0.0    0.00    0.00     100+100     std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+                0.00    0.00    4400/54900       seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [84]
+                0.00    0.00     400/252656      seal::util::MemoryPoolHeadMT::item_byte_count() const [81]
+                0.00    0.00     200/800         seal::util::Pointer<seal::util::BaseConverter, void>::release() [101]
+                0.00    0.00     100/200         std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [121]
+                                 100             std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [133]
+-----------------------------------------------
+                0.00    0.00     100/100         seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [8]
+[134]    0.0    0.00    0.00     100         std::vector<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >, std::allocator<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> > > >::_M_default_append(unsigned long) [134]
+-----------------------------------------------
+                0.00    0.00      26/66          seal::util::MemoryPoolHeadMT::MemoryPoolHeadMT(unsigned long) [136]
+                0.00    0.00      40/66          seal::util::MemoryPoolHeadMT::get() [83]
+[135]    0.0    0.00    0.00      66         void std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> >::_M_realloc_insert<seal::util::MemoryPoolHead::allocation const&>(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead::allocation*, std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> > >, seal::util::MemoryPoolHead::allocation const&) [135]
+-----------------------------------------------
+                0.00    0.00      26/26          seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+[136]    0.0    0.00    0.00      26         seal::util::MemoryPoolHeadMT::MemoryPoolHeadMT(unsigned long) [136]
+                0.00    0.00      26/66          void std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> >::_M_realloc_insert<seal::util::MemoryPoolHead::allocation const&>(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead::allocation*, std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> > >, seal::util::MemoryPoolHead::allocation const&) [135]
+-----------------------------------------------
+                0.00    0.00      26/26          seal::util::MemoryPoolMT::~MemoryPoolMT() [156]
+[137]    0.0    0.00    0.00      26         seal::util::MemoryPoolHeadMT::~MemoryPoolHeadMT() [137]
+-----------------------------------------------
+                0.00    0.00      25/25          seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+[138]    0.0    0.00    0.00      25         std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::insert(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead* const*, std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> > >, seal::util::MemoryPoolHead* const&) [138]
+-----------------------------------------------
+                0.00    0.00       6/6           std::map<unsigned long, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > > >::~map() [2103]
+[139]    0.0    0.00    0.00       6         std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >, std::_Select1st<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > > >::_M_erase(std::_Rb_tree_node<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > >*) [139]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[140]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal10CiphertextaSERKS0_ [140]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[141]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal11SEALContext8validateENS_20EncryptionParametersE [141]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[142]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal12BatchEncoderC2ERKSt10shared_ptrINS_11SEALContextEE [142]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[143]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal12KeyGeneratorC2ERKSt10shared_ptrINS_11SEALContextEE [143]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[144]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal13MemoryManager8mm_prof_E [144]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[145]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal26save_encryption_parametersERKNS_20EncryptionParametersERSo [145]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[146]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal4util13BaseConverterC2ERKSt6vectorINS_12SmallModulusESaIS3_EEmRKS3_RKNS_16MemoryPoolHandleE [146]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[147]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal4util14SmallNTTTablesC2EiRKNS_12SmallModulusERKNS_16MemoryPoolHandleE [147]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[148]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal4util16global_variables18global_memory_poolE [148]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[149]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal4util17is_primitive_rootEmmRKNS_12SmallModulusE [149]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[150]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal4util22ntt_multiply_poly_polyEPKmS2_RKNS0_14SmallNTTTablesEPmRNS0_10MemoryPoolE [150]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[151]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal9DecryptorC2ERKSt10shared_ptrINS_11SEALContextEERKNS_9SecretKeyE [151]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[152]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal9EncryptorC2ERKSt10shared_ptrINS_11SEALContextEERKNS_9PublicKeyE [152]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[153]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4seal9EvaluatorC2ERKSt10shared_ptrINS_11SEALContextEE [153]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[154]    0.0    0.00    0.00       1         _GLOBAL__sub_I__ZNK4seal12SmallModulus4saveERSo [154]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [2967]
+[155]    0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [clone .constprop.53] [155]
+-----------------------------------------------
+                0.00    0.00       1/1           seal::util::MemoryPoolMT::~MemoryPoolMT() [673]
+[156]    0.0    0.00    0.00       1         seal::util::MemoryPoolMT::~MemoryPoolMT() [156]
+                0.00    0.00      26/26          seal::util::MemoryPoolHeadMT::~MemoryPoolHeadMT() [137]
+-----------------------------------------------
+                0.00    0.00       1/1           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release() [1930]
+[157]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<seal::FastPRNGFactory<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [157]
+-----------------------------------------------
+                0.00    0.00       1/1           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release() [1930]
+[158]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<seal::FastPRNGFactory<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose() [158]
+-----------------------------------------------
+                0.00    0.00       1/1           seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [82]
+[159]    0.0    0.00    0.00       1         seal::util::MemoryPoolHead*& std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::emplace_back<seal::util::MemoryPoolHead*&>(seal::util::MemoryPoolHead*&) [159]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2015 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+ [140] _GLOBAL__sub_I__ZN4seal10CiphertextaSERKS0_ [156] seal::util::MemoryPoolMT::~MemoryPoolMT() [37] seal::Evaluator::populate_Zmstar_to_generator()
+ [141] _GLOBAL__sub_I__ZN4seal11SEALContext8validateENS_20EncryptionParametersE [67] seal::util::BaseConverter::reset() [38] seal::Evaluator::Evaluator(std::shared_ptr<seal::SEALContext> const&)
+ [142] _GLOBAL__sub_I__ZN4seal12BatchEncoderC2ERKSt10shared_ptrINS_11SEALContextEE [9] seal::util::BaseConverter::generate(std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > const&, unsigned long, seal::SmallModulus const&) [57] __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::deallocate(std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >*, unsigned long)
+ [143] _GLOBAL__sub_I__ZN4seal12KeyGeneratorC2ERKSt10shared_ptrINS_11SEALContextEE [65] seal::util::SmallNTTTables::reset() [103] seal::Ciphertext::data(unsigned long) const
+ [144] _GLOBAL__sub_I__ZN4seal13MemoryManager8mm_prof_E [4] seal::util::SmallNTTTables::generate(int, seal::SmallModulus const&) [40] seal::AESEncryptor::ecb_encrypt(seal::aes_block const*, unsigned long, seal::aes_block*) const
+ [145] _GLOBAL__sub_I__ZN4seal26save_encryption_parametersERKNS_20EncryptionParametersERSo [84] seal::util::MemoryPoolHeadMT::add(seal::util::MemoryPoolItem*) [22] seal::AESEncryptor::counter_encrypt(unsigned long, unsigned long, seal::aes_block*) const
+ [146] _GLOBAL__sub_I__ZN4seal4util13BaseConverterC2ERKSt6vectorINS_12SmallModulusESaIS3_EEmRKS3_RKNS_16MemoryPoolHandleE [83] seal::util::MemoryPoolHeadMT::get() [129] seal::KeyGenerator::public_key() const
+ [147] _GLOBAL__sub_I__ZN4seal4util14SmallNTTTablesC2EiRKNS_12SmallModulusERKNS_16MemoryPoolHandleE [136] seal::util::MemoryPoolHeadMT::MemoryPoolHeadMT(unsigned long) [130] seal::KeyGenerator::secret_key() const
+ [148] _GLOBAL__sub_I__ZN4seal4util16global_variables18global_memory_poolE [137] seal::util::MemoryPoolHeadMT::~MemoryPoolHeadMT() [14] seal::KeyGenerator::set_poly_coeffs_normal(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.165]
+ [149] _GLOBAL__sub_I__ZN4seal4util17is_primitive_rootEmmRKNS_12SmallModulusE [111] unsigned long seal::util::barrett_reduce_128<unsigned long long, seal::is_uint64_t<unsigned long long> >(unsigned long long const*, seal::SmallModulus const&) [15] seal::KeyGenerator::set_poly_coeffs_uniform(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const [clone .constprop.164]
+ [150] _GLOBAL__sub_I__ZN4seal4util22ntt_multiply_poly_polyEPKmS2_RKNS0_14SmallNTTTablesEPmRNS0_10MemoryPoolE [99] seal::util::try_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [54] seal::KeyGenerator::populate_decomposition_factors(seal::SEALContext::ContextData const&, int, std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >&) const
+ [151] _GLOBAL__sub_I__ZN4seal9DecryptorC2ERKSt10shared_ptrINS_11SEALContextEERKNS_9SecretKeyE [42] seal::util::exponentiate_uint64(unsigned long, unsigned long) [68] seal::KeyGenerator::set_poly_coeffs_zero_one_negone(seal::SEALContext::ContextData const&, unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>) const
+ [152] _GLOBAL__sub_I__ZN4seal9EncryptorC2ERKSt10shared_ptrINS_11SEALContextEERKNS_9PublicKeyE [50] seal::util::multiply_uint_uint64(unsigned long const*, unsigned long, unsigned long, unsigned long, unsigned long*) [24] seal::util::BaseConverter::fast_floor(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+ [153] _GLOBAL__sub_I__ZN4seal9EvaluatorC2ERKSt10shared_ptrINS_11SEALContextEE [36] seal::util::dyadic_product_coeffmod(unsigned long const*, unsigned long const*, unsigned long, seal::SmallModulus const&, unsigned long*) [25] seal::util::BaseConverter::fastbconv_sk(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+ [154] _GLOBAL__sub_I__ZNK4seal12SmallModulus4saveERSo [116] seal::util::divide_uint_uint_inplace(unsigned long*, unsigned long const*, unsigned long, unsigned long*, seal::util::MemoryPool&) [26] seal::util::BaseConverter::fastbconv_mtilde(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+ [155] __static_initialization_and_destruction_0(int, int) [clone .constprop.53] [86] seal::util::ClippedNormalDistribution::ClippedNormalDistribution(double, double, double) [131] seal::util::BaseConverter::fastbconv_plain_gamma(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  [89] seal::Ciphertext::resize_internal(unsigned long, unsigned long, unsigned long) [10] seal::util::ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [21] seal::util::BaseConverter::mont_rq(unsigned long const*, unsigned long*) const
+  [91] seal::Ciphertext::reserve_internal(unsigned long, unsigned long, unsigned long) [90] seal::util::try_minimal_primitive_root(unsigned long, seal::util::Modulus const&, unsigned long*, seal::util::MemoryPool&) [29] seal::util::BaseConverter::fastbconv(unsigned long const*, unsigned long*, seal::MemoryPoolHandle const&) const
+  [97] seal::Ciphertext::data(unsigned long) [33] seal::util::try_minimal_primitive_root(unsigned long, seal::SmallModulus const&, unsigned long&) [28] seal::util::SmallNTTTables::ntt_powers_of_primitive_root(unsigned long, unsigned long*) const
+ [102] seal::Ciphertext::resize(std::shared_ptr<seal::SEALContext> const&, std::array<unsigned long, 4ul>, unsigned long) [5] seal::util::divide_uint128_uint64_inplace(unsigned long*, unsigned long, unsigned long*) [81] seal::util::MemoryPoolHeadMT::item_byte_count() const
+ [122] seal::Ciphertext::operator=(seal::Ciphertext const&) [51] seal::util::divide_uint192_uint64_inplace(unsigned long*, unsigned long, unsigned long*) [30] seal::Encryptor::set_poly_coeffs_normal(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const
+ [123] seal::SEALContext::ContextData::~ContextData() [23] seal::util::ntt_double_multiply_poly_nttpoly(unsigned long const*, unsigned long const*, unsigned long const*, seal::util::SmallNTTTables const&, unsigned long*, unsigned long*, seal::util::MemoryPool&) [47] seal::Encryptor::set_poly_coeffs_zero_one_negone(unsigned long*, std::shared_ptr<seal::UniformRandomGenerator>, seal::SEALContext::ContextData const&) const
+   [1] seal::SEALContext::validate(seal::EncryptionParameters) [18] seal::util::inverse_ntt_negacyclic_harvey_lazy(unsigned long*, seal::util::SmallNTTTables const&) [120] std::pair<std::__detail::_Node_iterator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, false, true>, bool> std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_emplace<std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> > >(std::integral_constant<bool, true>, std::pair<std::array<unsigned long, 4ul>, std::shared_ptr<seal::SEALContext::ContextData const> >&&)
+   [2] seal::SEALContext::SEALContext(seal::EncryptionParameters, seal::MemoryPoolHandle const&) [117] seal::util::Modulus::Modulus(seal::util::Modulus&&) [132] std::_Hashtable<std::array<unsigned long, 4ul>, std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> >, std::allocator<std::pair<std::array<unsigned long, 4ul> const, std::shared_ptr<seal::SEALContext::ContextData const> > >, std::__detail::_Select1st, std::equal_to<std::array<unsigned long, 4ul> >, std::hash<std::array<unsigned long, 4ul> >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+  [94] seal::AESDecryptor::ecb_decrypt(seal::aes_block const&, seal::aes_block&) [118] seal::util::Modulus::Modulus(unsigned long const*, unsigned long) [58] void std::_Destroy_aux<false>::__destroy<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*>(std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*, std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >*)
+  [92] seal::AESEncryptor::set_key(seal::aes_block const&) [119] seal::util::Modulus::operator=(seal::util::Modulus&&) [157] std::_Sp_counted_ptr<seal::FastPRNGFactory<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+  [43] seal::BatchEncoder::populate_matrix_reps_index_map() [101] seal::util::Pointer<seal::util::BaseConverter, void>::release() [158] std::_Sp_counted_ptr<seal::FastPRNGFactory<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose()
+ [124] seal::BatchEncoder::populate_roots_of_unity_vector(seal::SEALContext::ContextData const&) [98] seal::util::Pointer<seal::util::SmallNTTTables, void>::release() [93] std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+  [64] seal::BatchEncoder::decode(seal::Plaintext const&, std::vector<unsigned long, std::allocator<unsigned long> >&, seal::MemoryPoolHandle const&) [95] seal::util::Pointer<seal::util::Pointer<unsigned long, void>, void>::release() [87] std::_Sp_counted_ptr<seal::FastPRNG<0ul, 0ul>*, (__gnu_cxx::_Lock_policy)2>::_M_dispose()
+  [39] seal::BatchEncoder::encode(std::vector<unsigned long, std::allocator<unsigned long> > const&, seal::Plaintext&) [110] seal::util::Pointer<seal::SmallModulus, void>::release() [16] double std::normal_distribution<double>::operator()<seal::util::RandomToStandardAdapter>(seal::util::RandomToStandardAdapter&, std::normal_distribution<double>::param_type const&)
+  [44] seal::BatchEncoder::BatchEncoder(std::shared_ptr<seal::SEALContext> const&) [66] auto seal::util::allocate<seal::util::BaseConverter, seal::MemoryPoolHandle&, std::enable_if<true, void> >(seal::util::MemoryPool&, seal::MemoryPoolHandle&) [121] std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+   [7] seal::KeyGenerator::galois_keys(int) [71] auto seal::util::allocate<seal::util::SmallNTTTables, , std::enable_if<true, void> >(seal::util::MemoryPool&) [133] std::_Sp_counted_ptr_inplace<seal::SEALContext::ContextData const, std::allocator<seal::SEALContext::ContextData>, (__gnu_cxx::_Lock_policy)2>::_M_dispose()
+   [8] seal::KeyGenerator::galois_keys(int, std::vector<unsigned long, std::allocator<unsigned long> > const&) [70] auto seal::util::allocate<seal::util::SmallNTTTables, seal::MemoryPoolHandle&, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, seal::MemoryPoolHandle&) [96] std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >::reserve(unsigned long)
+  [35] seal::KeyGenerator::generate_pk() [107] auto seal::util::allocate<seal::util::Pointer<unsigned long, void>, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [135] void std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> >::_M_realloc_insert<seal::util::MemoryPoolHead::allocation const&>(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead::allocation*, std::vector<seal::util::MemoryPoolHead::allocation, std::allocator<seal::util::MemoryPoolHead::allocation> > >, seal::util::MemoryPoolHead::allocation const&)
+  [63] seal::KeyGenerator::generate_sk() [69] auto seal::util::allocate<seal::SmallModulus, , std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&) [159] seal::util::MemoryPoolHead*& std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::emplace_back<seal::util::MemoryPoolHead*&>(seal::util::MemoryPoolHead*&)
+  [34] seal::KeyGenerator::KeyGenerator(std::shared_ptr<seal::SEALContext> const&) [108] auto seal::util::allocate<unsigned long, unsigned long, std::enable_if<true, void> >(unsigned long, seal::util::MemoryPool&, unsigned long&&) [138] std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> >::insert(__gnu_cxx::__normal_iterator<seal::util::MemoryPoolHead* const*, std::vector<seal::util::MemoryPoolHead*, std::allocator<seal::util::MemoryPoolHead*> > >, seal::util::MemoryPoolHead* const&)
+  [85] seal::MMProfGlobal::get_pool(unsigned long) [17] seal::FastPRNG<0ul, 0ul>::generate() [134] std::vector<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> >, std::allocator<std::vector<seal::Ciphertext, std::allocator<seal::Ciphertext> > > >::_M_default_append(unsigned long)
+  [49] seal::SmallModulus::set_value(unsigned long) [27] seal::FastPRNG<0ul, 0ul>::~FastPRNG() [55] std::vector<std::vector<unsigned long, std::allocator<unsigned long> >, std::allocator<std::vector<unsigned long, std::allocator<unsigned long> > > >::_M_default_append(unsigned long)
+  [73] seal::FastPRNGFactory<0ul, 0ul>::create() [32] seal::Decryptor::bfv_decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [59] std::vector<bool, std::allocator<bool> >::operator=(std::initializer_list<bool>)
+ [104] seal::EncryptionParameters::compute_parms_id() [53] seal::Decryptor::compute_secret_key_array(unsigned long) [60] std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_put_node(std::_Rb_tree_node<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >*)
+ [125] seal::UniformRandomGeneratorFactory::default_factory() [126] seal::Decryptor::decrypt(seal::Ciphertext const&, seal::Plaintext&, seal::MemoryPoolHandle const&) [48] std::pair<std::_Rb_tree_iterator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, bool> std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_M_emplace_unique<unsigned long&, std::pair<unsigned long, unsigned long>&>(unsigned long&, std::pair<unsigned long, unsigned long>&)
+ [112] seal::util::PolyModulus::PolyModulus(seal::util::PolyModulus&&) [127] seal::Decryptor::Decryptor(std::shared_ptr<seal::SEALContext> const&, seal::SecretKey const&) [45] std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::pair<unsigned long, unsigned long> >, std::_Select1st<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::pair<unsigned long, unsigned long> > > >::_S_right(std::_Rb_tree_node_base*)
+ [113] seal::util::PolyModulus::PolyModulus(unsigned long const*, unsigned long, unsigned long) [41] seal::Encryptor::preencrypt(unsigned long const*, unsigned long, seal::SEALContext::ContextData const&, unsigned long*) [139] std::_Rb_tree<unsigned long, std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >, std::_Select1st<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > >, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > > >::_M_erase(std::_Rb_tree_node<std::pair<unsigned long const, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > > >*)
+ [114] seal::util::PolyModulus::operator=(seal::util::PolyModulus&&) [20] seal::Encryptor::bfv_encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [46] __gnu_cxx::__enable_if<std::__is_scalar<unsigned long>::__value, unsigned long*>::__type std::__fill_n_a<unsigned long*, unsigned long, unsigned long>(unsigned long*, unsigned long, unsigned long const&)
+  [88] seal::util::modulo_uint(unsigned long const*, unsigned long, seal::SmallModulus const&, seal::util::MemoryPool&) [109] seal::Encryptor::encrypt(seal::Plaintext const&, seal::Ciphertext&, seal::MemoryPoolHandle const&) [61] seal::SmallModulus const* std::__niter_base<seal::SmallModulus const*, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >(__gnu_cxx::__normal_iterator<seal::SmallModulus const*, std::vector<seal::SmallModulus, std::allocator<seal::SmallModulus> > >)
+ [115] seal::util::ConstPointer<unsigned long, void>::release() [128] seal::Encryptor::Encryptor(std::shared_ptr<seal::SEALContext> const&, seal::PublicKey const&) [62] bool std::operator==<unsigned long, 4ul>(std::array<unsigned long, 4ul> const&, std::array<unsigned long, 4ul> const&)
+ [105] seal::util::HashFunction::keccak_1600(unsigned long (&) [5][5]) [52] seal::Evaluator::add_inplace(seal::Ciphertext&, seal::Ciphertext const&) [100] _init
+ [106] seal::util::HashFunction::sha3_hash(unsigned long const*, unsigned long, std::array<unsigned long, 4ul>&) [11] seal::Evaluator::bfv_multiply(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&)
+  [82] seal::util::MemoryPoolMT::get_for_byte_count(unsigned long) [12] seal::Evaluator::multiply_inplace(seal::Ciphertext&, seal::Ciphertext const&, seal::MemoryPoolHandle const&)
