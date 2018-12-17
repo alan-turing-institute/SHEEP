@@ -198,7 +198,7 @@ def upload_test_result(results,app_data):
         num_inputs = len(app_data["inputs"])
         input_signed = app_data["input_type"].startswith("i")
         num_slots = app_data["slots"][context]
-        tbb_enabled = (app.data["eval_strategy"][context] == "parallel")
+        tbb_enabled = (app_data["eval_strategy"][context] == "parallel")
         upload_benchmark_result(circuit_name, context, input_type, num_inputs, num_slots, tbb_enabled,
                                 result, results["parameter values"])
 
