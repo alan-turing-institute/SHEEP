@@ -103,11 +103,11 @@ template <typename PlaintextT>
 std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
   std::vector<std::vector<PlaintextT>> inputs;
 
-  // TODO: input from json
 
-  for (auto input : m_job_config.input_vals) {
-    std::vector<PlaintextT> input_vector(begin(input), end(input));
-
+  for (auto input_wire : m_job_config.circuit.get_inputs()) {
+    std::string input_name = input_wire.get_name();
+    std::vector<PlaintextT> input_vector(begin(m_job_config.input_vals[input_name]),
+					 end(m_job_config.input_vals[input_name]));
     inputs.push_back(input_vector);
   }
 
@@ -118,8 +118,9 @@ std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
 std::vector<long> SheepServer::make_const_plaintext_inputs() {
   std::vector<long> const_inputs;
 
-  for (auto input : m_job_config.const_input_vals) {
-    const_inputs.push_back(input);
+  for (auto input_wire : m_job_config.circuit.get_const_inputs()) {
+    std::string input_name = input_wire.get_name();
+    const_inputs.push_back(m_job_config.const_input_vals[input_name]);
   }
 
   return const_inputs;
@@ -196,7 +197,7 @@ void SheepServer::update_parameters(std::string context_type,
 
   // set number of slots
   m_job_config.nslots = *nslots_shared;
-  
+
   // set parameter values
   int i = 0;
   for (auto& p : context->get_parameters()) {
@@ -236,13 +237,13 @@ std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
 	ptvec.push_back((PlaintextT)input_val);
       }
       /// we can  assume we have values for context, input_type
-      
+
       auto context = make_context<PlaintextT>(m_job_config.context);
       /// set parameters for this context
       for (auto map_iter = m_job_config.parameters.begin();
 	   map_iter != m_job_config.parameters.end(); ++map_iter) {
 	context->set_parameter(map_iter->first, map_iter->second);
-	
+
       }
       /// apply the new parameters
       context->configure();
@@ -270,7 +271,7 @@ void SheepServer::configure_and_run(http_request message) {
     make_plaintext_inputs<PlaintextT>();
   std::vector<long> const_plaintext_inputs =
     make_const_plaintext_inputs();
-  
+
   // shared memory region for returning the results
   size_t n_gates = m_job_config.circuit.get_assignments().size();
   size_t n_outputs = m_job_config.circuit.get_outputs().size();
@@ -294,14 +295,18 @@ void SheepServer::configure_and_run(http_request message) {
 	}
 	/// apply the new parameters
 	context->configure();
-	
+
 	std::vector<Duration> totalTimings;
 	std::map<std::string, Duration> perGateTimings;
 	auto timings = std::make_pair(totalTimings, perGateTimings);
+	//define the timeout
+	std::chrono::duration<double, std::micro> timeout_micro(1000000.0 * m_job_config.timeout);
+
 	std::vector<std::vector<PlaintextT>> output_vals =
-        context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs,
+	context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs,
                                       const_plaintext_inputs, timings,
-                                      m_job_config.eval_strategy);
+                                      m_job_config.eval_strategy,
+				      timeout_micro);
 
 	if (timings.first.size() != 3) {
 	  // signal an error to the server
@@ -317,7 +322,7 @@ void SheepServer::configure_and_run(http_request message) {
 	  timings_shared[timing_index] = gate_timing.second;
 	  timing_index++;
 	}
-	
+
 	for (int i = 0; i < n_outputs; i++) {
 	  for (int j = 0; j < slot_cnt; j++) {
 	    outputs_shared[i * slot_cnt + j] = output_vals[i][j];
@@ -384,12 +389,9 @@ void SheepServer::configure_and_run(http_request message) {
       //// now do the plaintext evaluation
       auto clear_context = make_context<PlaintextT>("Clear");
       clear_context->set_parameter("NumSlots",slot_cnt);
-      //      std::vector<Duration> timings_clear;
 
       std::vector<std::vector<PlaintextT>> clear_output_vals =
-          clear_context->eval_with_plaintexts(
-					      m_job_config.circuit, plaintext_inputs, const_plaintext_inputs);
-      //              timings_clear);
+          clear_context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs, const_plaintext_inputs);
 
       // Compare the encrypted and plain results
       bool is_correct =
@@ -463,6 +465,8 @@ void SheepServer::handle_put(http_request message) {
     return handle_put_parameters(message);
   else if (path == "eval_strategy/")
     return handle_put_eval_strategy(message);
+  else if (path == "timeout/")
+    return handle_put_timeout(message);
   message.reply(status_codes::OK);
 };
 
@@ -571,13 +575,11 @@ void SheepServer::handle_post_inputs(http_request message) {
       json::value input_dict = jvalue.get();
       for (auto input_name : m_job_config.input_names) {
         std::vector<int> input_vals;
-
         for (auto input : input_dict[input_name].as_array()) {
           int input_val = input.as_integer();
           input_vals.push_back(input_val);
         }
-
-        m_job_config.input_vals.push_back(input_vals);
+        m_job_config.input_vals[input_name] = input_vals;
       }
     } catch (json::json_exception) {
       message.reply(status_codes::InternalError, ("Unrecognized inputs"));
@@ -594,7 +596,7 @@ void SheepServer::handle_post_const_inputs(http_request message) {
 
       for (auto input_name : m_job_config.const_input_names) {
         int input_val = input_dict[input_name].as_integer();
-        m_job_config.const_input_vals.push_back(input_val);
+	m_job_config.const_input_vals[input_name] = input_val;
       }
     } catch (json::json_exception) {
       message.reply(status_codes::InternalError, ("Unrecognized inputs"));
@@ -635,9 +637,9 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	json::value result = json::value::object();
 	result["ciphertext"] = json::value::string(sct);
 	result["size"] = json::value::number((int64_t)(sct.size()));
-      
+
 	message.reply(status_codes::OK, result);
-      
+
       } catch (json::json_exception&) {
 	message.reply(status_codes::InternalError, ("Unrecognized inputs"));
       } catch (std::bad_alloc&) {
@@ -659,6 +661,7 @@ void SheepServer::handle_get_eval_strategy(http_request message) {
   }
   message.reply(status_codes::OK, result);
 }
+
 
 void SheepServer::handle_get_context(http_request message) {
   /// list of available contexts?
@@ -741,6 +744,24 @@ void SheepServer::handle_put_eval_strategy(http_request message) {
   });
   message.reply(status_codes::OK);
 }
+
+void SheepServer::handle_put_timeout(http_request message) {
+  /// set which eval_strategy to use
+  message.extract_json().then([=](pplx::task<json::value> jvalue) {
+    try {
+      json::value val = jvalue.get();
+      auto timeout = val["timeout"].as_integer();
+
+      m_job_config.timeout = timeout;
+
+    } catch (json::json_exception) {
+      message.reply(status_codes::InternalError,
+                    ("Unable to set timeout"));
+    }
+  });
+  message.reply(status_codes::OK);
+}
+
 
 void SheepServer::handle_get_job(http_request message) {
   /// is the sheep job fully configured?
