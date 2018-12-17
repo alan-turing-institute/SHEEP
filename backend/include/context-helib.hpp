@@ -474,6 +474,7 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
       long hamming_weight = 128)  // Hamming weight of secret key
       : ContextHElib<Plaintext, Ciphertext>(p, param_set, bootstrap,
                                             hamming_weight) {
+    this->m_ninputs = 0;
     this->m_param_name_map.insert({"p", this->m_p});
   }
 
@@ -489,15 +490,17 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
           "that can be done at a time");
     }
     // convert plaintext input into a vector of longs
-    for (int i = 0; i < pt_len; i++) {
-      ptvec.push_back(pt[i]);
+    for (int i = 0; i < this->m_nslots; i++) {
+      ptvec.push_back(pt[i % pt_len]);
     }
+    /*
     // fill up extra slots with zeros
     for (int i = pt_len; i < this->m_nslots; i++) {
       ptvec.push_back(0);
     }
     // fill up nslots with zeros////
     for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
+    */
 
     // encrypt vector of longs
     Ciphertext ct(*(this->m_publicKey));
@@ -583,8 +586,19 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
 
   Ciphertext Rotate(Ciphertext a, long n) {
     /// Cyclically rotate the linear array by n positions
+    if (n > this->m_nslots) {
+      throw std::runtime_error("Error in Rotate: cannot rotate by more than nslots positions");
+    }
     Ciphertext result(a);
-    this->m_ea->rotate(result, n);
+    //if (n < 0) {
+      this->m_ea->rotate(result, n);
+      //} else {
+      // to get the wrap-around right, we rotate left
+      // by (ninputs - n) positions
+      // n = (this->m_ninputs - n) % this->m_ninputs;
+      // this->m_ea->rotate(result, n);
+
+      // }
     return result;
   }
 

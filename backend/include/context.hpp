@@ -538,6 +538,8 @@ class Context : public BaseContext<PlaintextT> {
     for (auto pt : plaintext_inputs) {
       // check that the num of input vals on this wire is <= nslots
       if (pt.size() > this->m_nslots) throw TooManyInputVals();
+      // set m_ninputs to be the number of supplied values in plaintext
+      this->m_ninputs = pt.size();
       ciphertext_inputs.push_back(encrypt(pt));
     }
     for (auto cpt : const_plaintext_inputs) {
@@ -698,6 +700,7 @@ class Context : public BaseContext<PlaintextT> {
   int m_public_key_size;
   int m_ciphertext_size;
   long m_nslots;
+  long m_ninputs;
 };
 
 template <typename ContextT, typename PlaintextCIterator,
