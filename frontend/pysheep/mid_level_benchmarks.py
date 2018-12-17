@@ -263,8 +263,9 @@ def generate_matrix_vector_mult(input_matrix, input_vec):
     const_input_vals = {"rotate_minus1": -1}
     circuit_str = "OUTPUTS output_vec\n"
     circuit_str += "CONST_INPUTS rotate_minus1\n"
-    circuit_str += "INPUTS vec "
+    circuit_str += "INPUTS input_vec "
     input_vals = {}
+    input_vals["input_vec"] = input_vec
     for i in range(len(input_matrix)):
         for j in range(len(input_vec)):
             index = rotate_vec(list(range(len(input_vec))),i)[j]
@@ -277,16 +278,17 @@ def generate_matrix_vector_mult(input_matrix, input_vec):
     circuit_str+= "\n"
     ## now start doing the assigments - multiply each diagonal strip by vec
     ## and rotate vec by 1.
-    circuit_str += "mstrip_0 vec MULTIPLY prod_0\n"
+    circuit_str += "input_vec ALIAS vec_r0\n"
+    circuit_str += "mstrip_0 vec_r0 MULTIPLY prod_0\n"
     for i in range(1,len(input_vec)):
-        circuit_str += "vec rotate_minus1 ROTATE vec_r{}\n".format(i)
-        circuit_str += "mstrip_{} vec MULTIPLY prod_{}\n".format(i,i)
+        circuit_str += "vec_r{} rotate_minus1 ROTATE vec_r{}\n".format(i-1,i)
+        circuit_str += "mstrip_{} vec_r{}  MULTIPLY prod_{}\n".format(i,i,i)
     ## we now have prod_0 up to prod_(n-1) - just need to sum them
     circuit_str += "prod_0 prod_1 ADD sum_0\n"
-    for i in range(1, len(input_vec)):
+    for i in range(1, len(input_vec)-1):
         circuit_str += "sum_{} prod_{} ADD sum_{}\n".format(i-1,i+1,i)
     ## rename the final output
-    circuit_str += "{} ALIAS output_vec\n".format(len(input_vec)-1)
+    circuit_str += "sum_{} ALIAS output_vec\n".format(len(input_vec)-2)
 
     ## return the circuit, the input_val dict and the const_input_val dict
     return circuit_str, input_vals, const_input_vals
