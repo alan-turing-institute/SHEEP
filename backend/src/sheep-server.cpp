@@ -284,7 +284,7 @@ void SheepServer::configure_and_run(http_request message) {
     SharedBuffer<Duration> timings_shared(n_timings);
     SharedBuffer<PlaintextT> outputs_shared(n_plaintexts_out);
 
-    int status = protect_eval(10L, [&](){
+    int status = protect_eval(m_job_config.timeout, [&](){
 
 	/// we can now assume we have values for context, inputs, circuit, etc
 	auto context = make_context<PlaintextT>(m_job_config.context);
