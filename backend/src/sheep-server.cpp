@@ -391,7 +391,9 @@ void SheepServer::configure_and_run(http_request message) {
       clear_context->set_parameter("NumSlots",slot_cnt);
 
       std::vector<std::vector<PlaintextT>> clear_output_vals =
-          clear_context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs, const_plaintext_inputs);
+          clear_context->eval_with_plaintexts(m_job_config.circuit,
+					      plaintext_inputs,
+					      const_plaintext_inputs);
 
       // Compare the encrypted and plain results
       bool is_correct =
