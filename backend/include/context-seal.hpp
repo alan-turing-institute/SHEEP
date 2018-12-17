@@ -144,6 +144,10 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
   }
 
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+    /// special case for bool, otherwise we get wrong answer
+    if (std::is_same<Plaintext, bool>::value)
+      return Add(a,b);
+
     m_evaluator->sub_inplace(a, b);
     return a;
   }
