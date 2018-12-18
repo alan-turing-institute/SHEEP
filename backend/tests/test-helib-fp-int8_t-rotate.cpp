@@ -42,8 +42,10 @@ int main(void) {
   for (int i = 0; i < 3; i++) {
     std::cout << std::to_string(result[0][i]) << " ";
   }
-
-  assert(result.front() == exp_values);
-
   std::cout << std::endl;
+  for (int i = 0; i < exp_values.size(); i++) {
+    assert(result[0][i] == exp_values[i]);
+  }
+
+
 }
