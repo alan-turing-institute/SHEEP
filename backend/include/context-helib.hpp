@@ -493,14 +493,6 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
     for (int i = 0; i < this->m_nslots; i++) {
       ptvec.push_back(pt[i % pt_len]);
     }
-    /*
-    // fill up extra slots with zeros
-    for (int i = pt_len; i < this->m_nslots; i++) {
-      ptvec.push_back(0);
-    }
-    // fill up nslots with zeros////
-    for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
-    */
 
     // encrypt vector of longs
     Ciphertext ct(*(this->m_publicKey));
@@ -590,15 +582,14 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
       throw std::runtime_error("Error in Rotate: cannot rotate by more than nslots positions");
     }
     Ciphertext result(a);
-    //if (n < 0) {
+    if (n < 0) {
       this->m_ea->rotate(result, n);
-      //} else {
-      // to get the wrap-around right, we rotate left
+    } else {
+      //to get the wrap-around right, we rotate left
       // by (ninputs - n) positions
-      // n = (this->m_ninputs - n) % this->m_ninputs;
-      // this->m_ea->rotate(result, n);
-
-      // }
+      n = (n - this->m_ninputs );
+      this->m_ea->rotate(result, n);
+    }
     return result;
   }
 
