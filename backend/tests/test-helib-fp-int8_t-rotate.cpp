@@ -28,8 +28,8 @@ int main(void) {
   // inputs is vector of vectors
   std::vector<std::vector<int8_t>> inputs = {{1, 2, 3}};
   // const_inputs is vector (same across slots)
-  std::vector<long> const_inputs = {-2};
-  std::vector<int8_t> exp_values = {2, 1, 3};
+  std::vector<long> const_inputs = {-1};
+  std::vector<int8_t> exp_values = {2, 3, 1};
 
   std::vector<std::vector<int8_t>> result =
       ctx.eval_with_plaintexts(C, inputs, const_inputs);

@@ -15,10 +15,12 @@ void test_single(ContextHElib_Fp<int8_t>& context) {
   std::vector<Plaintext> pt_orig = {123,45};
   std::vector<Plaintext> pt_new = context.decrypt(context.encrypt(pt_orig));
 
-  for (int i=0; i< pt_orig.size(); i++) {
-    std::cout << std::to_string(pt_orig[i]) << " = " << std::to_string(pt_new[i])
+  for (int i=0; i< pt_new.size(); i++) {
+    /// std::cout << std::to_string(pt_orig[i]) << " = "
+    std::cout<< std::to_string(pt_new[i])
 	      << std::endl;
-    assert(pt_orig[i] == pt_new[i]);
+    if (i < pt_orig.size())
+      assert(pt_orig[i] == pt_new[i]);
   }
 }
 
