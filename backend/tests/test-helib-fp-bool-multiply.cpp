@@ -20,7 +20,7 @@ int main(void) {
   ContextHElib_Fp<bool> ctx;
 
   std::vector<std::vector<ContextHElib_Fp<bool>::Plaintext>> pt_input = {
-      {0, 1, 0, 1}, {1, 1, 0, 0}};
+      {1, 1, 0, 0}, {0, 1, 0, 1}};
 
   std::vector<std::vector<ContextHElib_Fp<bool>::Plaintext>> result =
       ctx.eval_with_plaintexts(circ, pt_input);

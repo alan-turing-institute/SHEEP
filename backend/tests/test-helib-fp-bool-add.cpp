@@ -20,12 +20,12 @@ int main(void) {
   ContextHElib_Fp<bool> ctx;
 
   std::vector<std::vector<ContextHElib_Fp<bool>::Plaintext>> pt_input = {
-      {1, 0, 1, 0}, {1, 1, 0, 0}};
+      {0, 0, 1, 1}, {1, 0, 1, 0}};
 
   std::vector<std::vector<ContextHElib_Fp<bool>::Plaintext>> result =
       ctx.eval_with_plaintexts(circ, pt_input);
 
-  std::vector<bool> exp_values = {0, 1, 1, 0};
+  std::vector<bool> exp_values = {1, 0, 0, 1};
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(pt_input[0][i]) << " + "

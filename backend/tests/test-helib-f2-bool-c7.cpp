@@ -7,8 +7,6 @@
 #include "circuit-test-util.hpp"
 #include "context-helib.hpp"
 
-typedef std::chrono::duration<double, std::micro> DurationT;
-
 int main(void) {
   using namespace SHEEP;
 
@@ -16,7 +14,6 @@ int main(void) {
   for (int j = 0; j < 100; j++) {
 
     Circuit circ;
-    std::vector<DurationT> durations;
     ContextHElib_F2<bool> ctx;
     std::vector<std::vector<ContextHElib_F2<bool>::Plaintext>> pt_input;
     std::vector<std::vector<ContextHElib_F2<bool>::Plaintext>> result;
@@ -39,12 +36,23 @@ int main(void) {
     circ.set_output(w8);
 
     pt_input = {{0}, {1}, {0}, {1}, {0}};
-    result = ctx.eval_with_plaintexts(circ, pt_input, durations);
+    result = ctx.eval_with_plaintexts(circ, pt_input);
 
     exp_values = {1};
 
-    // for (int i = 0; i < exp_values.size(); i++) {
-    //   assert(result.front()[i] == exp_values[i]);
-    // }
+    for (int i = 0; i < exp_values.size(); i++) {
+
+      std::cout 
+        << std::to_string(i) << " | " 
+        << std::to_string(pt_input[0][i]) << " , " 
+        << std::to_string(pt_input[1][i]) << " , " 
+        << std::to_string(pt_input[2][i]) << " , " 
+        << std::to_string(pt_input[3][i]) << " , " 
+        << std::to_string(pt_input[4][i]) << " = " 
+        << std::to_string(result[0][i]) << " | " 
+        << std::to_string(exp_values[i]) << std::endl;
+
+      assert(result.front()[i] == exp_values[i]);
+    }
   }
 }
