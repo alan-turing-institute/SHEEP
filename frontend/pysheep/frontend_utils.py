@@ -197,30 +197,16 @@ def upload_test_result(results,app_data):
         input_type = app_data["input_type"]
         num_inputs = len(app_data["inputs"])
         input_signed = app_data["input_type"].startswith("i")
-        num_slots = app_data["slots"][context]
+        num_slots = app_data["slots"][context]['nslots']
         tbb_enabled = (app_data["eval_strategy"][context] == "parallel")
-        upload_benchmark_result(circuit_name, context, input_type, num_inputs, num_slots, tbb_enabled,
-                                result, results["parameter values"])
 
-#        execution_time = result["timings"]["evaluation"]
-#        is_correct = result["cleartext check"]["is_correct"]
-#        param_dict = result["parameter values"]
-#        cm = BenchmarkMeasurement(
-#            circuit_name = circuit_name,
-#            context_name = context,
-#            input_bitwidth = common_utils.get_bitwidth(app_data["input_type"]),
-#            input_signed = app_data["input_type"].startswith("i"),
-#            execution_time = execution_time,
-#            is_correct = is_correct,
-##            ciphertext_size = sizes["ciphertext"],
-##            private_key_size = sizes["privateKey"],
-##            public_key_size = sizes["publicKey"]
-#        )
-#
-#        context_prefix = context.split("_")[0]  ### only have HElib, not HElib_F2 and HElib_Fp
-#        for k,v in param_dict.items():
-#            column = context_prefix+"_"+k
-#            cm.__setattr__(column,v)
-#        session.add(cm)
-#        session.commit()
+        upload_benchmark_result(circuit_name,
+                                context,
+                                input_type,
+                                num_inputs,
+                                num_slots,
+                                tbb_enabled,
+                                result,
+                                result["parameter values"])
+
     return
