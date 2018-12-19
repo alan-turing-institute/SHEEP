@@ -31,9 +31,9 @@ int main(void) {
     Wire w5 = circ.add_assignment("w5", Gate::Multiply, w2, e);
     Wire w6 = circ.add_assignment("w6", Gate::Add, w4, w5);
     Wire w7 = circ.add_assignment("w7", Gate::Add, w3, w6);
-    Wire w8 = circ.add_assignment("w8", Gate::Multiply, w7, w6);
+    // Wire w8 = circ.add_assignment("w8", Gate::Multiply, w7, w6);
 
-    circ.set_output(w8);
+    circ.set_output(w7);
 
     pt_input = {{0}, {1}, {0}, {1}, {0}};
     result = ctx.eval_with_plaintexts(circ, pt_input);
