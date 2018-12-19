@@ -502,15 +502,23 @@ void SheepServer::handle_post_circuit(http_request message) {
       std::stringstream circuit_stream((std::string)circuit);
       /// create the circuit
       Circuit C;
-      circuit_stream >> C;
-      m_job_config.circuit = C;
-
+      try {
+	circuit_stream >> C;
+	m_job_config.circuit = C;
+      } catch (...) {
+	std::cerr<<"Caught exception when reading circuit"<<std::endl;
+      };
     } catch (json::json_exception) {
       message.reply(status_codes::InternalError,
                     ("Unrecognized circuit request"));
     }
   });
-  message.reply(status_codes::OK);
+  /// did we set the circuit OK?
+  bool circuit_OK = m_job_config.circuit.get_inputs().size() > 0;
+  if (circuit_OK) message.reply(status_codes::OK);
+  else message.reply(status_codes::InternalError,
+		     ("Bad circuit - undefined or multiply defined inputs"));
+
 }
 
 void SheepServer::handle_post_circuitfile(http_request message) {
