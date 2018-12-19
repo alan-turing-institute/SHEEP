@@ -73,22 +73,13 @@ class ContextTFHE
 
   Ciphertext encrypt(std::vector<Plaintext> pt) {
     Ciphertext ct;
-    for (int i = 0; i < pt.size(); i++) {
+    for (int i = 0; i < this->m_ninputs; i++) {
       CiphertextEl ct_el(parameters);
       for (int j = 0; j < BITWIDTH(Plaintext); j++) {
-        bootsSymEncrypt(ct_el[j], bit(j, pt[i]), secret_key.get());
+        bootsSymEncrypt(ct_el[j], bit(j, pt[i % pt.size()]), secret_key.get());
       }
       ct.push_back(ct_el);
       this->m_ciphertext_size = sizeof(*ct_el);
-    }
-    /// now pad with enc(0) to make the ciphertext size equal to nslots.
-    for (int i = pt.size(); i < this->m_nslots; i++) {
-      CiphertextEl ct_el(parameters);
-      Plaintext zero = 0;
-      for (int j = 0; j < BITWIDTH(Plaintext); j++) {
-        bootsSymEncrypt(ct_el[j], bit(j, zero), secret_key.get());
-      }
-      ct.push_back(ct_el);
     }
 
     return ct;
@@ -356,6 +347,9 @@ class ContextTFHE
 
   Ciphertext Rotate(Ciphertext a, long n) {
     /// shift the elements of the ciphertext by n places:
+    /// if n is positive (i.e. rotate right), in fact we
+    /// rotate left by ninputs - n places
+    if (n > 0) n = n - this->m_ninputs;
     Ciphertext c;
     for (int i = 0; i < a.size(); i++) {
       int index = (i - n) % a.size();
