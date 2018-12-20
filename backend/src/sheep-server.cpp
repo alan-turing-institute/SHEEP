@@ -13,6 +13,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include "sheep-server.hpp"
 #include "protect-eval.hpp"
@@ -505,7 +507,7 @@ void SheepServer::handle_post_circuit(http_request message) {
       try {
 	circuit_stream >> C;
 	m_job_config.circuit = C;
-      } catch (...) {
+      } catch (const std::exception& e) {
 	std::cerr<<"Caught exception when reading circuit"<<std::endl;
       };
     } catch (json::json_exception) {
@@ -514,6 +516,7 @@ void SheepServer::handle_post_circuit(http_request message) {
     }
   });
   /// did we set the circuit OK?
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   bool circuit_OK = m_job_config.circuit.get_inputs().size() > 0;
   if (circuit_OK) message.reply(status_codes::OK);
   else message.reply(status_codes::InternalError,
