@@ -66,7 +66,30 @@ cd /SHEEP/backend/build; export CC=gcc-7; export CXX=g++-7; cmake ../; make
 
 #### HElib
 
-Add profiler flags to CMakeList
+- Add profiler flags to NTL
+
+```
+cd /ntl-11.1.0/src
+
+./configure
+
+# Add "-pg" to makefile
+CXXFLAGS=-g -O2 -pg
+
+make; make install
+
+```
+
+- Add profiler flags to GMP
+
+```
+cd /gmp-6.1.0
+./configure
+# Add following flag to the Makefile
+CXXFLAGS = -pg
+```
+
+- Add profiler flags to CMakeList
 ```
 cd /SHEEP/backend/lib/HElib/src
 
@@ -85,12 +108,26 @@ export CC=gcc-7; export CXX=g++-7; make clean; make;
 
 #### TFHE
 
-Adding "-pg" compiler flags to /SHEEP/backend/lib/tfhe/src/CMakeLists.txt
+- In order to get function timings we need to recompile fftw library with the "-pg" flags
 
 ```
+apt-get -y remove libfftw3-dev
+wget http://fftw.org/fftw-3.3.8.tar.gz
+tar -xvzf fftw-3.3.8.tar.gz
+cd fftw-3.3.8
+
+# Add the following to CMakeList.txt
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pg")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg")
+
+./configure; make; make install
+```
+
+- Adding "-pg" compiler flags to /SHEEP/backend/lib/tfhe/src/CMakeLists.txt
+```
 # -std=c99 seems to be required in Travis tests for whatever reason
-set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=c99 -pg")
-set(CMAKE_CXX_FLAGS  "${CMAKE_C_FLAGS} -std=c99 -pg")
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pg")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg")
 
 ```
 
@@ -100,7 +137,7 @@ Adding
 
 ```
 set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pg")
-set(CMAKE_CXX_FLAGS  "${CMAKE_C_FLAGS} -pg")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg")
 ```
 
 to /SEAL_3.0/SEAL/CMakeList.txt file in the following position
@@ -114,7 +151,7 @@ find_package(Threads REQUIRED)
 
 # Flags for profiling
 set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pg")
-set(CMAKE_CXX_FLAGS  "${CMAKE_C_FLAGS} -pg")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg")
 
 
 # Link Threads with seal
@@ -124,8 +161,16 @@ target_link_libraries(seal PUBLIC Threads::Threads)
 
 #### LP
 
-No changes.
+```
+cd libpaillier-0.8
+./configure
 
+# Add additional -pg flag to CFLAGS
+CFLAGS  = -O3 -Wall -pg  .....
+
+make
+make install 
+```
 
 ### 2.4 (in the interactive shell mode) Visualise profiling results as a
 
@@ -144,7 +189,7 @@ gprof test-helib-f2-bool-c7 gmon.out > analysis.txt
 - To visualise the profiling results as a dot graph [gprof2dot](https://github.com/jrfonseca/gprof2dot):
 For example:
 ```
-gprof test-helib-f2-bool-c7 gmon.out | gprof2dot | dot -Tsvg -o output.svg
+gprof test-helib-f2-bool-c7 gmon.out | gprof2dot -s | dot -Tsvg -o output.svg
 ```
 
 ### 3. Copy results from docker to host:

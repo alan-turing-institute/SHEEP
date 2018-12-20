@@ -163,7 +163,7 @@ if (HELIB_FOUND)
   add_executable(test-helib-f2-bool-maximum test-helib-f2-bool-maximum.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
   target_link_libraries(test-helib-f2-bool-maximum ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
   add_test(NAME test-helib-f2-bool-maximum COMMAND $<TARGET_FILE:test-helib-f2-bool-maximum>)
-  
+
   # The test of seven gates
   foreach(fx IN ITEMS f2 fp)
     add_executable(test-helib-${fx}-bool-c7 test-helib-${fx}-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
