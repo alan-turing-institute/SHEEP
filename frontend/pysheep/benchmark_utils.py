@@ -7,6 +7,8 @@ import requests
 
 import os, uuid
 import random
+import re
+
 from . import common_utils
 from . import sheep_client
 from .database import BenchmarkMeasurement, Timing, ParameterSetting, session, upload_benchmark_result
@@ -131,3 +133,44 @@ def levels_for_params(context, param_dict):
     else:
         print("Levels not known for this context")
         return 0
+
+
+def timing_per_gate_type(timings, circuit):
+    """
+    The output of running a benchmark job will be a dict containing timings for
+    every named gate.  Or, if we are querying the database, it will be a list of Timing rows.
+    Either way, we want to know what type of gate each of these was, so
+    we parse the circuit to get the mapping.
+    """
+    gate_map = {}
+    lines = circuit.split("\n")
+    gate_rex = re.compile("([\w]+[\s]+){1,3}([A-Z]+)[\s]+([\w]+)[\s]*$")
+    for line in lines:
+        if line.startswith("INPUTS") or line.startswith("CONST_INPUTS") \
+           or line.startswith("OUTPUTS") or line.startswith("#"):
+            continue
+        gate_match = gate_rex.search(line)
+        if not gate_match:
+            continue
+        gate_type, gate_name = gate_match.groups()[1:]
+        gate_map[gate_name] = gate_type
+    ## now go through the results_dict and sum the timings
+    output_dict = {}
+    if isinstance(timings, dict):
+        for k,v in timings.items():
+            if k=="evaluation" or k=="encryption" or k=="decryption":
+                continue
+            gate_type = gate_map[k]
+            if not gate_type in output_dict.keys():
+                output_dict[gate_type] = 0.
+                output_dict[gate_type] += float(v)
+    elif isinstance(timings, list):
+        for row in timings:
+            if row.timing_name=="evaluation" or row.timing_name=="encryption" \
+               or row.timing_name=="decryption":
+                continue
+            gate_name = row.timing_name
+            if not gate_type in output_dict.keys():
+                output_dict[gate_type] = 0.
+                output_dict[gate_type] += float(row.timing_value)
+    return output_dict

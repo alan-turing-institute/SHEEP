@@ -493,19 +493,25 @@ def upload_results(circuit_name):
     results_dict['circuit_name'] = circuit_name
     try:
         ## first get the "results"
-        r=requests.get(BASE_URI+"/results/")
-        rj = json.loads(r.content.decode("utf-8"))
-        results_dict["is_correct"] = rj["cleartext check"]["is_correct"]
-        results_dict["execution_time"] = rj["timings"]["evaluation"]
+        results_dict = get_results()["content"]
         ## now get the configuration
-        c = requests.get(BASE_URI+"/config/")
-        cj = json.loads(c.content.decode("utf-8"))
-        input_type = cj['input_type']
-        results_dict['input_bitwidth'] = common_utils.get_bitwidth(input_type)
-        results_dict['input_signed'] = input_type.startswith("i")
-        results_dict['context_name'] = cj['context']
-
-        uploaded_ok = database.upload_benchmark_result(results_dict)
+        config_dict = get_config()["content"]
+        ## and the parameters
+        param_dict = get_parameters()["content"]
+        input_type = config_dict['input_type']
+        context_name = config_dict['context']
+        num_inputs = len(get_inputs()["content"])
+        tbb_enabled = config_dict["eval_strategy"] == "parallel"
+        num_slots = get_nslots()["content"]["nslots"]
+        uploaded_ok = database.upload_benchmark_result(circuit_name,
+                                                       context_name,
+                                                       input_type,
+                                                       num_inputs,
+                                                       num_slots,
+                                                       tbb_enabled,
+                                                       results_dict,
+                                                       param_dict
+        )
         if uploaded_ok:
             return {"status_code": 200, "content": "uploaded OK"}
         else:
