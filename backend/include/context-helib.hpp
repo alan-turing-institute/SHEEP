@@ -448,9 +448,22 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
     return output;
   }
 
-  // Ciphertext AddConstant(Ciphertext a, long b) {
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// Cyclically rotate the linear array by n positions
+    if (n > this->m_nslots) {
+      throw std::runtime_error("Error in Rotate: cannot rotate by more than nslots positions");
+    }
+    Ciphertext result;
+    if (n > 0) n = n - this->m_ninputs;
+    /// loop over all bits
+    for (int j = 0; j < this->m_bitwidth; j++) {
+      Ctxt result_bit(a[j]);
+      this->m_ea->rotate(result_bit, n);
+      result.append(result_bit);
+    }
+    return result;
 
-  // }
+  }
 
  private:
   bool m_signed_plaintext;
