@@ -23,12 +23,12 @@ int main(void) {
 
   // The type of the wires in circ are unsigned bools
   ContextLP<bool> ctx;
-  ctx.set_parameter("NumSlots", 10);
+  ctx.set_parameter("NumSlots", 20);
   // inputs is vector of vectors
   std::vector<std::vector<bool>> inputs = {{1, 1, 1, 1, 0, 0, 0, 0}};
   // const_inputs is vector (same across slots)
   std::vector<long> const_inputs = {1};
-  std::vector<bool> exp_values = {0, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+  std::vector<bool> exp_values = {0, 1, 1, 1, 1, 0, 0, 0};
 
   std::vector<std::vector<bool>> result =
       ctx.eval_with_plaintexts(C, inputs, const_inputs);
