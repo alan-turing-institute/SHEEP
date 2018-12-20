@@ -581,15 +581,13 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
     if (n > this->m_nslots) {
       throw std::runtime_error("Error in Rotate: cannot rotate by more than nslots positions");
     }
+    //to rotate right, we actually rotate left
+    // by (ninputs - n) positions
+    if (n > 0) n = n - this->m_ninputs;
+
     Ciphertext result(a);
-    if (n < 0) {
-      this->m_ea->rotate(result, n);
-    } else {
-      //to get the wrap-around right, we rotate left
-      // by (ninputs - n) positions
-      n = (n - this->m_ninputs );
-      this->m_ea->rotate(result, n);
-    }
+    this->m_ea->rotate(result, n);
+
     return result;
   }
 
