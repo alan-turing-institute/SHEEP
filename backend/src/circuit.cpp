@@ -116,7 +116,7 @@ std::istream &operator>>(std::istream &stream, Circuit &c) {
                       << e.name
                       << "' has already been used to store a value (it "
                          "must be unique).\n";
-            throw e;
+            throw std::exception();
           };
         }
       } else if (*token_iter == "OUTPUTS") {
@@ -162,12 +162,12 @@ std::istream &operator>>(std::istream &stream, Circuit &c) {
                         << "line " << lineno << ": the wire named '" << e.name
                         << "' has already been used to store a value "
                            "(it must be unique).\n";
-              throw e;
+              throw std::exception();
             } catch (const UndefinedVariableError &e) {
               std::cerr << "Error reading circuit: "
                         << "line " << lineno << ": a wire named '" << e.name
                         << "' has not yet been defined\n";
-              throw e;
+              throw std::exception();
             };
           }
         }
@@ -186,7 +186,7 @@ std::istream &operator>>(std::istream &stream, Circuit &c) {
                 << ": in OUTPUTS: cannot set a wire named '" << e.name
                 << "' to be an output of the circuit as one with this "
                    "name was not defined.\n";
-      throw e;
+      throw std::exception();
     }
   }
   return stream;

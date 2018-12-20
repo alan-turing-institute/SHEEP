@@ -13,6 +13,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include "sheep-server.hpp"
 #include "protect-eval.hpp"
@@ -284,7 +286,7 @@ void SheepServer::configure_and_run(http_request message) {
     SharedBuffer<Duration> timings_shared(n_timings);
     SharedBuffer<PlaintextT> outputs_shared(n_plaintexts_out);
 
-    int status = protect_eval(10L, [&](){
+    int status = protect_eval(m_job_config.timeout, [&](){
 
 	/// we can now assume we have values for context, inputs, circuit, etc
 	auto context = make_context<PlaintextT>(m_job_config.context);
@@ -391,7 +393,9 @@ void SheepServer::configure_and_run(http_request message) {
       clear_context->set_parameter("NumSlots",slot_cnt);
 
       std::vector<std::vector<PlaintextT>> clear_output_vals =
-          clear_context->eval_with_plaintexts(m_job_config.circuit, plaintext_inputs, const_plaintext_inputs);
+          clear_context->eval_with_plaintexts(m_job_config.circuit,
+					      plaintext_inputs,
+					      const_plaintext_inputs);
 
       // Compare the encrypted and plain results
       bool is_correct =
@@ -500,15 +504,24 @@ void SheepServer::handle_post_circuit(http_request message) {
       std::stringstream circuit_stream((std::string)circuit);
       /// create the circuit
       Circuit C;
-      circuit_stream >> C;
-      m_job_config.circuit = C;
-
+      try {
+	circuit_stream >> C;
+	m_job_config.circuit = C;
+      } catch (const std::exception& e) {
+	std::cerr<<"Caught exception when reading circuit"<<std::endl;
+      };
     } catch (json::json_exception) {
       message.reply(status_codes::InternalError,
                     ("Unrecognized circuit request"));
     }
   });
-  message.reply(status_codes::OK);
+  /// did we set the circuit OK?
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  bool circuit_OK = m_job_config.circuit.get_inputs().size() > 0;
+  if (circuit_OK) message.reply(status_codes::OK);
+  else message.reply(status_codes::InternalError,
+		     ("Bad circuit - undefined or multiply defined inputs"));
+
 }
 
 void SheepServer::handle_post_circuitfile(http_request message) {

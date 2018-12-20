@@ -6,12 +6,12 @@
 #include "simple-circuits.hpp"
 
 using namespace SHEEP;
-typedef ContextSEAL<int8_t>::Plaintext Plaintext;
-typedef ContextSEAL<int8_t>::Ciphertext Ciphertext;
+typedef ContextSeal<int8_t>::Plaintext Plaintext;
+typedef ContextSeal<int8_t>::Ciphertext Ciphertext;
 
 // Encrypt a value, decrypt the result, and check that we are
 // left with the original value.
-void test_single(ContextSEAL<int8_t>& context) {
+void test_single(ContextSeal<int8_t>& context) {
   std::vector<Plaintext> pt_orig = {56};
   std::string serialized_ciphertext = context.encrypt_and_serialize(pt_orig);
 
@@ -21,6 +21,6 @@ void test_single(ContextSEAL<int8_t>& context) {
 }
 
 int main(void) {
-  ContextSEAL<int8_t> context;
+  ContextSeal<int8_t> context;
   test_single(context);
 }

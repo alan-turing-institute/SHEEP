@@ -58,15 +58,9 @@ class ContextTFHE<bool> : public Context<bool, std::vector<CiphertextTFHE>> {
     CiphertextTFHE ct_el(parameters);
     Ciphertext ct;
 
-    for (int i = 0; i < pt.size(); i++) {
+    for (int i = 0; i < this->m_nslots; i++) {
       CiphertextTFHE ct_el(parameters);
-      bootsSymEncrypt(ct_el, pt[i], secret_key.get());
-      ct.push_back(ct_el);
-    }
-    /// now pad with enc(0) to make the ciphertext size equal to nslots.
-    for (int i = pt.size(); i < this->m_nslots; i++) {
-      CiphertextTFHE ct_el(parameters);
-      bootsSymEncrypt(ct_el, (Plaintext)0, secret_key.get());
+      bootsSymEncrypt(ct_el, pt[i % pt.size() ], secret_key.get());
       ct.push_back(ct_el);
     }
 
@@ -196,6 +190,10 @@ class ContextTFHE<bool> : public Context<bool, std::vector<CiphertextTFHE>> {
 
   Ciphertext Rotate(Ciphertext a, long n) {
     /// shift the elements of the ciphertext by n places:
+
+    /// always rotate left, even when given positive n
+    if (n > 0) n = n - this->m_ninputs;
+
     Ciphertext c;
     for (int i = 0; i < a.size(); i++) {
       int index = (i - n) % a.size();

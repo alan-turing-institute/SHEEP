@@ -89,8 +89,8 @@ def upload_benchmark_result(circuit_name,
     """
     upload a benchmark result, either from web frontend or notebook.
     """
+
     bm = BenchmarkMeasurement()
-#    bm.benchmark_id = get_last_benchmark_id() + 1
     bm.context = context
     bm.input_bitwidth = common_utils.get_bitwidth(input_type)
     bm.input_signed = input_type.startswith("int")
