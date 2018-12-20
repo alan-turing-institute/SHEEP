@@ -24,7 +24,7 @@ set (CMAKE_C_FLAGS " -pg ")
 set (CMAKE_CXX_FLAGS " -pg ")
 ```
 
-_/SHEEP/backend/CMakeLists.txt.txt_ should look similar to:
+_/SHEEP/backend/CMakeLists.txt_ should look similar to:
 ```
 ............
 enable_testing()
@@ -39,7 +39,7 @@ find_package(LP)
 ............
 ```
 
-_/SHEEP/backend/tests/CMakeLists.txt.txt_ should look similar to:
+_/SHEEP/backend/tests/CMakeLists.txt_ should look similar to:
 ```
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
 
@@ -58,7 +58,7 @@ set (CMAKE_CXX_FLAGS " -pg ")
 ```
 rm -fr /SHEEP/backend/build; mkdir SHEEP/backend/build;
 
-cd /SHEEP/backend/build; export CC=gcc-7; export CXX=g++-7; cmake ../  
+cd /SHEEP/backend/build; export CC=gcc-7; export CXX=g++-7; cmake ../; make  
 
 ```
 
@@ -144,7 +144,7 @@ gprof test-helib-f2-bool-c7 gmon.out > analysis.txt
 - To visualise the profiling results as a dot graph [gprof2dot](https://github.com/jrfonseca/gprof2dot):
 For example:
 ```
-gprof test-helib-f2-bool-c7 gmon.out | gprof2dot | dot -Tpng -o output.png
+gprof test-helib-f2-bool-c7 gmon.out | gprof2dot | dot -Tsvg -o output.svg
 ```
 
 ### 3. Copy results from docker to host:
