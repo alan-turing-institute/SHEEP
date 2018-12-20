@@ -23,7 +23,7 @@ int main(void) {
 
   // The type of the wires in circ are unsigned bools
   ContextClear<int8_t> ctx;
-  ctx.set_parameter("NumSlots", 8);
+  ctx.set_parameter("NumSlots", 20);
   // inputs is vector of vectors
   std::vector<std::vector<int8_t>> inputs = {{1, 2, 3, 4, 5, 6, 7, 8}};
   // const_inputs is vector (same across slots)
@@ -43,4 +43,23 @@ int main(void) {
     assert(result.front()[i] == exp_values[i]);
   }
   std::cout << std::endl;
+
+  /// now rotate the other way
+  const_inputs = {3};
+  exp_values = {6, 7, 8, 1, 2, 3, 4, 5};
+
+  result = ctx.eval_with_plaintexts(C, inputs, const_inputs);
+
+  std::cout << "Original vector: ";
+  for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(inputs[0][i]) << " ";
+  }
+  std::cout << std::endl << "Rotated vector:  ";
+  for (int i = 0; i < exp_values.size(); i++) {
+    std::cout << std::to_string(result[0][i]) << " ";
+    assert(result.front()[i] == exp_values[i]);
+  }
+  std::cout << std::endl;
+
+
 }

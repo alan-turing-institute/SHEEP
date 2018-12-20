@@ -44,12 +44,12 @@ struct SheepJobConfig {
   Circuit circuit;
   std::set<std::string> input_names;
   std::set<std::string> const_input_names;
-  std::vector<std::vector<int>> input_vals;
-  std::vector<long> const_input_vals;
+  std::map<std::string, std::vector<int>> input_vals;
+  std::map<std::string, long> const_input_vals;
   std::map<std::string, long> parameters;
   int nslots;
-
-  void setDefaults() { eval_strategy = EvaluationStrategy::serial; }
+  int timeout;
+  void setDefaults() { eval_strategy = EvaluationStrategy::serial; timeout = 10; }
   bool isConfigured() {
     return ((context.size() > 0) && (input_type.size() > 0) &&
             (circuit.get_inputs().size() > 0) &&
@@ -195,6 +195,8 @@ class SheepServer {
 
   void handle_put_parameters(http_request message);
   void handle_put_eval_strategy(http_request message);
+  void handle_put_timeout(http_request message);
+
   /// listen to http requests
   http_listener m_listener;
   /// structs to store the configuration and results of a test.

@@ -44,7 +44,7 @@ def generate_pir_circuit(database_size, alphas):
     inputs = ['d_0_{}_{}'.format(i, j) for i in range(alphas[0]) for j in range(sizes[0])]
     inputs += ['s_{}_{}'.format(i, j) for i in range(len(alphas)) for j in range(alphas[i])]
     operations = []
-    
+
     for i in range(len(alphas)):
         # component-wise multiplication
         for j in range(alphas[i]):
@@ -76,14 +76,14 @@ def generate_pir_circuit(database_size, alphas):
                     operations.append(op)
         else:
             outputs = next_database
-                    
+
 
     #for op in operations:
     #    print op
 
     write_output(operations, inputs, outputs, filename)
     return filename
-    
+
 def binary_add_tree(assignment):
     lhs, op, arg_list = assignment
     if len(arg_list) == 2:
@@ -100,7 +100,7 @@ def binary_add_tree(assignment):
         return ['{} {} {} {}'.format(x1, x2, op, lhs)] + l1 + l2
 
 
-    
+
 def write_output(operations, inputs, outputs, filename):
     """
     write the circuit to a file.
@@ -158,7 +158,7 @@ def generate_gaussian_inputs(num_inputs,mean,sigma):
         values["x_"+str(i)] = (int(random.gauss(mean,sigma)))
     return values
 
-        
+
 def generate_variance_circuit(num_inputs):
     """
     Generate the circuit.
@@ -169,7 +169,7 @@ def generate_variance_circuit(num_inputs):
     assignments = []
     last_output = ""
     filename = CIRCUIT_DIR+"/circuit-variance-"+str(num_inputs)+".sheep"
-    ## first, add all the inputs, to get the sum N.xbar    
+    ## first, add all the inputs, to get the sum N.xbar
     for i in range(num_inputs):
         inputs.append("x_"+str(i))
         if i == 0:
@@ -214,4 +214,81 @@ def generate_variance_circuit(num_inputs):
     for a in assignments:
         outfile.write(a+"\n")
     outfile.close()
-    return filename 
+    return filename
+
+
+
+def generate_vector_dot_product_circuit(input_0, input_1):
+    """
+    generate a circuit to do input_0.input_1 assuming that the
+    HE context has enough "slots" to hold the vectors.
+    """
+    if len(input_0) != len(input_1):
+        raise RuntimeError("input_0 and input_1 must be the same length")
+    circuit_str = "INPUTS input_0 input_1\nCONST_INPUTS rotate_1\n"
+    circuit_str += "OUTPUTS output prod_s1 prod_s2 prod_s3\n"
+    circuit_str += "input_0 input_1 MULTIPLY prod_r0\n"
+    for i in range(len(input_0)-1):
+        circuit_str += "prod_r{} rotate_1 ROTATE prod_r{}\n".format(i,i+1)
+        if i==0:
+            circuit_str += "prod_r0 prod_r1 ADD prod_s1\n"
+        else:
+            circuit_str += "prod_s{} prod_r{} ADD prod_s{}\n".format(i,i+1,i+1)
+    circuit_str += "prod_s{} ALIAS output\n".format(i+1)
+    return circuit_str
+
+
+def rotate_vec(input_vec, n):
+    """
+    rotate an input vec by n places, wrapping around.
+    """
+    output_vec = []
+    for i in range(len(input_vec)):
+        output_vec.append(input_vec[(i-n)%len(input_vec)])
+    return output_vec
+
+
+def generate_matrix_vector_mult(input_matrix, input_vec):
+    """
+    Takes a matrix expressed as a list of lists (each inner list being a row)
+    and a vector expressed as a list, and uses the GAZELLE (arXiv:1801.05507)
+    trick for expressing the matrix.
+    Will return, a circuit (string), a dictionary of input values, and a dictionary
+    of const_input_values (though the latter is trivial).
+    """
+    for row in input_matrix:
+        if len(row) != len(input_vec):
+            print("Width of matrix must be the same as length of vector")
+            return
+    const_input_vals = {"rotate_minus1": -1}
+    circuit_str = "OUTPUTS output_vec\n"
+    circuit_str += "CONST_INPUTS rotate_minus1\n"
+    circuit_str += "INPUTS input_vec "
+    input_vals = {}
+    input_vals["input_vec"] = input_vec
+    for i in range(len(input_matrix)):
+        for j in range(len(input_vec)):
+            index = rotate_vec(list(range(len(input_vec))),i)[j]
+            if not "mstrip_{}".format(index) in input_vals.keys():
+                input_vals["mstrip_{}".format(index)] = []
+                circuit_str += "mstrip_{} ".format(index)
+            input_vals["mstrip_{}".format(index)].append(input_matrix[i][j])
+            pass
+        pass
+    circuit_str+= "\n"
+    ## now start doing the assigments - multiply each diagonal strip by vec
+    ## and rotate vec by 1.
+    circuit_str += "input_vec ALIAS vec_r0\n"
+    circuit_str += "mstrip_0 vec_r0 MULTIPLY prod_0\n"
+    for i in range(1,len(input_vec)):
+        circuit_str += "vec_r{} rotate_minus1 ROTATE vec_r{}\n".format(i-1,i)
+        circuit_str += "mstrip_{} vec_r{}  MULTIPLY prod_{}\n".format(i,i,i)
+    ## we now have prod_0 up to prod_(n-1) - just need to sum them
+    circuit_str += "prod_0 prod_1 ADD sum_0\n"
+    for i in range(1, len(input_vec)-1):
+        circuit_str += "sum_{} prod_{} ADD sum_{}\n".format(i-1,i+1,i)
+    ## rename the final output
+    circuit_str += "sum_{} ALIAS output_vec\n".format(len(input_vec)-2)
+
+    ## return the circuit, the input_val dict and the const_input_val dict
+    return circuit_str, input_vals, const_input_vals

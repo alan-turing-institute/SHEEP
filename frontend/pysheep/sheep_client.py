@@ -528,3 +528,23 @@ def get_circuit():
         response_dict["status_code"] = 404
         response_dict["content"] = "Unable to connect to SHEEP server to get results"
     return response_dict
+
+
+
+def set_timeout(timeout):
+    """
+    set the timeout (in seconds)
+    """
+    if not isinstance(timeout, int):
+        return {"status_code": 500, "content": "incorrect input type for set_timeout"}
+    response_dict = {}
+
+    try:
+        r=requests.put(BASE_URI+"/timeout/",
+                       json={"timeout": timeout})
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set timeout"
+    return response_dict

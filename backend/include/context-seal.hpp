@@ -89,7 +89,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     // this type.  Plaintext64 is this promoted type (defined above).
     std::vector<Plaintext64> p64(this->get_num_slots(), (Plaintext64)0);
     // We can assume p.size() < number of slots due to check above
-    for (size_t i = 0; i < p.size(); i++) p64[i] = p[i];
+    for (size_t i = 0; i < this->m_nslots; i++) p64[i] = p[i % p.size()];
 
     seal::Plaintext pt;
     m_encoder->encode(p64, pt);
@@ -144,11 +144,19 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
   }
 
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+    /// special case for bool, otherwise we get wrong answer
+    if (std::is_same<Plaintext, bool>::value)
+      return Add(a,b);
+
     m_evaluator->sub_inplace(a, b);
     return a;
   }
 
   Ciphertext Negate(Ciphertext a) {
+    /// special case for bool, otherwise we get wrong answer
+    if (std::is_same<Plaintext, bool>::value)
+      return AddConstant(a,1);
+
     m_evaluator->negate_inplace(a);
     return a;
   }
@@ -183,7 +191,9 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     seal::Plaintext s1, s2;
     long N = this->get_num_slots();
     std::vector<Plaintext64> pre_s1(N), pre_s2(N);
-
+    /// always rotate left - if user wants to rotate
+    /// right, we rotate left by ninputs - n places.
+    if (n > 0) n = n - this->m_ninputs;
     // n always even
     for (int i = 0; i < N / 2; i++) {
       pre_s1[i] = ((i >= n) != (i + N / 2 < n));

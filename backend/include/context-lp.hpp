@@ -40,17 +40,9 @@ class ContextLP
 
   Ciphertext encrypt(std::vector<Plaintext> p) {
     Ciphertext c;
-    for (int i = 0; i < p.size(); i++) {
+    for (int i = 0; i < this->m_nslots; i++) {
       paillier_plaintext_t* m;
-      m = paillier_plaintext_from_ui(p[i]);
-      CiphertextEl* ctxt;
-      ctxt = paillier_enc(NULL, pubKey, m, paillier_get_rand_devurandom);
-      c.push_back(*ctxt);
-    }
-    /// fill up with zeros until ciphertext has all nslots slots filled.
-    for (int i = p.size(); i < this->m_nslots; i++) {
-      paillier_plaintext_t* m;
-      m = paillier_plaintext_from_ui((Plaintext)0);
+      m = paillier_plaintext_from_ui(p[i % p.size()]);
       CiphertextEl* ctxt;
       ctxt = paillier_enc(NULL, pubKey, m, paillier_get_rand_devurandom);
       c.push_back(*ctxt);
@@ -141,6 +133,9 @@ class ContextLP
 
   Ciphertext Rotate(Ciphertext a, long n) {
     /// shift the elements of the ciphertext by n places:
+    /// always rotate left - if a positive n is given (i.e. rotate right)
+    /// we rotate left by ninputs - n places.
+    if (n > 0) n = n - this->m_ninputs;
     Ciphertext c;
     for (int i = 0; i < a.size(); i++) {
       int index = (i - n) % a.size();
