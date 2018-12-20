@@ -23,6 +23,10 @@ enable_testing()
 
 include_directories(include)
 
+# Flags for profiling
+# set (CMAKE_C_FLAGS " -pg ")
+# set (CMAKE_CXX_FLAGS " -pg ")
+
 find_package(LP)
 if (LP_FOUND)
   include_directories(SYSTEM ${LP_INCLUDE_DIRS})
