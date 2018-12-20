@@ -73,15 +73,13 @@ class ContextTFHE
 
   Ciphertext encrypt(std::vector<Plaintext> pt) {
     Ciphertext ct;
-    for (int i = 0; i < this->m_ninputs; i++) {
+    for (int i = 0; i < this->m_nslots; i++) {
       CiphertextEl ct_el(parameters);
       for (int j = 0; j < BITWIDTH(Plaintext); j++) {
         bootsSymEncrypt(ct_el[j], bit(j, pt[i % pt.size()]), secret_key.get());
       }
       ct.push_back(ct_el);
-      this->m_ciphertext_size = sizeof(*ct_el);
     }
-
     return ct;
   }
 

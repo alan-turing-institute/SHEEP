@@ -48,7 +48,7 @@ int main(void) {
   inputs = {{1, 1, 1, 1, 0, 0, 0, 0}};
   // const_inputs is vector (same across slots)
   const_inputs = {-3};
-  exp_values = {1, 0, 0, 0, 1, 1, 1};
+  exp_values = {1, 0, 0, 0, 0, 1, 1, 1};
 
   result = ctx.eval_with_plaintexts(C, inputs, const_inputs);
 
