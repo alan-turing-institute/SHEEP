@@ -52,14 +52,14 @@ def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial
     ## configure the sheep client
     check_result(sheep_client.set_context,context_name=context)
     check_result(sheep_client.set_input_type,input_type=input_type)
-## TEMP COMMENT OUT FOR NOW    check_result(sheep_client.set_parameters,param_dict=params)
+    check_result(sheep_client.set_parameters,param_dict=params)
     check_result(sheep_client.set_eval_strategy,strategy=eval_strategy)
     check_result(sheep_client.set_circuit,circuit_filename=circuit_file)
 
     ## randomly assign input values
     r = check_result(sheep_client.get_nslots)
-    nslots = min(r["nslots"],100)
-#    nslots = r["nslots"]
+#    nslots = min(r["nslots"],100)
+    nslots = r["nslots"]
     inputs = check_result(sheep_client.get_inputs)
     const_inputs = check_result(sheep_client.get_const_inputs)
     input_vals, const_input_vals = generate_input_vals(inputs, const_inputs, input_type, nslots)
@@ -174,3 +174,35 @@ def timing_per_gate_type(timings, circuit):
                 output_dict[gate_type] = 0.
                 output_dict[gate_type] += float(row.timing_value)
     return output_dict
+
+
+def upload_results(circuit_name):
+    """
+    function that can be called after sheep-server has run a test,
+    so results, params, config are available via the sheep_client
+    upload test result and some configuration to db
+    """
+
+    ## first get the "results"
+    results_dict = sheep_client.get_results()["content"]
+    ## now get the configuration
+    config_dict = sheep_client.get_config()["content"]
+    ## and the parameters
+    param_dict = sheep_client.get_parameters()["content"]
+    num_slots = sheep_client.get_nslots()["content"]["nslots"]
+    ## now extract some values
+    input_type = config_dict['input_type']
+    context_name = config_dict['context']
+    num_inputs = len(sheep_client.get_inputs()["content"])
+    tbb_enabled = config_dict["eval_strategy"] == "parallel"
+
+    uploaded_ok = upload_benchmark_result(circuit_name,
+                                          context_name,
+                                          input_type,
+                                          num_inputs,
+                                          num_slots,
+                                          tbb_enabled,
+                                          results_dict,
+                                          param_dict
+    )
+    return uploaded_ok

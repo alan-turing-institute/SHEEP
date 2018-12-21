@@ -485,41 +485,7 @@ def get_results():
     return response_dict
 
 
-def upload_results(circuit_name):
-    """
-    upload test result and some configuration to db
-    """
-    results_dict = {}
-    results_dict['circuit_name'] = circuit_name
-    try:
-        ## first get the "results"
-        results_dict = get_results()["content"]
-        ## now get the configuration
-        config_dict = get_config()["content"]
-        ## and the parameters
-        param_dict = get_parameters()["content"]
-        input_type = config_dict['input_type']
-        context_name = config_dict['context']
-        num_inputs = len(get_inputs()["content"])
-        tbb_enabled = config_dict["eval_strategy"] == "parallel"
-        num_slots = get_nslots()["content"]["nslots"]
-        uploaded_ok = database.upload_benchmark_result(circuit_name,
-                                                       context_name,
-                                                       input_type,
-                                                       num_inputs,
-                                                       num_slots,
-                                                       tbb_enabled,
-                                                       results_dict,
-                                                       param_dict
-        )
-        if uploaded_ok:
-            return {"status_code": 200, "content": "uploaded OK"}
-        else:
-            return {"status_code": 500, "content": "Error uploading results"}
 
-    except(requests.exceptions.ConnectionError):
-        return {"status_code": 404,
-                "content": "Unable to connect to SHEEP server to get results"}
 
 def get_circuit():
     """
