@@ -225,12 +225,10 @@ bool SheepServer::check_job_outputs(
 }
 
 template <typename PlaintextT>
-std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
-  // Ask for a 4 Mb buffer.  This should be enough to hold any
-  // serialization of a single plaintext we are likely to encounter.
-  // TODO: handle arbitrary size.
-  size_t ct_buffer_size = 4*1024*1024;
-  SharedBuffer<char> serialized_ct_shared(ct_buffer_size);
+int SheepServer::configure_and_serialize(std::vector<int> inputvec) {
+  /// Return the size of the serialized ciphertext (string itself is not much use)
+  size_t ct_buffer_size = 1;
+  SharedBuffer<int> serialized_ct_shared(ct_buffer_size);
 
   int status = protect_eval(60L, [&](){
       /// convert inputvec to plaintext type
@@ -250,8 +248,8 @@ std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
       /// apply the new parameters
       context->configure();
       std::string serialized_ct = context->encrypt_and_serialize(ptvec);
-      strncpy(serialized_ct_shared.data(), serialized_ct.c_str(), ct_buffer_size);
-      serialized_ct_shared[ct_buffer_size - 1] = 0;
+      int sct_size = serialized_ct.size();
+      serialized_ct_shared[0] = sct_size;
     });
 
   if (status == PE_TIMEOUT) {
@@ -259,7 +257,7 @@ std::string SheepServer::configure_and_serialize(std::vector<int> inputvec) {
   } else if (status) {
     throw std::runtime_error("Error performing serialization");
   } else {
-    return std::string(serialized_ct_shared.data());
+    return serialized_ct_shared[0];
   }
 }
 
@@ -630,7 +628,7 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	for (auto input_val : input_vals) {
 	  plaintext_inputs.push_back(input_val.as_integer());
 	}
-	std::string sct;
+	int sct;
 	if (m_job_config.input_type == "bool")
 	  sct = configure_and_serialize<bool>(plaintext_inputs);
 	else if (m_job_config.input_type == "uint8_t")
@@ -648,8 +646,7 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	else
 	  message.reply(status_codes::InternalError, ("Unknown input type"));
 	json::value result = json::value::object();
-	result["ciphertext"] = json::value::string(sct);
-	result["size"] = json::value::number((int64_t)(sct.size()));
+	result["size"] = json::value::number((int64_t)(sct));
 
 	message.reply(status_codes::OK, result);
 

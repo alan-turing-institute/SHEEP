@@ -151,7 +151,7 @@ class SheepServer {
   void configure_and_run(http_request message);
 
   template <typename PlaintextT>
-  std::string configure_and_serialize(std::vector<int> pt);
+  int configure_and_serialize(std::vector<int> pt);
 
   void get_parameters();
 
