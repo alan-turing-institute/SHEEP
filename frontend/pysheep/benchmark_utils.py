@@ -43,7 +43,7 @@ def generate_input_vals(inputs, const_inputs, input_type, nslots):
 
 
 
-def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial", scan_id=None):
+def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial", scan_id=None, timeout=None):
     """
     Run the circuit and retreive the results.
     scan_id is an optional argument that can help with retrieving a set of results from the database.
@@ -55,17 +55,16 @@ def run_circuit(circuit_file, input_type, context, params, eval_strategy="serial
     check_result(sheep_client.set_parameters,param_dict=params)
     check_result(sheep_client.set_eval_strategy,strategy=eval_strategy)
     check_result(sheep_client.set_circuit,circuit_filename=circuit_file)
-
     ## randomly assign input values
     r = check_result(sheep_client.get_nslots)
-#    nslots = min(r["nslots"],100)
-    nslots = r["nslots"]
+    nslots = min(r["nslots"],100)
     inputs = check_result(sheep_client.get_inputs)
     const_inputs = check_result(sheep_client.get_const_inputs)
     input_vals, const_input_vals = generate_input_vals(inputs, const_inputs, input_type, nslots)
     check_result(sheep_client.set_inputs,input_dict=input_vals)
     check_result(sheep_client.set_const_inputs, input_dict=const_input_vals)
-
+    if timeout:
+        check_result(sheep_client.set_timeout,timeout=timeout)
     ## run the job
     check_result(sheep_client.run_job)
     ## get the results
@@ -91,24 +90,33 @@ def params_for_level(context,level):
     set parameters for a given context for a given level
     """
     if context == "HElib_Fp":
-        param_dict = {"Levels": level+2}
+        param_dict = {"Levels": level+4}
 
     elif context == "SEAL":
         param_dict = {
             1: {"N": 2048},
             2: {"N": 4096},
             3: {"N": 4096},
-            4: {"N": 8192},
-            5: {"N": 8192},
-            6: {"N": 16384},
-            7: {"N": 16384},
-            8: {"N": 16384},
-            9: {"N": 32768},
+#            4: {"N": 8192},
+#            5: {"N": 8192},
+#            6: {"N": 16384},
+#            7: {"N": 16384},
+#            8: {"N": 16384},
+#            9: {"N": 32768},
+### NOTE with SEAL v3+ it seems that we are unable to
+### set the parameter N to values larger than 4096.
+            4: {"N": 4096},
+            5: {"N": 4096},
+            6: {"N": 4096},
+            7: {"N": 4096},
+            8: {"N": 4096},
+            9: {"N": 4096}
         }
         return param_dict[level]
     else:
         param_dict = {}
     return param_dict
+
 
 def levels_for_params(context, param_dict):
     """
@@ -121,13 +129,13 @@ def levels_for_params(context, param_dict):
         if param_dict["N"] == 2048:
             return 1
         elif param_dict["N"] == 4096:
-            return 3
-        elif param_dict["N"] == 8192:
-            return 5
-        elif param_dict["N"] == 16384:
-            return 8
-        elif param_dict["N"] == 32768:
             return 9
+#        elif param_dict["N"] == 8192:
+#            return 5
+#        elif param_dict["N"] == 16384:
+#            return 8
+#        elif param_dict["N"] == 32768:
+#            return 9
         else:
             raise RuntimeError("Unrecognized value of N parameter")
     else:
@@ -170,6 +178,7 @@ def timing_per_gate_type(timings, circuit):
                or row.timing_name=="decryption":
                 continue
             gate_name = row.timing_name
+            gate_type = gate_map[gate_name]
             if not gate_type in output_dict.keys():
                 output_dict[gate_type] = 0.
             output_dict[gate_type] += float(row.timing_value)
