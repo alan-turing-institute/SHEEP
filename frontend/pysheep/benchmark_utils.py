@@ -172,7 +172,7 @@ def timing_per_gate_type(timings, circuit):
             gate_name = row.timing_name
             if not gate_type in output_dict.keys():
                 output_dict[gate_type] = 0.
-                output_dict[gate_type] += float(row.timing_value)
+            output_dict[gate_type] += float(row.timing_value)
     return output_dict
 
 
