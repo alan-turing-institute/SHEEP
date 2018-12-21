@@ -1,10 +1,13 @@
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
 
+# # Flags for profiling
+# set (CMAKE_C_FLAGS " -pg ")
+# set (CMAKE_CXX_FLAGS " -pg ")
+
 add_executable(test-invalid-circuit
   test-invalid-circuit.cpp
   ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 add_test(NAME test-invalid-circuit COMMAND $<TARGET_FILE:test-invalid-circuit>)
-
 
 #add_executable(test-invalid-circuit-from-file
 #  test-invalid-circuit-from-file.cpp
@@ -103,6 +106,11 @@ if (TFHE_FOUND)
 
   endforeach(type)
 
+  # The test of seven gates
+  add_executable(test-tfhe-bool-c7 test-tfhe-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-tfhe-bool-c7 ${TFHE_LIBRARIES})
+  add_test(NAME test-tfhe-bool-c7 COMMAND $<TARGET_FILE:test-tfhe-bool-c7>)
+
 endif (TFHE_FOUND)
 
 ##################################################################################################
@@ -152,11 +160,16 @@ if (HELIB_FOUND)
     endforeach(type)
 
   # finally, one more test, only for f2/bool
-  add_executable(test-helib-f2-bool-maximum
-    test-helib-f2-bool-maximum.cpp
-    ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  add_executable(test-helib-f2-bool-maximum test-helib-f2-bool-maximum.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
   target_link_libraries(test-helib-f2-bool-maximum ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
   add_test(NAME test-helib-f2-bool-maximum COMMAND $<TARGET_FILE:test-helib-f2-bool-maximum>)
+
+  # The test of seven gates
+  foreach(fx IN ITEMS f2 fp)
+    add_executable(test-helib-${fx}-bool-c7 test-helib-${fx}-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    target_link_libraries(test-helib-${fx}-bool-c7 ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+    add_test(NAME test-helib-${fx}-bool-c7 COMMAND $<TARGET_FILE:test-helib-${fx}-bool-c7>)
+  endforeach(fx)
 
 #  add_executable(test-helib-fp-int8_t-encrypt-serialize
 #    test-helib-fp-int8_t-encrypt-serialize.cpp
@@ -166,13 +179,13 @@ if (HELIB_FOUND)
 
 endif (HELIB_FOUND)
 
-###################### END OF HELIB ###################################################################################
-
-
+##################################################################################################
+### SEAL
+##################################################################################################
 if (SEAL_FOUND)
 
     foreach(type IN ITEMS bool int8_t uint8_t)
-      foreach (op IN ITEMS add multiply subtract multByConst encrypt-decrypt rotate negate) # addConst encrypt-serialize)
+      foreach (op IN ITEMS add multiply subtract multByConst encrypt-decrypt rotate negate)
           add_executable(test-seal-${type}-${op}
                           test-seal-${type}-${op}
         ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
@@ -183,6 +196,13 @@ if (SEAL_FOUND)
     add_executable(test-seal-int64_t-rotate test-seal-int64_t-rotate ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
     target_link_libraries(test-seal-int64_t-rotate ${SEAL_LIBRARIES})
     add_test(NAME test-seal-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-int64_t-rotate>)
+
+  # The test of seven gates
+  add_executable(test-seal-bool-c7 test-seal-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-seal-bool-c7 ${SEAL_LIBRARIES})
+  add_test(NAME test-seal-bool-c7 COMMAND $<TARGET_FILE:test-seal-bool-c7>)
+
+
 endif (SEAL_FOUND)
 
 ##################################################################################################
@@ -190,16 +210,20 @@ endif (SEAL_FOUND)
 ##################################################################################################
 
 if (LP_FOUND)
- foreach(type IN ITEMS bool int8_t uint8_t)
-   foreach (op IN ITEMS encrypt-decrypt add multByConst negate rotate encrypt-serialize)
-   add_executable(test-lp-${type}-${op} test-lp-${type}-${op} ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-  target_link_libraries(test-lp-${type}-${op} ${LP_LIBRARIES} ${GMP_LIBRARIES})
-  add_test(NAME test-lp-${type}-${op} COMMAND $<TARGET_FILE:test-lp-${type}-${op}>)
-  endforeach(op)
- endforeach(type)
+  foreach(type IN ITEMS bool int8_t uint8_t)
+    foreach (op IN ITEMS encrypt-decrypt add multByConst negate rotate encrypt-serialize)
+      add_executable(test-lp-${type}-${op} test-lp-${type}-${op} ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+      target_link_libraries(test-lp-${type}-${op} ${LP_LIBRARIES} ${GMP_LIBRARIES})
+      add_test(NAME test-lp-${type}-${op} COMMAND $<TARGET_FILE:test-lp-${type}-${op}>)
+    endforeach(op)
+  endforeach(type)
+
+  # The test of seven gates
+  add_executable(test-lp-bool-c7 test-lp-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-lp-bool-c7 ${LP_LIBRARIES} ${GMP_LIBRARIES})
+  add_test(NAME test-lp-bool-c7 COMMAND $<TARGET_FILE:test-lp-bool-c7>)
 endif (LP_FOUND)
 ############### end of libpaillier ###############################################################
-
 
 #add_executable(test-parallel-eval test-parallel-eval.cpp
 #  ${CMAKE_SOURCE_DIR}/src/circuit.cpp
