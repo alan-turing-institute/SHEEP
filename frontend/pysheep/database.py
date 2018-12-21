@@ -47,13 +47,22 @@ class BenchmarkMeasurement(Base):
     scan_id = Column(String(250), nullable=True)
 
 
+class CiphertextMeasurement(Base):
+    __tablename__ = "ciphertext"
+    ciphertext_id = Column(Integer, primary_key=True,autoincrement=True)
+    context = Column(String(250), nullable=False)
+    input_bitwidth = Column(Integer, nullable=False)
+    num_slots = Column(Integer, nullable=False)
+    ciphertext_size = Column(Integer, nullable=False)
+    parameters  = relationship("ParameterSetting",uselist=True)
+
+
 class Timing(Base):
     __tablename__ = "timings"
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     timing_name = Column(String(100), nullable=False)
     timing_value = Column(Float, nullable=False)
-    benchmark_id = Column(Integer, ForeignKey("benchmarks.benchmark_id"))
-
+    benchmark_id = Column(Integer, ForeignKey("benchmarks.benchmark_id"),nullable=True)
 
 class ParameterSetting(Base):
     __tablename__ = "param"
@@ -61,20 +70,13 @@ class ParameterSetting(Base):
     param_name = Column(String(100), nullable=False)
     param_value = Column(Integer, nullable=False)
     benchmark_id = Column(Integer, ForeignKey("benchmarks.benchmark_id"))
-
+    ciphertext_id = Column(Integer, ForeignKey("ciphertext.ciphertext_id"),nullable=True)
 
 Base.metadata.create_all(engine)
 
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
-
-
-def get_last_benchmark_id():
-    bms = session.query(BenchmarkMeasurement).all()
-    if len(bms) == 0:
-        return 0
-    return bms[-1].benchmark_id
 
 
 def upload_benchmark_result(circuit_name,
@@ -117,3 +119,28 @@ def upload_benchmark_result(circuit_name,
         session.add(p)
     session.commit()
     return True
+
+
+def upload_ciphertext_result(context,
+                             input_type,
+                             nslots,
+                             ct_size,
+                             param_dict):
+    """
+    Upload nslots, serialized ciphertext size, and parameters
+    """
+    cm = CiphertextMeasurement()
+    cm.context = context
+    cm.input_bitwidth = common_utils.get_bitwidth(input_type)
+    cm.num_slots = nslots
+    cm.ciphertext_size = ct_size
+    session.add(cm)
+    session.commit()
+    cm.ciphertext_size = ct_size
+    for k,v in param_dict.items():
+        p = ParameterSetting()
+        p.param_name = k
+        p.param_value = v
+        p.ciphertext_id = cm.ciphertext_id
+        session.add(p)
+    session.commit()
