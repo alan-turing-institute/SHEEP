@@ -304,7 +304,6 @@ class ContextClear
     } else {
       /// rotate left by ninputs - n places
       n = n - this->m_ninputs;
-      std::cout<<" n is "<<n<<std::endl;
       for (int i = 0; i < a.size(); i++) {
 	int index = (i - n) % a.size();
 	c.push_back(a[index]);

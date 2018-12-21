@@ -153,9 +153,8 @@ def generate_gaussian_inputs(num_inputs,mean,sigma):
     however, these values should not be too large, to avoid integer overflows..
     """
     values = {}
-    values["N"] = num_inputs
     for i in range(num_inputs):
-        values["x_"+str(i)] = (int(random.gauss(mean,sigma)))
+        values["x_"+str(i)] = [(int(random.gauss(mean,sigma)))]
     return values
 
 
@@ -185,7 +184,7 @@ def generate_variance_circuit(num_inputs):
 
     ## now multiply each of the inputs by N and subtract from Nxbar
     for i in range(num_inputs):
-        assignments.append("x_"+str(i)+" N  MULTIPLY Nx_"+str(i))
+        assignments.append("x_"+str(i)+" N  MULTBYCONST Nx_"+str(i))
         assignments.append("Nxbar Nx_"+str(i)+" SUBTRACT v_"+str(i))
     ## now square each of these outputs by multiplying with an ALIAS of themself
         assignments.append("v_"+str(i)+" ALIAS vv_"+str(i))
@@ -201,9 +200,10 @@ def generate_variance_circuit(num_inputs):
     last_output = assignments[-1].split()[-1]
     assignments.append(last_output+" ALIAS varianceN3")
     outfile = open(filename,"w")
-    outfile.write("INPUTS ")
+    outfile.write("CONST_INPUTS ")
     for ci in const_inputs:
         outfile.write(" "+ci)
+    outfile.write("\nINPUTS ")
     for i in inputs:
         outfile.write(" "+i)
     outfile.write("\n")
