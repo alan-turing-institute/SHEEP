@@ -25,7 +25,7 @@ int main(void) {
   std::vector<uint8_t> exp_values = {110};
 
   std::vector<std::vector<uint8_t>> result =
-      ctx.eval_with_plaintexts(circ, inputs, durations);
+      ctx.eval_with_plaintexts(circ, inputs);
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " * "
@@ -38,7 +38,7 @@ int main(void) {
   inputs = {{100, 0}, {127, 1}};
   exp_values = {156, 0};
 
-  result = ctx.eval_with_plaintexts(circ, inputs, durations);
+  result = ctx.eval_with_plaintexts(circ, inputs);
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " * "

@@ -27,7 +27,7 @@ int main(void) {
   std::vector<std::vector<int8_t> > pt_input = {
       {1, 1, 0, 0}, {11, 22, 33, 44}, {21, -32, 43, -54}};
   std::vector<std::vector<int8_t> > result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
   std::vector<int8_t> exp_values = {11, 22, 43, -54};
 
   for (int i = 0; i < exp_values.size(); i++) {

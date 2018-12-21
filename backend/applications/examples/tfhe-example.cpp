@@ -1,5 +1,5 @@
 #include <memory>
-
+#include <vector>
 #include "context-tfhe.hpp"
 
 int main(void) {
@@ -22,22 +22,22 @@ int main(void) {
   // ContextTFHE<bool>::CircuitEvaluator run_circuit;
   // run_circuit = ctx.compile(C);
 
-  std::list<ContextTFHE<bool>::Plaintext> plaintext_inputs = {false, true, true,
-                                                              true};
-  std::list<ContextTFHE<bool>::Ciphertext> ciphertext_inputs;
+  std::vector<std::vector<ContextTFHE<bool>::Plaintext> > plaintext_inputs = {{false}, {true}, {true}, {true}};
 
-  for (ContextTFHE<bool>::Plaintext pt : plaintext_inputs)
+  std::vector<ContextTFHE<bool>::Ciphertext> ciphertext_inputs;
+
+  for (std::vector<ContextTFHE<bool>::Plaintext> pt : plaintext_inputs)
     ciphertext_inputs.push_back(ctx.encrypt(pt));
 
-  std::list<ContextTFHE<bool>::Ciphertext> ciphertext_outputs;
+  std::vector<ContextTFHE<bool>::Ciphertext> ciphertext_outputs;
   using microsecond = std::chrono::duration<double, std::micro>;
   microsecond time = ctx.eval(C, ciphertext_inputs, ciphertext_outputs);
 
-  std::list<ContextTFHE<bool>::Plaintext> plaintext_outputs;
+  std::vector< std::vector<ContextTFHE<bool>::Plaintext> > plaintext_outputs;
   for (ContextTFHE<bool>::Ciphertext ct : ciphertext_outputs) {
-    ContextTFHE<bool>::Plaintext pt = ctx.decrypt(ct);
+    std::vector<ContextTFHE<bool>::Plaintext> pt = ctx.decrypt(ct);
     plaintext_outputs.push_back(pt);
-    std::cout << pt << std::endl;
+    std::cout << pt[0] << std::endl;
   }
   std::cout << "time was " << time.count() << " microseconds\n";
 }

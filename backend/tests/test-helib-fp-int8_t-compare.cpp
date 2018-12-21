@@ -30,7 +30,7 @@ int main(void) {
   // pt_input = {{{15}, {22}}};//, {10, -12}, {-12, -12}, {-81, -80}};
 
   // std::vector<std::vector<ContextHElib_Fp<int8_t>::Plaintext>> result =
-  // ctx.eval_with_plaintexts(circ, pt_input, durations);
+  // ctx.eval_with_plaintexts(circ, pt_input);
 
   // std::vector<int8_t> exp_values = {1};//, 1, 0, 0};
 

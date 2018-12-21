@@ -288,6 +288,24 @@ def set_circuit(circuit_filename):
     return response_dict
 
 
+def set_circuit_text(circuit_text):
+    """
+    Read the circuit and pass it to the server as a string.
+    """
+    if not isinstance(circuit_text, str):
+        return {"status_code": 500, "content": "incorrect input type for set_circuit"}
+    response_dict = {}
+    try:
+        r = requests.post(BASE_URI+"/circuit/",
+                          json={"circuit": circuit_text})
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set circuit"
+    return response_dict
+
+
 def get_parameters():
     """
     Will instantiate a context and query it for its parameters"
@@ -331,6 +349,31 @@ def set_parameters(param_dict):
                        json=param_dict)
         response_dict["status_code"] = r.status_code
         response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set parameters"
+    return response_dict
+
+
+def encrypt_and_serialize(plaintext_vec):
+    """
+    Given a vector of plaintexts, encrypt them and get the string
+    of the serialized output
+    """
+    nslot_request = get_nslots()
+    if nslot_request["status_code"] != 200:
+        return nslot_request
+    nslots = nslot_request["content"]["nslots"]
+
+    if len(plaintext_vec) > nslots:
+        return {"status_code": 500, "content": "Not enough slots"}
+    response_dict = {}
+    try:
+        r=requests.post(BASE_URI+"/serialized_ct/", json={"inputs":plaintext_vec})
+        if r.status_code != 200:
+            return r
+        response_dict["status_code"] = 200
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
     except(requests.exceptions.ConnectionError):
         response_dict["status_code"] = 404
         response_dict["content"] = "Unable to connect to SHEEP server to set parameters"
@@ -442,32 +485,38 @@ def get_results():
     return response_dict
 
 
-def upload_results(circuit_name):
+
+
+def get_circuit():
     """
-    upload test result and some configuration to db
+    Get the server to return its circuit as a string
     """
-    results_dict = {}
-    results_dict['circuit_name'] = circuit_name
+    response_dict = {}
     try:
-        ## first get the "results"
-        r=requests.get(BASE_URI+"/results/")
-        rj = json.loads(r.content.decode("utf-8"))
-        results_dict["is_correct"] = rj["cleartext check"]["is_correct"]
-        results_dict["execution_time"] = rj["timings"]["evaluation"]
-        ## now get the configuration
-        c = requests.get(BASE_URI+"/config/")
-        cj = json.loads(c.content.decode("utf-8"))
-        input_type = cj['input_type']
-        results_dict['input_bitwidth'] = common_utils.get_bitwidth(input_type)
-        results_dict['input_signed'] = input_type.startswith("i")
-        results_dict['context_name'] = cj['context']
-
-        uploaded_ok = database.upload_benchmark_result(results_dict)
-        if uploaded_ok:
-            return {"status_code": 200, "content": "uploaded OK"}
-        else:
-            return {"status_code": 500, "content": "Error uploading results"}
-
+        r=requests.get(BASE_URI+"/circuit/")
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))
     except(requests.exceptions.ConnectionError):
-        return {"status_code": 404,
-                "content": "Unable to connect to SHEEP server to get results"}
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to get results"
+    return response_dict
+
+
+
+def set_timeout(timeout):
+    """
+    set the timeout (in seconds)
+    """
+    if not isinstance(timeout, int):
+        return {"status_code": 500, "content": "incorrect input type for set_timeout"}
+    response_dict = {}
+
+    try:
+        r=requests.put(BASE_URI+"/timeout/",
+                       json={"timeout": timeout})
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = r.content.decode("utf-8")
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to set timeout"
+    return response_dict

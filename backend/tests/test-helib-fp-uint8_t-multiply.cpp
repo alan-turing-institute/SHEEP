@@ -23,7 +23,7 @@ int main(void) {
       {3, 100}, {15, 127}};
 
   std::vector<std::vector<ContextHElib_Fp<uint8_t>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<uint8_t> exp_values = {45, 156};
 

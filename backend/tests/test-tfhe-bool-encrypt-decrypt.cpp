@@ -15,11 +15,12 @@ void test_single(ContextTFHE<bool>& context) {
   std::vector<Plaintext> pt_orig = {true, false};
   std::vector<Plaintext> pt_new = context.decrypt(context.encrypt(pt_orig));
 
-  for (int i = 0; i < pt_new.size(); i++) {
+  for (int i = 0; i < pt_orig.size(); i++) {
     std::cout << pt_orig[i] << " = " << pt_new[i] << std::endl;
+    assert(pt_orig[i] == pt_new[i]);
   }
 
-  assert(pt_orig == pt_new);
+
 };
 
 // // Similar to test_single, but using the container interface

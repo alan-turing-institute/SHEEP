@@ -40,12 +40,13 @@ class ContextClear
 
   Ciphertext encrypt(std::vector<Plaintext> p) {
     if (!this->m_configured) this->configure();
-    this->m_ciphertext_size = sizeof(p[0]) * this->m_nslots;
+    Ciphertext c;
     /// we are given a vector of Plaintexts p, which can have any number
-    /// of elements.  To make it consistent with real HE schemes, we should
-    /// pad this vector with zeros until it has size m_nslots.
-    for (int i = p.size(); i < this->m_nslots; i++) p.push_back((Plaintext)0);
-    return p;  // plaintext and ciphertext are the same for this context
+    /// of elements.  Fill up nslots with repeating pattern of input plaintext vector.
+    for (int i = 0; i < this->m_nslots; i++) {
+      c.push_back(p[i % p.size()]);
+    }
+    return c;  // plaintext and ciphertext are the same for this context
   }
 
   std::vector<Plaintext> decrypt(Ciphertext c) {
@@ -295,11 +296,19 @@ class ContextClear
   Ciphertext Rotate(Ciphertext a, long n) {
     /// shift the elements of the ciphertext by n places:
     Ciphertext c;
-    for (int i = 0; i < a.size(); i++) {
-      int index = (i - n) % a.size();
-      c.push_back(a[index]);
+    if (n < 0) {
+      for (int i = 0; i < a.size(); i++) {
+	int index = (i - n) % a.size();
+	c.push_back(a[index]);
+      }
+    } else {
+      /// rotate left by ninputs - n places
+      n = n - this->m_ninputs;
+      for (int i = 0; i < a.size(); i++) {
+	int index = (i - n) % a.size();
+	c.push_back(a[index]);
+      }
     }
-
     return c;
   }
 };

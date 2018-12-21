@@ -44,12 +44,12 @@ struct SheepJobConfig {
   Circuit circuit;
   std::set<std::string> input_names;
   std::set<std::string> const_input_names;
-  std::vector<std::vector<int>> input_vals;
-  std::vector<int> const_input_vals;
+  std::map<std::string, std::vector<int>> input_vals;
+  std::map<std::string, long> const_input_vals;
   std::map<std::string, long> parameters;
   int nslots;
-
-  void setDefaults() { eval_strategy = EvaluationStrategy::serial; }
+  int timeout;
+  void setDefaults() { eval_strategy = EvaluationStrategy::serial; timeout = 10; }
   bool isConfigured() {
     return ((context.size() > 0) && (input_type.size() > 0) &&
             (circuit.get_inputs().size() > 0) &&
@@ -145,11 +145,13 @@ class SheepServer {
   template <typename PlaintextT>
   std::vector<std::vector<PlaintextT>> make_plaintext_inputs();
 
-  template <typename PlaintextT>
-  std::vector<PlaintextT> make_const_plaintext_inputs();
+  std::vector<long> make_const_plaintext_inputs();
 
   template <typename PlaintextT>
   void configure_and_run(http_request message);
+
+  template <typename PlaintextT>
+  int configure_and_serialize(std::vector<int> pt);
 
   void get_parameters();
 
@@ -160,8 +162,6 @@ class SheepServer {
   template <typename PlaintextT>
   bool check_job_outputs(std::vector<std::vector<PlaintextT>> test_outputs,
                          std::vector<std::vector<PlaintextT>> clear_outputs);
-  //			 std::map<std::string, std::string> test_outputs,
-  //			 std::map<std::string, std::string> clear_outputs);
 
  private:
   /// generic methods - will then dispatch to specific ones based on URL
@@ -170,6 +170,7 @@ class SheepServer {
   void handle_post(http_request message);
   /// actual endpoints
   void handle_get_context(http_request message);
+  void handle_get_circuit(http_request message);
   void handle_get_input_type(http_request message);
   void handle_get_inputs(http_request message);
   void handle_get_const_inputs(http_request message);
@@ -182,6 +183,7 @@ class SheepServer {
 
   void handle_post_inputs(http_request message);
   void handle_post_const_inputs(http_request message);
+  void handle_post_serialized_ciphertext(http_request message);
 
   void handle_post_input_type(http_request message);
   void handle_post_circuit(http_request message);
@@ -193,6 +195,8 @@ class SheepServer {
 
   void handle_put_parameters(http_request message);
   void handle_put_eval_strategy(http_request message);
+  void handle_put_timeout(http_request message);
+
   /// listen to http requests
   http_listener m_listener;
   /// structs to store the configuration and results of a test.

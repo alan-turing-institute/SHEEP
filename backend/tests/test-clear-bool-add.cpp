@@ -28,7 +28,7 @@ int main(void) {
   std::vector<bool> exp_values = {0, 1, 1, 0};
 
   std::vector<std::vector<bool>> result =
-      ctx.eval_with_plaintexts(circ, inputs, durations);
+      ctx.eval_with_plaintexts(circ, inputs);
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(inputs[0][i]) << " + "

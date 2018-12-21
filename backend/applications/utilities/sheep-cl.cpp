@@ -131,14 +131,14 @@ bool check_correct(std::vector<std::vector<PlaintextT>> test_results,
 template <typename PlaintextT>
 void print_outputs(Circuit C, std::vector<std::vector<PlaintextT>> test_results,
                    std::vector<std::vector<PlaintextT>> cleartext_results,
-                   std::vector<DurationT>& durations) {
+                   DurationContainer& durations) {
   std::cout << std::endl << "===============" << std::endl;
   std::cout << "=== RESULTS ===" << std::endl << std::endl;
   std::cout << "== Processing times: ==" << std::endl;
-  std::cout << "setup: " << durations[0].count() << std::endl;
-  std::cout << "encryption: " << durations[1].count() << std::endl;
-  std::cout << "circuit_evaluation: " << durations[2].count() << std::endl;
-  std::cout << "decryption: " << durations[3].count() << std::endl;
+  std::cout << "setup: " << durations.first[0].count() << std::endl;
+  std::cout << "encryption: " << durations.first[1].count() << std::endl;
+  std::cout << "circuit_evaluation: " << durations.first[2].count() << std::endl;
+  std::cout << "decryption: " << durations.first[3].count() << std::endl;
   std::cout << std::endl;
 
   std::vector<Wire> circuit_outputs = C.get_outputs();
@@ -195,16 +195,19 @@ template <typename PlaintextT>
 bool benchmark_run(std::string context_name, std::string parameter_file,
                    Circuit C, std::string input_filename,
                    EvaluationStrategy eval_strategy) {
-  std::vector<DurationT> durations;
+  std::vector<DurationT> totalDurations;
   typedef std::chrono::duration<double, std::micro> microsecond;
   typedef std::chrono::high_resolution_clock high_res_clock;
   auto setup_start_time = high_res_clock::now();
+
+  std::map<std::string, DurationT> perGateDurations;
+  DurationContainer durations = std::make_pair(totalDurations, perGateDurations);
 
   std::unique_ptr<BaseContext<PlaintextT>> test_ctx =
       make_context<PlaintextT>(context_name, parameter_file);
   std::cout << " === Made context " << context_name << std::endl;
   auto setup_end_time = high_res_clock::now();
-  durations.push_back(microsecond(setup_end_time - setup_start_time));
+  durations.first.push_back(microsecond(setup_end_time - setup_start_time));
 
   std::unique_ptr<BaseContext<PlaintextT>> clear_ctx =
       make_context<PlaintextT>("Clear");
@@ -227,8 +230,8 @@ bool benchmark_run(std::string context_name, std::string parameter_file,
   test_ctx->print_parameters();
   test_ctx->print_sizes();
   std::vector<std::vector<PlaintextT>> result_clear =
-      clear_ctx->eval_with_plaintexts(C, ordered_inputs, durations,
-                                      eval_strategy);
+    clear_ctx->eval_with_plaintexts(C, ordered_inputs);
+
   print_outputs(C, result_bench, result_clear, durations);
 
   return true;

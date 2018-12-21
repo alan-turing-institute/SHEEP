@@ -22,7 +22,7 @@ int main(void) {
       {15, -15, -128, 0}};
 
   std::vector<std::vector<ContextTFHE<int8_t>::Plaintext>> result =
-      ctx.eval_with_plaintexts(circ, pt_input, durations);
+      ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<int8_t> exp_values = {-15, 15, -128, 0};
 

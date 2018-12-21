@@ -275,6 +275,17 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
     return pt_transformed;
   }
 
+
+  std::string encrypt_and_serialize(std::vector<PlaintextT> pt) {
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    for (int i=0; i< this->m_bitwidth; ++i) {
+      ss << ct[i];
+    }
+    std::string ctstring = ss.str();
+    return ctstring;
+  };
+
   Ciphertext Negate(Ciphertext a) {
     /// bootstrapping method copied from HElib's Test_binaryCompare
     if (this->m_bootstrap) {
@@ -320,8 +331,6 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
     a2 *= b[0];  // AND(a,b)
     a1 += a2;    // XOR the previous two lines
     output.append(a1);
-
-    std::cout << " about  to return outptu" << std::endl;
     return output;
   }
 
@@ -439,9 +448,22 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
     return output;
   }
 
-  // Ciphertext AddConstant(Ciphertext a, long b) {
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// Cyclically rotate the linear array by n positions
+    if (n > this->m_nslots) {
+      throw std::runtime_error("Error in Rotate: cannot rotate by more than nslots positions");
+    }
+    Ciphertext result;
+    if (n > 0) n = n - this->m_ninputs;
+    /// loop over all bits
+    for (int j = 0; j < this->m_bitwidth; j++) {
+      Ctxt result_bit(a[j]);
+      this->m_ea->rotate(result_bit, n);
+      result.append(result_bit);
+    }
+    return result;
 
-  // }
+  }
 
  private:
   bool m_signed_plaintext;
@@ -465,6 +487,7 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
       long hamming_weight = 128)  // Hamming weight of secret key
       : ContextHElib<Plaintext, Ciphertext>(p, param_set, bootstrap,
                                             hamming_weight) {
+    this->m_ninputs = 0;
     this->m_param_name_map.insert({"p", this->m_p});
   }
 
@@ -480,15 +503,9 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
           "that can be done at a time");
     }
     // convert plaintext input into a vector of longs
-    for (int i = 0; i < pt_len; i++) {
-      ptvec.push_back(pt[i]);
+    for (int i = 0; i < this->m_nslots; i++) {
+      ptvec.push_back(pt[i % pt_len]);
     }
-    // fill up extra slots with zeros
-    for (int i = pt_len; i < this->m_nslots; i++) {
-      ptvec.push_back(0);
-    }
-    // fill up nslots with zeros////
-    for (int i = ptvec.size(); i < this->m_nslots; i++) ptvec.push_back(0);
 
     // encrypt vector of longs
     Ciphertext ct(*(this->m_publicKey));
@@ -519,6 +536,14 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
 
     return result;
   }
+
+  std::string encrypt_and_serialize(std::vector<PlaintextT> pt) {
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+    ss << ct;
+    std::string ctstring = ss.str();
+    return ctstring;
+  };
 
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     a += b;
@@ -566,8 +591,16 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
 
   Ciphertext Rotate(Ciphertext a, long n) {
     /// Cyclically rotate the linear array by n positions
+    if (n > this->m_nslots) {
+      throw std::runtime_error("Error in Rotate: cannot rotate by more than nslots positions");
+    }
+    //to rotate right, we actually rotate left
+    // by (ninputs - n) positions
+    if (n > 0) n = n - this->m_ninputs;
+
     Ciphertext result(a);
     this->m_ea->rotate(result, n);
+
     return result;
   }
 

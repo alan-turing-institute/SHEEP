@@ -65,6 +65,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     m_public_key = keygen.public_key();
     m_secret_key = keygen.secret_key();
     m_galois_keys = keygen.galois_keys(30);
+    m_relin_keys = keygen.relin_keys(30);
 
     //// sizes of objects, in bytes
     this->m_public_key_size = sizeof(m_public_key);
@@ -74,7 +75,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     m_evaluator = new seal::Evaluator(m_context);
     m_decryptor = new seal::Decryptor(m_context, m_secret_key);
 
-    this->m_nslots = m_encoder->slot_count();
+    this->m_nslots = m_encoder->slot_count() / 2;
   }
 
   Ciphertext encrypt(std::vector<Plaintext> p) {
@@ -89,7 +90,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     // this type.  Plaintext64 is this promoted type (defined above).
     std::vector<Plaintext64> p64(this->get_num_slots(), (Plaintext64)0);
     // We can assume p.size() < number of slots due to check above
-    for (size_t i = 0; i < p.size(); i++) p64[i] = p[i];
+    for (size_t i = 0; i < this->m_nslots; i++) p64[i] = p[i % p.size()];
 
     seal::Plaintext pt;
     m_encoder->encode(p64, pt);
@@ -118,6 +119,21 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     return p;
   }
 
+  std::string encrypt_and_serialize(std::vector<Plaintext> pt) {
+
+    Ciphertext ct = encrypt(pt);
+    std::stringstream ss;
+
+    ct.save(ss);
+
+    std::string ctstring = ss.str();
+
+    return ctstring;
+
+  };
+
+
+
   Ciphertext Add(Ciphertext a, Ciphertext b) {
     m_evaluator->add_inplace(a, b);
     return a;
@@ -125,15 +141,25 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
 
   Ciphertext Multiply(Ciphertext a, Ciphertext b) {
     m_evaluator->multiply_inplace(a, b);
+    /// relinearize
+    m_evaluator->relinearize_inplace(a, m_relin_keys);
     return a;
   }
 
   Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+    /// special case for bool, otherwise we get wrong answer
+    if (std::is_same<Plaintext, bool>::value)
+      return Add(a,b);
+
     m_evaluator->sub_inplace(a, b);
     return a;
   }
 
   Ciphertext Negate(Ciphertext a) {
+    /// special case for bool, otherwise we get wrong answer
+    if (std::is_same<Plaintext, bool>::value)
+      return AddConstant(a,1);
+
     m_evaluator->negate_inplace(a);
     return a;
   }
@@ -165,31 +191,11 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
 
   Ciphertext Rotate(Ciphertext a, long n) {
     Ciphertext b, c;
-    seal::Plaintext s1, s2;
     long N = this->get_num_slots();
-    std::vector<Plaintext64> pre_s1(N), pre_s2(N);
-
-    // n always even
-    for (int i = 0; i < N / 2; i++) {
-      pre_s1[i] = ((i >= n) != (i + N / 2 < n));
-      pre_s1[i + N / 2] = pre_s1[i];
-      pre_s2[i] = 1 - pre_s1[i];
-      pre_s2[i + N / 2] = pre_s2[i];
-    }
-
-    m_encoder->encode(pre_s1, s1);
-    m_encoder->encode(pre_s2, s2);
-
+    if (n > 0) n = n - this->m_ninputs;
     // SEAL won't accept values for the step count outside [-N/2, N/2]
     int step_count = (-n) % (N / 2);
-
     m_evaluator->rotate_rows(a, step_count, m_galois_keys, b);
-    m_evaluator->rotate_columns(b, m_galois_keys, c);
-    m_evaluator->multiply_plain_inplace(b, s1);
-    m_evaluator->multiply_plain_inplace(c, s2);
-
-    m_evaluator->add_inplace(b, c);
-
     return b;
   }
 
@@ -213,6 +219,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
   seal::PublicKey m_public_key;
   seal::SecretKey m_secret_key;
   seal::GaloisKeys m_galois_keys;
+  seal::RelinKeys m_relin_keys;
   seal::Encryptor* m_encryptor;
   seal::Evaluator* m_evaluator;
   seal::Decryptor* m_decryptor;
