@@ -3,9 +3,9 @@
 ## Introduction
 
 One way to interact with SHEEP is via a REST API.  The ```applications/run-sheep-server```
-executable built here from [https://github.com/alan-turing-institute/SHEEP/blob/master/backend/applications/server/run-sheep-server.cpp](this).
+executable built here from [this source code](https://github.com/alan-turing-institute/SHEEP/blob/master/backend/applications/server/run-sheep-server.cpp).
 
-The server makes use of the [https://github.com/Microsoft/cpprestsdk](cpprestsdk) framework from Microsoft.
+The server makes use of the [cpprestsdk](https://github.com/Microsoft/cpprestsdk) framework from Microsoft.
 
 By default, the server uses port *34568*, i.e. if running locally, the endpoints
 can be reached at ```http://localhost:34568/SheepServer/<endpoint>/```
@@ -18,7 +18,7 @@ The response to all requests is a json object in the format
 where ```status_code``` will be 200 for success, or 500 for error, and the "content" will be a string or JSON object as detailed below.
 
 Users can hit these API endpoints using the tool of their choice,
-but for convenience, a python module (using the ***requests*** library) providing functions that wrap these calls is provided [ ](here) and documented [ ](here)
+but for convenience, a python module (using the ***requests*** library) providing functions that wrap these calls is provided [here](https://github.com/alan-turing-institute/SHEEP/frontend/pysheep/sheep_client.py) and documented [here](https://github.com/alan-turing-institute/SHEEP/frontend/CLIENT.md).
 
 
 ## Available endpoints
