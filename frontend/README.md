@@ -26,42 +26,26 @@ cd /path/to/SHEEP/frontend/webapp
 python app.py
 ```
 and again, the webpage will be available at ```http:\\localhost:5000```.
-Note that the [sheep server](https://github.com/alan-turing-institute/SHEEP/tree/master/backend/API.md) must also be running on ```localhost:34568``` (this is already taken care of when running with ***docker-compose***.
+Note that the [sheep server](https://github.com/alan-turing-institute/SHEEP/tree/master/backend/API.md) must also be running on ```localhost:34568``` (this is already taken care of when running with ***docker-compose***).
 
 ## Jupyter notebooks
 
 Several notebooks are available [in this directory](https://github.com/alan-turing-institute/SHEEP/tree/master/frontend/notebooks) to demonstrate the functionality of SHEEP and provide starting points for users to explore further.
 
-If running the notebooks locally, you should be able to do
+### Running the notebook server locally
+
+To run the notebooks locally, you should be able to do:
 ```
 export SHEEP_HOME=/path/to/SHEEP/frontend
 cd /path/to/SHEEP/frontend/notebooks
 jupyter notebook
 ```
-then point your browser to ```localhost:8888````.  The sheep-server must be running and available at ```localhost:34568```.
-
-If running via ***docker-compose*** (recommended) you will also need to put an authentication token string into the URL.  In the console output in the terminal from which you run ```docker-compose up``` there should be something like:
-```
-```http:\\localhost:5000```.
-Note that the [sheep server](https://github.com/alan-turing-institute/SHEEP/tree/master/backend/API.md) must also be running on ```localhost:34568``` (this is already taken care of when running with ***docker-compose***.
-
-## Jupyter notebooks
-
-Several notebooks are available [in this directory](https://github.com/alan-turing-institute/SHEEP/tree/master/frontend/notebooks) to demonstrate the functionality of SHEEP and provide starting points for users to explore further.
-
-### Running notebook server locally
-
-If running the notebooks locally, you should be able to do
-```
-export SHEEP_HOME=/path/to/SHEEP/frontend
-cd /path/to/SHEEP/frontend/notebooks
-jupyter notebook
-```
-then point your browser to ```localhost:8888````.  The sheep-server must be running and available at ```localhost:34568```.
+then point your browser to ```localhost:8888```.  The sheep-server must be running and available at ```localhost:34568``` (this is already taken care of when running with ***docker-compose***).
 
 ### Running with docker-compose
 
 If running via ***docker-compose*** (recommended) you will also need to put an authentication token string into the URL.  In the console output in the terminal from which you run ```docker-compose up``` there should be something like:
+
 ```
 sheep-notebook_1  |     Copy/paste this URL into your browser when you connect for the first time,
 sheep-notebook_1  |     to login with a token:
