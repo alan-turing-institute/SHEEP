@@ -18,14 +18,14 @@ docker-compose down
 ## Web application
 
 A basic web server, allowing users to upload circuits, set inputs and parameters, evaluate circuits and view the results, is provided via a ***Flask*** app.
-As mentioned above, the easiest way to run this is via ***docker-compose***, with which the webpage will be available at ```http:\\localhost:5000```.  It is
+As mentioned above, the easiest way to run this is via ***docker-compose***, with which the webpage will be available at ```http://localhost:5000```.  It is
 also possible to run the app locally, using the following:
 ```
 export SHEEP_HOME=/path/to/SHEEP/frontend
 cd /path/to/SHEEP/frontend/webapp
 python app.py
 ```
-and again, the webpage will be available at ```http:\\localhost:5000```.
+and again, the webpage will be available at ```http://localhost:5000```.
 Note that the [sheep server](https://github.com/alan-turing-institute/SHEEP/tree/master/backend/API.md) must also be running on ```localhost:34568``` (this is already taken care of when running with ***docker-compose***).
 
 ## Jupyter notebooks
