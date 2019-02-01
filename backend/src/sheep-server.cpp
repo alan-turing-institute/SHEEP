@@ -278,7 +278,8 @@ void SheepServer::configure_and_run(http_request message) {
   // All the inputs should be the same length, thus we can check only the first element
   size_t slot_cnt = plaintext_inputs[0].size();
   size_t n_plaintexts_out = slot_cnt * n_outputs;
-  size_t n_timings = 3 + n_gates;
+  size_t n_summary_timings = 3;
+  size_t n_timings = n_summary_timings + n_gates;
 
   try {
     SharedBuffer<Duration> timings_shared(n_timings);
@@ -308,18 +309,25 @@ void SheepServer::configure_and_run(http_request message) {
                                       m_job_config.eval_strategy,
 				      timeout_micro);
 
-	if (timings.first.size() != 3) {
+	if (timings.first.size() != n_summary_timings) {
 	  // signal an error to the server
 	  std::cerr << "Child exiting: more than three timings reported!\n";
 	  _exit(1);
 	}
 	// insert the various things in the shared memory buffer
-	for (int i = 0; i < 3; i++) {
+
+	for (int i = 0; i < n_summary_timings; i++) {
 	  timings_shared[i] = timings.first[i];
 	}
-	int timing_index = 3;
-	for (auto gate_timing : timings.second) {
-	  timings_shared[timing_index] = gate_timing.second;
+	/// now we need to get the assignments in the order returned
+	/// by the circuit, so we can match up with the timings from
+	/// the per-gate timing map.
+	int timing_index = n_summary_timings;
+	for (int i=0; i < n_gates; i++) {
+	  std::string gate_name = m_job_config.circuit.get_assignments()[i].get_output().get_name();
+	  timings_shared[timing_index] = timings.second[gate_name];
+	  //	for (auto gate_timing : timings.second) {
+	  // timings_shared[timing_index] = gate_timing.second;
 	  timing_index++;
 	}
 
@@ -346,7 +354,11 @@ void SheepServer::configure_and_run(http_request message) {
       // child exited normally => evaluation completed
       m_job_finished = true;
 
-      std::vector<std::vector<PlaintextT>> output_vals;
+      /// We will report the output vals as strings, but we also
+      /// make a vector<vector<plaintext> > called test_output_vals
+      /// in order to validate against the ClearContext
+
+      std::vector<std::vector<PlaintextT>> test_output_vals;
 
       for (int i = 0; i < n_outputs; i++) {
         std::vector<PlaintextT> output_val;
@@ -359,7 +371,7 @@ void SheepServer::configure_and_run(http_request message) {
           string_val.push_back(std::to_string(output_val[j]));
         }
 
-        output_vals.push_back(output_val);
+        test_output_vals.push_back(output_val);
 
         auto output = std::make_pair(
             m_job_config.circuit.get_outputs()[i].get_name(), string_val);
@@ -382,7 +394,7 @@ void SheepServer::configure_and_run(http_request message) {
       for (int i=0; i < n_gates; i++) {
 	auto gate_time = std::make_pair(
 	   m_job_config.circuit.get_assignments()[i].get_output().get_name(),
-	   std::to_string(timings_shared[3+i].count()));
+	   std::to_string(timings_shared[n_summary_timings+i].count()));
 	m_job_result.timings.insert(gate_time);
       }
 
@@ -397,7 +409,7 @@ void SheepServer::configure_and_run(http_request message) {
 
       // Compare the encrypted and plain results
       bool is_correct =
-          check_job_outputs<PlaintextT>(output_vals, clear_output_vals);
+          check_job_outputs<PlaintextT>(test_output_vals, clear_output_vals);
       m_job_result.is_correct = is_correct;
 
       message.reply(status_codes::OK);
