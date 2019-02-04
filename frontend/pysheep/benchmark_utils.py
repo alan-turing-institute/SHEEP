@@ -110,7 +110,8 @@ def params_for_level(context,level):
             6: {"N": 4096},
             7: {"N": 4096},
             8: {"N": 4096},
-            9: {"N": 4096}
+            9: {"N": 4096},
+            10: {"N": 4096}
         }
         return param_dict[level]
     else:
@@ -124,12 +125,12 @@ def levels_for_params(context, param_dict):
     look up what we expect the safe multiplicative depth to be.
     """
     if context == "HElib_Fp":
-        return param_dict["Levels"]
+        return param_dict["Levels"]-4
     elif context == "SEAL":
         if param_dict["N"] == 2048:
             return 1
         elif param_dict["N"] == 4096:
-            return 9
+            return 10
 #        elif param_dict["N"] == 8192:
 #            return 5
 #        elif param_dict["N"] == 16384:
