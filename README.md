@@ -1,5 +1,9 @@
 # SHEEP is a Homomorphic Encryption Evaluation Platform
 
+## Disclaimer
+
+SHEEP is **development** code.  We strongly recommend that you do not deploy this **prototype** application in a production setting.    SHEEP is intended to be an academic research framework to explore the homomorphic encryption (HE) space, and the characteristics of some HE libraries.  However, we are not responsible for the content of these external libraries, and we offer no guarantees regarding their use.
+
 ## Summary
 
 The overall aim of the SHEEP project is to provide a platform for practitioners to evaluate the state-of-the-art of (fully) homomorphic encryption technology in the context of their concrete application. SHEEP enables this evaluation to be done across libraries implementing different HE schemes (with in some cases incomparable security).
