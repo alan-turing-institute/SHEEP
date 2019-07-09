@@ -10,18 +10,17 @@ RUN apt-get -y install wget
 
 ####### install python packages for the frontend
 RUN apt-get install -y python3
-RUN apt-get install -y python3-pip 
-
+RUN apt-get install -y python3-pip
+RUN pip3 install --upgrade pip
 RUN pip3 install  flask
 RUN pip3 install  wtforms
 RUN pip3 install  pytest
 RUN pip3 install  sqlalchemy
-RUN pip3 install  python-nvd3
 RUN pip3 install requests
 
 ####### python packages for jupyter
 RUN pip3 install jupyter
-RUN pip3 install matplotlib
+RUN pip3 install matplotlib==3.0.3
 RUN pip3 install pandas
 
 #### run the flask app
