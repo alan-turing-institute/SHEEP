@@ -24,8 +24,8 @@
 #ifdef HAVE_TFHE
 #include "context-tfhe.hpp"
 #endif
-#ifdef HAVE_SEAL
-#include "context-seal.hpp"
+#ifdef HAVE_SEAL_BFV
+#include "context-seal-bfv.hpp"
 #endif
 #ifdef HAVE_LP
 #include "context-lp.hpp"
