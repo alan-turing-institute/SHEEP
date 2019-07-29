@@ -54,8 +54,8 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url) {
 #ifdef HAVE_TFHE
   m_available_contexts.push_back("TFHE");
 #endif
-#ifdef HAVE_SEAL
-  m_available_contexts.push_back("SEAL");
+#ifdef HAVE_SEAL_BFV
+  m_available_contexts.push_back("SEAL_BFV");
 #endif
 
 #ifdef HAVE_LP
@@ -86,9 +86,9 @@ BaseContext<PlaintextT> *SheepServer::make_context(std::string context_type) {
     return new ContextTFHE<PlaintextT>();
 #endif
 
-#ifdef HAVE_SEAL
-  } else if (context_type == "SEAL") {
-    return new ContextSeal<PlaintextT>();
+#ifdef HAVE_SEAL_BFV
+  } else if (context_type == "SEAL_BFV") {
+    return new ContextSealBFV<PlaintextT>();
 #endif
 
 #ifdef HAVE_LP
