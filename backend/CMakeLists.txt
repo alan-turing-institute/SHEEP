@@ -59,6 +59,7 @@ find_package(SEAL)
 if (SEAL_FOUND)
   include_directories(SYSTEM ${SEAL_INCLUDE_DIRS})
   add_definitions(-DHAVE_SEAL_BFV)
+  add_definitions(-DHAVE_SEAL_CKKS)
 endif()
 
 link_libraries(pthread)
