@@ -202,6 +202,24 @@ if (SEAL_FOUND)
   target_link_libraries(test-seal-bfv-bool-c7 ${SEAL_LIBRARIES})
   add_test(NAME test-seal-bfv-bool-c7 COMMAND $<TARGET_FILE:test-seal-bfv-bool-c7>)
 
+### SEAL CKKS
+  add_executable(test-seal-ckks-double-encrypt-decrypt
+	test-seal-ckks-double-encrypt-decrypt.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-seal-ckks-double-encrypt-decrypt ${SEAL_LIBRARIES})
+  add_test(NAME test-seal-ckks-double-encrypt-decrypt COMMAND test-seal-ckks-double-encrypt-decrypt)
+
+  add_executable(test-seal-ckks-double-add
+	test-seal-ckks-double-add.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-seal-ckks-double-add ${SEAL_LIBRARIES})
+  add_test(NAME test-seal-ckks-double-add COMMAND test-seal-ckks-double-add)
+
+  add_executable(test-seal-ckks-double-multiply
+	test-seal-ckks-double-multiply.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-seal-ckks-double-multiply ${SEAL_LIBRARIES})
+  add_test(NAME test-seal-ckks-double-multiply COMMAND test-seal-ckks-double-multiply)
 
 endif (SEAL_FOUND)
 
