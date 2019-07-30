@@ -61,6 +61,13 @@ if (SEAL_FOUND)
   add_definitions(-DHAVE_SEAL)
 endif()
 
+find_package(PALISADE)
+if (PALISADE_FOUND)
+  include_directories(SYSTEM ${PALISADE_INCLUDE_DIRS})
+  link_libraries(PALISADEcore)
+  add_definitions(-DHAVE_PALISADE)
+endif()
+
 link_libraries(pthread)
 
 add_subdirectory(applications)
