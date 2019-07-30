@@ -161,3 +161,16 @@ endif(SEAL_FOUND)
 if (LP_FOUND)
   target_link_libraries(run-sheep-server ${LP_LIBRARIES} ${GMP_LIBRARIES})
 endif(LP_FOUND)
+
+####################################################################################
+# BENCHMARKS 
+####################################################################################
+
+if (HElib_FOUND)
+
+  add_executable(helib-sheep-bench benchmarks/helib-sheep-bench.cpp ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  add_test(NAME helib-sheep-bench COMMAND $<TARGET_FILE:helib-sheep-bench>)
+  target_link_libraries(helib-sheep-bench ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
+
+endif(HElib_FOUND)
+
