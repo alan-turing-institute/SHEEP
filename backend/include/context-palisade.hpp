@@ -5,8 +5,12 @@
 #include <cmath>
 #include <sstream>
 #include <type_traits>
+
+#define RLWE RLWE_Palisade
 #include <palisade.h>
 #include <cryptocontexthelper.h>
+#undef RLWE
+
 #include "bits.hpp"
 #include "circuit.hpp"
 #include "context.hpp"
@@ -20,6 +24,7 @@ namespace SHEEP {
     std::string m_paramSetName;
     lbcrypto::CryptoContext<lbcrypto::Poly> m_PalisadeContext;
     lbcrypto::LPKeyPair<lbcrypto::Poly> m_keyPair;
+    long m;
   public:
     typedef PlaintextT Plaintext;
     typedef lbcrypto::Ciphertext<lbcrypto::Poly> Ciphertext;
@@ -27,7 +32,8 @@ namespace SHEEP {
 
     ContextPalisade()
     {
-      uint32_t m = 22;
+      m = 22;
+      this->m_param_name_map.insert({"m", m});
       // lbcrypto::PlaintextModulus p = 89; // we choose s.t. 2m|p-1 to leverage CRTArb
       lbcrypto::PlaintextModulus p = 65957;
       lbcrypto::BigInteger modulusQ("72385066601");
@@ -119,7 +125,7 @@ namespace SHEEP {
 
     Ciphertext Negate(Ciphertext a) {
       return m_PalisadeContext->EvalNegate(a);
-    }
+    }    
   };
 }
 

@@ -30,6 +30,9 @@
 #ifdef HAVE_LP
 #include "context-lp.hpp"
 #endif
+#ifdef HAVE_PALISADE
+#include "context-palisade.hpp"
+#endif
 
 using namespace web;
 using namespace http;

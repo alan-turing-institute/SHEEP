@@ -57,9 +57,11 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url) {
 #ifdef HAVE_SEAL
   m_available_contexts.push_back("SEAL");
 #endif
-
 #ifdef HAVE_LP
   m_available_contexts.push_back("LP");
+#endif
+#ifdef HAVE_PALISADE
+  m_available_contexts.push_back("PALISADE");
 #endif
 
   //// what input_types are supported?
@@ -94,6 +96,11 @@ BaseContext<PlaintextT> *SheepServer::make_context(std::string context_type) {
 #ifdef HAVE_LP
   } else if (context_type == "LP") {
     return new ContextLP<PlaintextT>();
+#endif
+
+#ifdef HAVE_PALISADE
+  } else if (context_type == "PALISADE") {
+    return new ContextPalisade<PlaintextT>();
 #endif
 
   } else {

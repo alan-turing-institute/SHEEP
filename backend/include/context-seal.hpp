@@ -180,15 +180,6 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     return a;
   }
 
-  Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-    /// s is 0 or 1
-    /// output is s*a + (1-s)*b
-    Ciphertext sa = Multiply(s, a);
-    Ciphertext one_minus_s = MultByConstant(AddConstant(s, -1L), -1L);
-    Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
-    return Add(sa, one_minus_s_times_b);
-  }
-
   Ciphertext Rotate(Ciphertext a, long n) {
     Ciphertext b, c;
     long N = this->get_num_slots();

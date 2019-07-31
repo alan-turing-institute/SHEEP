@@ -4,7 +4,7 @@ FROM my-sheep-base:latest as sheep
 ENV LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:/PALISADE/bin/lib:/PALISADE/third-party/lib"
 ENV LIBRARY_PATH "${LIBRARY_PATH}:/PALISADE/bin/lib"
 
-ENV CMAKE_LIBRARY_PATH "/PALISADE/bin/lib/:/PALISADE/third-party/lib"
+ENV CMAKE_LIBRARY_PATH "/usr/local/lib:/PALISADE/bin/lib/:/PALISADE/third-party/lib"
 ENV CMAKE_INCLUDE_PATH "/PALISADE/src/pke/lib/:/PALISADE/src/:/PALISADE/src/core/lib/:/PALISADE/third-party/include/"
 
 ENV CPLUS_INCLUDE_PATH "/PALISADE/src/pke/lib/:/PALISADE/src/:/PALISADE/src/core/lib/:/PALISADE/third-party/include/"
@@ -21,15 +21,15 @@ RUN rm -fr SHEEP/backend/build; mkdir SHEEP/backend/build
 
 RUN cd SHEEP/backend/build; export CC=gcc-7; export CXX=g++-7; cmake ../
 
-#RUN cd SHEEP/backend/build; make run-sheep-server
+RUN cd SHEEP/backend/build; make VERBOSE=1 run-sheep-server
 
-RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-add
-RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-encrypt-decrypt
+# RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-add
+# RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-encrypt-decrypt
 
-WORKDIR SHEEP/backend/build/tests
+WORKDIR SHEEP/backend/build
 
-CMD test-palisade-int8_t-encrypt-decrypt 
+# CMD test-palisade-int8_t-encrypt-decrypt 
 
-#EXPOSE 34568
+EXPOSE 34568
 
-#CMD ["bin/run-sheep-server"]
+CMD ["bin/run-sheep-server"]

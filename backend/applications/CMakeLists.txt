@@ -150,6 +150,8 @@ add_executable(run-sheep-server
 
 target_link_libraries(run-sheep-server cpprestsdk::cpprest ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
+message(STATUS "*****&&&&&&&&&&&*********** ntl ${NTL_LIBRARIES}")
+
 if (HElib_FOUND)
   target_link_libraries(run-sheep-server ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
 endif(HElib_FOUND)
