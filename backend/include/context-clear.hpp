@@ -7,6 +7,11 @@
 #include "circuit.hpp"
 #include "context.hpp"
 
+#include <complex>
+#include <cmath>
+
+using namespace std::complex_literals;
+
 namespace SHEEP {
 
 template <typename Ciphertext>
@@ -22,8 +27,8 @@ struct CiphertextWrapper<bool> {
 template <typename PlaintextT>
 class ContextClear
     : public Context<PlaintextT,
-                     std::vector<PlaintextT>> {  // plaintext and ciphertext are
-                                                 // the same type
+                     std::vector<PlaintextT>> {
+
  public:
   typedef PlaintextT Plaintext;
   typedef std::vector<PlaintextT> Ciphertext;
@@ -121,8 +126,8 @@ class ContextClear
 
     } else {
       for (int i = 0; i < a.size(); i++) {
-        typedef typename std::make_unsigned<
-            typename CiphertextWrapper<CiphertextEl>::type>::type uC;
+	typedef typename std::make_unsigned<
+	  typename CiphertextWrapper<CiphertextEl>::type>::type uC;
 
         uC au = static_cast<uC>(a[i]);
         uC bu = static_cast<uC>(b[i]);
@@ -151,8 +156,8 @@ class ContextClear
 
     } else {
       for (int i = 0; i < a.size(); i++) {
-        typedef typename std::make_unsigned<
-            typename CiphertextWrapper<CiphertextEl>::type>::type uC;
+	typedef typename std::make_unsigned<
+	  typename CiphertextWrapper<CiphertextEl>::type>::type uC;
 
         uC au = static_cast<uC>(a[i]);
         uC bu = static_cast<uC>(b[i]);
@@ -187,8 +192,8 @@ class ContextClear
 
     } else {
       for (int i = 0; i < a.size(); i++) {
-        typedef typename std::make_unsigned<
-            typename CiphertextWrapper<CiphertextEl>::type>::type uC;
+	typedef typename std::make_unsigned<
+	  typename CiphertextWrapper<CiphertextEl>::type>::type uC;
 
         uC au = static_cast<uC>(a[i]);
         uC bu = static_cast<uC>(b[i]);
@@ -233,8 +238,8 @@ class ContextClear
       Ciphertext c;
 
       for (int i = 0; i < a.size(); i++) {
-        typedef typename std::make_unsigned<
-            typename CiphertextWrapper<CiphertextEl>::type>::type uC;
+	typedef typename std::make_unsigned<
+	  typename CiphertextWrapper<CiphertextEl>::type>::type uC;
 
         uC au = static_cast<uC>(a[i]);
 
@@ -269,7 +274,7 @@ class ContextClear
     }
 
     for (int i = 0; i < a.size(); i++) {
-      c.push_back((s[i] % 2) ? a[i] : b[i]);
+      c.push_back((((int64_t)s[i]) % 2) ? a[i] : b[i]);
     }
 
     return c;
@@ -312,6 +317,182 @@ class ContextClear
     return c;
   }
 };
+
+// Specializations of ContextClear, to deal with double and complex<double> inputs
+//  TODO - refactor all of this - maybe use base class to avoid so much duplication
+
+
+template <>
+class ContextClear<double> : public Context<double, std::vector<double>> {
+
+public:
+  typedef double PlaintextT;
+  typedef std::vector<PlaintextT> Ciphertext;
+  typedef PlaintextT CiphertextEl;
+
+  /// constructor
+  ContextClear() {
+    this->m_nslots = 100;  // reasonable default size
+    this->m_public_key_size = 0;
+    this->m_private_key_size = 0;
+    this->m_ciphertext_size = 0;
+    this->m_param_name_map.insert({"NumSlots", this->m_nslots});
+  }
+
+  Ciphertext encrypt(std::vector<Plaintext> p) {
+    if (!this->m_configured) this->configure();
+    Ciphertext c;
+    /// we are given a vector of Plaintexts p, which can have any number
+    /// of elements.  Fill up nslots with repeating pattern of input plaintext vector.
+    for (int i = 0; i < this->m_nslots; i++) {
+      c.push_back(p[i % p.size()]);
+    }
+    return c;  // plaintext and ciphertext are the same for this context
+  }
+
+  std::vector<Plaintext> decrypt(Ciphertext c) {
+    return c;  // plaintext and ciphertext are the same for this context
+  }
+
+  Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+    Ciphertext c;
+
+    if (a.size() != b.size()) {
+      throw std::runtime_error(
+	   "Ciphertext a, Ciphertext b - lengths do not match.");
+    }
+
+    for (int i = 0; i < a.size(); i++) {
+      c.push_back(static_cast<CiphertextEl>(a[i] * b[i]));
+    }
+
+    return c;
+  }
+  Ciphertext Add(Ciphertext a, Ciphertext b) {
+    Ciphertext c;
+
+    if (a.size() != b.size()) {
+      throw std::runtime_error(
+	   "Ciphertext a, Ciphertext b - lengths do not match.");
+    }
+
+    for (int i = 0; i < a.size(); i++) {
+      c.push_back(static_cast<CiphertextEl>(a[i] + b[i]));
+    }
+
+    return c;
+
+  }
+
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// shift the elements of the ciphertext by n places:
+    Ciphertext c;
+    if (n < 0) {
+      for (int i = 0; i < a.size(); i++) {
+	int index = (i - n) % a.size();
+	c.push_back(a[index]);
+      }
+    } else {
+      /// rotate left by ninputs - n places
+      n = n - this->m_ninputs;
+      for (int i = 0; i < a.size(); i++) {
+	int index = (i - n) % a.size();
+	c.push_back(a[index]);
+      }
+    }
+    return c;
+  }
+
+};
+
+
+
+template <>
+class ContextClear<std::complex<double> >: public Context<std::complex<double>,
+							  std::vector<std::complex<double>>> {
+
+public:
+  typedef std::complex<double> PlaintextT;
+  typedef std::vector<PlaintextT> Ciphertext;
+  typedef PlaintextT CiphertextEl;
+
+  /// constructor
+  ContextClear() {
+    this->m_nslots = 100;  // reasonable default size
+    this->m_public_key_size = 0;
+    this->m_private_key_size = 0;
+    this->m_ciphertext_size = 0;
+    this->m_param_name_map.insert({"NumSlots", this->m_nslots});
+  }
+
+  Ciphertext encrypt(std::vector<Plaintext> p) {
+    if (!this->m_configured) this->configure();
+    Ciphertext c;
+    /// we are given a vector of Plaintexts p, which can have any number
+    /// of elements.  Fill up nslots with repeating pattern of input plaintext vector.
+    for (int i = 0; i < this->m_nslots; i++) {
+      c.push_back(p[i % p.size()]);
+    }
+    return c;  // plaintext and ciphertext are the same for this context
+  }
+
+  std::vector<Plaintext> decrypt(Ciphertext c) {
+    return c;  // plaintext and ciphertext are the same for this context
+  }
+
+  Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+    Ciphertext c;
+
+    if (a.size() != b.size()) {
+      throw std::runtime_error(
+			       "Ciphertext a, Ciphertext b - lengths do not match.");
+    }
+
+    for (int i = 0; i < a.size(); i++) {
+
+      c.push_back(static_cast<CiphertextEl>(a[i] * b[i]));
+    }
+
+    return c;
+  }
+  Ciphertext Add(Ciphertext a, Ciphertext b) {
+    Ciphertext c;
+
+    if (a.size() != b.size()) {
+      throw std::runtime_error(
+			       "Ciphertext a, Ciphertext b - lengths do not match.");
+    }
+
+    for (int i = 0; i < a.size(); i++) {
+
+      c.push_back(static_cast<CiphertextEl>(a[i] + b[i]));
+    }
+
+    return c;
+
+  }
+  Ciphertext Rotate(Ciphertext a, long n) {
+    /// shift the elements of the ciphertext by n places:
+    Ciphertext c;
+    if (n < 0) {
+      for (int i = 0; i < a.size(); i++) {
+	int index = (i - n) % a.size();
+	c.push_back(a[index]);
+      }
+    } else {
+      /// rotate left by ninputs - n places
+      n = n - this->m_ninputs;
+      for (int i = 0; i < a.size(); i++) {
+	int index = (i - n) % a.size();
+	c.push_back(a[index]);
+      }
+    }
+    return c;
+  }
+
+
+};
+
 
 }  // namespace SHEEP
 
