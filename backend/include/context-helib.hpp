@@ -5,6 +5,8 @@
 #include <chrono>
 #include <type_traits>
 #include <unordered_map>
+#include <complex>
+#include <cmath>
 #include "bits.hpp"
 NTL_CLIENT
 
@@ -471,6 +473,42 @@ class ContextHElib_F2 : public ContextHElib<PlaintextT, NTL::Vec<Ctxt> > {
 
 };  /// end of class definition
 
+// (dummy) specializations for double and complex<double>
+template <>
+class ContextHElib_F2<double> : public Context<double, NTL::Vec<Ctxt> > {
+ public:
+  typedef double Plaintext;
+  typedef NTL::Vec<Ctxt>  Ciphertext;
+
+  ContextHElib_F2() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+template <>
+class ContextHElib_F2<std::complex<double> >: public Context<std::complex<double>, NTL::Vec<Ctxt> > {
+ public:
+  typedef std::complex<double> Plaintext;
+  typedef NTL::Vec<Ctxt>  Ciphertext;
+
+  ContextHElib_F2() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+
 ////////////////////////////////////////////////////////////////////////////
 //// ContextHElib_Fp  - use integer plaintext space, e.g. p=65537
 
@@ -605,6 +643,42 @@ class ContextHElib_Fp : public ContextHElib<PlaintextT, Ctxt> {
   }
 
 };  /// end of class definition
+
+// (dummy) specializations for double and complex<double>
+template <>
+class ContextHElib_Fp<double> : public Context<double, Ctxt > {
+ public:
+  typedef double Plaintext;
+  typedef Ctxt  Ciphertext;
+
+  ContextHElib_Fp() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+template <>
+class ContextHElib_Fp<std::complex<double> >: public Context<std::complex<double>, Ctxt > {
+ public:
+  typedef std::complex<double> Plaintext;
+  typedef Ctxt  Ciphertext;
+
+  ContextHElib_Fp() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
 
 }  // namespace SHEEP
 

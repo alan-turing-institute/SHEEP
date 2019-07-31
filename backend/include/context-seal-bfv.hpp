@@ -3,6 +3,7 @@
 
 #include <seal/seal.h>
 #include <cmath>
+#include <complex>
 #include <sstream>
 #include <type_traits>
 #include "bits.hpp"
@@ -228,6 +229,42 @@ class ContextSealBFV : public Context<PlaintextT, seal::Ciphertext> {
   seal::Evaluator* m_evaluator;
   seal::Decryptor* m_decryptor;
 };
+
+  // (dummy) specializations for double and complex<double>
+template <>
+class ContextSealBFV<double> : public Context<double, seal::Ciphertext> {
+ public:
+  typedef double Plaintext;
+  typedef seal::Ciphertext Ciphertext;
+
+  ContextSealBFV() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+template <>
+class ContextSealBFV<std::complex<double> >: public Context<std::complex<double>, seal::Ciphertext> {
+ public:
+  typedef std::complex<double> Plaintext;
+  typedef seal::Ciphertext Ciphertext;
+
+  ContextSealBFV() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
 
 }  // namespace SHEEP
 

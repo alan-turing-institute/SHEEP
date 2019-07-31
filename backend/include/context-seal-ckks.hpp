@@ -14,10 +14,10 @@
 
 namespace SHEEP {
 
-// default plaintext template inheriting from DummyContext, in case
+// default plaintext template inheriting from Context, in case
 // someone tries to use a bool or integer input type, which is not supported.
 template <typename PlaintextT>
-class ContextSealCKKS : public DummyContext<PlaintextT, seal::Ciphertext> {
+class ContextSealCKKS : public Context<PlaintextT, seal::Ciphertext> {
 public:
   typedef seal::Ciphertext Ciphertext;
   typedef PlaintextT Plaintext;
