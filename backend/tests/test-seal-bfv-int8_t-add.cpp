@@ -5,7 +5,7 @@
 #include <cstdint>
 #include "circuit-repo.hpp"
 #include "circuit-test-util.hpp"
-#include "context-seal.hpp"
+#include "context-seal-bfv.hpp"
 
 typedef std::chrono::duration<double, std::micro> DurationT;
 
@@ -18,7 +18,7 @@ int main(void) {
   Circuit circ = cr.create_circuit(Gate::Add, 1);
   std::cout << circ;
   std::vector<DurationT> durations;
-  ContextSeal<int8_t> ctx;
+  ContextSealBFV<int8_t> ctx;
 
   /// test small postitive numbers
   std::vector<std::vector<int8_t> > inputs = {{15}, {22}};

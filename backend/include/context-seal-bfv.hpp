@@ -1,8 +1,9 @@
-#ifndef CONTEXT_SEAL_HPP
-#define CONTEXT_SEAL_HPP
+#ifndef CONTEXT_SEAL_BFV_HPP
+#define CONTEXT_SEAL_BFV_HPP
 
 #include <seal/seal.h>
 #include <cmath>
+#include <complex>
 #include <sstream>
 #include <type_traits>
 #include "bits.hpp"
@@ -12,7 +13,7 @@
 namespace SHEEP {
 
 template <typename PlaintextT>
-class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
+class ContextSealBFV : public Context<PlaintextT, seal::Ciphertext> {
  public:
   typedef PlaintextT Plaintext;
   typedef seal::Ciphertext Ciphertext;
@@ -22,7 +23,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
 
   // constructors
 
-  ContextSeal(
+  ContextSealBFV(
       long plaintext_modulus =
           40961,  // for slots, this should be a prime congruent to 1 (mod 2N)
       long security =
@@ -48,14 +49,18 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     this->m_poly_modulus = x.str();
     seal::EncryptionParameters parms(seal::scheme_type::BFV);
     parms.set_poly_modulus_degree(m_N);
+    seal::sec_level_type sec_level;
     if (m_security == 128) {
-      parms.set_coeff_modulus(seal::coeff_modulus_128(m_N));
+      sec_level = seal::sec_level_type::tc128;
     } else if (m_security == 192) {
-      parms.set_coeff_modulus(seal::coeff_modulus_192(m_N));
+      sec_level = seal::sec_level_type::tc192;
+    } else if (m_security == 256) {
+      sec_level = seal::sec_level_type::tc256;
     } else {
       throw std::invalid_argument(
-          "Unsupported security value in ContextSeal, expected 128 or 192");
+	    "Unsupported security value in ContextSealBFV, expected 128, 192 or 256");
     }
+    parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(m_N, sec_level));
 
     parms.set_plain_modulus(m_plaintext_modulus);
     m_context = seal::SEALContext::Create(parms);
@@ -64,8 +69,8 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
     seal::KeyGenerator keygen(m_context);
     m_public_key = keygen.public_key();
     m_secret_key = keygen.secret_key();
-    m_galois_keys = keygen.galois_keys(30);
-    m_relin_keys = keygen.relin_keys(30);
+    m_galois_keys = keygen.galois_keys();
+    m_relin_keys = keygen.relin_keys();
 
     //// sizes of objects, in bytes
     this->m_public_key_size = sizeof(m_public_key);
@@ -81,7 +86,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
   Ciphertext encrypt(std::vector<Plaintext> p) {
     if (this->get_num_slots() < p.size()) {
       throw std::runtime_error(
-          "ContextSeal::encrypt: The number of input data elements exceeds the "
+          "ContextSealBFV::encrypt: The number of input data elements exceeds the "
           "number of slots provided by the context.");
     }
 
@@ -200,7 +205,7 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
   }
 
   // destructor
-  virtual ~ContextSeal() {
+  virtual ~ContextSealBFV() {
     /// delete everything we new-ed in the constructor
     // if (m_context != NULL) delete m_context;
     if (m_encoder != NULL) delete m_encoder;
@@ -225,6 +230,42 @@ class ContextSeal : public Context<PlaintextT, seal::Ciphertext> {
   seal::Decryptor* m_decryptor;
 };
 
+  // (dummy) specializations for double and complex<double>
+template <>
+class ContextSealBFV<double> : public Context<double, seal::Ciphertext> {
+ public:
+  typedef double Plaintext;
+  typedef seal::Ciphertext Ciphertext;
+
+  ContextSealBFV() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+template <>
+class ContextSealBFV<std::complex<double> >: public Context<std::complex<double>, seal::Ciphertext> {
+ public:
+  typedef std::complex<double> Plaintext;
+  typedef seal::Ciphertext Ciphertext;
+
+  ContextSealBFV() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+
 }  // namespace SHEEP
 
-#endif  // CONTEXT_SEAL_HPP
+#endif  // CONTEXT_SEAL_BFV_HPP

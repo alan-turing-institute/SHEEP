@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "circuit-repo.hpp"
 #include "circuit-test-util.hpp"
-#include "context-seal.hpp"
+#include "context-seal-bfv.hpp"
 #include "simple-circuits.hpp"
 
 typedef std::chrono::duration<double, std::micro> DurationT;
@@ -16,12 +16,12 @@ int main(void) {
   Circuit circ = cr.create_circuit(Gate::Subtract, 1);
   std::cout << circ;
   std::vector<DurationT> durations;
-  ContextSeal<bool> ctx;
+  ContextSealBFV<bool> ctx;
   ctx.set_parameter("NumSlots", 4);
-  std::vector<std::vector<ContextSeal<bool>::Plaintext>> pt_input = {
+  std::vector<std::vector<ContextSealBFV<bool>::Plaintext>> pt_input = {
       {1, 1, 0, 0}, {1, 0, 1, 0}};
 
-  std::vector<std::vector<ContextSeal<bool>::Plaintext>> result =
+  std::vector<std::vector<ContextSealBFV<bool>::Plaintext>> result =
       ctx.eval_with_plaintexts(circ, pt_input);
 
   std::vector<bool> exp_values = {0, 1, 1, 0};

@@ -58,6 +58,19 @@ add_test(NAME test-circuit-seq COMMAND test-circuit-seq)
      endforeach(op)
  endforeach(type)
 
+
+ foreach(type IN ITEMS double complex)
+     foreach(op IN ITEMS add multiply) # rotate)
+         add_executable(test-clear-${type}-${op}
+             test-clear-${type}-${op}.cpp
+             ${CMAKE_SOURCE_DIR}/src/circuit.cpp
+             ${CMAKE_SOURCE_DIR}/src/circuit-util.cpp
+             ${CMAKE_SOURCE_DIR}/src/simple-circuits.cpp)
+
+         add_test(NAME test-clear-${type}-${op} COMMAND $<TARGET_FILE:test-clear-${type}-${op}>)
+     endforeach(op)
+ endforeach(type)
+
  foreach(type IN ITEMS int8_t uint8_t)
      foreach(op IN ITEMS ripple-carry-add)
          add_executable(test-clear-${type}-${op}
@@ -185,23 +198,39 @@ endif (HELIB_FOUND)
 if (SEAL_FOUND)
 
     foreach(type IN ITEMS bool int8_t uint8_t)
-      foreach (op IN ITEMS add multiply subtract multByConst encrypt-decrypt rotate negate)
-          add_executable(test-seal-${type}-${op}
-                          test-seal-${type}-${op}
+      foreach (op IN ITEMS add multiply subtract multByConst rotate negate)
+          add_executable(test-seal-bfv-${type}-${op}
+                          test-seal-bfv-${type}-${op}
         ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-        target_link_libraries(test-seal-${type}-${op} ${SEAL_LIBRARIES})
-        add_test(NAME test-seal-${type}-${op} COMMAND $<TARGET_FILE:test-seal-${type}-${op}>)
+        target_link_libraries(test-seal-bfv-${type}-${op} ${SEAL_LIBRARIES})
+        add_test(NAME test-seal-bfv-${type}-${op} COMMAND $<TARGET_FILE:test-seal-bfv-${type}-${op}>)
       endforeach(op)
     endforeach(type)
-    add_executable(test-seal-int64_t-rotate test-seal-int64_t-rotate ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-    target_link_libraries(test-seal-int64_t-rotate ${SEAL_LIBRARIES})
-    add_test(NAME test-seal-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-int64_t-rotate>)
+    add_executable(test-seal-bfv-int64_t-rotate test-seal-bfv-int64_t-rotate ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+    target_link_libraries(test-seal-bfv-int64_t-rotate ${SEAL_LIBRARIES})
+    add_test(NAME test-seal-bfv-int64_t-rotate COMMAND $<TARGET_FILE:test-seal-bfv-int64_t-rotate>)
 
   # The test of seven gates
-  add_executable(test-seal-bool-c7 test-seal-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
-  target_link_libraries(test-seal-bool-c7 ${SEAL_LIBRARIES})
-  add_test(NAME test-seal-bool-c7 COMMAND $<TARGET_FILE:test-seal-bool-c7>)
+  add_executable(test-seal-bfv-bool-c7 test-seal-bfv-bool-c7 ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-seal-bfv-bool-c7 ${SEAL_LIBRARIES})
+  add_test(NAME test-seal-bfv-bool-c7 COMMAND $<TARGET_FILE:test-seal-bfv-bool-c7>)
 
+### SEAL CKKS
+  foreach(type IN ITEMS double complex )
+    foreach (op IN ITEMS encrypt-decrypt add)
+     add_executable(test-seal-ckks-${type}-${op}
+   	test-seal-ckks-${type}-${op}.cpp
+     ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+     target_link_libraries(test-seal-ckks-${type}-${op} ${SEAL_LIBRARIES})
+     add_test(NAME test-seal-ckks-${type}-${op} COMMAND test-seal-ckks-${type}-${op})
+    endforeach(op)
+  endforeach(type)
+
+  add_executable(test-seal-ckks-double-multiply
+	test-seal-ckks-double-multiply.cpp
+  ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+  target_link_libraries(test-seal-ckks-double-multiply ${SEAL_LIBRARIES})
+  add_test(NAME test-seal-ckks-double-multiply COMMAND test-seal-ckks-double-multiply)
 
 endif (SEAL_FOUND)
 
