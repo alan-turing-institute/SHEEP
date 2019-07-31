@@ -1,6 +1,6 @@
 #include <cassert>
 #include <memory>
-#include "context-seal.hpp"
+#include "context-seal-bfv.hpp"
 
 #include "circuit-repo.hpp"
 
@@ -22,7 +22,7 @@ int main(void) {
   std::vector<DurationT> durations;
 
   // The type of the wires in circ are unsigned bools
-  ContextSeal<int64_t> ctx;
+  ContextSealBFV<int64_t> ctx;
 
   std::cout << "Number of slots provided by SEAL: " << ctx.get_num_slots()
             << "\n";

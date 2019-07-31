@@ -27,6 +27,11 @@ struct GateNotImplemented : public std::runtime_error {
   GateNotImplemented() : std::runtime_error("Gate not implemented."){};
 };
 
+struct InputTypeNotSupported : public std::runtime_error {
+  InputTypeNotSupported() : std::runtime_error("Input type not supported for this context."){};
+};
+
+
 struct TooManyInputVals : public std::runtime_error {
   TooManyInputVals()
       : std::runtime_error("Number of values per wire > num slots."){};
@@ -718,27 +723,5 @@ class Context : public BaseContext<PlaintextT> {
   long m_nslots;
   long m_ninputs;
 };
-
-template <typename ContextT, typename PlaintextCIterator,
-          typename CiphertextIterator>
-void encrypt(ContextT& context, PlaintextCIterator plaintext_begin,
-             PlaintextCIterator plaintext_end,
-             CiphertextIterator ciphertext_begin) {
-  std::transform(plaintext_begin, plaintext_end, ciphertext_begin,
-                 [&context](typename ContextT::Plaintext pt) {
-                   return context.encrypt(pt);
-                 });
-}
-
-template <typename ContextT, typename CiphertextCIterator,
-          typename PlaintextIterator>
-void decrypt(ContextT& context, CiphertextCIterator ciphertext_begin,
-             CiphertextCIterator ciphertext_end,
-             PlaintextIterator plaintext_begin) {
-  std::transform(ciphertext_begin, ciphertext_end, plaintext_begin,
-                 [&context](typename ContextT::Ciphertext ct) {
-                   return context.decrypt(ct);
-                 });
-}
 
 #endif  // CONTEXT_HPP
