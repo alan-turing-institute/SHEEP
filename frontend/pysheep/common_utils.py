@@ -5,6 +5,7 @@ Python functions that are useful for both the notebooks and the frontend.
 import re
 import os
 import uuid
+import sys
 
 def get_inputs(circuit_file):
     """
@@ -83,6 +84,12 @@ def get_min_max(input_type):
     if input_type == "bool":
         min_allowed = 0
         max_allowed = 1
+    elif input_type == "double":
+        min_allowed = -1*sys.float_info.max
+        max_allowed = sys.float_info.max
+    elif input_type == "complex":
+        min_allowed = -1*(sys.float_info.max,sys.float_info.max)
+        max_allowed = (sys.float_info.max,sys.float_info.max)
     else:
         bitwidth = re.search("[\d]+",input_type).group()
         if input_type.startswith("u"):
@@ -110,9 +117,13 @@ def check_inputs(input_dict, input_type, num_slots=None):
                 return False
             if num_slots and len(v)>num_slots:
                 return False
-            for val_int in v:
-                if int(val_int) < min_allowed or int(val_int) > max_allowed:
-                    return False
+            for val in v:
+                try:
+                    if int(val) < min_allowed or int(val) > max_allowed:
+                        return False
+                except(ValueError):
+                   if float(val) < min_allowed or float(val) > max_allowed:
+                        return False
         for k, v in const_inputs:
             if not isinstance(v,int):  ## const_inputs need to be integers.
                 return False
@@ -123,6 +134,15 @@ def check_inputs(input_dict, input_type, num_slots=None):
         print(" ERROR {}".format(e))
         return False
 
+
+def convert_inputs_to_str(input_dict):
+    """
+    input_dict values should be lists of strings.
+    If not already, convert them to be so.
+    """
+    for k,v in input_dict.items():
+        input_dict[k] = [str(vv) for vv in v]
+    return input_dict
 
 
 

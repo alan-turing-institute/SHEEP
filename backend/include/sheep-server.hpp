@@ -26,6 +26,7 @@
 #endif
 #ifdef HAVE_SEAL_BFV
 #include "context-seal-bfv.hpp"
+#include "context-seal-ckks.hpp"
 #endif
 #ifdef HAVE_LP
 #include "context-lp.hpp"
@@ -44,7 +45,7 @@ struct SheepJobConfig {
   Circuit circuit;
   std::set<std::string> input_names;
   std::set<std::string> const_input_names;
-  std::map<std::string, std::vector<int>> input_vals;
+  std::map<std::string, std::vector<std::string>> input_vals;
   std::map<std::string, long> const_input_vals;
   std::map<std::string, long> parameters;
   int nslots;
@@ -143,9 +144,15 @@ class SheepServer {
   BaseContext<PlaintextT>* make_context(std::string context_type);
 
   template <typename PlaintextT>
+  PlaintextT convert_to_plaintext(std::string);
+
+  template <typename PlaintextT>
   std::vector<std::vector<PlaintextT>> make_plaintext_inputs();
 
   std::vector<long> make_const_plaintext_inputs();
+
+  template<typename PlaintextT>
+  std::string convert_to_string(PlaintextT t);
 
   template <typename PlaintextT>
   void configure_and_run(http_request message);
