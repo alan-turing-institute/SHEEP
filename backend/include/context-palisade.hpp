@@ -28,7 +28,8 @@ namespace SHEEP {
     ContextPalisade()
     {
       uint32_t m = 22;
-      lbcrypto::PlaintextModulus p = 89; // we choose s.t. 2m|p-1 to leverage CRTArb
+      // lbcrypto::PlaintextModulus p = 89; // we choose s.t. 2m|p-1 to leverage CRTArb
+      lbcrypto::PlaintextModulus p = 65957;
       lbcrypto::BigInteger modulusQ("72385066601");
       lbcrypto::BigInteger modulusP(p);
       lbcrypto::BigInteger rootOfUnity("69414828251");
@@ -72,7 +73,7 @@ namespace SHEEP {
       m_PalisadeContext->EvalSumKeyGen(m_keyPair.secretKey);
       m_PalisadeContext->EvalMultKeyGen(m_keyPair.secretKey);
 
-      this->m_nslots = 2;
+      this->m_nslots = m/2 - 1;
     }
 
     void configure() { /* nothing to do */ }
@@ -104,9 +105,22 @@ namespace SHEEP {
       return p;
     }
 
-    Ciphertext Add(Ciphertext a, Ciphertext b) { }
-    // etc ...
+    Ciphertext Add(Ciphertext a, Ciphertext b) {
+      return m_PalisadeContext->EvalAdd(a, b);
+    }
+
+    Ciphertext Multiply(Ciphertext a, Ciphertext b) {
+      return m_PalisadeContext->EvalMult(a, b);
+    }
+
+    Ciphertext Subtract(Ciphertext a, Ciphertext b) {
+      return m_PalisadeContext->EvalSub(a, b);
+    }
+
+    Ciphertext Negate(Ciphertext a) {
+      return m_PalisadeContext->EvalNegate(a);
+    }
   };
 }
 
-#endif 
+#endif

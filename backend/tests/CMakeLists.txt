@@ -248,7 +248,7 @@ endif (LP_FOUND)
 
 if (PALISADE_FOUND)
   foreach (type IN ITEMS int8_t)
-    foreach (op IN ITEMS encrypt-decrypt)
+    foreach (op IN ITEMS encrypt-decrypt add)
       add_executable(test-palisade-${type}-${op} test-palisade-${type}-${op}
         ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
       target_link_libraries(test-palisade-${type}-${op} ${PALISADE_LIBRARIES})

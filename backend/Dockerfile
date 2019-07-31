@@ -23,7 +23,8 @@ RUN cd SHEEP/backend/build; export CC=gcc-7; export CXX=g++-7; cmake ../
 
 #RUN cd SHEEP/backend/build; make run-sheep-server
 
-RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-encrypt-decrypt 
+RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-add
+RUN cd SHEEP/backend/build/tests; make VERBOSE=1 test-palisade-int8_t-encrypt-decrypt
 
 WORKDIR SHEEP/backend/build/tests
 
