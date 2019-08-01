@@ -131,6 +131,10 @@ if (LP_FOUND)
   target_link_libraries(sheep-cl ${LP_LIBRARIES} ${GMP_LIBRARIES})
 endif(LP_FOUND)
 
+if (PALISADE_FOUND)
+  target_link_libraries(sheep-cl ${PALISADE_LIBRARIES})
+endif(PALISADE_FOUND)
+
 add_test(NAME sheep-cl COMMAND $<TARGET_FILE:sheep-cl>)
 
 ####################################################################################
@@ -145,6 +149,8 @@ add_executable(run-sheep-server
                ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
 
 target_link_libraries(run-sheep-server cpprestsdk::cpprest ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+
+message(STATUS "*****&&&&&&&&&&&*********** ntl ${NTL_LIBRARIES}")
 
 if (HElib_FOUND)
   target_link_libraries(run-sheep-server ${HElib_LIBRARIES} ${NTL_LIBRARIES} ${GMP_LIBRARIES})
@@ -161,3 +167,7 @@ endif(SEAL_FOUND)
 if (LP_FOUND)
   target_link_libraries(run-sheep-server ${LP_LIBRARIES} ${GMP_LIBRARIES})
 endif(LP_FOUND)
+
+if (PALISADE_FOUND)
+  target_link_libraries(run-sheep-server ${PALISADE_LIBRARIES})
+endif(PALISADE_FOUND)

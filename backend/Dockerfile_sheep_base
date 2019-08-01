@@ -12,6 +12,11 @@ RUN add-apt-repository -y  ppa:ubuntu-toolchain-r/test
 RUN apt-get update; apt-get -y install gcc-7 g++-7
 RUN apt-get update; apt-get -y install build-essential
 
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 10
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 10
+RUN update-alternatives --set gcc /usr/bin/gcc-7
+RUN update-alternatives --set g++ /usr/bin/g++-7
+
 ###### get fftw3 (needed for TFHE)
 RUN apt-get install -y libfftw3-dev
 
@@ -23,7 +28,15 @@ RUN cd cmake-3.11.4; export CC=gcc-7; export CXX=g++-7; ./bootstrap; make -j4; m
 ####### install intel-tbb for parallelisation
 RUN apt-get -y install libtbb-dev
 
-###### get gmp (needed for HElib)
+###### install PALISADE
+RUN apt-get -y install lzip
+RUN apt-get -y install flex
+RUN apt-get -y install bison
+RUN git clone https://git.njit.edu/palisade/PALISADE.git
+RUN cd PALISADE && ./configure.sh
+RUN cd PALISADE && echo "@@@@@" && g++ --version && CC=gcc-7 CXX=g++-7 make 
+
+# ###### get gmp (needed for HElib)
 RUN apt-get -y install m4
 RUN wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.xz
 RUN tar -xvf gmp-6.1.0.tar.xz

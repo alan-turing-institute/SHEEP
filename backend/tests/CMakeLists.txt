@@ -269,3 +269,21 @@ endif (LP_FOUND)
 #endif(HELIB_FOUND AND TFHE_FOUND)
 
 # add_test(NAME test-parallel-eval COMMAND test-parallel-eval)
+
+
+##################################################################################################
+### PALISADE
+##################################################################################################
+
+if (PALISADE_FOUND)
+  foreach (type IN ITEMS int8_t)
+    foreach (op IN ITEMS encrypt-decrypt add)
+      add_executable(test-palisade-${type}-${op} test-palisade-${type}-${op}
+        ${CMAKE_SOURCE_DIR}/src/circuit.cpp)
+      target_link_libraries(test-palisade-${type}-${op} ${PALISADE_LIBRARIES})
+      add_test(NAME test-palisade-${type}-${op} COMMAND $<TARGET_FILE:test-palisade-${type}-${op}>)
+    endforeach (op)
+  endforeach (type)
+endif (PALISADE_FOUND)
+
+##################################################################################################
