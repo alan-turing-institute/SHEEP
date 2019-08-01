@@ -65,14 +65,14 @@ namespace SHEEP {
       lbcrypto::PackedEncoding::SetParams(m, encodingParams);
 
       lbcrypto::BigInteger delta(modulusQ.DividedBy(modulusP));
-      
+
       m_PalisadeContext =
         lbcrypto::CryptoContextFactory<lbcrypto::Poly>::genCryptoContextBFV(
           params, encodingParams, 1, stdDev, delta.ToString(), OPTIMIZED,
           bigEvalMultModulus.ToString(), bigEvalMultRootOfUnity.ToString(),
           1, 9, 1.006, bigEvalMultModulusAlt.ToString(),
           bigEvalMultRootOfUnityAlt.ToString());
-      
+
       m_PalisadeContext->Enable(ENCRYPTION);
       m_PalisadeContext->Enable(SHE);
       m_keyPair = m_PalisadeContext->KeyGen();
@@ -83,13 +83,13 @@ namespace SHEEP {
     }
 
     void configure() { /* nothing to do */ }
-    
+
     Ciphertext encrypt(std::vector<Plaintext> p) {
       std::vector<Plaintext64> p64(this->get_num_slots(), (Plaintext64)0);
       for (size_t i = 0; i < this->get_num_slots(); i++) {
         p64[i] = p[i % p.size()];
       }
-      
+
       lbcrypto::Plaintext pt = m_PalisadeContext->MakePackedPlaintext(p64);
       return m_PalisadeContext->Encrypt(m_keyPair.publicKey, pt);
     }
@@ -125,8 +125,46 @@ namespace SHEEP {
 
     Ciphertext Negate(Ciphertext a) {
       return m_PalisadeContext->EvalNegate(a);
-    }    
+    }
   };
+
+
+  // Dummy specializations to deal with types that Palisade doesn't support
+  template <>
+  class ContextPalisade<double> : public Context<double, lbcrypto::Ciphertext<lbcrypto::Poly> > {
+  public:
+    typedef double Plaintext;
+    typedef lbcrypto::Ciphertext<lbcrypto::Poly>  Ciphertext;
+
+    ContextPalisade() {
+      throw InputTypeNotSupported();
+    }
+    Ciphertext encrypt(std::vector<Plaintext> pt) {
+      throw InputTypeNotSupported();
+    }
+    std::vector<Plaintext> decrypt(Ciphertext ct) {
+      throw InputTypeNotSupported();
+    }
+  };
+
+  template <>
+  class ContextPalisade<std::complex<double> >: public Context<std::complex<double>, lbcrypto::Ciphertext<lbcrypto::Poly>> {
+  public:
+    typedef std::complex<double> Plaintext;
+    typedef lbcrypto::Ciphertext<lbcrypto::Poly>  Ciphertext;
+
+    ContextPalisade() {
+      throw InputTypeNotSupported();
+    }
+    Ciphertext encrypt(std::vector<Plaintext> pt) {
+      throw InputTypeNotSupported();
+    }
+    std::vector<Plaintext> decrypt(Ciphertext ct) {
+      throw InputTypeNotSupported();
+    }
+  };
+
+
 }
 
 #endif
