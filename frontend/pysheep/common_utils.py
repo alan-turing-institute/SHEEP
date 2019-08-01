@@ -117,6 +117,8 @@ def check_inputs(input_dict, input_type, num_slots=None):
                 return False
             if num_slots and len(v)>num_slots:
                 return False
+            if input_type == "complex":  ## don't worry about checking complex numbers
+                return True
             for val in v:
                 try:
                     if int(val) < min_allowed or int(val) > max_allowed:
@@ -135,13 +137,23 @@ def check_inputs(input_dict, input_type, num_slots=None):
         return False
 
 
-def convert_inputs_to_str(input_dict):
+def convert_inputs_to_str(input_dict, input_type):
     """
     input_dict values should be lists of strings.
     If not already, convert them to be so.
     """
+    complex_match = re.compile("([\.\d]+)[\s]*[-+][\s]*([\.\d]+)i")
     for k,v in input_dict.items():
-        input_dict[k] = [str(vv) for vv in v]
+        if input_type == "complex":
+            new_slots = []
+            for vv in v:
+                if not complex_match.search(vv):
+                    raise RuntimeError("Format complex numbers as x+yi")
+                real, im = complex_match.search(vv).groups()
+                new_slots.append(real+","+im)
+            input_dict[k] = new_slots
+        else:
+            input_dict[k] = [str(vv) for vv in v]
     return input_dict
 
 

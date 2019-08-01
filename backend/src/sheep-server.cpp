@@ -149,6 +149,14 @@ double SheepServer::convert_to_plaintext(std::string ptString) {
   return (double)(std::stod(ptString));
 }
 
+template <>
+std::complex<double> SheepServer::convert_to_plaintext(std::string ptString) {
+  std::complex<double> pt;
+  std::istringstream iss(ptString);
+  iss >> pt;
+  return pt;
+}
+
 
 template <typename PlaintextT>
 std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
