@@ -27,7 +27,7 @@ def convert_input_vals_list(input_val_dict):
       output_dict[k] = int(v)
     else:
       ## split on commas
-      output_dict[k] = [int(v_value) for v_value in v.split(",")]
+      output_dict[k] = [v_value for v_value in v.split(",")]
   return output_dict
 
 def cleanup_upload_dir(config):
