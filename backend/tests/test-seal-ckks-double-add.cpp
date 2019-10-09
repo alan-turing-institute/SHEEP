@@ -26,7 +26,7 @@ int main(void) {
   std::vector<std::vector<ContextSealCKKS<double>::Plaintext>> result =
       ctx.eval_with_plaintexts(circ, pt_input);
 
-  std::vector<double> exp_values = {37.3, -2.0, 200.6, -160.8};
+  std::vector<double> exp_values = {37.2, -2.0, 200.6, -160.8};
 
   for (int i = 0; i < exp_values.size(); i++) {
     std::cout << std::to_string(pt_input[0][i]) << " + "
