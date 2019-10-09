@@ -10,6 +10,7 @@ extern "C" {
 
 #include <cmath>
 #include <sstream>
+#include <complex>
 
 namespace SHEEP {
 
