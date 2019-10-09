@@ -27,6 +27,11 @@ struct GateNotImplemented : public std::runtime_error {
   GateNotImplemented() : std::runtime_error("Gate not implemented."){};
 };
 
+struct InputTypeNotSupported : public std::runtime_error {
+  InputTypeNotSupported() : std::runtime_error("Input type not supported for this context."){};
+};
+
+
 struct TooManyInputVals : public std::runtime_error {
   TooManyInputVals()
       : std::runtime_error("Number of values per wire > num slots."){};
@@ -181,19 +186,35 @@ class Context : public BaseContext<PlaintextT> {
   // Select from two inputs (has fan-in of three)
   // Select(s,a,b) := lsb(s)?a:b
   virtual Ciphertext Select(Ciphertext s, Ciphertext a, Ciphertext b) {
-    throw GateNotImplemented();
+    // default implementation:
+    /// s is 0 or 1
+    /// output is s*a + (1-s)*b
+    Ciphertext sa = Multiply(s, a);
+    Ciphertext one_minus_s = MultByConstant(AddConstant(s, -1L), -1L);
+    Ciphertext one_minus_s_times_b = Multiply(one_minus_s, b);
+    return Add(sa, one_minus_s_times_b);
   };
 
-  // Add, where the first input names a regular (encrypted) wire,
-  // and the second input names a plaintext input
-  virtual Ciphertext AddConstant(Ciphertext, long) {
-    throw GateNotImplemented();
+  // Add, where the first input names a regular (encrypted) wire, and
+  // the second input names a plaintext input.  For packed
+  // cyphertexts, the constant is added to each slot.
+  virtual Ciphertext AddConstant(Ciphertext a, long c) {
+    // default implementation:
+    /// encrypt c then Add
+    std::vector<Plaintext> c_vec(get_num_slots(), c);
+    Ciphertext b = encrypt(c_vec);
+    return Add(a, b);
   };
 
-  // Multiply, where the first input names a regular (encrypted)
-  // wire, and the second input names a plaintext input
-  virtual Ciphertext MultByConstant(Ciphertext, long) {
-    throw GateNotImplemented();
+  // Multiply, where the first input names a regular (encrypted) wire,
+  // and the second input names a plaintext input.  For packed
+  // cyphertexts, each slot is multiplied by the constant.
+  virtual Ciphertext MultByConstant(Ciphertext a, long c) {
+    // default implementation:
+    /// encrypt a then Multiply
+    std::vector<Plaintext> c_vec(get_num_slots(), c);
+    Ciphertext b = encrypt(c_vec);
+    return Multiply(a, b);
   };
 
   // Rotate, i.e. shift the elements of the vector, by n places.
@@ -702,27 +723,5 @@ class Context : public BaseContext<PlaintextT> {
   long m_nslots;
   long m_ninputs;
 };
-
-template <typename ContextT, typename PlaintextCIterator,
-          typename CiphertextIterator>
-void encrypt(ContextT& context, PlaintextCIterator plaintext_begin,
-             PlaintextCIterator plaintext_end,
-             CiphertextIterator ciphertext_begin) {
-  std::transform(plaintext_begin, plaintext_end, ciphertext_begin,
-                 [&context](typename ContextT::Plaintext pt) {
-                   return context.encrypt(pt);
-                 });
-}
-
-template <typename ContextT, typename CiphertextCIterator,
-          typename PlaintextIterator>
-void decrypt(ContextT& context, CiphertextCIterator ciphertext_begin,
-             CiphertextCIterator ciphertext_end,
-             PlaintextIterator plaintext_begin) {
-  std::transform(ciphertext_begin, ciphertext_end, plaintext_begin,
-                 [&context](typename ContextT::Ciphertext ct) {
-                   return context.decrypt(ct);
-                 });
-}
 
 #endif  // CONTEXT_HPP

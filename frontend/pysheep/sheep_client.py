@@ -200,11 +200,13 @@ def set_inputs(input_dict):
     if num_slots_request["status_code"] != 200:
         return num_slots_request
     num_slots = num_slots_request["content"]["nslots"]
+    input_dict = common_utils.convert_inputs_to_str(input_dict, input_type)
     consistent_inputs = common_utils.check_inputs(input_dict, input_type, num_slots)
     if not consistent_inputs:
         response_dict["status_code"] = 500
         response_dict["content"] = "Inputs are wrong type, or different lengths, or > nslots values per wire"
         return response_dict
+    #
     try:
         r = requests.post(BASE_URI+"/inputs/",
                           json=input_dict)

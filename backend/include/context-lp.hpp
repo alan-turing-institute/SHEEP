@@ -10,6 +10,7 @@ extern "C" {
 
 #include <cmath>
 #include <sstream>
+#include <complex>
 
 namespace SHEEP {
 
@@ -151,6 +152,42 @@ class ContextLP
   paillier_prvkey_t* secKey;
   long m_n;
 };
+
+  // (dummy) specializations for double and complex<double>
+template <>
+class ContextLP<double> : public Context<double, std::vector<paillier_ciphertext_t>> {
+ public:
+  typedef double Plaintext;
+  typedef std::vector<paillier_ciphertext_t> Ciphertext;
+
+  ContextLP() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+template <>
+class ContextLP<std::complex<double> >: public Context<std::complex<double>, std::vector<paillier_ciphertext_t>> {
+ public:
+  typedef std::complex<double> Plaintext;
+  typedef std::vector<paillier_ciphertext_t> Ciphertext;
+
+  ContextLP() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
 
 }  // namespace SHEEP
 

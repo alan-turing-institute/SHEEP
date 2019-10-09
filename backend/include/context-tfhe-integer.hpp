@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <complex>
 
 #include <tfhe/tfhe.h>
 #include <tfhe/tfhe_io.h>
@@ -360,6 +361,42 @@ class ContextTFHE
  private:
   long m_minimum_lambda;
 };
+
+// (dummy) specializations for double and complex<double>
+template <>
+class ContextTFHE<double> : public Context<double, std::vector<CiphertextArrayTFHE<1>>> {
+ public:
+  typedef double Plaintext;
+  typedef std::vector<CiphertextArrayTFHE<1>> Ciphertext;
+
+  ContextTFHE() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
+template <>
+class ContextTFHE<std::complex<double> >: public Context<std::complex<double>, std::vector<CiphertextArrayTFHE<1>>> {
+ public:
+  typedef std::complex<double> Plaintext;
+  typedef std::vector<CiphertextArrayTFHE<1>> Ciphertext;
+
+  ContextTFHE() {
+    throw InputTypeNotSupported();
+  }
+  Ciphertext encrypt(std::vector<Plaintext> pt) {
+    throw InputTypeNotSupported();
+  }
+  std::vector<Plaintext> decrypt(Ciphertext ct) {
+    throw InputTypeNotSupported();
+  }
+};
+
 
 }  // namespace SHEEP
 

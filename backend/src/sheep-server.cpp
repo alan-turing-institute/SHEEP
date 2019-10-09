@@ -16,6 +16,12 @@
 #include <chrono>
 #include <thread>
 
+#include <complex>
+#include <cmath>
+
+using namespace std::complex_literals;
+
+
 #include "sheep-server.hpp"
 #include "protect-eval.hpp"
 
@@ -25,6 +31,7 @@ using namespace utility;
 using namespace http;
 using namespace web::http::experimental::listener;
 using namespace SHEEP;
+
 
 typedef std::chrono::duration<double, std::micro>
     Duration;  /// for storing execution times
@@ -54,18 +61,37 @@ SheepServer::SheepServer(utility::string_t url) : m_listener(url) {
 #ifdef HAVE_TFHE
   m_available_contexts.push_back("TFHE");
 #endif
-#ifdef HAVE_SEAL
-  m_available_contexts.push_back("SEAL");
+#ifdef HAVE_SEAL_BFV
+  m_available_contexts.push_back("SEAL_BFV");
 #endif
-
+#ifdef HAVE_SEAL_CKKS
+  m_available_contexts.push_back("SEAL_CKKS");
+#endif
 #ifdef HAVE_LP
   m_available_contexts.push_back("LP");
+#endif
+#ifdef HAVE_PALISADE
+  m_available_contexts.push_back("PALISADE");
 #endif
 
   //// what input_types are supported?
   m_available_input_types = {"bool",   "uint8_t", "uint16_t", "uint32_t",
-                             "int8_t", "int16_t", "int32_t"};
+                             "int8_t", "int16_t", "int32_t", "double", "complex"};
 }
+
+
+
+template <typename PlaintextT>
+std::string SheepServer::convert_to_string(PlaintextT t) {
+  return std::to_string(t);
+}
+
+template <>
+std::string SheepServer::convert_to_string(std::complex<double> t) {
+  return std::to_string(t.real()) + " + " + std::to_string(t.imag()) + "i";
+}
+
+
 
 /// templated functions to interact with the contexts.
 
@@ -86,14 +112,26 @@ BaseContext<PlaintextT> *SheepServer::make_context(std::string context_type) {
     return new ContextTFHE<PlaintextT>();
 #endif
 
-#ifdef HAVE_SEAL
-  } else if (context_type == "SEAL") {
-    return new ContextSeal<PlaintextT>();
+#ifdef HAVE_SEAL_BFV
+  } else if (context_type == "SEAL_BFV") {
+    return new ContextSealBFV<PlaintextT>();
+#endif
+
+#ifdef HAVE_SEAL_CKKS
+  } else if ((context_type == "SEAL_CKKS") &&
+	     ((std::is_same<PlaintextT, double>::value  ) ||
+	      (std::is_same<PlaintextT, std::complex<double>>::value ))) {
+    return new ContextSealCKKS<PlaintextT>();
 #endif
 
 #ifdef HAVE_LP
   } else if (context_type == "LP") {
     return new ContextLP<PlaintextT>();
+#endif
+
+#ifdef HAVE_PALISADE
+  } else if (context_type == "PALISADE") {
+    return new ContextPalisade<PlaintextT>();
 #endif
 
   } else {
@@ -102,14 +140,34 @@ BaseContext<PlaintextT> *SheepServer::make_context(std::string context_type) {
 }
 
 template <typename PlaintextT>
+PlaintextT SheepServer::convert_to_plaintext(std::string ptString) {
+  return (PlaintextT)(std::stoi(ptString));
+}
+
+template <>
+double SheepServer::convert_to_plaintext(std::string ptString) {
+  return (double)(std::stod(ptString));
+}
+
+template <>
+std::complex<double> SheepServer::convert_to_plaintext(std::string ptString) {
+  std::complex<double> pt;
+  std::istringstream iss(ptString);
+  iss >> pt;
+  return pt;
+}
+
+
+template <typename PlaintextT>
 std::vector<std::vector<PlaintextT>> SheepServer::make_plaintext_inputs() {
   std::vector<std::vector<PlaintextT>> inputs;
 
-
   for (auto input_wire : m_job_config.circuit.get_inputs()) {
     std::string input_name = input_wire.get_name();
-    std::vector<PlaintextT> input_vector(begin(m_job_config.input_vals[input_name]),
-					 end(m_job_config.input_vals[input_name]));
+    std::vector<PlaintextT> input_vector;
+    for (auto input_string : m_job_config.input_vals[input_name]) {
+      input_vector.push_back(convert_to_plaintext<PlaintextT>(input_string));
+    }
     inputs.push_back(input_vector);
   }
 
@@ -134,6 +192,7 @@ void SheepServer::get_parameters() {
   if (m_job_config.parameters.size() == 0) {
     /// call a function that will create a context and set
     /// m_job_config.parameters to default values
+
     if (m_job_config.input_type == "bool")
       update_parameters<bool>(m_job_config.context);
     if (m_job_config.input_type == "uint8_t")
@@ -148,6 +207,10 @@ void SheepServer::get_parameters() {
       update_parameters<int16_t>(m_job_config.context);
     if (m_job_config.input_type == "int32_t")
       update_parameters<int32_t>(m_job_config.context);
+    if (m_job_config.input_type == "double")
+      update_parameters<double>(m_job_config.context);
+    if (m_job_config.input_type == "complex")
+      update_parameters<std::complex<double>>(m_job_config.context);
   }
 }
 
@@ -368,7 +431,7 @@ void SheepServer::configure_and_run(http_request message) {
           output_val.push_back(outputs_shared[i * slot_cnt + j]);
 
           ///  store outputs values as strings, to avoid ambiguity about type.
-          string_val.push_back(std::to_string(output_val[j]));
+          string_val.push_back(convert_to_string<PlaintextT>(output_val[j]));
         }
 
         test_output_vals.push_back(output_val);
@@ -487,6 +550,7 @@ void SheepServer::handle_put(http_request message) {
 void SheepServer::handle_post_run(http_request message) {
   /// get a context, configure it with the stored
   /// parameters, and run it.
+
   if (m_job_config.input_type == "bool")
     configure_and_run<bool>(message);
   else if (m_job_config.input_type == "uint8_t")
@@ -501,6 +565,10 @@ void SheepServer::handle_post_run(http_request message) {
     configure_and_run<int16_t>(message);
   else if (m_job_config.input_type == "int32_t")
     configure_and_run<int32_t>(message);
+  else if (m_job_config.input_type == "double")
+    configure_and_run<double>(message);
+  else if (m_job_config.input_type == "complex")
+    configure_and_run<std::complex<double> >(message);
   else
     message.reply(status_codes::InternalError, ("Unknown input type"));
 }
@@ -595,11 +663,13 @@ void SheepServer::handle_get_const_inputs(http_request message) {
 void SheepServer::handle_post_inputs(http_request message) {
   message.extract_json().then([=](pplx::task<json::value> jvalue) {
     try {
+
       json::value input_dict = jvalue.get();
       for (auto input_name : m_job_config.input_names) {
-        std::vector<int> input_vals;
+
+        std::vector<std::string> input_vals;
         for (auto input : input_dict[input_name].as_array()) {
-          int input_val = input.as_integer();
+	  std::string input_val = input.as_string();
           input_vals.push_back(input_val);
         }
         m_job_config.input_vals[input_name] = input_vals;
@@ -641,6 +711,7 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	  plaintext_inputs.push_back(input_val.as_integer());
 	}
 	int sct;
+
 	if (m_job_config.input_type == "bool")
 	  sct = configure_and_serialize<bool>(plaintext_inputs);
 	else if (m_job_config.input_type == "uint8_t")
@@ -655,6 +726,10 @@ void SheepServer::handle_post_serialized_ciphertext(http_request message) {
 	  sct = configure_and_serialize<int16_t>(plaintext_inputs);
 	else if (m_job_config.input_type == "int32_t")
 	  sct = configure_and_serialize<int32_t>(plaintext_inputs);
+	else if (m_job_config.input_type == "double")
+	  sct = configure_and_serialize<double>(plaintext_inputs);
+	else if (m_job_config.input_type == "complex")
+	  sct = configure_and_serialize<std::complex<double> >(plaintext_inputs);
 	else
 	  message.reply(status_codes::InternalError, ("Unknown input type"));
 	json::value result = json::value::object();
@@ -903,6 +978,10 @@ void SheepServer::handle_put_parameters(http_request message) {
         update_parameters<int16_t>(m_job_config.context, params);
       else if (m_job_config.input_type == "int32_t")
         update_parameters<int32_t>(m_job_config.context, params);
+      else if (m_job_config.input_type == "double")
+        update_parameters<double>(m_job_config.context, params);
+      else if (m_job_config.input_type == "complex")
+        update_parameters<std::complex<double> >(m_job_config.context, params);
       else
         message.reply(status_codes::InternalError,
                       ("Unknown input type when updating parameters"));

@@ -2,6 +2,7 @@
 #define CONTEXT_TFHE_BOOL_HPP
 
 #include <memory>
+#include <complex>
 
 #include <tfhe/tfhe.h>
 #include <tfhe/tfhe_io.h>
