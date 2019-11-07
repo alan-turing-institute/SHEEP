@@ -140,7 +140,7 @@ def levels_for_params(context, param_dict):
         else:
             raise RuntimeError("Unrecognized value of N parameter")
     else:
-        print("Levels not known for this context")
+#        print("Levels not known for this context")
         return 0
 
 
