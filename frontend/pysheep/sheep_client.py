@@ -58,14 +58,23 @@ def get_available_contexts():
 def get_available_input_types():
     """
     get a list of the available input types.
+    If the context is already
     """
     response_dict = {}
     try:
         r = requests.get(BASE_URI+"/input_type/")
         response_dict["status_code"] = r.status_code
         result = json.loads(r.content.decode("utf-8"))
+        input_types = result["input_types"]
+        ## see if we have a CKKS context set
+        if get_context()["content"]:
+            if "CKKS" in get_context()["content"]:
+                input_types = ["double","complex"]
+            else:
+                input_types.remove("double")
+                input_types.remove("complex")
         if r.status_code == 200:
-            response_dict["content"] = result["input_types"]
+            response_dict["content"] = input_types
         else:
             response_dict["content"] = result
     except(requests.exceptions.ConnectionError):
@@ -465,6 +474,21 @@ def get_config():
         r = requests.get(BASE_URI+"/config/")
         response_dict["status_code"] = r.status_code
         response_dict["content"] = json.loads(r.content.decode("utf-8"))
+    except(requests.exceptions.ConnectionError):
+        response_dict["status_code"] = 404
+        response_dict["content"] = "Unable to connect to SHEEP server to get config"
+    return response_dict
+
+
+def get_context():
+    """
+    Get the currently set context
+    """
+    response_dict = {}
+    try:
+        r = requests.get(BASE_URI+"/config/")
+        response_dict["status_code"] = r.status_code
+        response_dict["content"] = json.loads(r.content.decode("utf-8"))['context']
     except(requests.exceptions.ConnectionError):
         response_dict["status_code"] = 404
         response_dict["content"] = "Unable to connect to SHEEP server to get config"
