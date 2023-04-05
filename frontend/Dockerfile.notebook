@@ -1,4 +1,4 @@
-FROM ubuntu:16.04 as pysheep_base
+FROM ubuntu:18.04 as pysheep_base
 
 ### get pip git etc
 
